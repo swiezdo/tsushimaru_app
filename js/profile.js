@@ -1,7 +1,8 @@
 // profile.js
 import { tg, $, hapticTapSmart, hapticERR, hapticOK } from './telegram.js';
+import { focusAndScrollIntoView } from './ui.js';
 
-// ---------- Общие утилиты для чипов ----------
+// ---------- Утилиты для чипов ----------
 function renderChips(container, values, { single = false, onChange } = {}) {
   if (!container) return;
   container.innerHTML = '';
@@ -12,7 +13,7 @@ function renderChips(container, values, { single = false, onChange } = {}) {
     b.textContent = v;
     b.dataset.value = v;
     b.addEventListener('click', () => {
-      hapticTapSmart(); // Tap на чипы
+      hapticTapSmart();
       if (single) {
         container.querySelectorAll('.chip-btn').forEach((x) => x.classList.remove('active'));
         b.classList.add('active');
@@ -42,33 +43,14 @@ function shake(el) {
   void el.offsetWidth;
   el.classList.add('shake');
 }
-function smartScrollIntoView(el){
-  if (!el) return;
-  try { el.focus({ preventScroll: true }); } catch(_) { try{ el.focus(); }catch{} }
-  const behavior = 'smooth';
-  const pad = 16;
-  const rect = el.getBoundingClientRect();
 
-  if (window.visualViewport) {
-    const vv = window.visualViewport;
-    const topOk = rect.top >= pad;
-    const bottomOk = rect.bottom <= (vv.height - pad);
-    if (!topOk || !bottomOk) {
-      const targetY = rect.top + window.scrollY - Math.max(0, (vv.height/2 - rect.height/2));
-      window.scrollTo({ top: targetY, behavior });
-    }
-  } else {
-    el.scrollIntoView({ block: 'center', behavior });
-  }
-}
-
-// ---------- Константы профиля ----------
+// ---------- Константы ----------
 const PLATFORM   = ['🎮 PlayStation','💻 ПК'];
 const MODES      = ['📖 Сюжет','🏹 Выживание','🗻 Испытания Иё','⚔️ Соперники','📜 Главы'];
 const GOALS      = ['🏆 Получение трофеев','🔎 Узнать что-то новое','👥 Поиск тиммейтов'];
 const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','🏅 Платина','👻 Кошмар','🔥 HellMode'];
 
-// ---------- Элементы отображения ----------
+// ---------- Отображение ----------
 const v_real_name  = $('v_real_name');
 const v_psn        = $('v_psn');
 const v_platform   = $('v_platform');
@@ -76,7 +58,7 @@ const v_modes      = $('v_modes');
 const v_goals      = $('v_goals');
 const v_difficulty = $('v_difficulty');
 
-// ---------- Форма профиля ----------
+// ---------- Форма ----------
 const profileForm     = $('profileForm');
 const profileSaveBtn  = $('profileSaveBtn');
 
@@ -88,19 +70,18 @@ function refreshProfileView() {
 }
 
 export function initProfile() {
-  // Chip-контролы
+  // Чипы
   renderChips($('platformChips'),   PLATFORM,   { onChange: refreshProfileView });
   renderChips($('modesChips'),      MODES,      { onChange: refreshProfileView });
   renderChips($('goalsChips'),      GOALS,      { onChange: refreshProfileView });
   renderChips($('difficultyChips'), DIFFICULTY, { onChange: refreshProfileView });
 
-  // Шапка с @username
+  // chip @username
   const chip = $('userChip');
   const uname = tg?.initDataUnsafe?.user?.username;
   if (chip && uname) chip.textContent = '@' + uname;
 
   if (!profileForm) return;
-
   const nameInput = profileForm.real_name;
   const psnInput  = profileForm.psn;
 
@@ -112,7 +93,7 @@ export function initProfile() {
     if (e.key === 'Enter') { e.preventDefault(); }
   });
 
-  // Tap на фокус полей
+  // Tap при фокусе (глобальный скролл сам подвинет поле)
   nameInput?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
   psnInput?.addEventListener('focus',  ()=>{ hapticTapSmart(); }, {passive:true});
 
@@ -140,11 +121,10 @@ export function initProfile() {
         const val = (psnInput?.value || '').trim();
         if (!val) msgs.push('Нужно указать Ник PlayStation.');
         else msgs.push('Неверный формат ника PlayStation (3–16: A–Z, a–z, 0–9, -, _).');
-        shake(psnInput);
-        if (!firstBad) firstBad = psnInput;
+        shake(psnInput); if (!firstBad) firstBad = psnInput;
       }
-      if (firstBad) smartScrollIntoView(firstBad);
-      hapticERR(); // ERR при валидации
+      if (firstBad) focusAndScrollIntoView(firstBad); // <— фокус + скролл
+      hapticERR();
       tg?.showPopup?.({ title: 'Ошибка', message: msgs.join('\n'), buttons: [{ type: 'ok' }] });
       return;
     }
@@ -153,7 +133,7 @@ export function initProfile() {
     if (v_psn)       v_psn.textContent       = (psnInput?.value || '').trim()       || '—';
     refreshProfileView();
 
-    hapticOK(); // OK на успех
+    hapticOK();
     tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены.', buttons: [{ type: 'ok' }] });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -161,5 +141,5 @@ export function initProfile() {
   profileSaveBtn?.addEventListener('click', () => profileForm.requestSubmit());
 }
 
-// Экспорт вспомогательных функций для других модулей
-export { renderChips, activeValues, setActive, shake, smartScrollIntoView, refreshProfileView };
+// Экспорт вспомогательных
+export { renderChips, activeValues, setActive, shake, refreshProfileView };

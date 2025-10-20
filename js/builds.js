@@ -1,9 +1,8 @@
 // builds.js
 import { tg, $, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
-import { showScreen } from './ui.js';
+import { showScreen, focusAndScrollIntoView } from './ui.js';
 import { renderChips, activeValues, setActive, shake } from './profile.js';
 
-// ---------- Константы/пути ----------
 const LS_KEY_BUILDS      = 'tsu_builds_v1';
 const LS_KEY_PUB_BUILDS  = 'tsu_builds_public_v1';
 
@@ -17,7 +16,7 @@ const CLASS_ICON = {
   'Ронин':'./assets/icons/ronin.svg'
 };
 
-// ---------- Элементы ----------
+// Элементы
 const myBuildsList     = $('myBuildsList');
 const noBuildsHint     = $('noBuildsHint');
 const createBuildBtn   = $('createBuildBtn');
@@ -57,12 +56,10 @@ const publicDetailShots = $('publicDetailShots');
 const allBuildsList   = $('allBuildsList');
 const noAllBuildsHint = $('noAllBuildsHint');
 
-// ---------- Состояние ----------
 let currentBuildId = null;
 let shot1Data = null;
 let shot2Data = null;
 
-// ---------- Хелперы ----------
 async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -72,19 +69,15 @@ async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
         const scale = Math.min(1, maxEdge / Math.max(width, height));
         const w = Math.max(1, Math.round(width * scale));
         const h = Math.max(1, Math.round(height * scale));
-
         const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
+        canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
-
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
         resolve(dataUrl);
       } catch (e) { reject(e); }
     };
     img.onerror = reject;
-
     const r = new FileReader();
     r.onload = () => { img.src = r.result; };
     r.onerror = reject;
@@ -102,7 +95,7 @@ function renderShotThumb(idx, src) {
   img.src = src;
   btn.appendChild(img);
   btn.addEventListener('click', () => {
-    hapticTapSmart(); // Tap по миниатюре (замена)
+    hapticTapSmart();
     const input = getShotInputByIdx(String(idx));
     if (!input) return;
     try { input.value = ''; } catch {}
@@ -111,18 +104,14 @@ function renderShotThumb(idx, src) {
   return btn;
 }
 
-// ---------- Storage ----------
+// Storage
 function loadBuilds() {
-  try {
-    const raw = localStorage.getItem(LS_KEY_BUILDS);
-    return raw ? JSON.parse(raw) : [];
-  } catch (_) { return []; }
+  try { const raw = localStorage.getItem(LS_KEY_BUILDS); return raw ? JSON.parse(raw) : []; }
+  catch { return []; }
 }
 function saveBuilds(arr){
-  try{
-    localStorage.setItem(LS_KEY_BUILDS, JSON.stringify(arr||[]));
-    return true;
-  }catch(e){
+  try { localStorage.setItem(LS_KEY_BUILDS, JSON.stringify(arr||[])); return true; }
+  catch {
     tg?.showPopup?.({
       title: 'Хранилище заполнено',
       message: 'Не удалось сохранить билд: лимит хранения исчерпан. Уменьшите размер скриншотов или удалите старые билды.',
@@ -133,26 +122,19 @@ function saveBuilds(arr){
   }
 }
 function loadPublicBuilds() {
-  try {
-    const raw = localStorage.getItem(LS_KEY_PUB_BUILDS);
-    return raw ? JSON.parse(raw) : [];
-  } catch(_) { return []; }
+  try { const raw = localStorage.getItem(LS_KEY_PUB_BUILDS); return raw ? JSON.parse(raw) : []; }
+  catch { return []; }
 }
 function savePublicBuilds(arr) {
-  try {
-    localStorage.setItem(LS_KEY_PUB_BUILDS, JSON.stringify(arr||[]));
-    return true;
-  } catch(_) { return false; }
+  try { localStorage.setItem(LS_KEY_PUB_BUILDS, JSON.stringify(arr||[])); return true; }
+  catch { return false; }
 }
 
-// ---------- Рендер списков ----------
+// Рендер списков
 function renderMyBuilds() {
   const items = loadBuilds();
   myBuildsList.innerHTML = '';
-  if (!items.length) {
-    noBuildsHint.style.display = 'block';
-    return;
-  }
+  if (!items.length) { noBuildsHint.style.display = 'block'; return; }
   noBuildsHint.style.display = 'none';
 
   items.slice().reverse().forEach((b) => {
@@ -176,17 +158,14 @@ function renderMyBuilds() {
 
     row.appendChild(icon);
     row.appendChild(title);
-    row.addEventListener('click', () => { hapticTapSmart(); openBuildDetail(b.id); }); // Tap на строку
+    row.addEventListener('click', () => { hapticTapSmart(); openBuildDetail(b.id); });
     myBuildsList.appendChild(row);
   });
 }
 function renderAllBuilds() {
   const items = loadPublicBuilds();
   allBuildsList.innerHTML = '';
-  if (!items.length) {
-    noAllBuildsHint.style.display = 'block';
-    return;
-  }
+  if (!items.length) { noAllBuildsHint.style.display = 'block'; return; }
   noAllBuildsHint.style.display = 'none';
 
   items.slice().reverse().forEach((p) => {
@@ -210,16 +189,15 @@ function renderAllBuilds() {
 
     row.appendChild(icon);
     row.appendChild(title);
-    row.addEventListener('click', () => { hapticTapSmart(); openPublicBuildDetail(p.id); }); // Tap на строку
+    row.addEventListener('click', () => { hapticTapSmart(); openPublicBuildDetail(p.id); });
     allBuildsList.appendChild(row);
   });
 }
 
-// ---------- Создание билда ----------
+// Создание билда
 function resetBuildForm() {
   try { buildForm?.reset(); } catch {}
-  setActive(classChipsEl, []);
-  setActive(tagsChipsEl,  []);
+  setActive(classChipsEl, []); setActive(tagsChipsEl,  []);
   if (shotInput1) shotInput1.value = '';
   if (shotInput2) shotInput2.value = '';
   shot1Data = null; shot2Data = null;
@@ -236,28 +214,19 @@ function getShotBoxByIdx(idx) {
   return shotsTwo?.querySelector(`.upload-box[data-idx="${idx}"]`) ||
          shotsTwo?.querySelector(`.shot-thumb[data-idx="${idx}"]`);
 }
-
 function bindShotInput(input, idx){
   input?.addEventListener('change', async ()=>{
     const file = input.files && input.files[0];
     if(!file) return;
     try{
       const data = await compressImageFile(file, { maxEdge: 1280, quality: 0.7 });
-
       const targetEl = getShotBoxByIdx(idx);
       const thumb = renderShotThumb(idx, data);
-
-      if(targetEl && targetEl.parentNode){
-        targetEl.parentNode.replaceChild(thumb, targetEl);
-      } else if (shotsTwo){
-        shotsTwo.appendChild(thumb);
-      }
-
+      if(targetEl && targetEl.parentNode){ targetEl.parentNode.replaceChild(thumb, targetEl); }
+      else if (shotsTwo){ shotsTwo.appendChild(thumb); }
       if(idx === '1') shot1Data = data; else shot2Data = data;
-      hapticTapSmart(); // Tap при выборе файла
-    }catch(_){
-      shake(shotsTwo);
-    }
+      hapticTapSmart();
+    }catch(_){ shake(shotsTwo); }
   });
 }
 
@@ -279,16 +248,14 @@ function updatePublishButton(myId) {
   }
 }
 
-// ---------- Открытие карточек ----------
+// Открытие карточек
 function openBuildDetail(id) {
   const all = loadBuilds();
   const b = all.find((x) => String(x.id) === String(id));
   if (!b) { tg?.showAlert?.('Билд не найден'); return; }
   currentBuildId = b.id;
 
-  if (deleteBuildBtn) {
-    deleteBuildBtn.dataset.id = String(b.id);
-  }
+  if (deleteBuildBtn) deleteBuildBtn.dataset.id = String(b.id);
 
   buildDetailTitle.textContent = b.name || 'Билд';
   vd_class.textContent = b.class || '—';
@@ -341,7 +308,7 @@ function openPublicBuildDetail(pubId) {
   showScreen('buildPublicDetail');
 }
 
-// ---------- Лайтбокс ----------
+// Лайтбокс
 const lightbox = $('lightbox');
 const lightboxImg = $('lightboxImg');
 function openLightbox(src) {
@@ -355,7 +322,7 @@ function closeLightbox() {
 }
 lightbox?.addEventListener('click', closeLightbox);
 
-// ---------- Паблиш/Удаление ----------
+// Подтверждение
 function tgConfirm(title, message) {
   if (!tg?.showPopup) return Promise.resolve(window.confirm(message || title));
   return new Promise((resolve) => {
@@ -389,9 +356,8 @@ function deleteBuildById(id) {
   showScreen('builds');
 }
 
-// ---------- Публичные обработчики/инициализация ----------
+// Инициализация
 export function initBuilds() {
-  // Чипы — Tap внутри renderChips
   renderChips(classChipsEl, CLASS_VALUES, { single: true });
   renderChips(tagsChipsEl,  TAG_VALUES);
 
@@ -405,7 +371,7 @@ export function initBuilds() {
     setTimeout(autoResize, 0);
   }
 
-  // Tap при фокусе полей
+  // Tap при фокусе полей — глобальный скролл сам подвинет
   buildNameEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
   buildDescEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
 
@@ -420,7 +386,7 @@ export function initBuilds() {
   bindShotInput(shotInput1, '1');
   bindShotInput(shotInput2, '2');
 
-  // Делегирование клика по квадратам — Tap
+  // Делегирование клика по квадратам
   shotsTwo?.addEventListener('click', (e) => {
     hapticTapSmart();
     const box = e.target.closest('.upload-box');
@@ -444,9 +410,9 @@ export function initBuilds() {
     const tags  = activeValues(tagsChipsEl);
     const desc  = (buildDescEl?.value || '').trim();
 
-    if (!name)   { shake(buildNameEl); hapticERR(); buildNameEl && buildNameEl.scrollIntoView({behavior:'smooth', block:'center'}); return; }
-    if (!klass)  { shake(classChipsEl); hapticERR(); return; }
-    if (!shot1Data || !shot2Data) { shake(shotsTwo); hapticERR(); return; }
+    if (!name)   { shake(buildNameEl); hapticERR(); focusAndScrollIntoView(buildNameEl); return; }
+    if (!klass)  { shake(classChipsEl); hapticERR(); focusAndScrollIntoView(classChipsEl); return; }
+    if (!shot1Data || !shot2Data) { shake(shotsTwo); hapticERR(); focusAndScrollIntoView(shotsTwo); return; }
 
     const item = {
       id: Date.now(),
@@ -462,14 +428,14 @@ export function initBuilds() {
     all.push(item);
     if (!saveBuilds(all)) { return; }
 
-    hapticOK(); // OK на успех
+    hapticOK();
     tg?.showPopup?.({ title: 'Билд создан', message: 'Сохранено локально (макет, без сервера).', buttons: [{ type:'ok' }] });
 
     renderMyBuilds();
     showScreen('builds');
   });
 
-  // Публикация/скрытие — OK
+  // Публикация/Скрытие — OK
   publishBuildBtn?.addEventListener('click', () => {
     hapticOK();
     if (!currentBuildId) return;
@@ -510,7 +476,7 @@ export function initBuilds() {
     tg?.showPopup?.({ title:'Опубликовано', message:'Билд успешно опубликован.', buttons:[{type:'ok'}] });
   });
 
-  // Удаление — OK при нажатии
+  // Удаление — OK
   deleteBuildBtn?.addEventListener('click', async () => {
     hapticOK();
     const idFromBtn = deleteBuildBtn?.dataset?.id;
@@ -521,7 +487,6 @@ export function initBuilds() {
     deleteBuildById(String(id));
   });
 
-  // Первый рендер списков
   renderMyBuilds();
   renderAllBuilds();
 }

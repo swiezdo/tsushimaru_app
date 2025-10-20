@@ -1,9 +1,9 @@
 // ui.js
-// Управление экранами, верхней панелью и безопасными отступами.
+// Управление экранами, верхней панелью, безопасными отступами и умным скроллом к полям ввода.
 
 import { tg, scrollTopSmooth } from './telegram.js';
 
-// Ссылки на экраны (section-ы). Поддерживает show/hide по классу .hidden.
+// Ссылки на экраны
 export const screens = {
   home:               document.getElementById('homeScreen'),
   profile:            document.getElementById('profileScreen'),
@@ -15,7 +15,7 @@ export const screens = {
   buildPublicDetail:  document.getElementById('buildPublicDetailScreen'),
 };
 
-// Управление видимостью топбара и заголовком
+// Топбар
 export function setTopbar(visible, title) {
   const tb = document.querySelector('.topbar');
   if (tb) tb.style.display = visible ? 'flex' : 'none';
@@ -25,20 +25,18 @@ export function setTopbar(visible, title) {
   }
 }
 
-// Универсальный показ экрана + синхронизация BackButton Telegram
+// Показ экрана
 export function showScreen(name) {
   Object.values(screens).forEach((el) => el && el.classList.add('hidden'));
   const el = screens[name];
   if (el) el.classList.remove('hidden');
 
-  // Telegram BackButton
   if (tg) {
     const withBack = ['profile','trophies','builds','buildCreate','buildDetail','buildPublicDetail','trophyDetail'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
 
-  // Заголовки топбара
   if (name === 'home')                 setTopbar(false);
   else if (name === 'profile')         setTopbar(true, 'Профиль');
   else if (name === 'trophies')        setTopbar(true, 'Трофеи');
@@ -48,17 +46,59 @@ export function showScreen(name) {
   else if (name === 'buildDetail')     setTopbar(true, 'Билд');
   else if (name === 'buildPublicDetail') setTopbar(true, 'Билд');
 
-  // Всегда аккуратно наверх после переключения экрана
   scrollTopSmooth();
 }
 
-// Безопасный верхний отступ под системные панели Telegram + вырезы
+// Безопасный верхний отступ
 export function applyTopInset() {
   const root = document.querySelector('main.container');
   if (!root) return;
-  const TOP_OFFSET_PX = 64; // запас под верхнюю область Telegram
+  const TOP_OFFSET_PX = 64;
   root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + ${TOP_OFFSET_PX}px)`;
 }
-
-// Авто-обновление отступа при изменении размера окна/вьюпорта
 window.addEventListener('resize', applyTopInset);
+
+// ===== Умный скролл к полю (с учётом экранной клавиатуры) =====
+export function focusAndScrollIntoView(el) {
+  if (!el) return;
+  try { el.focus({ preventScroll: true }); } catch(_) { try { el.focus(); } catch {} }
+
+  const behavior = 'smooth';
+  const pad = 16;
+  const rect = el.getBoundingClientRect();
+
+  if (window.visualViewport) {
+    const vv = window.visualViewport;
+    const topOk = rect.top >= pad;
+    const bottomOk = rect.bottom <= (vv.height - pad);
+    if (!topOk || !bottomOk) {
+      const targetY = rect.top + window.scrollY - Math.max(0, (vv.height/2 - rect.height/2));
+      window.scrollTo({ top: targetY, behavior });
+    }
+  } else {
+    el.scrollIntoView({ block: 'center', behavior });
+  }
+}
+
+// Глобально: держим текущий фокус в видимой области
+(function installGlobalSmartScroll(){
+  // При фокусе на любом input/textarea — подскроллим
+  document.addEventListener('focusin', (e) => {
+    const t = e.target;
+    if (!t) return;
+    const tag = t.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') {
+      setTimeout(() => focusAndScrollIntoView(t), 50);
+    }
+  }, { passive: true });
+
+  // Если высота вьюпорта меняется (клавиатура) — удерживаем поле в зоне видимости
+  window.visualViewport?.addEventListener('resize', () => {
+    const a = document.activeElement;
+    if (!a) return;
+    const tag = a.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') {
+      focusAndScrollIntoView(a);
+    }
+  });
+})();
