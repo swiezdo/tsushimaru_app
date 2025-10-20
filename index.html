@@ -8,7 +8,7 @@
     />
     <title>Tsushima.Ru</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="./css/style.css?v=2" />
+    <link rel="stylesheet" href="./css/style.css?v=3" />
   </head>
 
   <body>
@@ -40,6 +40,9 @@
           <button id="trophiesBtn" class="big-btn">🏆 Трофеи</button>
           <button id="buildsBtn" class="big-btn ghost">🛠️ Билды</button>
         </div>
+
+        <!-- НИЖНИЙ СПЕЙСЕР ДЛЯ SAFE-AREA (как на других экранах) -->
+        <div style="height: calc(env(safe-area-inset-bottom, 0px) + 12px)"></div>
       </section>
 
       <!-- ====== ПРОФИЛЬ ====== -->
@@ -209,7 +212,7 @@
           </div>
         </section>
 
-        <!-- ====== НОВЫЙ БЛОК: ВСЕ БИЛДЫ ====== -->
+        <!-- ====== ВСЕ БИЛДЫ ====== -->
         <section class="card">
           <h3 class="card-title">Все билды</h3>
           <div id="allBuildsList" class="list-builds"></div>
@@ -217,6 +220,9 @@
             Публикаций пока нет.
           </div>
         </section>
+
+        <!-- НИЖНИЙ СПЕЙСЕР ДЛЯ SAFE-AREA под последним блоком -->
+        <div style="height: calc(env(safe-area-inset-bottom, 0px) + 12px)"></div>
       </section>
 
       <!-- ====== СОЗДАТЬ БИЛД ====== -->
@@ -396,6 +402,7 @@
       <img id="lightboxImg" alt="Просмотр изображения" />
     </div>
 
-    <script type="module" src="./js/main.js?v=2"></script>
+    <!-- Модульный бандл -->
+    <script type="module" src="./js/main.js?v=3"></script>
   </body>
 </html>
