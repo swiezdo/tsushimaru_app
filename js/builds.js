@@ -1,5 +1,5 @@
 // builds.js
-import { tg, $, hapticTap, hapticOK, hapticERR } from './telegram.js';
+import { tg, $, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
 import { showScreen } from './ui.js';
 import { renderChips, activeValues, setActive, shake } from './profile.js';
 
@@ -63,14 +63,6 @@ let shot1Data = null;
 let shot2Data = null;
 
 // ---------- Хелперы ----------
-function fileToDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
 async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -110,7 +102,7 @@ function renderShotThumb(idx, src) {
   img.src = src;
   btn.appendChild(img);
   btn.addEventListener('click', () => {
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap();
+    hapticTapSmart(); // Tap по миниатюре (замена)
     const input = getShotInputByIdx(String(idx));
     if (!input) return;
     try { input.value = ''; } catch {}
@@ -136,7 +128,7 @@ function saveBuilds(arr){
       message: 'Не удалось сохранить билд: лимит хранения исчерпан. Уменьшите размер скриншотов или удалите старые билды.',
       buttons: [{ type:'ok' }]
     });
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticERR();
+    hapticERR();
     return false;
   }
 }
@@ -184,7 +176,7 @@ function renderMyBuilds() {
 
     row.appendChild(icon);
     row.appendChild(title);
-    row.addEventListener('click', () => openBuildDetail(b.id));
+    row.addEventListener('click', () => { hapticTapSmart(); openBuildDetail(b.id); }); // Tap на строку
     myBuildsList.appendChild(row);
   });
 }
@@ -218,7 +210,7 @@ function renderAllBuilds() {
 
     row.appendChild(icon);
     row.appendChild(title);
-    row.addEventListener('click', () => openPublicBuildDetail(p.id));
+    row.addEventListener('click', () => { hapticTapSmart(); openPublicBuildDetail(p.id); }); // Tap на строку
     allBuildsList.appendChild(row);
   });
 }
@@ -262,7 +254,7 @@ function bindShotInput(input, idx){
       }
 
       if(idx === '1') shot1Data = data; else shot2Data = data;
-      if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap();
+      hapticTapSmart(); // Tap при выборе файла
     }catch(_){
       shake(shotsTwo);
     }
@@ -367,7 +359,6 @@ lightbox?.addEventListener('click', closeLightbox);
 function tgConfirm(title, message) {
   if (!tg?.showPopup) return Promise.resolve(window.confirm(message || title));
   return new Promise((resolve) => {
-    let _resolver = null;
     const handler = (e) => {
       tg.offEvent('popupClosed', handler);
       resolve(e?.button_id === 'yes');
@@ -400,7 +391,7 @@ function deleteBuildById(id) {
 
 // ---------- Публичные обработчики/инициализация ----------
 export function initBuilds() {
-  // Чипы
+  // Чипы — Tap внутри renderChips
   renderChips(classChipsEl, CLASS_VALUES, { single: true });
   renderChips(tagsChipsEl,  TAG_VALUES);
 
@@ -414,25 +405,24 @@ export function initBuilds() {
     setTimeout(autoResize, 0);
   }
 
-  // Хаптик на фокус полей
-  buildNameEl?.addEventListener('focus', ()=>{ if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap(); }, {passive:true});
-  buildDescEl?.addEventListener('focus', ()=>{ if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap(); }, {passive:true});
+  // Tap при фокусе полей
+  buildNameEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
+  buildDescEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
 
-  // Кнопка «Создать билд»
+  // «＋ Создать билд» — OK
   createBuildBtn?.addEventListener('click', () => {
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticOK();
+    hapticOK();
     resetBuildForm();
     showScreen('buildCreate');
   });
-  createBuildBtn?.addEventListener('pointerdown', () => { /* tap в click */ });
 
   // Слоты изображений
   bindShotInput(shotInput1, '1');
   bindShotInput(shotInput2, '2');
 
-  // Делегирование клика по квадратам
+  // Делегирование клика по квадратам — Tap
   shotsTwo?.addEventListener('click', (e) => {
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap();
+    hapticTapSmart();
     const box = e.target.closest('.upload-box');
     if (!box) return;
     const idx = box.dataset.idx;
@@ -442,7 +432,7 @@ export function initBuilds() {
     input.click();
   });
 
-  // Submit билда
+  // Сабмит
   buildSubmitBtn?.addEventListener('click', () => buildForm?.requestSubmit());
   buildForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -454,9 +444,9 @@ export function initBuilds() {
     const tags  = activeValues(tagsChipsEl);
     const desc  = (buildDescEl?.value || '').trim();
 
-    if (!name)   { shake(buildNameEl); if ((window.__tsuShouldHaptic?.() ?? true)) hapticERR(); buildNameEl && buildNameEl.scrollIntoView({behavior:'smooth', block:'center'}); return; }
-    if (!klass)  { shake(classChipsEl); if ((window.__tsuShouldHaptic?.() ?? true)) hapticERR(); return; }
-    if (!shot1Data || !shot2Data) { shake(shotsTwo); if ((window.__tsuShouldHaptic?.() ?? true)) hapticERR(); return; }
+    if (!name)   { shake(buildNameEl); hapticERR(); buildNameEl && buildNameEl.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+    if (!klass)  { shake(classChipsEl); hapticERR(); return; }
+    if (!shot1Data || !shot2Data) { shake(shotsTwo); hapticERR(); return; }
 
     const item = {
       id: Date.now(),
@@ -472,16 +462,16 @@ export function initBuilds() {
     all.push(item);
     if (!saveBuilds(all)) { return; }
 
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticOK();
+    hapticOK(); // OK на успех
     tg?.showPopup?.({ title: 'Билд создан', message: 'Сохранено локально (макет, без сервера).', buttons: [{ type:'ok' }] });
 
     renderMyBuilds();
     showScreen('builds');
   });
 
-  // Публикация/скрытие
+  // Публикация/скрытие — OK
   publishBuildBtn?.addEventListener('click', () => {
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticOK();
+    hapticOK();
     if (!currentBuildId) return;
 
     const myAll = loadBuilds();
@@ -520,9 +510,9 @@ export function initBuilds() {
     tg?.showPopup?.({ title:'Опубликовано', message:'Билд успешно опубликован.', buttons:[{type:'ok'}] });
   });
 
-  // Удаление
+  // Удаление — OK при нажатии
   deleteBuildBtn?.addEventListener('click', async () => {
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticOK();
+    hapticOK();
     const idFromBtn = deleteBuildBtn?.dataset?.id;
     const id = idFromBtn ?? currentBuildId;
     if (!id) { tg?.showAlert?.('Не удалось определить билд для удаления.'); return; }

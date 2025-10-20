@@ -15,20 +15,22 @@ export const tg = window.Telegram?.WebApp || null;
     if (th.text_color) document.documentElement.style.setProperty('--tg-tx', th.text_color);
     if (th.hint_color) document.documentElement.style.setProperty('--tg-hint', th.hint_color);
 
-    // Маркер, что работаем в контексте Telegram
     document.documentElement.classList.add('tg');
-
-    // Telegram MainButton в этом проекте не используется
     tg.MainButton.hide();
-  } catch (_) {
-    // без падений в браузере вне Telegram
-  }
+  } catch (_) {}
 })();
 
-// Тактильная отдача — безопасные обёртки, не бросают ошибок вне Telegram
+// Базовые хаптики
 export function hapticOK()  { try { tg?.HapticFeedback?.notificationOccurred('success'); } catch {} }
 export function hapticERR() { try { tg?.HapticFeedback?.notificationOccurred('error'); }   catch {} }
 export function hapticTap() { try { tg?.HapticFeedback?.impactOccurred('light'); }         catch {} }
+
+// «Умный» Tap: не срабатывает, если жест был прокруткой
+export function hapticTapSmart() {
+  try {
+    if (window.__tsuShouldHaptic?.()) hapticTap();
+  } catch {}
+}
 
 // Утилиты DOM/скролла
 export function $(id) {

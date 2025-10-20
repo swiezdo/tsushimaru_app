@@ -1,5 +1,5 @@
 // main.js
-import { tg, $ } from './telegram.js';
+import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, applyTopInset } from './ui.js';
 import { initProfile } from './profile.js';
 import { initTrophies } from './trophies.js';
@@ -20,17 +20,19 @@ import { initBuilds } from './builds.js';
     const dx  = Math.abs((window.__lastUpX ?? lastDown.x) - lastDown.x);
     const dy  = Math.abs((window.__lastUpY ?? lastDown.y) - lastDown.y);
     const dsy = Math.abs((window.scrollY||0) - lastDown.sy);
+    // если жест похож на прокрутку — не вибрируем
     return dt < 1200 && dx < 6 && dy < 6 && dsy < 6;
   };
 })();
 
-// ---------------- BackButton навигация ----------------
+// ---------------- BackButton навигация + Tap ----------------
 function isVisible(id) {
   const el = document.getElementById(id);
   return el && !el.classList.contains('hidden');
 }
 function installBackButton() {
   tg?.onEvent?.('backButtonClicked', () => {
+    hapticTapSmart(); // Tap на Back
     if (isVisible('buildCreateScreen'))       { showScreen('builds'); return; }
     if (isVisible('buildDetailScreen'))       { showScreen('builds'); return; }
     if (isVisible('buildPublicDetailScreen')) { showScreen('builds'); return; }
@@ -42,20 +44,26 @@ function installBackButton() {
   });
 }
 
-// ---------------- Кнопки главного экрана ----------------
+// ---------------- Главная: Tap на все кнопки ----------------
 function bindHomeButtons() {
-  $('openProfileBtn')?.addEventListener('click', () => showScreen('profile'));
-  $('trophiesBtn')?.addEventListener('click', () => showScreen('trophies'));
-  $('buildsBtn')?.addEventListener('click',   () => showScreen('builds'));
+  const map = [
+    ['openProfileBtn', () => showScreen('profile')],
+    ['trophiesBtn',    () => showScreen('trophies')],
+    ['buildsBtn',      () => showScreen('builds')],
+  ];
+  for (const [id, handler] of map) {
+    const el = $(id);
+    if (!el) continue;
+    el.addEventListener('click', () => { hapticTapSmart(); handler(); });
+  }
 }
 
-// ---------------- Старт приложения ----------------
+// ---------------- Старт ----------------
 async function startApp() {
   applyTopInset();
   bindHomeButtons();
   installBackButton();
 
-  // Порядок инициализаций
   initProfile();
   await initTrophies();
   initBuilds();
@@ -63,7 +71,7 @@ async function startApp() {
   showScreen('home');
 }
 
-// Надёжный запуск: если DOM уже готов — стартуем сразу
+// Надёжный запуск
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', startApp, { once: true });
 } else {

@@ -1,6 +1,5 @@
 // profile.js
-import { tg, $, hapticTap, hapticERR, hapticOK } from './telegram.js';
-import { showScreen } from './ui.js';
+import { tg, $, hapticTapSmart, hapticERR, hapticOK } from './telegram.js';
 
 // ---------- Общие утилиты для чипов ----------
 function renderChips(container, values, { single = false, onChange } = {}) {
@@ -13,7 +12,7 @@ function renderChips(container, values, { single = false, onChange } = {}) {
     b.textContent = v;
     b.dataset.value = v;
     b.addEventListener('click', () => {
-      if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap();
+      hapticTapSmart(); // Tap на чипы
       if (single) {
         container.querySelectorAll('.chip-btn').forEach((x) => x.classList.remove('active'));
         b.classList.add('active');
@@ -113,9 +112,9 @@ export function initProfile() {
     if (e.key === 'Enter') { e.preventDefault(); }
   });
 
-  // Хаптик Tap при фокусе
-  nameInput?.addEventListener('focus', ()=>{ if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap(); }, {passive:true});
-  psnInput?.addEventListener('focus',  ()=>{ if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap(); }, {passive:true});
+  // Tap на фокус полей
+  nameInput?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
+  psnInput?.addEventListener('focus',  ()=>{ hapticTapSmart(); }, {passive:true});
 
   function isNameOk() {
     return !!(nameInput && (nameInput.value || '').trim());
@@ -145,7 +144,7 @@ export function initProfile() {
         if (!firstBad) firstBad = psnInput;
       }
       if (firstBad) smartScrollIntoView(firstBad);
-      if ((window.__tsuShouldHaptic?.() ?? true)) hapticERR();
+      hapticERR(); // ERR при валидации
       tg?.showPopup?.({ title: 'Ошибка', message: msgs.join('\n'), buttons: [{ type: 'ok' }] });
       return;
     }
@@ -154,7 +153,7 @@ export function initProfile() {
     if (v_psn)       v_psn.textContent       = (psnInput?.value || '').trim()       || '—';
     refreshProfileView();
 
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticOK();
+    hapticOK(); // OK на успех
     tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены.', buttons: [{ type: 'ok' }] });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -162,5 +161,5 @@ export function initProfile() {
   profileSaveBtn?.addEventListener('click', () => profileForm.requestSubmit());
 }
 
-// Экспорт вспомогательных функций, если понадобятся в других модулях
+// Экспорт вспомогательных функций для других модулей
 export { renderChips, activeValues, setActive, shake, smartScrollIntoView, refreshProfileView };

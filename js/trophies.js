@@ -1,5 +1,5 @@
 // trophies.js
-import { tg, $, hapticTap, hapticOK, hapticERR } from './telegram.js';
+import { tg, $, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
 import { showScreen } from './ui.js';
 import { shake, smartScrollIntoView } from './profile.js';
 
@@ -41,7 +41,7 @@ function renderTrophyList(data) {
     btn.type = 'button';
     btn.dataset.id = key;
     btn.innerHTML = `<span>${t.name || key} ${t.emoji || ''}</span><span class="right">›</span>`;
-    btn.addEventListener('click', () => openTrophyDetail(key));
+    btn.addEventListener('click', () => { hapticTapSmart(); openTrophyDetail(key); }); // Tap на кнопку трофея
     trophyListEl.appendChild(btn);
   });
 }
@@ -85,7 +85,7 @@ function renderProofPreview() {
 
     tile.addEventListener('click', () => {
       proofSelected.splice(idx, 1);
-      if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap();
+      hapticTapSmart(); // Tap при удалении превью
       renderProofPreview();
     });
 
@@ -127,13 +127,13 @@ async function submitProof() {
   if (filesCount === 0 || !comment) {
     if (!filesCount) shake(previewEl || proofAddBtn || proofFilesEl);
     if (!comment)    { shake(commentEl); smartScrollIntoView(commentEl); }
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticERR();
+    hapticERR(); // ERR при ошибке
     tg?.showPopup?.({ title: 'Ошибка', message: 'Добавьте файл и комментарий.', buttons: [{ type: 'ok' }] });
     return;
   }
 
   // Имитация успешной отправки
-  if ((window.__tsuShouldHaptic?.() ?? true)) hapticOK();
+  hapticOK(); // OK на успех
   tg?.showPopup?.({ title: 'Заявка отправлена', message: '✅ Модераторы рассмотрят вашу заявку.' });
   resetProofForm();
   showScreen('trophies');
@@ -144,12 +144,14 @@ export async function initTrophies() {
   const data = await loadTrophies();
   renderTrophyList(data);
 
-  // Кнопка «＋ Прикрепить»
+  // «＋ Прикрепить» — Tap
   proofAddBtn?.addEventListener('click', () => {
-    if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap();
+    hapticTapSmart();
     try { proofFilesEl.value = ''; } catch {}
     proofFilesEl?.click();
   });
+
+  // Если не выбрано медиа при попытке добавить — shake делается в change ниже (когда пусто)
 
   // Выбор файлов
   if (proofFilesEl) {
@@ -176,19 +178,19 @@ export async function initTrophies() {
     });
   }
 
-  // Авторесайз textarea и haptic на фокус
+  // Авторесайз textarea и Tap на фокус
   if (commentEl) {
     const autoResize = () => {
       commentEl.style.height = 'auto';
       commentEl.style.height = Math.min(commentEl.scrollHeight, 200) + 'px';
     };
     commentEl.addEventListener('input', autoResize);
-    commentEl.addEventListener('focus', ()=>{ if ((window.__tsuShouldHaptic?.() ?? true)) hapticTap(); }, {passive:true});
+    commentEl.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true}); // Tap на поле комментария
     setTimeout(autoResize, 0);
   }
 
-  // Сабмит из нижней панели
-  proofSubmitBtn?.addEventListener('pointerdown', () => { /* tap-хаптик в click */ });
+  // Кнопка «Отправить»: Tap при нажатии, OK/ERR в submitProof
+  proofSubmitBtn?.addEventListener('pointerdown', () => { hapticTapSmart(); });
   proofSubmitBtn?.addEventListener('click', (e) => { e.preventDefault?.(); submitProof(); });
 
   // Блок самой формы — защита от submit
