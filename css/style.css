@@ -1,0 +1,373 @@
+:root {
+  --bg:#0e1621;
+  --fg:#fff;
+  --muted:#aeb7c2;
+  --card:rgba(255,255,255,0.04);
+  --accent:#2ea6ff;
+  --stroke:rgba(255,255,255,0.08);
+  --radius:16px;
+
+  --tg-bg: var(--bg);
+  --tg-tx: var(--fg);
+  --tg-hint: var(--muted);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+html,body { height:100%; }
+
+body {
+  font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu;
+  background:var(--tg-bg);
+  color:var(--tg-tx);
+  -webkit-font-smoothing:antialiased;
+  padding:16px;
+  max-width:920px;
+  margin:auto;
+  padding-bottom: calc(36px + var(--safe-bottom));
+}
+
+.hidden { display:none; }
+
+/* Topbar */
+.topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.title { font-size:20px; font-weight:600; }
+.chip { border:1px solid var(--stroke); border-radius:999px; padding:6px 10px; color:var(--tg-hint); }
+
+/* Card */
+.card {
+  background:var(--card);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:16px;
+}
+.card-title { font-weight:600; margin-bottom:12px; }
+
+/* Кнопка под заголовком «Билды» */
+.top-action { margin:16px 0 4px; }
+
+/* Доп. пустое пространство */
+.space-md { height:12px; }
+
+/* Grid */
+.profile-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.field label { font-size:12px; color:var(--tg-hint); margin-bottom:4px; display:block; }
+.value { font-size:15px; word-break:break-word; }
+.value.lines { white-space:pre-line; }
+.span-2 { grid-column:1/-1; }
+
+/* Forms */
+.form { display:grid; gap:12px; }
+.input label { font-size:13px; color:var(--tg-hint); margin-bottom:6px; }
+.input input,
+.input textarea {
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid var(--stroke);
+  background:transparent;
+  color:var(--tg-tx);
+  font-size:16px;
+  line-height:1.35;
+  outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.input textarea {
+  resize:none;
+  min-height: calc(1em + 24px);
+  max-height: 200px;
+  overflow-y:auto;
+}
+.input input:focus,
+.input textarea:focus { border-color:var(--accent); }
+
+/* Панель действий под карточкой */
+.actions-bar {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:16px 0;
+}
+
+/* ==== МАЛЕНЬКИЕ КВАДРАТЫ ДЛЯ СКРИНОВ (создание билда) ==== */
+.shots-two {
+  display:grid;
+  grid-template-columns:repeat(2, auto);
+  gap:8px;
+  justify-content:flex-start;
+}
+
+/* Пустой слот (плюс) */
+.shots-two .upload-box {
+  width:88px;
+  height:88px;
+  aspect-ratio:1/1;
+  border-radius:12px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,0.04);
+  font-size:28px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+}
+
+/* Миниатюра вместо плюса */
+.shots-two .shot-thumb {
+  width:88px;
+  height:88px;
+  aspect-ratio:1/1;
+  border-radius:12px;
+  border:1px solid var(--stroke);
+  overflow:hidden;
+  background:rgba(255,255,255,0.06);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.shots-two .shot-thumb img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+  border-radius:inherit;
+}
+
+/* Chips */
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid var(--stroke);
+  background:transparent;
+  color:var(--tg-tx);
+  cursor:pointer;
+  font-size:15px;
+  min-height:44px;
+}
+.chip-btn.active {
+  background:var(--accent);
+  border-color:transparent;
+  color:#00131f;
+  font-weight:600;
+}
+
+/* Buttons */
+.actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+.btn {
+  border:1px solid var(--stroke);
+  border-radius:12px;
+  padding:12px 16px;
+  background:transparent;
+  color:var(--tg-tx);
+  cursor:pointer;
+  min-height:44px;
+  font-size:16px;
+}
+.btn.primary { background:var(--accent); border-color:transparent; color:#00131f; font-weight:700; }
+.btn.danger  { background:#ff4d4f; border-color:transparent; color:#00131f; font-weight:700; }
+.btn.ghost   { opacity:.95; }
+.btn.wide    { width:100%; }
+.btn:active  { transform:translateY(1px); }
+.only-browser{ display:block; }
+
+/* Home */
+.home .brand { display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:12px; }
+.logo { width:128px; height:128px; object-fit:contain; }
+.brand-title { font-size:22px; font-weight:700; letter-spacing:.3px; }
+.home-buttons { display:grid; gap:10px; margin-top:8px; }
+.big-btn {
+  display:flex; align-items:center; justify-content:center;
+  padding:14px 16px; border-radius:16px; border:1px solid var(--stroke);
+  background:transparent; color:var(--tg-tx); font-size:16px; cursor:pointer; text-decoration:none; min-height:50px;
+}
+.big-btn.primary { background:var(--accent); border-color:transparent; color:#00131f; font-weight:700; }
+.big-btn.ghost   { opacity:.95; }
+
+/* Нижние кнопки — одинаковый зазор до низа */
+.footer-actions { margin:8px 0 calc(28px + var(--safe-bottom)); }
+#backToListBtn, #trophiesHomeBtn, #homeBtn, #buildsHomeBtn, #backToBuildsBtn { margin-bottom:calc(28px + var(--safe-bottom)); }
+#submitInlineBtn { margin-bottom:8px; }
+
+/* List */
+.list-buttons {
+  display:grid; gap:8px;
+}
+.list-btn {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 14px; border:1px solid var(--stroke); border-radius:12px;
+  background:transparent; color:var(--tg-tx); cursor:pointer; min-height:48px;
+}
+.list-btn:active { transform:translateY(1px); }
+.list-btn .right { opacity:.7; }
+
+/* Trophy detail */
+.desc-list { margin-left:18px; display:grid; gap:6px; }
+.desc-list li { line-height:1.35; }
+#trophiesScreen .value { white-space:pre-line; line-height:1.15; }
+
+/* Узкая прозрачная кнопка-строка "＋ Прикрепить" */
+.fileline-btn{
+  width:100%;
+  min-height:44px;
+  border:1px dashed var(--stroke);
+  border-radius:12px;
+  background:transparent;
+  color:var(--tg-tx);
+  font-size:15px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  cursor:pointer;
+}
+.fileline-btn:active{ transform:translateY(1px); }
+
+/* Превью файлов (трофеи) — компактные, 4 в ряд + плитка "+N" */
+.thumbs-row{
+  display:flex;
+  gap:6px;
+  margin-top:6px;          /* небольшой зазор, когда превью есть */
+  flex-wrap:nowrap;
+  overflow:visible;
+}
+.thumbs-row:empty{
+  display:none;            /* когда нет миниатюр — нет зазора */
+}
+.thumbs-row .preview-item,
+.thumbs-row .preview-more{
+  width:52px;
+  height:52px;
+  border-radius:10px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,0.06);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  font-size:18px;
+  flex:0 0 auto;
+  position:relative;       /* для overlay-крестика */
+}
+.thumbs-row .preview-item img{
+  width:100%; height:100%;
+  object-fit:cover; display:block; border-radius:inherit;
+}
+.thumbs-row .preview-more{
+  border:1px dashed var(--stroke);
+  font-weight:700; opacity:.9;
+}
+
+/* Полупрозрачный крестик на миниатюре (понятно, что можно удалить) */
+.preview-item.removable::after{
+  content:"✕";
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;            /* примерно «на пол миниатюры» */
+  color:rgba(255,255,255,.85);
+  background:rgba(0,0,0,.25);
+  opacity:.35;               /* всегда слегка видно */
+  pointer-events:none;       /* клики идут в сам tile */
+}
+.preview-item.removable:active::after{
+  opacity:.6;
+}
+
+/* Старый грид превью (если где-то нужен) */
+.preview-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; }
+.preview-item {
+  width:100%; height:80px; border-radius:10px; border:1px solid var(--stroke);
+  overflow:hidden; background:rgba(255,255,255,0.06);
+  display:flex; align-items:center; justify-content:center; font-size:24px;
+}
+.preview-item img { width:100%; height:100%; object-fit:cover; }
+.preview-more {
+  display:flex; align-items:center; justify-content:center;
+  border:1px dashed var(--stroke); border-radius:10px; height:80px; font-weight:700; opacity:.9;
+}
+
+/* Уплотняем форму заявки: меньше зазоров до «Комментарий» */
+#proofForm { gap: 8px; }
+#filePreview:empty { display:none; margin-top:0; }
+
+/* Ошибки и shake */
+.error { border-color:#ff4444!important; }
+.error-text { color:#ff4444; font-size:12px; margin-top:4px; }
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  25% { transform:translateX(-4px); }
+  50% { transform:translateX(4px); }
+  75% { transform:translateX(-4px); }
+}
+.shake { animation:shake .3s; }
+
+
+/* Билды — список */
+.list-builds { display:grid; gap:8px; }
+.build-item {
+  display:grid; grid-template-columns:48px 1fr; gap:10px; align-items:center;
+  padding:10px 12px; border-radius:12px; border:1px solid var(--stroke);
+  background:transparent; cursor:pointer; min-height:48px; color:var(--tg-tx);
+}
+.build-item:active { transform:translateY(1px); }
+.build-icon {
+  width:48px; height:48px; border-radius:10px; border:1px solid var(--stroke);
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.04); overflow:hidden;
+}
+.build-icon img { width:70%; height:70%; object-fit:contain; opacity:.95; }
+.build-title { font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--tg-tx); }
+.muted { color:var(--tg-hint); font-size:14px; }
+
+/* Детали билдов — сетка скринов */
+.shots-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.shots-grid .shot-thumb {
+  width:100%; height:160px; border-radius:10px; border:1px solid var(--stroke);
+  overflow:hidden; background:rgba(255,255,255,0.06);
+  display:flex; align-items:center; justify-content:center;
+}
+.shot-thumb img { width:100%; height:100%; object-fit:cover; }
+
+/* Лайтбокс */
+.lightbox {
+  position:fixed; inset:0; background:rgba(0,0,0,.85);
+  display:flex; align-items:center; justify-content:center; z-index:9999;
+}
+.lightbox img {
+  max-width:92vw; max-height:88vh; border-radius:12px; border:1px solid var(--stroke);
+}
+.lightbox.hidden { display:none!important; }
+
+/* Responsive */
+@media(max-width:640px) {
+  .profile-grid { grid-template-columns:1fr; }
+  .shots-grid { grid-template-columns:1fr; }
+  .shots-two { grid-template-columns:repeat(2, auto); gap:8px; } /* остаются рядом */
+  .actions-bar { grid-template-columns:1fr; gap:8px; }
+  .preview-grid { grid-template-columns:repeat(3,1fr); }
+}
+@media (max-width:360px){
+  .thumbs-row{ gap:5px; }
+  .thumbs-row .preview-item,
+  .thumbs-row .preview-more{ width:48px; height:48px; }
+}
+
+/* Touch */
+button, .btn, .big-btn, .list-btn, .chip-btn, .build-item, .upload-box {
+  -webkit-user-select:none; -moz-user-select:none; user-select:none;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+
+/* В Telegram скрываем браузерную кнопку отправки (если где-то осталась) */
+html.tg .only-browser { display:none; }
