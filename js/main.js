@@ -1,9 +1,9 @@
 // main.js
-import { tg, $ } from './telegram.js';
-import { showScreen, applyTopInset } from './ui.js';
-import { initProfile } from './profile.js';
-import { initTrophies } from './trophies.js';
-import { initBuilds } from './builds.js';
+import { tg, $ } from './js/telegram.js';
+import { showScreen, applyTopInset } from './js/ui.js';
+import { initProfile } from './js/profile.js';
+import { initTrophies } from './js/trophies.js';
+import { initBuilds } from './js/builds.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (однократно глобально) ----------------
 (function installHapticGuardOnce(){
