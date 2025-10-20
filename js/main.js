@@ -1,11 +1,11 @@
 // main.js
-import { tg, $ } from './js/telegram.js';
-import { showScreen, applyTopInset } from './js/ui.js';
-import { initProfile } from './js/profile.js';
-import { initTrophies } from './js/trophies.js';
-import { initBuilds } from './js/builds.js';
+import { tg, $ } from './telegram.js';
+import { showScreen, applyTopInset } from './ui.js';
+import { initProfile } from './profile.js';
+import { initTrophies } from './trophies.js';
+import { initBuilds } from './builds.js';
 
-// ---------------- Анти-«пролистывание» для тактильной отдачи (однократно глобально) ----------------
+// ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
 (function installHapticGuardOnce(){
   if (window.__tsuHapticInstalled) return;
   window.__tsuHapticInstalled = true;
@@ -29,27 +29,31 @@ function isVisible(id) {
   const el = document.getElementById(id);
   return el && !el.classList.contains('hidden');
 }
-tg?.onEvent?.('backButtonClicked', () => {
-  // простая схема возвратов
-  if (isVisible('buildCreateScreen'))       { showScreen('builds'); return; }
-  if (isVisible('buildDetailScreen'))       { showScreen('builds'); return; }
-  if (isVisible('buildPublicDetailScreen')) { showScreen('builds'); return; }
-  if (isVisible('trophyDetailScreen'))      { showScreen('trophies'); return; }
-  if (isVisible('profileScreen') || isVisible('trophiesScreen') || isVisible('buildsScreen')) { showScreen('home'); return; }
-  showScreen('home');
-});
+function installBackButton() {
+  tg?.onEvent?.('backButtonClicked', () => {
+    if (isVisible('buildCreateScreen'))       { showScreen('builds'); return; }
+    if (isVisible('buildDetailScreen'))       { showScreen('builds'); return; }
+    if (isVisible('buildPublicDetailScreen')) { showScreen('builds'); return; }
+    if (isVisible('trophyDetailScreen'))      { showScreen('trophies'); return; }
+    if (isVisible('profileScreen') || isVisible('trophiesScreen') || isVisible('buildsScreen')) {
+      showScreen('home'); return;
+    }
+    showScreen('home');
+  });
+}
 
 // ---------------- Кнопки главного экрана ----------------
 function bindHomeButtons() {
   $('openProfileBtn')?.addEventListener('click', () => showScreen('profile'));
   $('trophiesBtn')?.addEventListener('click', () => showScreen('trophies'));
-  $('buildsBtn')?.addEventListener('click',   () => { showScreen('builds'); });
+  $('buildsBtn')?.addEventListener('click',   () => showScreen('builds'));
 }
 
-// ---------------- Старт ----------------
-window.addEventListener('DOMContentLoaded', async () => {
+// ---------------- Старт приложения ----------------
+async function startApp() {
   applyTopInset();
   bindHomeButtons();
+  installBackButton();
 
   // Порядок инициализаций
   initProfile();
@@ -57,6 +61,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   initBuilds();
 
   showScreen('home');
+}
 
-  // Логотип/чип с username уже подставляется в initProfile()
-});
+// Надёжный запуск: если DOM уже готов — стартуем сразу
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', startApp, { once: true });
+} else {
+  startApp();
+}
