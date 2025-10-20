@@ -44,9 +44,6 @@ body {
 }
 .card-title { font-weight:600; margin-bottom:12px; }
 
-/* Кнопка под заголовком «Билды» */
-.top-action { margin:2px 0 4px; }
-
 /* Доп. пустое пространство */
 .space-md { height:12px; }
 
