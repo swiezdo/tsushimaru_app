@@ -25,6 +25,13 @@ body {
   max-width:920px;
   margin:auto;
   padding-bottom: calc(36px + var(--safe-bottom));
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .hidden { display:none; }
