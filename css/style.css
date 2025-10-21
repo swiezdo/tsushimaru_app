@@ -347,6 +347,14 @@ body {
 }
 .lightbox.hidden { display:none!important; }
 
+/* Специальные правила для страниц деталей билда - каждое поле на отдельной строке */
+#buildDetailScreen .profile-grid,
+#buildPublicDetailScreen .profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
 /* Responsive */
 @media(max-width:640px) {
   .profile-grid { grid-template-columns:1fr; }
