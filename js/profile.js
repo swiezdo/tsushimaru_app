@@ -50,6 +50,27 @@ const MODES      = ['📖 Сюжет','🏹 Выживание','🗻 Испыт
 const GOALS      = ['🏆 Получение трофеев','🔎 Узнать что-то новое','👥 Поиск тиммейтов'];
 const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','🏅 Платина','👻 Кошмар','🔥 HellMode'];
 
+// ---------- LocalStorage ----------
+const LS_KEY_PROFILE = 'tsu_profile_v1';
+
+function saveProfile(data) {
+  try {
+    localStorage.setItem(LS_KEY_PROFILE, JSON.stringify(data));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function loadProfile() {
+  try {
+    const raw = localStorage.getItem(LS_KEY_PROFILE);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 // ---------- Отображение ----------
 const v_real_name  = $('v_real_name');
 const v_psn        = $('v_psn');
@@ -69,12 +90,39 @@ function refreshProfileView() {
   if (v_difficulty) v_difficulty.textContent = prettyLines(activeValues($('difficultyChips')));
 }
 
+function loadProfileToForm(profile) {
+  if (!profile) return;
+  
+  // Заполняем текстовые поля
+  if (profile.real_name && profileForm.real_name) {
+    profileForm.real_name.value = profile.real_name;
+  }
+  if (profile.psn && profileForm.psn) {
+    profileForm.psn.value = profile.psn;
+  }
+  
+  // Устанавливаем чипы
+  if (profile.platform) setActive($('platformChips'), profile.platform);
+  if (profile.modes) setActive($('modesChips'), profile.modes);
+  if (profile.goals) setActive($('goalsChips'), profile.goals);
+  if (profile.difficulty) setActive($('difficultyChips'), profile.difficulty);
+  
+  // Обновляем отображение
+  refreshProfileView();
+}
+
 export function initProfile() {
   // Чипы
   renderChips($('platformChips'),   PLATFORM,   { onChange: refreshProfileView });
   renderChips($('modesChips'),      MODES,      { onChange: refreshProfileView });
   renderChips($('goalsChips'),      GOALS,      { onChange: refreshProfileView });
   renderChips($('difficultyChips'), DIFFICULTY, { onChange: refreshProfileView });
+
+  // Загружаем сохраненный профиль
+  const savedProfile = loadProfile();
+  if (savedProfile) {
+    loadProfileToForm(savedProfile);
+  }
 
 
   if (!profileForm) return;
@@ -125,8 +173,24 @@ export function initProfile() {
       return;
     }
 
-    if (v_real_name) v_real_name.textContent = (nameInput?.value || '').trim() || '—';
-    if (v_psn)       v_psn.textContent       = (psnInput?.value || '').trim()       || '—';
+    // Сохраняем в localStorage
+    const profileData = {
+      real_name: (nameInput?.value || '').trim(),
+      psn: (psnInput?.value || '').trim(),
+      platform: activeValues($('platformChips')),
+      modes: activeValues($('modesChips')),
+      goals: activeValues($('goalsChips')),
+      difficulty: activeValues($('difficultyChips'))
+    };
+    
+    if (!saveProfile(profileData)) {
+      tg?.showPopup?.({ title: 'Ошибка', message: 'Не удалось сохранить профиль.', buttons: [{ type: 'ok' }] });
+      return;
+    }
+
+    // Обновляем отображение
+    if (v_real_name) v_real_name.textContent = profileData.real_name || '—';
+    if (v_psn)       v_psn.textContent       = profileData.psn || '—';
     refreshProfileView();
 
     hapticOK();
