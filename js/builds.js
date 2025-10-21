@@ -275,8 +275,8 @@ function openBuildDetail(id) {
   });
 
   updatePublishButton(b.id);
-  setTopbar(true, b.name || 'Билд'); // Устанавливаем название билда в topbar
   showScreen('buildDetail');
+  setTopbar(true, b.name || 'Билд'); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
 }
 function openPublicBuildDetail(pubId) {
   const pubs = loadPublicBuilds();
@@ -306,8 +306,8 @@ function openPublicBuildDetail(pubId) {
     publicDetailShots.appendChild(wrap);
   });
 
-  setTopbar(true, p.name || 'Билд'); // Устанавливаем название билда в topbar
   showScreen('buildPublicDetail');
+  setTopbar(true, p.name || 'Билд'); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
 }
 
 // Лайтбокс
