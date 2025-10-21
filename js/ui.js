@@ -56,7 +56,11 @@ export function applyTopInset() {
   const TOP_OFFSET_PX = 64;
   root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + ${TOP_OFFSET_PX}px)`;
 }
-window.addEventListener('resize', applyTopInset);
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(applyTopInset, 100);
+});
 
 // ===== Умный скролл к полю (с учётом экранной клавиатуры) =====
 export function focusAndScrollIntoView(el) {

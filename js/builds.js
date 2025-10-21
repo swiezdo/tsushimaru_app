@@ -257,7 +257,7 @@ function openBuildDetail(id) {
 
   if (deleteBuildBtn) deleteBuildBtn.dataset.id = String(b.id);
 
-  buildDetailTitle.textContent = ''; // Убираем название из карточки
+  buildDetailTitle.textContent = b.name || 'Билд';
   vd_class.textContent = b.class || '—';
   vd_tags.textContent  = (b.tags && b.tags.length) ? b.tags.join(', ') : '—';
   vd_desc.textContent  = b.desc || '—';
@@ -283,7 +283,7 @@ function openPublicBuildDetail(pubId) {
   const p = pubs.find(x => String(x.id) === String(pubId));
   if (!p) { tg?.showAlert?.('Публикация не найдена'); return; }
 
-  publicDetailTitle.textContent = ''; // Убираем название из карточки
+  publicDetailTitle.textContent = p.name || 'Билд';
   pd_class.textContent = p.class || '—';
   pd_tags.textContent  = (p.tags && p.tags.length) ? p.tags.join(', ') : '—';
   pd_desc.textContent  = p.desc || '—';

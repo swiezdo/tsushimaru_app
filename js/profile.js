@@ -76,10 +76,6 @@ export function initProfile() {
   renderChips($('goalsChips'),      GOALS,      { onChange: refreshProfileView });
   renderChips($('difficultyChips'), DIFFICULTY, { onChange: refreshProfileView });
 
-  // chip @username
-  const chip = $('userChip');
-  const uname = tg?.initDataUnsafe?.user?.username;
-  if (chip && uname) chip.textContent = '@' + uname;
 
   if (!profileForm) return;
   const nameInput = profileForm.real_name;
