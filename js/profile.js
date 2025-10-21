@@ -107,7 +107,9 @@ function loadProfileToForm(profile) {
   if (profile.goals) setActive($('goalsChips'), profile.goals);
   if (profile.difficulty) setActive($('difficultyChips'), profile.difficulty);
   
-  // Обновляем отображение
+  // Обновляем отображение в карточке "Ваш профиль"
+  if (v_real_name) v_real_name.textContent = profile.real_name || '—';
+  if (v_psn) v_psn.textContent = profile.psn || '—';
   refreshProfileView();
 }
 
@@ -120,7 +122,6 @@ export function initProfile() {
 
   // Загружаем сохраненный профиль
   const savedProfile = loadProfile();
-  console.log('Загруженный профиль:', savedProfile);
   if (savedProfile) {
     loadProfileToForm(savedProfile);
   }
@@ -183,8 +184,6 @@ export function initProfile() {
       goals: activeValues($('goalsChips')),
       difficulty: activeValues($('difficultyChips'))
     };
-    
-    console.log('Сохраняем профиль:', profileData);
     
     if (!saveProfile(profileData)) {
       tg?.showPopup?.({ title: 'Ошибка', message: 'Не удалось сохранить профиль.', buttons: [{ type: 'ok' }] });
