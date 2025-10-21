@@ -1,6 +1,6 @@
 // builds.js
 import { tg, $, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
-import { showScreen, focusAndScrollIntoView } from './ui.js';
+import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
 import { renderChips, activeValues, setActive, shake } from './profile.js';
 
 const LS_KEY_BUILDS      = 'tsu_builds_v1';
@@ -257,7 +257,7 @@ function openBuildDetail(id) {
 
   if (deleteBuildBtn) deleteBuildBtn.dataset.id = String(b.id);
 
-  buildDetailTitle.textContent = b.name || 'Билд';
+  buildDetailTitle.textContent = ''; // Убираем название из карточки
   vd_class.textContent = b.class || '—';
   vd_tags.textContent  = (b.tags && b.tags.length) ? b.tags.join(', ') : '—';
   vd_desc.textContent  = b.desc || '—';
@@ -275,6 +275,7 @@ function openBuildDetail(id) {
   });
 
   updatePublishButton(b.id);
+  setTopbar(true, b.name || 'Билд'); // Устанавливаем название билда в topbar
   showScreen('buildDetail');
 }
 function openPublicBuildDetail(pubId) {
@@ -282,7 +283,7 @@ function openPublicBuildDetail(pubId) {
   const p = pubs.find(x => String(x.id) === String(pubId));
   if (!p) { tg?.showAlert?.('Публикация не найдена'); return; }
 
-  publicDetailTitle.textContent = p.name || 'Билд';
+  publicDetailTitle.textContent = ''; // Убираем название из карточки
   pd_class.textContent = p.class || '—';
   pd_tags.textContent  = (p.tags && p.tags.length) ? p.tags.join(', ') : '—';
   pd_desc.textContent  = p.desc || '—';
@@ -305,6 +306,7 @@ function openPublicBuildDetail(pubId) {
     publicDetailShots.appendChild(wrap);
   });
 
+  setTopbar(true, p.name || 'Билд'); // Устанавливаем название билда в topbar
   showScreen('buildPublicDetail');
 }
 
