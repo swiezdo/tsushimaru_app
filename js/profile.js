@@ -94,11 +94,11 @@ function loadProfileToForm(profile) {
   if (!profile) return;
   
   // Заполняем текстовые поля
-  if (profile.real_name && profileForm.real_name) {
-    profileForm.real_name.value = profile.real_name;
+  if (profileForm.real_name) {
+    profileForm.real_name.value = profile.real_name || '';
   }
-  if (profile.psn && profileForm.psn) {
-    profileForm.psn.value = profile.psn;
+  if (profileForm.psn) {
+    profileForm.psn.value = profile.psn || '';
   }
   
   // Устанавливаем чипы
@@ -120,6 +120,7 @@ export function initProfile() {
 
   // Загружаем сохраненный профиль
   const savedProfile = loadProfile();
+  console.log('Загруженный профиль:', savedProfile);
   if (savedProfile) {
     loadProfileToForm(savedProfile);
   }
@@ -182,6 +183,8 @@ export function initProfile() {
       goals: activeValues($('goalsChips')),
       difficulty: activeValues($('difficultyChips'))
     };
+    
+    console.log('Сохраняем профиль:', profileData);
     
     if (!saveProfile(profileData)) {
       tg?.showPopup?.({ title: 'Ошибка', message: 'Не удалось сохранить профиль.', buttons: [{ type: 'ok' }] });
