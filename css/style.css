@@ -30,7 +30,7 @@ body {
 .hidden { display:none; }
 
 /* Topbar */
-.topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.topbar { display:flex; justify-content:center; align-items:center; margin-bottom:8px; }
 .title { font-size:20px; font-weight:600; }
 .chip { border:1px solid var(--stroke); border-radius:999px; padding:6px 10px; color:var(--tg-hint); }
 
@@ -373,4 +373,21 @@ html.tg .only-browser { display:none; }
 /* === NEW: безопасный отступ под последней карточкой на экране «Билды» === */
 #buildsScreen .card:last-of-type {
   margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+}
+
+/* === Единообразные отступы для всех страниц === */
+#profileScreen,
+#trophiesScreen,
+#trophyDetailScreen,
+#buildsScreen,
+#buildCreateScreen,
+#buildDetailScreen,
+#buildPublicDetailScreen {
+  padding-top: 0;
+}
+
+/* Убираем лишние отступы у actions-bar на страницах билдов */
+#buildsScreen .actions-bar:first-of-type,
+#buildDetailScreen .actions-bar:first-of-type {
+  margin-top: 0;
 }
