@@ -1,6 +1,7 @@
 // profile.js
 import { tg, $, hapticTapSmart, hapticERR, hapticOK } from './telegram.js';
 import { focusAndScrollIntoView } from './ui.js';
+import { fetchProfile, saveProfile as apiSaveProfile } from './api.js';
 
 // ---------- Утилиты для чипов ----------
 function renderChips(container, values, { single = false, onChange } = {}) {
@@ -113,6 +114,38 @@ function loadProfileToForm(profile) {
   refreshProfileView();
 }
 
+// Загрузка профиля с сервера
+async function fetchProfileFromServer() {
+  try {
+    const serverProfile = await fetchProfile();
+    if (serverProfile) {
+      // Сохраняем в LocalStorage
+      saveProfile(serverProfile);
+      // Обновляем форму и отображение
+      loadProfileToForm(serverProfile);
+      console.log('Профиль загружен с сервера и обновлен');
+    }
+  } catch (error) {
+    console.log('Ошибка загрузки профиля с сервера:', error);
+    
+    // Показываем предупреждение только для критических ошибок
+    if (error.status === 401) {
+      tg?.showPopup?.({ 
+        title: 'Ошибка авторизации', 
+        message: 'Не удалось авторизоваться в системе.', 
+        buttons: [{ type: 'ok' }] 
+      });
+    } else if (error.status !== 404) {
+      // 404 - профиль не создан, это нормально
+      tg?.showPopup?.({ 
+        title: 'Предупреждение', 
+        message: 'Не удалось загрузить профиль с сервера. Используются локальные данные.', 
+        buttons: [{ type: 'ok' }] 
+      });
+    }
+  }
+}
+
 export function initProfile() {
   // Чипы
   renderChips($('platformChips'),   PLATFORM,   { onChange: refreshProfileView });
@@ -120,11 +153,14 @@ export function initProfile() {
   renderChips($('goalsChips'),      GOALS,      { onChange: refreshProfileView });
   renderChips($('difficultyChips'), DIFFICULTY, { onChange: refreshProfileView });
 
-  // Загружаем сохраненный профиль
+  // Загружаем сохраненный профиль из LocalStorage и сразу показываем
   const savedProfile = loadProfile();
   if (savedProfile) {
     loadProfileToForm(savedProfile);
   }
+
+  // Параллельно загружаем профиль с сервера
+  fetchProfileFromServer();
 
 
   if (!profileForm) return;
@@ -153,7 +189,7 @@ export function initProfile() {
     return /^[A-Za-z0-9_-]{3,16}$/.test(val);
   }
 
-  profileForm.addEventListener('submit', (e) => {
+  profileForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const okName = isNameOk();
@@ -175,29 +211,64 @@ export function initProfile() {
       return;
     }
 
-    // Сохраняем в localStorage
+    // Подготавливаем данные профиля
     const profileData = {
       real_name: (nameInput?.value || '').trim(),
       psn: (psnInput?.value || '').trim(),
-      platform: activeValues($('platformChips')),
+      platforms: activeValues($('platformChips')),
       modes: activeValues($('modesChips')),
       goals: activeValues($('goalsChips')),
-      difficulty: activeValues($('difficultyChips'))
+      difficulties: activeValues($('difficultyChips'))
     };
-    
-    if (!saveProfile(profileData)) {
-      tg?.showPopup?.({ title: 'Ошибка', message: 'Не удалось сохранить профиль.', buttons: [{ type: 'ok' }] });
-      return;
+
+    // Показываем индикатор загрузки
+    const originalBtnText = profileSaveBtn?.textContent;
+    if (profileSaveBtn) {
+      profileSaveBtn.disabled = true;
+      profileSaveBtn.textContent = 'Сохранение...';
     }
 
-    // Обновляем отображение
-    if (v_real_name) v_real_name.textContent = profileData.real_name || '—';
-    if (v_psn)       v_psn.textContent       = profileData.psn || '—';
-    refreshProfileView();
+    try {
+      // Отправляем данные на сервер
+      await apiSaveProfile(profileData);
+      
+      // Сохраняем в LocalStorage
+      saveProfile(profileData);
+      
+      // Обновляем отображение
+      if (v_real_name) v_real_name.textContent = profileData.real_name || '—';
+      if (v_psn) v_psn.textContent = profileData.psn || '—';
+      refreshProfileView();
 
-    hapticOK();
-    tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены.', buttons: [{ type: 'ok' }] });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+      hapticOK();
+      tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены на сервере.', buttons: [{ type: 'ok' }] });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+    } catch (error) {
+      console.error('Ошибка сохранения профиля:', error);
+      
+      // Показываем ошибку пользователю
+      let errorMessage = 'Не удалось сохранить профиль.';
+      if (error.status === 401) {
+        errorMessage = 'Ошибка авторизации. Попробуйте перезапустить приложение.';
+      } else if (error.status === 400) {
+        errorMessage = error.message || 'Проверьте правильность заполнения полей.';
+      } else if (error.status >= 500) {
+        errorMessage = 'Ошибка сервера. Попробуйте позже.';
+      } else if (!navigator.onLine) {
+        errorMessage = 'Нет подключения к интернету.';
+      }
+      
+      tg?.showPopup?.({ title: 'Ошибка', message: errorMessage, buttons: [{ type: 'ok' }] });
+      hapticERR();
+      
+    } finally {
+      // Восстанавливаем кнопку
+      if (profileSaveBtn) {
+        profileSaveBtn.disabled = false;
+        profileSaveBtn.textContent = originalBtnText;
+      }
+    }
   });
 
   profileSaveBtn?.addEventListener('click', () => profileForm.requestSubmit());
