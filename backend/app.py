@@ -1,5 +1,6 @@
 # app.py
 # FastAPI приложение для Tsushima Mini App API
+# Проверка пуша на GitHub
 
 import os
 import uvicorn
