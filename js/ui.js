@@ -38,7 +38,11 @@ export function showScreen(name) {
   }
 
   if (name === 'home')                 setTopbar(false);
-  else if (name === 'profile')         setTopbar(true, 'Профиль');
+  else if (name === 'profile')         {
+    setTopbar(true, 'Профиль');
+    // Загружаем профиль с сервера при открытии экрана профиля
+    loadProfileOnScreenOpen();
+  }
   else if (name === 'trophies')        setTopbar(true, 'Трофеи');
   else if (name === 'trophyDetail')    setTopbar(true, 'Трофеи');
   else if (name === 'builds')          setTopbar(true, 'Билды');
@@ -47,6 +51,29 @@ export function showScreen(name) {
   else if (name === 'buildPublicDetail') setTopbar(true, 'Билд');
 
   scrollTopSmooth();
+}
+
+// Загрузка профиля с сервера при открытии экрана профиля
+async function loadProfileOnScreenOpen() {
+  try {
+    // Импортируем функцию динамически, чтобы избежать циклических зависимостей
+    const { fetchProfile } = await import('./api.js');
+    const serverProfile = await fetchProfile();
+    
+    if (serverProfile) {
+      // Импортируем функции профиля
+      const { saveProfile, loadProfileToForm } = await import('./profile.js');
+      
+      // Сохраняем в LocalStorage
+      saveProfile(serverProfile);
+      // Обновляем форму и отображение
+      loadProfileToForm(serverProfile);
+      console.log('Профиль загружен с сервера при открытии экрана');
+    }
+  } catch (error) {
+    console.log('Ошибка загрузки профиля с сервера при открытии экрана:', error);
+    // Не показываем ошибку пользователю, так как это не критично
+  }
 }
 
 // Безопасный верхний отступ

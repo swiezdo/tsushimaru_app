@@ -159,8 +159,8 @@ export function initProfile() {
     loadProfileToForm(savedProfile);
   }
 
-  // Параллельно загружаем профиль с сервера
-  fetchProfileFromServer();
+  // НЕ загружаем профиль с сервера при инициализации
+  // Это будет сделано только когда пользователь откроет профиль
 
 
   if (!profileForm) return;
@@ -275,4 +275,4 @@ export function initProfile() {
 }
 
 // Экспорт вспомогательных
-export { renderChips, activeValues, setActive, shake, refreshProfileView };
+export { renderChips, activeValues, setActive, shake, refreshProfileView, saveProfile, loadProfileToForm };
