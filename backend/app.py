@@ -35,12 +35,12 @@ if not BOT_TOKEN:
 if not ALLOWED_ORIGIN:
     raise ValueError("ALLOWED_ORIGIN не установлен в .env файле")
 
-# Настройка CORS
+# Настройка CORS (временно разрешаем все origins для тестирования)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ALLOWED_ORIGIN],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_origins=["*"],  # Временно разрешаем все origins
+    allow_credentials=False,  # Отключаем credentials для тестирования
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -53,13 +53,15 @@ async def options_handler(path: str):
     """
     Глобальный обработчик OPTIONS запросов для CORS.
     """
+    print(f"🔍 Глобальный OPTIONS запрос для пути: /{path}")
+    from fastapi.responses import Response
     return Response(
         status_code=200,
         headers={
-            "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+            "Access-Control-Allow-Origin": "*",  # Временно разрешаем все origins
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "*",
-            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Credentials": "false",
         }
     )
 
