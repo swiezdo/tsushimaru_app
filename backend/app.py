@@ -206,40 +206,40 @@ async def save_profile(
     Returns:
         JSON с результатом операции
     """
-        # Валидация входных данных
-        if not real_name or not real_name.strip():
-            raise HTTPException(
-                status_code=400,
-                detail="Поле 'real_name' обязательно для заполнения"
-            )
+    # Валидация входных данных
+    if not real_name or not real_name.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Поле 'real_name' обязательно для заполнения"
+        )
 
-        if not validate_psn_format(psn):
-            raise HTTPException(
-                status_code=400,
-                detail="Неверный формат PSN никнейма (3-16 символов: A-Z, a-z, 0-9, -, _)"
-            )
+    if not validate_psn_format(psn):
+        raise HTTPException(
+            status_code=400,
+            detail="Неверный формат PSN никнейма (3-16 символов: A-Z, a-z, 0-9, -, _)"
+        )
 
-        # Подготавливаем данные для сохранения
-        profile_data = {
-            "real_name": real_name.strip(),
-            "psn_id": psn.strip(),
-            "platforms": platforms,
-            "modes": modes,
-            "goals": goals,
-            "difficulties": difficulties,
-            "trophies": []
-        }
+    # Подготавливаем данные для сохранения
+    profile_data = {
+        "real_name": real_name.strip(),
+        "psn_id": psn.strip(),
+        "platforms": platforms,
+        "modes": modes,
+        "goals": goals,
+        "difficulties": difficulties,
+        "trophies": []
+    }
 
-        # Сохраняем профиль
-        success = upsert_user(DB_PATH, user_id, profile_data)
+    # Сохраняем профиль
+    success = upsert_user(DB_PATH, user_id, profile_data)
 
-        if not success:
-            raise HTTPException(
-                status_code=500,
-                detail="Ошибка при сохранении профиля"
-            )
+    if not success:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка при сохранении профиля"
+        )
 
-        return {"status": "ok", "message": "Профиль успешно сохранен"}
+    return {"status": "ok", "message": "Профиль успешно сохранен"}
 
 
 @app.get("/api/stats")
