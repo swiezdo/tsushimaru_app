@@ -1,3 +1,18 @@
-miniapp_api/.env
-miniapp_api/cloudflared-linux-arm64.deb
-TESTING_INSTRUCTIONS.md
+# Backend
+backend/.env
+backend/venv/
+backend/__pycache__/
+backend/*.db
+
+# Python
+*.pyc
+*.pyo
+__pycache__/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

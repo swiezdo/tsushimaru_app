@@ -141,9 +141,8 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         
         return True
         
-    except Exception as e:
-        print(f"Ошибка при сохранении профиля: {e}")
-        return False
+        except Exception as e:
+            return False
 
 
 def delete_user(db_path: str, user_id: int) -> bool:
@@ -171,9 +170,8 @@ def delete_user(db_path: str, user_id: int) -> bool:
         
         return True
         
-    except Exception as e:
-        print(f"Ошибка при удалении профиля: {e}")
-        return False
+        except Exception as e:
+            return False
 
 
 def get_user_count(db_path: str) -> int:
@@ -204,43 +202,3 @@ def get_user_count(db_path: str) -> int:
         return 0
 
 
-# Тестирование (запускать только если файл запущен напрямую)
-if __name__ == "__main__":
-    # Тестирование модуля
-    test_db_path = "/tmp/test_app.db"
-    
-    print("Тестирование модуля db.py...")
-    
-    # Инициализация БД
-    init_db(test_db_path)
-    print("✅ База данных инициализирована")
-    
-    # Тестовые данные
-    test_user_id = 123456789
-    test_profile = {
-        'psn_id': 'TestPSN',
-        'platforms': ['🎮 PlayStation', '💻 ПК'],
-        'modes': ['📖 Сюжет', '🏹 Выживание'],
-        'goals': ['🏆 Получение трофеев'],
-        'difficulties': ['🥉 Бронза', '🥈 Серебро'],
-        'trophies': []
-    }
-    
-    # Сохранение профиля
-    success = upsert_user(test_db_path, test_user_id, test_profile)
-    print(f"✅ Профиль сохранен: {success}")
-    
-    # Получение профиля
-    retrieved_profile = get_user(test_db_path, test_user_id)
-    print(f"✅ Профиль получен: {retrieved_profile is not None}")
-    
-    if retrieved_profile:
-        print(f"Данные: PSN={retrieved_profile['psn_id']}, Platforms={retrieved_profile['platforms']}")
-    
-    # Количество пользователей
-    user_count = get_user_count(test_db_path)
-    print(f"✅ Количество пользователей: {user_count}")
-    
-    # Очистка тестовой БД
-    os.remove(test_db_path)
-    print("✅ Тестовая база данных удалена")
