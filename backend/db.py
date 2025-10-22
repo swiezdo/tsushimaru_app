@@ -141,8 +141,8 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         
         return True
         
-        except Exception as e:
-            return False
+    except Exception as e:
+        return False
 
 
 def delete_user(db_path: str, user_id: int) -> bool:
@@ -170,8 +170,8 @@ def delete_user(db_path: str, user_id: int) -> bool:
         
         return True
         
-        except Exception as e:
-            return False
+    except Exception as e:
+        return False
 
 
 def get_user_count(db_path: str) -> int:
