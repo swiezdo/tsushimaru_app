@@ -47,6 +47,22 @@ app.add_middleware(
 # Инициализируем базу данных при запуске
 init_db(DB_PATH)
 
+# Глобальный обработчик OPTIONS запросов
+@app.options("/{path:path}")
+async def options_handler(path: str):
+    """
+    Глобальный обработчик OPTIONS запросов для CORS.
+    """
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
+
 
 def get_current_user(x_telegram_init_data: Optional[str] = Header(None)) -> int:
     """
