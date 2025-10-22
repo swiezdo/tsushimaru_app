@@ -103,10 +103,10 @@ function loadProfileToForm(profile) {
   }
   
   // Устанавливаем чипы
-  if (profile.platform) setActive($('platformChips'), profile.platform);
+  if (profile.platforms) setActive($('platformChips'), profile.platforms);
   if (profile.modes) setActive($('modesChips'), profile.modes);
   if (profile.goals) setActive($('goalsChips'), profile.goals);
-  if (profile.difficulty) setActive($('difficultyChips'), profile.difficulty);
+  if (profile.difficulties) setActive($('difficultyChips'), profile.difficulties);
   
   // Обновляем отображение в карточке "Ваш профиль"
   if (v_real_name) v_real_name.textContent = profile.real_name || '—';

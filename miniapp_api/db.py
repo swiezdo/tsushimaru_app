@@ -25,6 +25,7 @@ def init_db(db_path: str) -> None:
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
+            real_name TEXT,
             psn_id TEXT,
             platforms TEXT,
             modes TEXT,
@@ -62,7 +63,7 @@ def get_user(db_path: str, user_id: int) -> Optional[Dict[str, Any]]:
     cursor = conn.cursor()
     
     cursor.execute('''
-        SELECT user_id, psn_id, platforms, modes, goals, difficulties, trophies, updated_at
+        SELECT user_id, real_name, psn_id, platforms, modes, goals, difficulties, trophies, updated_at
         FROM users WHERE user_id = ?
     ''', (user_id,))
     
@@ -75,13 +76,14 @@ def get_user(db_path: str, user_id: int) -> Optional[Dict[str, Any]]:
     # Преобразуем в словарь
     profile = {
         'user_id': row[0],
-        'psn_id': row[1],
-        'platforms': json.loads(row[2]) if row[2] else [],
-        'modes': json.loads(row[3]) if row[3] else [],
-        'goals': json.loads(row[4]) if row[4] else [],
-        'difficulties': json.loads(row[5]) if row[5] else [],
-        'trophies': json.loads(row[6]) if row[6] else [],
-        'updated_at': row[7]
+        'real_name': row[1],
+        'psn_id': row[2],
+        'platforms': json.loads(row[3]) if row[3] else [],
+        'modes': json.loads(row[4]) if row[4] else [],
+        'goals': json.loads(row[5]) if row[5] else [],
+        'difficulties': json.loads(row[6]) if row[6] else [],
+        'trophies': json.loads(row[7]) if row[7] else [],
+        'updated_at': row[8]
     }
     
     return profile
@@ -120,10 +122,11 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         # Выполняем INSERT OR REPLACE
         cursor.execute('''
             INSERT OR REPLACE INTO users 
-            (user_id, psn_id, platforms, modes, goals, difficulties, trophies, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, real_name, psn_id, platforms, modes, goals, difficulties, trophies, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             user_id,
+            profile_data.get('real_name', ''),
             profile_data.get('psn_id', ''),
             platforms_json,
             modes_json,

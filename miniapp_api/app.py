@@ -35,17 +35,20 @@ if not BOT_TOKEN:
 if not ALLOWED_ORIGIN:
     raise ValueError("ALLOWED_ORIGIN не установлен в .env файле")
 
-# Настройка CORS
+# Настройка CORS (временно разрешаем все origins для тестирования)
+print(f"🔧 CORS настройки: allow_origins=['*']")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ALLOWED_ORIGIN],
-    allow_credentials=True,
+    allow_origins=["*"],  # Временно разрешаем все origins
+    allow_credentials=False,  # Отключаем credentials для тестирования
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Инициализируем базу данных при запуске
 init_db(DB_PATH)
+
+# Убираем глобальный OPTIONS обработчик - пусть CORS middleware сам обрабатывает
 
 
 def get_current_user(x_telegram_init_data: Optional[str] = Header(None)) -> int:
@@ -112,6 +115,42 @@ async def health_check():
     return {"status": "ok", "message": "Tsushima Mini App API работает"}
 
 
+@app.options("/api/profile.get")
+async def options_profile_get():
+    """
+    OPTIONS эндпоинт для CORS preflight запросов.
+    """
+    print(f"🔍 OPTIONS /api/profile.get - ALLOWED_ORIGIN: {ALLOWED_ORIGIN}")
+    from fastapi.responses import Response
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
+
+
+@app.options("/api/profile.save")
+async def options_profile_save():
+    """
+    OPTIONS эндпоинт для CORS preflight запросов.
+    """
+    print(f"🔍 OPTIONS /api/profile.save - ALLOWED_ORIGIN: {ALLOWED_ORIGIN}")
+    from fastapi.responses import Response
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
+
+
 @app.get("/api/profile.get")
 async def get_profile(user_id: int = Depends(get_current_user)):
     """
@@ -123,9 +162,11 @@ async def get_profile(user_id: int = Depends(get_current_user)):
     Returns:
         JSON с данными профиля или 404 если профиль не найден
     """
+    print(f"🔍 Загружаем профиль для user_id: {user_id}")
     profile = get_user(DB_PATH, user_id)
     
     if not profile:
+        print(f"❌ Профиль не найден для user_id: {user_id}")
         raise HTTPException(
             status_code=404,
             detail="Профиль не найден"
@@ -133,7 +174,7 @@ async def get_profile(user_id: int = Depends(get_current_user)):
     
     # Убираем служебные поля из ответа
     response_data = {
-        "real_name": profile.get("psn_id", ""),
+        "real_name": profile.get("real_name", ""),
         "psn": profile.get("psn_id", ""),
         "platforms": profile.get("platforms", []),
         "modes": profile.get("modes", []),
@@ -142,6 +183,7 @@ async def get_profile(user_id: int = Depends(get_current_user)):
         "trophies": profile.get("trophies", [])
     }
     
+    print(f"📤 Отправляем данные: {response_data}")
     return response_data
 
 
@@ -170,6 +212,11 @@ async def save_profile(
     Returns:
         JSON с результатом операции
     """
+    # Логируем полученные данные
+    print(f"🔍 Сохранение профиля для user_id: {user_id}")
+    print(f"📝 Данные: real_name={real_name}, psn={psn}")
+    print(f"📝 platforms={platforms}, modes={modes}, goals={goals}, difficulties={difficulties}")
+    
     # Валидация входных данных
     if not real_name or not real_name.strip():
         raise HTTPException(
@@ -185,6 +232,7 @@ async def save_profile(
     
     # Подготавливаем данные для сохранения
     profile_data = {
+        "real_name": real_name.strip(),  # Добавляем сохранение имени
         "psn_id": psn.strip(),
         "platforms": platforms,
         "modes": modes,
@@ -194,14 +242,18 @@ async def save_profile(
     }
     
     # Сохраняем профиль
+    print(f"💾 Сохраняем профиль в БД: {profile_data}")
     success = upsert_user(DB_PATH, user_id, profile_data)
+    print(f"✅ Результат сохранения: {success}")
     
     if not success:
+        print("❌ Ошибка при сохранении профиля в БД")
         raise HTTPException(
             status_code=500,
             detail="Ошибка при сохранении профиля"
         )
     
+    print("🎉 Профиль успешно сохранен")
     return {"status": "ok", "message": "Профиль успешно сохранен"}
 
 
