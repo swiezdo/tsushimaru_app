@@ -37,7 +37,7 @@ export function showScreen(name) {
     else tg.BackButton.hide();
   }
 
-  if (name === 'home')                 setTopbar(false);
+  if (name === 'home')                 setTopbar(true, 'Tsushima.Ru');
   else if (name === 'profile')         {
     setTopbar(true, 'Профиль');
     // Загружаем профиль с сервера при открытии экрана профиля
