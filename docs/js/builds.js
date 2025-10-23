@@ -134,8 +134,8 @@ function savePublicBuilds(arr) {
 function renderMyBuilds() {
   const items = loadBuilds();
   myBuildsList.innerHTML = '';
-  if (!items.length) { noBuildsHint.style.display = 'block'; return; }
-  noBuildsHint.style.display = 'none';
+  if (!items.length) { noBuildsHint.classList.remove('hidden'); return; }
+  noBuildsHint.classList.add('hidden');
 
   items.slice().reverse().forEach((b) => {
     const row = document.createElement('button');
@@ -165,8 +165,8 @@ function renderMyBuilds() {
 function renderAllBuilds() {
   const items = loadPublicBuilds();
   allBuildsList.innerHTML = '';
-  if (!items.length) { noAllBuildsHint.style.display = 'block'; return; }
-  noAllBuildsHint.style.display = 'none';
+  if (!items.length) { noAllBuildsHint.classList.remove('hidden'); return; }
+  noAllBuildsHint.classList.add('hidden');
 
   items.slice().reverse().forEach((p) => {
     const row = document.createElement('button');
