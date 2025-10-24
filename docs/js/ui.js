@@ -85,7 +85,7 @@ export function applySafeInsets() {
   const cardSpacing = 16;
   
   // Используем системные безопасные зоны
-  root.style.marginTop = `56px`;
+  root.style.marginTop = `64px`;
   root.style.marginBottom = `16px`;
   root.style.paddingTop = `env(safe-area-inset-top, 0px)`;
   root.style.paddingLeft = `calc(env(safe-area-inset-left, 0px)`;
