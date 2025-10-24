@@ -218,7 +218,7 @@ body {
 .only-browser { display: block; }
 
 /* ========== HOME ========== */
-.home .brand { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); }
+.brand { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); }
 .logo { width: 128px; height: 128px; object-fit: contain; }
 .brand-title { font-size: var(--fs-22); font-weight: 700; letter-spacing: .3px; }
 .home-buttons { display: grid; gap: var(--space-2); }
