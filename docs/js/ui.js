@@ -82,13 +82,14 @@ export function applySafeInsets() {
   if (!root) return;
   
   // Определяем боковые отступы в зависимости от платформы
-  const safeHorizontal = (tg && tg.platform === 'ios') ? 16 : 12;
   const cardSpacing = 16;
   
-  // Используем системные безопасные зоны + минимальные отступы для контента
+  // Используем системные безопасные зоны
+  root.style.marginTop = `56px`;
+  root.style.marginBottom = `16px`;
   root.style.paddingTop = `env(safe-area-inset-top, 0px)`;
-  root.style.paddingLeft = `calc(env(safe-area-inset-left, 0px) + ${safeHorizontal}px)`;
-  root.style.paddingRight = `calc(env(safe-area-inset-right, 0px) + ${safeHorizontal}px)`;
+  root.style.paddingLeft = `calc(env(safe-area-inset-left, 0px)`;
+  root.style.paddingRight = `calc(env(safe-area-inset-right, 0px)`;
   root.style.paddingBottom = `env(safe-area-inset-bottom, 0px)`;
   
   // Добавляем отступы между карточками через CSS переменную

@@ -73,7 +73,7 @@ body {
 .hidden { display: none; }
 
 /* ========== TOPBAR ========== */
-.topbar { display: flex; justify-content: center; align-items: center; }
+.topbar { display: flex; justify-content: center; align-items: center; margin-top: var(--space-4); margin-bottom: var(--space-4); }
 .title { font-size: var(--fs-20); font-weight: 600; }
 
 /* ========== CARD ========== */
