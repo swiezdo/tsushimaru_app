@@ -19,25 +19,33 @@
       </header>
 
       <!-- ====== HOME ====== -->
-      <section id="homeScreen" class="card home">
-        <div class="brand">
-          <img class="logo" src="./assets/logo/logo.png" alt="Tsushima.Ru" />
-        </div>
+      <section id="homeScreen">
+        <section class="card">
+          <div class="brand">
+            <img class="logo" src="./assets/logo/logo.png" alt="Tsushima.Ru" />
+          </div>
+        </section>
 
-        <div class="home-buttons">
-          <a
-            class="big-btn primary"
-            href="https://t.me/+ZFiVYVrz-PEzYjBi"
-            target="_blank"
-            rel="noopener"
-          >
-            🏯 Группа Tsushima.Ru
-          </a>
+        <section class="card">
+          <h2 class="card-title">Главное меню</h2>
+          <div class="home-buttons">
+            <a
+              class="big-btn primary"
+              href="https://t.me/+ZFiVYVrz-PEzYjBi"
+              target="_blank"
+              rel="noopener"
+            >
+              🏯 Группа Tsushima.Ru
+            </a>
 
-          <button id="openProfileBtn" class="big-btn">👤 Мой профиль</button>
-          <button id="trophiesBtn" class="big-btn">🏆 Трофеи</button>
-          <button id="buildsBtn" class="big-btn ghost">🛠️ Билды</button>
-        </div>
+            <button id="openProfileBtn" class="big-btn">👤 Мой профиль</button>
+            <button id="trophiesBtn" class="big-btn">🏆 Трофеи</button>
+            <button id="buildsBtn" class="big-btn ghost">🛠️ Билды</button>
+          </div>
+        </section>
+
+        <!-- НИЖНИЙ СПЕЙСЕР ДЛЯ SAFE-AREA (как на других экранах) -->
+        <div style="height: calc(env(safe-area-inset-bottom, 0px) + 12px)"></div>
       </section>
 
       <!-- ====== ПРОФИЛЬ ====== -->
