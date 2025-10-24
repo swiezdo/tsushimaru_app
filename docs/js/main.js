@@ -1,6 +1,6 @@
 // main.js
 import { tg, $, hapticTapSmart } from './telegram.js';
-import { showScreen, applyTopInset } from './ui.js';
+import { showScreen, applySafeInsets } from './ui.js';
 import { initProfile } from './profile.js';
 import { initTrophies } from './trophies.js';
 import { initBuilds } from './builds.js';
@@ -60,7 +60,7 @@ function bindHomeButtons() {
 
 // ---------------- Старт ----------------
 async function startApp() {
-  applyTopInset();
+  applySafeInsets();
   bindHomeButtons();
   installBackButton();
 
