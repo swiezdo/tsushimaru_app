@@ -81,24 +81,18 @@ export function applySafeInsets() {
   const root = document.querySelector('main.container');
   if (!root) return;
   
-  // Используем Telegram WebApp методы для безопасных зон
-  if (tg && tg.platform) {
-    // Для Telegram WebApp используем встроенные методы
-    const headerHeight = 60; // Высота топбара
-    const safeTop = tg.platform === 'ios' ? 44 : 24; // iOS и Android имеют разные отступы
-    const safeHorizontal = tg.platform === 'ios' ? 16 : 12; // Боковые отступы
-    
-    root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + ${safeTop + headerHeight}px)`;
-    root.style.paddingLeft = `calc(env(safe-area-inset-left, 0px) + ${safeHorizontal}px)`;
-    root.style.paddingRight = `calc(env(safe-area-inset-right, 0px) + ${safeHorizontal}px)`;
-    root.style.paddingBottom = `calc(env(safe-area-inset-bottom, 0px) + 16px)`;
-  } else {
-    // Fallback для браузера
-    root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + 84px)`;
-    root.style.paddingLeft = `calc(env(safe-area-inset-left, 0px) + 16px)`;
-    root.style.paddingRight = `calc(env(safe-area-inset-right, 0px) + 16px)`;
-    root.style.paddingBottom = `calc(env(safe-area-inset-bottom, 0px) + 16px)`;
-  }
+  // Определяем боковые отступы в зависимости от платформы
+  const safeHorizontal = (tg && tg.platform === 'ios') ? 16 : 12;
+  const cardSpacing = 16;
+  
+  // Используем системные безопасные зоны + минимальные отступы для контента
+  root.style.paddingTop = `env(safe-area-inset-top, 0px)`;
+  root.style.paddingLeft = `calc(env(safe-area-inset-left, 0px) + ${safeHorizontal}px)`;
+  root.style.paddingRight = `calc(env(safe-area-inset-right, 0px) + ${safeHorizontal}px)`;
+  root.style.paddingBottom = `env(safe-area-inset-bottom, 0px)`;
+  
+  // Добавляем отступы между карточками через CSS переменную
+  root.style.setProperty('--card-spacing', `${cardSpacing}px`);
 }
 let resizeTimeout;
 window.addEventListener('resize', () => {

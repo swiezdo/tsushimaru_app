@@ -82,14 +82,14 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
-  margin-bottom: var(--space-4);
+  margin: 0 var(--space-4) 0 var(--space-4);
 }
 
-/* Карточки на главной странице с правильными отступами */
-#homeScreen .card {
-  margin-bottom: var(--space-4);
+/* Карточки с отступами, управляемыми через JavaScript */
+.card {
+  margin-bottom: var(--card-spacing, 16px);
 }
-#homeScreen .card:last-child {
+.card:last-child {
   margin-bottom: 0;
 }
 .card-title { font-weight: 600; margin-bottom: var(--space-3); }
