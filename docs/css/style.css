@@ -38,6 +38,7 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
+  --space-12: 56px;
 
   /* Border Radius Scale */
   --radius-sm: 10px;
@@ -68,6 +69,12 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+/* ========== CONTAINER ========== */
+.container {
+  margin-top: var(--space-12);
+  margin-bottom: var(--space-4);
 }
 
 .hidden { display: none; }
