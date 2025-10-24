@@ -59,7 +59,6 @@ body {
   background: var(--tg-bg);
   color: var(--tg-tx);
   -webkit-font-smoothing: antialiased;
-  padding: var(--space-4);
   max-width: 920px;
   margin: auto;
   padding-bottom: calc(var(--space-10) + var(--safe-bottom));
@@ -75,7 +74,7 @@ body {
 .hidden { display: none; }
 
 /* ========== TOPBAR ========== */
-.topbar { display: flex; justify-content: center; align-items: center; margin-bottom: var(--space-4); margin-top: var(--space-4); }
+.topbar { display: flex; justify-content: center; align-items: center; }
 .title { font-size: var(--fs-20); font-weight: 600; }
 
 /* ========== CARD ========== */
@@ -85,6 +84,14 @@ body {
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   margin-bottom: var(--space-4);
+}
+
+/* Карточки на главной странице с правильными отступами */
+#homeScreen .card {
+  margin-bottom: var(--space-4);
+}
+#homeScreen .card:last-child {
+  margin-bottom: 0;
 }
 .card-title { font-weight: 600; margin-bottom: var(--space-3); }
 

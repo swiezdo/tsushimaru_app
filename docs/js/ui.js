@@ -80,8 +80,17 @@ async function loadProfileOnScreenOpen() {
 export function applyTopInset() {
   const root = document.querySelector('main.container');
   if (!root) return;
-  const TOP_OFFSET_PX = 64;
-  root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + ${TOP_OFFSET_PX}px)`;
+  
+  // Используем Telegram WebApp методы для безопасных зон
+  if (tg && tg.platform) {
+    // Для Telegram WebApp используем встроенные методы
+    const headerHeight = 60; // Высота топбара
+    const safeTop = tg.platform === 'ios' ? 44 : 24; // iOS и Android имеют разные отступы
+    root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + ${safeTop + headerHeight}px)`;
+  } else {
+    // Fallback для браузера
+    root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + 84px)`;
+  }
 }
 let resizeTimeout;
 window.addEventListener('resize', () => {
