@@ -85,10 +85,10 @@ export function applySafeInsets() {
   const cardSpacing = 16;
   
   // Используем системные безопасные зоны
-  root.style.paddingTop = `env(safe-area-inset-top, 0px)`;
-  root.style.paddingLeft = `calc(env(safe-area-inset-left, 0px)`;
-  root.style.paddingRight = `calc(env(safe-area-inset-right, 0px)`;
-  root.style.paddingBottom = `env(safe-area-inset-bottom, 0px)`;
+  root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + 64px)`;
+  root.style.paddingLeft = `env(safe-area-inset-left, 0px)`;
+  root.style.paddingRight = `env(safe-area-inset-right, 0px)`;
+  root.style.paddingBottom = `calc(env(safe-area-inset-bottom, 0px) + 16px)`;
   
   // Добавляем отступы между карточками через CSS переменную
   root.style.setProperty('--card-spacing', `${cardSpacing}px`);

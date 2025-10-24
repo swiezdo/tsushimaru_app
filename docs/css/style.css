@@ -71,12 +71,6 @@ body {
   user-select: none;
 }
 
-/* ========== CONTAINER ========== */
-.container {
-  margin-top: var(--space-12);
-  margin-bottom: var(--space-4);
-}
-
 .hidden { display: none; }
 
 /* ========== TOPBAR ========== */
