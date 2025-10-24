@@ -21,6 +21,7 @@
   --fs-14: 14px;
   --fs-15: 15px;
   --fs-16: 16px;
+  --fs-18: 18px;
   --fs-20: 20px;
   --fs-22: 22px;
   
@@ -248,6 +249,7 @@ body {
   display: flex; justify-content: space-between; align-items: center;
   padding: var(--space-3) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md);
   background: transparent; color: var(--tg-tx); cursor: pointer; min-height: 48px;
+  font-size: var(--fs-18);
 }
 .list-btn:active { transform: translateY(1px); }
 .list-btn .right { opacity: .7; }
@@ -255,7 +257,7 @@ body {
 /* ========== TROPHY DETAIL ========== */
 .desc-list { margin-left: 18px; display: grid; gap: var(--space-1); }
 .desc-list li { line-height: var(--lh-normal); }
-#trophiesScreen .value { white-space: pre-line; line-height: var(--lh-tight); }
+#trophiesScreen .value { white-space: pre-line; line-height: var(--lh-normal); }
 
 /* ========== FILE LINE ========== */
 .fileline-btn {
