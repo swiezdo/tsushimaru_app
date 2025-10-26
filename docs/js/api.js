@@ -4,7 +4,7 @@
 import { tg } from './telegram.js';
 
 // Базовый URL API (обновите на ваш Cloudflare Tunnel URL)
-const API_BASE = 'https://lake-racing-volume-sum.trycloudflare.com';
+const API_BASE = 'https://painting-quarters-compound-promote.trycloudflare.com';
 
 // Получение initData из Telegram WebApp
 function getInitData() {
