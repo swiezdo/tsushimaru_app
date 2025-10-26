@@ -1,5 +1,5 @@
 // trophies.js
-import { tg, $, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
+import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView } from './ui.js';
 import { shake } from './profile.js';
 
@@ -172,8 +172,26 @@ export async function initTrophies() {
     };
     commentEl.addEventListener('input', autoResize);
     commentEl.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
+    
+    // Закрытие клавиатуры по Enter для textarea (для iOS)
+    commentEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) { 
+        e.preventDefault(); 
+        hideKeyboard();
+      }
+    });
+    
     setTimeout(autoResize, 0);
   }
+
+  // Закрытие клавиатуры при клике вне полей ввода (для iOS)
+  document.addEventListener('click', (e) => {
+    // Проверяем, что клик не по полю ввода и не по его родительским элементам
+    if (!commentEl?.contains(e.target)) {
+      // Убираем фокус с активного поля
+      hideKeyboard();
+    }
+  });
 
   proofSubmitBtn?.addEventListener('pointerdown', () => { hapticTapSmart(); });
   proofSubmitBtn?.addEventListener('click', (e) => { e.preventDefault?.(); submitProof(); });

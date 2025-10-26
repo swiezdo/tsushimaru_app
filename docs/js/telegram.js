@@ -39,3 +39,11 @@ export function $(id) {
 export function scrollTopSmooth() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// Утилита для закрытия клавиатуры на iOS
+export function hideKeyboard() {
+  // Убираем фокус с активного элемента
+  if (document.activeElement && document.activeElement.blur) {
+    document.activeElement.blur();
+  }
+}

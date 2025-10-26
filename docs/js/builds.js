@@ -1,5 +1,5 @@
 // builds.js
-import { tg, $, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
+import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
 import { renderChips, activeValues, setActive, shake } from './profile.js';
 
@@ -377,6 +377,23 @@ export function initBuilds() {
   // Tap при фокусе полей — глобальный скролл сам подвинет
   buildNameEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
   buildDescEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
+
+  // Закрытие клавиатуры по Enter для textarea (для iOS)
+  buildDescEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) { 
+      e.preventDefault(); 
+      hideKeyboard();
+    }
+  });
+
+  // Закрытие клавиатуры при клике вне полей ввода (для iOS)
+  document.addEventListener('click', (e) => {
+    // Проверяем, что клик не по полям ввода и не по их родительским элементам
+    if (!buildNameEl?.contains(e.target) && !buildDescEl?.contains(e.target)) {
+      // Убираем фокус с активного поля
+      hideKeyboard();
+    }
+  });
 
   // «＋ Создать билд» — OK
   createBuildBtn?.addEventListener('click', () => {

@@ -1,5 +1,5 @@
 // profile.js
-import { tg, $, hapticTapSmart, hapticERR, hapticOK } from './telegram.js';
+import { tg, $, hapticTapSmart, hapticERR, hapticOK, hideKeyboard } from './telegram.js';
 import { focusAndScrollIntoView } from './ui.js';
 import { fetchProfile, saveProfile as apiSaveProfile } from './api.js';
 
@@ -169,15 +169,31 @@ export function initProfile() {
 
   // Навигация по Enter
   nameInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); psnInput?.focus(); }
+    if (e.key === 'Enter') { 
+      e.preventDefault(); 
+      psnInput?.focus(); 
+    }
   });
   psnInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); }
+    if (e.key === 'Enter') { 
+      e.preventDefault(); 
+      // Закрываем клавиатуру на iOS
+      hideKeyboard();
+    }
   });
 
   // Tap при фокусе (глобальный скролл сам подвинет поле)
   nameInput?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
   psnInput?.addEventListener('focus',  ()=>{ hapticTapSmart(); }, {passive:true});
+
+  // Закрытие клавиатуры при клике вне полей ввода (для iOS)
+  document.addEventListener('click', (e) => {
+    // Проверяем, что клик не по полям ввода и не по их родительским элементам
+    if (!nameInput?.contains(e.target) && !psnInput?.contains(e.target)) {
+      // Убираем фокус с активного поля
+      hideKeyboard();
+    }
+  });
 
   function isNameOk() {
     return !!(nameInput && (nameInput.value || '').trim());
