@@ -60,6 +60,12 @@ async function apiRequest(endpoint, options = {}) {
 export async function fetchProfile() {
     try {
         const data = await apiRequest('/api/profile.get');
+        
+        // Фильтруем пустые трофеи
+        if (data.trophies && typeof data.trophies === 'string') {
+            data.trophies = data.trophies.split(',').map(t => t.trim()).filter(t => t.length > 0);
+        }
+        
         return data;
     } catch (error) {
         console.error('Ошибка получения профиля:', error);

@@ -39,6 +39,7 @@ DB_PATH = os.getenv("DB_PATH", "/home/ubuntu/miniapp_api/app.db")
 # Переменные для системы трофеев
 TROPHY_GROUP_CHAT_ID = os.getenv("TROPHY_GROUP_CHAT_ID", "-1002348168326")
 TROPHY_GROUP_TOPIC_ID = os.getenv("TROPHY_GROUP_TOPIC_ID", "5675")
+BOT_USERNAME = os.getenv("BOT_USERNAME", "swiezdo_testbot")
 
 # Кеш для данных трофеев
 _trophies_cache: Dict[str, Any] = {}
@@ -79,7 +80,7 @@ def load_trophies_data() -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail="Не удалось загрузить данные трофеев")
 
 # Функции для работы с Telegram Bot API
-async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None):
+async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None, message_thread_id: str = None):
     """
     Отправляет сообщение в Telegram через Bot API.
     """
@@ -93,6 +94,9 @@ async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = No
         "parse_mode": "HTML"
     }
     
+    if message_thread_id:
+        data["message_thread_id"] = message_thread_id
+    
     if reply_markup:
         data["reply_markup"] = json.dumps(reply_markup)
     
@@ -100,7 +104,7 @@ async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = No
         async with session.post(url, json=data) as response:
             return await response.json()
 
-async def send_telegram_photo(chat_id: str, photo_path: str, caption: str = "", reply_markup: dict = None):
+async def send_telegram_photo(chat_id: str, photo_path: str, caption: str = "", reply_markup: dict = None, message_thread_id: str = None):
     """
     Отправляет фотографию в Telegram через Bot API.
     """
@@ -115,6 +119,9 @@ async def send_telegram_photo(chat_id: str, photo_path: str, caption: str = "", 
         data.add_field('caption', caption)
         data.add_field('parse_mode', 'HTML')
         
+        if message_thread_id:
+            data.add_field('message_thread_id', message_thread_id)
+        
         if reply_markup:
             data.add_field('reply_markup', json.dumps(reply_markup))
         
@@ -122,7 +129,7 @@ async def send_telegram_photo(chat_id: str, photo_path: str, caption: str = "", 
             async with session.post(url, data=data) as response:
                 return await response.json()
 
-async def send_telegram_media_group(chat_id: str, photo_paths: List[str], caption: str = ""):
+async def send_telegram_media_group(chat_id: str, photo_paths: List[str], caption: str = "", message_thread_id: str = None):
     """
     Отправляет группу фотографий в Telegram через Bot API.
     """
@@ -147,6 +154,9 @@ async def send_telegram_media_group(chat_id: str, photo_paths: List[str], captio
         data.add_field('chat_id', chat_id)
         data.add_field('media', json.dumps(media))
         data.add_field('parse_mode', 'HTML')
+        
+        if message_thread_id:
+            data.add_field('message_thread_id', message_thread_id)
         
         # Добавляем файлы в FormData
         for i, photo_file in enumerate(photo_files):
@@ -785,21 +795,24 @@ async def submit_trophy_application(
                 chat_id=TROPHY_GROUP_CHAT_ID,
                 photo_path=photo_paths[0],
                 caption=message_text,
-                reply_markup=reply_markup
+                reply_markup=reply_markup,
+                message_thread_id=TROPHY_GROUP_TOPIC_ID
             )
         else:
             # Несколько фотографий - отправляем как медиагруппу
             await send_telegram_media_group(
                 chat_id=TROPHY_GROUP_CHAT_ID,
                 photo_paths=photo_paths,
-                caption=message_text
+                caption=message_text,
+                message_thread_id=TROPHY_GROUP_TOPIC_ID
             )
             
             # Отправляем отдельное сообщение с кнопками
             await send_telegram_message(
                 chat_id=TROPHY_GROUP_CHAT_ID,
                 text=f"Заявка от {psn_id} на трофей {trophy_name} {trophy_emoji}",
-                reply_markup=reply_markup
+                reply_markup=reply_markup,
+                message_thread_id=TROPHY_GROUP_TOPIC_ID
             )
     
     except Exception as e:
@@ -861,7 +874,7 @@ async def approve_trophy_application(
         "inline_keyboard": [[
             {
                 "text": "🏆 Открыть трофеи",
-                "web_app": {"url": f"{ALLOWED_ORIGIN}/docs/index.html#trophies"}
+                "url": f"https://t.me/{BOT_USERNAME}?startapp=trophies"
             }
         ]]
     }

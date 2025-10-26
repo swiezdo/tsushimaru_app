@@ -79,7 +79,7 @@ async def handle_trophy_approve(callback: types.CallbackQuery):
         
         if success:
             await callback.message.edit_text(
-                f"✅ Трофей {trophy_id} одобрен для пользователя {user_id}"
+                f"✅ Заявка одобрена\n\nТрофей: {trophy_id}\nПользователь: {user_id}"
             )
         else:
             await callback.message.edit_text(
@@ -102,7 +102,7 @@ async def handle_trophy_reject(callback: types.CallbackQuery):
         
         if success:
             await callback.message.edit_text(
-                f"❌ Трофей {trophy_id} отклонен для пользователя {user_id}"
+                f"❌ Заявка отклонена\n\nТрофей: {trophy_id}\nПользователь: {user_id}"
             )
         else:
             await callback.message.edit_text(

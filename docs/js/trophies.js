@@ -225,7 +225,16 @@ let submitting = false;
 async function submitProof() {
   if (submitting) return;
   submitting = true;
-  setTimeout(() => (submitting = false), 1200);
+  
+  const submitBtn = document.getElementById('proofSubmitBtn');
+  const originalText = submitBtn?.textContent || 'Отправить';
+  
+  // Блокируем кнопку и меняем текст
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('success');
+    submitBtn.textContent = 'Подождите...';
+  }
 
   const filesCount = proofSelected.length;
   const comment = (commentEl?.value || '').trim();
@@ -235,6 +244,14 @@ async function submitProof() {
     focusAndScrollIntoView(proofAddBtn || previewEl);
     hapticERR();
     tg?.showPopup?.({ title: 'Ошибка', message: 'Добавьте хотя бы одно изображение.', buttons: [{ type: 'ok' }] });
+    
+    // Восстанавливаем кнопку
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('success');
+      submitBtn.textContent = originalText;
+    }
+    submitting = false;
     return;
   }
 
@@ -264,6 +281,14 @@ async function submitProof() {
       message: error.message || 'Произошла ошибка при отправке заявки.', 
       buttons: [{ type: 'ok' }] 
     });
+  } finally {
+    // Восстанавливаем кнопку
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('success');
+      submitBtn.textContent = originalText;
+    }
+    submitting = false;
   }
 }
 
