@@ -270,7 +270,22 @@ function updatePublishButton(myId) {
 // Открытие карточек
 function formatTopbarTitle(name, maxChars = 18) {
   if (!name || name.length <= maxChars) return name;
-  return name.substring(0, maxChars) + '-\n' + name.substring(maxChars);
+  
+  // Ищем последний пробел до maxChars, чтобы не разбивать слово
+  let splitIndex = maxChars;
+  for (let i = maxChars; i >= 0; i--) {
+    if (name[i] === ' ') {
+      splitIndex = i;
+      break;
+    }
+  }
+  
+  // Если пробел не найден, разбиваем по maxChars
+  if (splitIndex === maxChars && name[maxChars] !== ' ') {
+    splitIndex = maxChars;
+  }
+  
+  return name.substring(0, splitIndex).trim() + '\n' + name.substring(splitIndex).trim();
 }
 
 function openBuildDetail(id) {
