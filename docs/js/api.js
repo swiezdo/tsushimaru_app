@@ -169,5 +169,20 @@ export async function testConnection() {
     }
 }
 
+// Проверка регистрации пользователя
+export async function checkUserRegistration() {
+    try {
+        await fetchProfile();
+        return true; // Пользователь зарегистрирован (статус 200)
+    } catch (error) {
+        if (error.status === 404) {
+            return false; // Пользователь не зарегистрирован
+        }
+        // Для других ошибок (сеть, сервер) считаем что пользователь не зарегистрирован
+        console.error('Ошибка проверки регистрации:', error);
+        return false;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };

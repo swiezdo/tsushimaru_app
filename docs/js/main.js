@@ -4,6 +4,7 @@ import { showScreen, applySafeInsets, screens } from './ui.js';
 import { initProfile } from './profile.js';
 import { initTrophies } from './trophies.js';
 import { initBuilds } from './builds.js';
+import { checkUserRegistration } from './api.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
 (function installHapticGuardOnce(){
@@ -52,12 +53,38 @@ function installBackButton() {
   });
 }
 
+// ---------------- Проверка регистрации ----------------
+async function requireRegistration(callback) {
+  const isRegistered = await checkUserRegistration();
+  
+  if (!isRegistered) {
+    // Показываем Telegram попап
+    tg?.showPopup({
+      title: "Требуется регистрация",
+      message: "Эти функции доступны только зарегистрированным пользователям",
+      buttons: [
+        { id: "cancel", type: "default", text: "Ок" },
+        { id: "register", type: "ok", text: "Создать профиль" }
+      ]
+    }, (buttonId) => {
+      if (buttonId === "register") {
+        showScreen('profile');
+      }
+      // При нажатии "Ок" или закрытии попапа остаемся на главной
+    });
+    return;
+  }
+  
+  // Если зарегистрирован - выполняем callback
+  callback();
+}
+
 // ---------------- Главная: Tap на все кнопки ----------------
 function bindHomeButtons() {
   const map = [
     ['openProfileBtn', () => showScreen('profile')],
-    ['trophiesBtn',    () => showScreen('trophies')],
-    ['buildsBtn',      () => showScreen('builds')],
+    ['trophiesBtn',    () => requireRegistration(() => showScreen('trophies'))],
+    ['buildsBtn',      () => requireRegistration(() => showScreen('builds'))],
   ];
   for (const [id, handler] of map) {
     const el = $(id);
