@@ -34,7 +34,6 @@ const shotsTwo         = $('shotsTwo');
 
 const buildSubmitBtn   = $('buildSubmitBtn');
 
-const buildDetailTitle = $('buildDetailTitle');
 const vd_class         = $('vd_class');
 const vd_tags          = $('vd_tags');
 const vd_desc          = $('vd_desc');
@@ -44,7 +43,6 @@ const publishBuildBtn  = $('publishBuildBtn');
 const deleteBuildBtn   = $('deleteBuildBtn');
 
 // Публичные детали
-const publicDetailTitle = $('publicDetailTitle');
 const pd_class          = $('pd_class');
 const pd_tags           = $('pd_tags');
 const pd_desc           = $('pd_desc');
@@ -257,7 +255,6 @@ function openBuildDetail(id) {
 
   if (deleteBuildBtn) deleteBuildBtn.dataset.id = String(b.id);
 
-  buildDetailTitle.textContent = b.name || 'Билд';
   vd_class.textContent = b.class || '—';
   vd_tags.textContent  = (b.tags && b.tags.length) ? b.tags.join(', ') : '—';
   vd_desc.textContent  = b.desc || '—';
@@ -283,7 +280,6 @@ function openPublicBuildDetail(pubId) {
   const p = pubs.find(x => String(x.id) === String(pubId));
   if (!p) { tg?.showAlert?.('Публикация не найдена'); return; }
 
-  publicDetailTitle.textContent = p.name || 'Билд';
   pd_class.textContent = p.class || '—';
   pd_tags.textContent  = (p.tags && p.tags.length) ? p.tags.join(', ') : '—';
   pd_desc.textContent  = p.desc || '—';
