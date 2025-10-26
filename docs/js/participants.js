@@ -2,6 +2,7 @@
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen } from './ui.js';
 import { fetchParticipants } from './api.js';
+import { openParticipantDetail } from './participantDetail.js';
 
 // Элементы интерфейса
 const participantsListEl = $('participantsList');
@@ -37,7 +38,16 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
         btn.type = 'button';
         btn.dataset.userId = user.user_id;
         btn.innerHTML = `<span>${user.psn_id || '—'}</span><span class="right">›</span>`;
-        // Кнопки пока не кликабельны по требованию
+        
+        // Добавляем обработчик клика
+        btn.addEventListener('click', () => {
+            hapticTapSmart();
+            const userId = btn.dataset.userId;
+            if (userId) {
+                openParticipantDetail(parseInt(userId));
+            }
+        });
+        
         participantsListEl.appendChild(btn);
     });
 }

@@ -417,6 +417,44 @@ async def get_users_list(user_id: int = Depends(get_current_user)):
     return {"users": users}
 
 
+@app.get("/api/users.getProfile")
+async def get_user_profile(
+    target_user_id: int,
+    user_id: int = Depends(get_current_user)
+):
+    """
+    Получает профиль указанного пользователя.
+    
+    Args:
+        target_user_id: ID пользователя, чей профиль нужно получить
+        user_id: ID текущего пользователя (из dependency, для проверки авторизации)
+    
+    Returns:
+        JSON с данными профиля или 404 если профиль не найден
+    """
+    profile = get_user(DB_PATH, target_user_id)
+    
+    if not profile:
+        raise HTTPException(
+            status_code=404,
+            detail="Профиль пользователя не найден"
+        )
+    
+    # Убираем служебные поля из ответа
+    response_data = {
+        "user_id": profile.get("user_id"),
+        "real_name": profile.get("real_name", ""),
+        "psn_id": profile.get("psn_id", ""),
+        "platforms": profile.get("platforms", []),
+        "modes": profile.get("modes", []),
+        "goals": profile.get("goals", []),
+        "difficulties": profile.get("difficulties", []),
+        "trophies": profile.get("trophies", [])
+    }
+    
+    return response_data
+
+
 @app.get("/api/stats")
 async def get_stats():
     """
@@ -587,6 +625,33 @@ async def get_public_builds_endpoint():
     return {
         "status": "ok",
         "builds": builds
+    }
+
+
+@app.get("/api/builds.getUserBuilds")
+async def get_user_builds_endpoint(
+    target_user_id: int,
+    user_id: int = Depends(get_current_user)
+):
+    """
+    Получает публичные билды указанного пользователя.
+    
+    Args:
+        target_user_id: ID пользователя, чьи билды нужно получить
+        user_id: ID текущего пользователя (из dependency, для проверки авторизации)
+    
+    Returns:
+        JSON со списком публичных билдов пользователя
+    """
+    from db import get_user_builds as db_get_user_builds
+    all_builds = db_get_user_builds(DB_PATH, target_user_id)
+    
+    # Фильтруем только публичные билды
+    public_builds = [build for build in all_builds if build.get('is_public') == 1]
+    
+    return {
+        "status": "ok",
+        "builds": public_builds
     }
 
 

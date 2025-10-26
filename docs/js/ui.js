@@ -11,6 +11,7 @@ export const screens = {
   trophies:           document.getElementById('trophiesScreen'),
   trophyDetail:       document.getElementById('trophyDetailScreen'),
   participants:       document.getElementById('participantsScreen'),
+  participantDetail:  document.getElementById('participantDetailScreen'),
   builds:             document.getElementById('buildsScreen'),
   buildCreate:        document.getElementById('buildCreateScreen'),
   buildDetail:        document.getElementById('buildDetailScreen'),
@@ -34,7 +35,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','trophies','participants','builds','buildCreate','buildDetail','buildPublicDetail','trophyDetail'];
+    const withBack = ['profile','trophies','participants','participantDetail','builds','buildCreate','buildDetail','buildPublicDetail','trophyDetail'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -48,6 +49,7 @@ export function showScreen(name) {
   else if (name === 'trophies')        setTopbar(true, 'Трофеи');
   else if (name === 'trophyDetail')    setTopbar(true, 'Трофеи');
   else if (name === 'participants')    setTopbar(true, 'Участники');
+  else if (name === 'participantDetail') setTopbar(true, 'Участник');
   else if (name === 'builds')          setTopbar(true, 'Билды');
   else if (name === 'buildCreate')     setTopbar(true, 'Создать билд');
   else if (name === 'buildDetail')     setTopbar(true, 'Билд');

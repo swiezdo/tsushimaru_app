@@ -230,6 +230,70 @@
         </section>
       </section>
 
+      <!-- ====== ДЕТАЛИ ПРОФИЛЯ УЧАСТНИКА ====== -->
+      <section id="participantDetailScreen" class="hidden">
+        <section class="card">
+          <h2 class="card-title">Профиль участника</h2>
+          <div class="profile-grid">
+            <div class="field">
+              <label>Имя</label>
+              <div id="participant_real_name" class="value">—</div>
+            </div>
+
+            <div class="field">
+              <label>Ник в PlayStation Network</label>
+              <div id="participant_psn_id" class="value">—</div>
+            </div>
+
+            <div class="field">
+              <label>Платформы</label>
+              <div id="participant_platform" class="value lines">—</div>
+            </div>
+
+            <div class="field">
+              <label>Режимы</label>
+              <div id="participant_modes" class="value lines">—</div>
+            </div>
+
+            <div class="field">
+              <label>Цели</label>
+              <div id="participant_goals" class="value lines">—</div>
+            </div>
+
+            <div class="field">
+              <label>Сложность</label>
+              <div id="participant_difficulty" class="value lines">—</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="card-title">Трофеи участника</h2>
+          <div class="profile-grid">
+            <div class="field span-2">
+              <div class="trophy-progress-container">
+                <div class="trophy-progress-bar">
+                  <div class="trophy-progress-fill" id="participantTrophyProgressFill"></div>
+                </div>
+                <div class="trophy-progress-text" id="participantTrophyProgressText">0/0</div>
+              </div>
+            </div>
+          </div>
+          <div id="participantTrophiesList" class="list-buttons"></div>
+          <div id="noParticipantTrophiesHint" class="hint muted hidden" style="margin-top: 8px">
+            У участника пока нет трофеев.
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="card-title">Билды участника</h2>
+          <div id="participantBuildsList" class="list-builds"></div>
+          <div id="noParticipantBuildsHint" class="hint muted hidden" style="margin-top: 8px">
+            У участника пока нет публичных билдов.
+          </div>
+        </section>
+      </section>
+
       <!-- ====== БИЛДЫ: СПИСОК ====== -->
       <section id="buildsScreen" class="hidden">
         <div class="actions-bar">

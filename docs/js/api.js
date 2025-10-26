@@ -382,5 +382,27 @@ export async function fetchParticipants() {
     }
 }
 
+// Получение профиля участника по user_id
+export async function fetchUserProfile(userId) {
+    try {
+        const data = await apiRequest(`/api/users.getProfile?target_user_id=${userId}`);
+        return data;
+    } catch (error) {
+        console.error('Ошибка получения профиля участника:', error);
+        throw error;
+    }
+}
+
+// Получение публичных билдов участника по user_id
+export async function fetchUserBuilds(userId) {
+    try {
+        const data = await apiRequest(`/api/builds.getUserBuilds?target_user_id=${userId}`);
+        return data.builds || [];
+    } catch (error) {
+        console.error('Ошибка получения билдов участника:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };

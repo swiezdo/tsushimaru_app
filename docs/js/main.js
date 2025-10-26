@@ -5,6 +5,7 @@ import { initProfile } from './profile.js';
 import { initTrophies } from './trophies.js';
 import { initParticipants } from './participants.js';
 import { initBuilds } from './builds.js';
+import { initParticipantDetail } from './participantDetail.js';
 import { checkUserRegistration } from './api.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
@@ -38,19 +39,42 @@ function installBackButton() {
       return screen && !screen.classList.contains('hidden');
     });
     
+    // Проверяем sessionStorage для специальных случаев навигации
+    const previousScreen = sessionStorage.getItem('previousScreen');
+    
     // Маппинг экранов для навигации назад
     const backNavigation = {
       'buildCreate': 'builds',
       'buildDetail': 'builds', 
-      'buildPublicDetail': 'builds',
+      'buildPublicDetail': previousScreen ? (previousScreen.startsWith('participantDetail:') ? 'participantDetail' : 'builds') : 'builds',
       'trophyDetail': 'trophies',
       'profile': 'home',
       'trophies': 'home',
       'participants': 'home',
-      'builds': 'home'
+      'builds': 'home',
+      'participantDetail': previousScreen || 'participants'
     };
     
-    const nextScreen = backNavigation[currentScreen] || 'home';
+    let nextScreen = backNavigation[currentScreen] || 'home';
+    
+    // Обработка специального случая возврата к профилю участника
+    if (nextScreen === 'participantDetail' && previousScreen && previousScreen.startsWith('participantDetail:')) {
+      const userId = previousScreen.split(':')[1];
+      // Импортируем функцию открытия профиля участника
+      import('./participantDetail.js').then(module => {
+        module.openParticipantDetail(userId);
+      }).catch(error => {
+        console.error('Ошибка импорта participantDetail.js:', error);
+        showScreen('participants');
+      });
+      return;
+    }
+    
+    // Очищаем sessionStorage после использования
+    if (previousScreen) {
+      sessionStorage.removeItem('previousScreen');
+    }
+    
     showScreen(nextScreen);
   });
 }
@@ -106,6 +130,7 @@ async function startApp() {
   await initTrophies();
   await initParticipants();
   initBuilds();
+  initParticipantDetail();
 
   showScreen('home');
 }

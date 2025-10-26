@@ -886,3 +886,6 @@ export function initBuilds() {
   renderMyBuilds();
   renderAllBuilds();
 }
+
+// Экспорт функций для использования в других модулях
+export { openPublicBuildDetail };
