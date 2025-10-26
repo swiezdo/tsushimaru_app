@@ -278,16 +278,15 @@ function applyFilters() {
 }
 
 function renderFilteredBuilds(items) {
-  // Очищаем контейнер в любом случае
-  if (allBuildsList) {
-    allBuildsList.innerHTML = '';
-  }
-  
   // Скрываем все подсказки
   noAllBuildsHint.classList.add('hidden');
   noFilteredBuildsHint.classList.add('hidden');
   
   if (!items.length) {
+    // Очищаем контейнер, если нет результатов
+    if (allBuildsList) {
+      allBuildsList.innerHTML = '';
+    }
     // Показываем соответствующую подсказку
     if (selectedClasses.length > 0 || selectedTags.length > 0) {
       noFilteredBuildsHint.classList.remove('hidden');
