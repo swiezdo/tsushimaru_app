@@ -63,6 +63,31 @@ async def start_command(message: types.Message):
     
     await message.answer(welcome_text, reply_markup=builder.as_markup())
 
+async def get_trophy_and_user_info(user_id: int, trophy_id: str) -> tuple:
+    """Получает название трофея и PSN ID пользователя"""
+    trophy_name = trophy_id
+    psn_id = str(user_id)
+    
+    try:
+        # Получаем данные трофея
+        async with aiohttp.ClientSession() as session:
+            trophy_url = f"{API_BASE_URL}/api/trophy_info/{trophy_id}"
+            async with session.get(trophy_url) as trophy_response:
+                if trophy_response.status == 200:
+                    trophy_data = await trophy_response.json()
+                    trophy_name = f"{trophy_data.get('name', trophy_id)} {trophy_data.get('emoji', '')}".strip()
+            
+            # Получаем PSN ID пользователя
+            user_url = f"{API_BASE_URL}/api/user_info/{user_id}"
+            async with session.get(user_url) as user_response:
+                if user_response.status == 200:
+                    user_data = await user_response.json()
+                    psn_id = user_data.get('psn_id', str(user_id))
+    except Exception as e:
+        logger.error(f"Ошибка получения данных: {e}")
+    
+    return trophy_name, psn_id
+
 @dp.callback_query(F.data.startswith("trophy_approve:"))
 async def handle_trophy_approve(callback: types.CallbackQuery):
     """Обработчик callback кнопки одобрения трофея"""
@@ -75,15 +100,18 @@ async def handle_trophy_approve(callback: types.CallbackQuery):
         user_id = int(parts[1])
         trophy_id = parts[2]
         
+        # Получаем данные трофея и пользователя
+        trophy_name, psn_id = await get_trophy_and_user_info(user_id, trophy_id)
+        
         success = await approve_trophy(user_id, trophy_id)
         
         if success:
             await callback.message.edit_text(
-                f"✅ Заявка одобрена\n\nТрофей: {trophy_id}\nПользователь: {user_id}"
+                f"✅ Заявка одобрена\n\nТрофей: {trophy_name}\nПользователь: {psn_id}"
             )
         else:
             await callback.message.edit_text(
-                f"❌ Ошибка при одобрении трофея {trophy_id}"
+                f"❌ Ошибка при одобрении трофея"
             )
 
 @dp.callback_query(F.data.startswith("trophy_reject:"))
@@ -98,15 +126,18 @@ async def handle_trophy_reject(callback: types.CallbackQuery):
         user_id = int(parts[1])
         trophy_id = parts[2]
         
+        # Получаем данные трофея и пользователя
+        trophy_name, psn_id = await get_trophy_and_user_info(user_id, trophy_id)
+        
         success = await reject_trophy(user_id, trophy_id)
         
         if success:
             await callback.message.edit_text(
-                f"❌ Заявка отклонена\n\nТрофей: {trophy_id}\nПользователь: {user_id}"
+                f"❌ Заявка отклонена\n\nТрофей: {trophy_name}\nПользователь: {psn_id}"
             )
         else:
             await callback.message.edit_text(
-                f"❌ Ошибка при отклонении трофея {trophy_id}"
+                f"❌ Ошибка при отклонении трофея"
             )
 
 async def approve_trophy(user_id: int, trophy_id: str) -> bool:

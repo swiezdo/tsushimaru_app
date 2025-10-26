@@ -652,6 +652,30 @@ async def get_build_photo(build_id: int, photo_name: str):
     return FileResponse(photo_path, media_type='image/jpeg')
 
 
+@app.get("/api/trophy_info/{trophy_id}")
+async def get_trophy_info(trophy_id: str):
+    """Получает информацию о трофее по ID"""
+    try:
+        trophies_data = load_trophies_data()
+        trophy_info = trophies_data.get(trophy_id, {})
+        return {
+            "name": trophy_info.get('name', trophy_id),
+            "emoji": trophy_info.get('emoji', '🏆')
+        }
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Trophy not found")
+
+@app.get("/api/user_info/{user_id}")
+async def get_user_info(user_id: int):
+    """Получает информацию о пользователе по ID"""
+    try:
+        user = get_user(DB_PATH, user_id)
+        if user:
+            return {"psn_id": user.get('psn_id', str(user_id))}
+        raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="User not found")
+
 # ========== API ЭНДПОИНТЫ ДЛЯ ТРОФЕЕВ ==========
 
 @app.post("/api/trophies.submit")
@@ -795,19 +819,32 @@ async def submit_trophy_application(
                 chat_id=TROPHY_GROUP_CHAT_ID,
                 photo_path=photo_paths[0],
                 caption=message_text,
-                reply_markup=reply_markup,
-                message_thread_id=TROPHY_GROUP_TOPIC_ID
-            )
-        else:
-            # Несколько фотографий - отправляем как медиагруппу
-            await send_telegram_media_group(
-                chat_id=TROPHY_GROUP_CHAT_ID,
-                photo_paths=photo_paths,
-                caption=message_text,
                 message_thread_id=TROPHY_GROUP_TOPIC_ID
             )
             
             # Отправляем отдельное сообщение с кнопками
+            await send_telegram_message(
+                chat_id=TROPHY_GROUP_CHAT_ID,
+                text=f"Заявка от {psn_id} на трофей {trophy_name} {trophy_emoji}",
+                reply_markup=reply_markup,
+                message_thread_id=TROPHY_GROUP_TOPIC_ID
+            )
+        else:
+            # Отправляем сначала текстовое сообщение с полным описанием
+            await send_telegram_message(
+                chat_id=TROPHY_GROUP_CHAT_ID,
+                text=message_text,
+                message_thread_id=TROPHY_GROUP_TOPIC_ID
+            )
+            
+            # Затем отправляем медиагруппу с фото
+            await send_telegram_media_group(
+                chat_id=TROPHY_GROUP_CHAT_ID,
+                photo_paths=photo_paths,
+                message_thread_id=TROPHY_GROUP_TOPIC_ID
+            )
+            
+            # И отдельное сообщение с кнопками
             await send_telegram_message(
                 chat_id=TROPHY_GROUP_CHAT_ID,
                 text=f"Заявка от {psn_id} на трофей {trophy_name} {trophy_emoji}",
