@@ -10,8 +10,18 @@ export const tg = window.Telegram?.WebApp || null;
     tg.ready();
     tg.expand();
     
-    // Запрашиваем полноэкранный режим
-    tg.requestFullscreen();
+    // Определяем платформу и выбираем режим отображения
+    const platform = tg.platform || 'unknown';
+    const isDesktop = platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
+    
+    if (isDesktop) {
+      // На ПК используем expand() для максимального размера без полноэкранного режима
+      console.log('🖥️ Desktop platform detected, using expand mode');
+    } else {
+      // На мобильных устройствах используем полноэкранный режим
+      tg.requestFullscreen();
+      console.log('📱 Mobile platform detected, using fullscreen mode');
+    }
 
     const th = tg.themeParams || {};
     if (th.bg_color)   document.documentElement.style.setProperty('--tg-bg', th.bg_color);
@@ -62,4 +72,19 @@ export function exitFullscreen() {
 
 export function isFullscreen() {
   try { return tg?.isFullscreen || false; } catch { return false; }
+}
+
+// Утилиты для определения платформы
+export function getPlatform() {
+  try { return tg?.platform || 'unknown'; } catch { return 'unknown'; }
+}
+
+export function isDesktop() {
+  const platform = getPlatform();
+  return platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
+}
+
+export function isMobile() {
+  const platform = getPlatform();
+  return platform === 'ios' || platform === 'android';
 }
