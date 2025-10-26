@@ -33,7 +33,7 @@ async function loadTrophiesData() {
         return await response.json();
     } catch (error) {
         console.error('Ошибка загрузки данных трофеев:', error);
-        return { trophies: [] };
+        return {};
     }
 }
 
@@ -55,11 +55,11 @@ async function renderParticipantTrophies(profile) {
     
     try {
         const trophiesData = await loadTrophiesData();
-        const allTrophies = trophiesData.trophies || [];
+        const allTrophies = trophiesData || {};
         const userTrophies = profile.trophies || [];
         
         // Обновляем прогресс-бар
-        const totalTrophies = allTrophies.length;
+        const totalTrophies = Object.keys(allTrophies).length;
         const obtainedTrophies = userTrophies.length;
         const progressPercent = totalTrophies > 0 ? (obtainedTrophies / totalTrophies) * 100 : 0;
         
@@ -82,16 +82,13 @@ async function renderParticipantTrophies(profile) {
             
             noParticipantTrophiesHintEl?.classList.add('hidden');
             
-            userTrophies.forEach(trophyId => {
-                const trophy = allTrophies.find(t => t.id === trophyId);
-                if (trophy) {
-                    const btn = document.createElement('button');
-                    btn.className = 'list-btn';
-                    btn.type = 'button';
-                    btn.innerHTML = `<span>${trophy.name}</span><span class="right">›</span>`;
-                    participantTrophiesListEl.appendChild(btn);
-                }
+            // Создаем простой текстовый список
+            const trophyNames = userTrophies.map(trophyId => {
+                const trophy = allTrophies[trophyId];
+                return trophy ? `${trophy.name || trophyId} ${trophy.emoji || ''}` : trophyId;
             });
+            
+            participantTrophiesListEl.innerHTML = trophyNames.join('<br>');
         }
         
     } catch (error) {
