@@ -685,7 +685,9 @@ async def submit_trophy_application(
     
     # Загружаем данные трофея из JSON
     try:
-        trophies_json_path = os.path.join(os.path.dirname(DB_PATH), '..', 'docs', 'assets', 'data', 'trophies.json')
+        # Определяем путь к проекту относительно текущего файла
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        trophies_json_path = os.path.join(project_root, 'docs', 'assets', 'data', 'trophies.json')
         with open(trophies_json_path, 'r', encoding='utf-8') as f:
             trophies_data = json.load(f)
         
@@ -791,7 +793,9 @@ async def approve_trophy_application(
     
     # Загружаем данные трофея для уведомления
     try:
-        trophies_json_path = os.path.join(os.path.dirname(DB_PATH), '..', 'docs', 'assets', 'data', 'trophies.json')
+        # Определяем путь к проекту относительно текущего файла
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        trophies_json_path = os.path.join(project_root, 'docs', 'assets', 'data', 'trophies.json')
         with open(trophies_json_path, 'r', encoding='utf-8') as f:
             trophies_data = json.load(f)
         
@@ -854,7 +858,9 @@ async def reject_trophy_application(
     
     # Загружаем данные трофея для уведомления
     try:
-        trophies_json_path = os.path.join(os.path.dirname(DB_PATH), '..', 'docs', 'assets', 'data', 'trophies.json')
+        # Определяем путь к проекту относительно текущего файла
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        trophies_json_path = os.path.join(project_root, 'docs', 'assets', 'data', 'trophies.json')
         with open(trophies_json_path, 'r', encoding='utf-8') as f:
             trophies_data = json.load(f)
         
