@@ -189,7 +189,7 @@ async def get_profile(user_id: int = Depends(get_current_user)):
     # Убираем служебные поля из ответа
     response_data = {
         "real_name": profile.get("real_name", ""),
-        "psn": profile.get("psn_id", ""),
+        "psn_id": profile.get("psn_id", ""),
         "platforms": profile.get("platforms", []),
         "modes": profile.get("modes", []),
         "goals": profile.get("goals", []),
@@ -204,7 +204,7 @@ async def get_profile(user_id: int = Depends(get_current_user)):
 async def save_profile(
     user_id: int = Depends(get_current_user),
     real_name: str = Form(...),
-    psn: str = Form(...),
+    psn_id: str = Form(...),
     platforms: List[str] = Form(default=[]),
     modes: List[str] = Form(default=[]),
     goals: List[str] = Form(default=[]),
@@ -216,7 +216,7 @@ async def save_profile(
     Args:
         user_id: ID пользователя (из dependency)
         real_name: Реальное имя пользователя
-        psn: PSN никнейм
+        psn_id: PSN никнейм
         platforms: Список платформ
         modes: Список режимов
         goals: Список целей
@@ -225,6 +225,14 @@ async def save_profile(
     Returns:
         JSON с результатом операции
     """
+    # Логируем полученные данные для отладки
+    print(f"🔍 Получены данные профиля для user_id={user_id}:")
+    print(f"  real_name: '{real_name}'")
+    print(f"  psn_id: '{psn_id}'")
+    print(f"  platforms: {platforms}")
+    print(f"  modes: {modes}")
+    print(f"  goals: {goals}")
+    print(f"  difficulties: {difficulties}")
     # Валидация входных данных
     if not real_name or not real_name.strip():
         raise HTTPException(
@@ -232,7 +240,7 @@ async def save_profile(
             detail="Поле 'real_name' обязательно для заполнения"
         )
 
-    if not validate_psn_format(psn):
+    if not validate_psn_format(psn_id):
         raise HTTPException(
             status_code=400,
             detail="Неверный формат PSN никнейма (3-16 символов: A-Z, a-z, 0-9, -, _)"
@@ -241,7 +249,7 @@ async def save_profile(
     # Подготавливаем данные для сохранения
     profile_data = {
         "real_name": real_name.strip(),
-        "psn_id": psn.strip(),
+        "psn_id": psn_id.strip(),
         "platforms": platforms,
         "modes": modes,
         "goals": goals,

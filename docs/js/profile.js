@@ -74,7 +74,7 @@ function loadProfile() {
 
 // ---------- Отображение ----------
 const v_real_name  = $('v_real_name');
-const v_psn        = $('v_psn');
+const v_psn_id     = $('v_psn_id');
 const v_platform   = $('v_platform');
 const v_modes      = $('v_modes');
 const v_goals      = $('v_goals');
@@ -98,8 +98,8 @@ function loadProfileToForm(profile) {
   if (profileForm.real_name) {
     profileForm.real_name.value = profile.real_name || '';
   }
-  if (profileForm.psn) {
-    profileForm.psn.value = profile.psn || '';
+  if (profileForm.psn_id) {
+    profileForm.psn_id.value = profile.psn_id || '';
   }
   
   // Устанавливаем чипы
@@ -110,7 +110,7 @@ function loadProfileToForm(profile) {
   
   // Обновляем отображение в карточке "Ваш профиль"
   if (v_real_name) v_real_name.textContent = profile.real_name || '—';
-  if (v_psn) v_psn.textContent = profile.psn || '—';
+  if (v_psn_id) v_psn_id.textContent = profile.psn_id || '—';
   refreshProfileView();
 }
 
@@ -165,7 +165,7 @@ export function initProfile() {
 
   if (!profileForm) return;
   const nameInput = profileForm.real_name;
-  const psnInput  = profileForm.psn;
+  const psnInput  = profileForm.psn_id;
 
   // Навигация по Enter
   nameInput?.addEventListener('keydown', (e) => {
@@ -214,7 +214,7 @@ export function initProfile() {
     // Подготавливаем данные профиля
     const profileData = {
       real_name: (nameInput?.value || '').trim(),
-      psn: (psnInput?.value || '').trim(),
+      psn_id: (psnInput?.value || '').trim(),
       platforms: activeValues($('platformChips')),
       modes: activeValues($('modesChips')),
       goals: activeValues($('goalsChips')),
@@ -237,7 +237,7 @@ export function initProfile() {
       
       // Обновляем отображение
       if (v_real_name) v_real_name.textContent = profileData.real_name || '—';
-      if (v_psn) v_psn.textContent = profileData.psn || '—';
+      if (v_psn_id) v_psn_id.textContent = profileData.psn_id || '—';
       refreshProfileView();
 
       hapticOK();

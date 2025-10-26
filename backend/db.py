@@ -102,6 +102,10 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         True при успешном сохранении, иначе False
     """
     try:
+        # Логируем данные для отладки
+        print(f"💾 Сохранение профиля user_id={user_id}:")
+        print(f"  profile_data: {profile_data}")
+        
         # Инициализируем БД если её нет
         if not os.path.exists(db_path):
             init_db(db_path)
@@ -118,6 +122,13 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         goals_json = json.dumps(profile_data.get('goals', []))
         difficulties_json = json.dumps(profile_data.get('difficulties', []))
         trophies_json = json.dumps(profile_data.get('trophies', []))
+        
+        print(f"  JSON данные:")
+        print(f"    platforms_json: {platforms_json}")
+        print(f"    modes_json: {modes_json}")
+        print(f"    goals_json: {goals_json}")
+        print(f"    difficulties_json: {difficulties_json}")
+        print(f"    trophies_json: {trophies_json}")
         
         # Выполняем INSERT OR REPLACE
         cursor.execute('''
@@ -139,9 +150,11 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         conn.commit()
         conn.close()
         
+        print(f"✅ Профиль user_id={user_id} успешно сохранен")
         return True
         
     except Exception as e:
+        print(f"❌ Ошибка сохранения профиля user_id={user_id}: {e}")
         return False
 
 

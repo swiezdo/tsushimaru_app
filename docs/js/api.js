@@ -71,6 +71,8 @@ export async function fetchProfile() {
 // Сохранение профиля пользователя
 export async function saveProfile(formData) {
     try {
+        console.log('📤 Отправка данных профиля:', formData);
+        
         const initData = getInitData();
         if (!initData) {
             throw new Error('Не удалось получить данные авторизации Telegram');
@@ -81,31 +83,32 @@ export async function saveProfile(formData) {
         
         // Добавляем поля формы
         data.append('real_name', formData.real_name || '');
-        data.append('psn', formData.psn || '');
+        data.append('psn_id', formData.psn_id || '');
         
         // Добавляем массивы как отдельные поля
-        if (formData.platforms && Array.isArray(formData.platforms)) {
-            formData.platforms.forEach(platform => {
-                data.append('platforms', platform);
-            });
-        }
+        const platforms = formData.platforms || [];
+        platforms.forEach(platform => {
+            data.append('platforms', platform);
+        });
         
-        if (formData.modes && Array.isArray(formData.modes)) {
-            formData.modes.forEach(mode => {
-                data.append('modes', mode);
-            });
-        }
+        const modes = formData.modes || [];
+        modes.forEach(mode => {
+            data.append('modes', mode);
+        });
         
-        if (formData.goals && Array.isArray(formData.goals)) {
-            formData.goals.forEach(goal => {
-                data.append('goals', goal);
-            });
-        }
+        const goals = formData.goals || [];
+        goals.forEach(goal => {
+            data.append('goals', goal);
+        });
         
-        if (formData.difficulties && Array.isArray(formData.difficulties)) {
-            formData.difficulties.forEach(difficulty => {
-                data.append('difficulties', difficulty);
-            });
+        const difficulties = formData.difficulties || [];
+        difficulties.forEach(difficulty => {
+            data.append('difficulties', difficulty);
+        });
+
+        console.log('📋 FormData содержимое:');
+        for (let [key, value] of data.entries()) {
+            console.log(`  ${key}: ${value}`);
         }
 
         const url = `${API_BASE}/api/profile.save`;
@@ -125,7 +128,7 @@ export async function saveProfile(formData) {
         }
 
         const result = await response.json();
-        console.log('Профиль сохранен:', result);
+        console.log('✅ Профиль сохранен:', result);
         return result;
     } catch (error) {
         console.error('Ошибка сохранения профиля:', error);
