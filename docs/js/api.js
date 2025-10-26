@@ -60,7 +60,6 @@ async function apiRequest(endpoint, options = {}) {
 export async function fetchProfile() {
     try {
         const data = await apiRequest('/api/profile.get');
-        console.log('Профиль получен:', data);
         return data;
     } catch (error) {
         console.error('Ошибка получения профиля:', error);
@@ -71,8 +70,6 @@ export async function fetchProfile() {
 // Сохранение профиля пользователя
 export async function saveProfile(formData) {
     try {
-        console.log('📤 Отправка данных профиля:', formData);
-        
         const initData = getInitData();
         if (!initData) {
             throw new Error('Не удалось получить данные авторизации Telegram');
@@ -128,7 +125,6 @@ export async function saveProfile(formData) {
         }
 
         const result = await response.json();
-        console.log('✅ Профиль сохранен:', result);
         return result;
     } catch (error) {
         console.error('Ошибка сохранения профиля:', error);
@@ -144,7 +140,6 @@ export async function checkApiHealth() {
             throw new Error(`API недоступен: ${response.status}`);
         }
         const data = await response.json();
-        console.log('API работает:', data);
         return data;
     } catch (error) {
         console.error('Ошибка проверки API:', error);
@@ -156,7 +151,6 @@ export async function checkApiHealth() {
 export async function getApiStats() {
     try {
         const data = await apiRequest('/api/stats');
-        console.log('Статистика API:', data);
         return data;
     } catch (error) {
         console.error('Ошибка получения статистики:', error);

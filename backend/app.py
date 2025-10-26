@@ -225,14 +225,6 @@ async def save_profile(
     Returns:
         JSON с результатом операции
     """
-    # Логируем полученные данные для отладки
-    print(f"🔍 Получены данные профиля для user_id={user_id}:")
-    print(f"  real_name: '{real_name}'")
-    print(f"  psn_id: '{psn_id}'")
-    print(f"  platforms: {platforms}")
-    print(f"  modes: {modes}")
-    print(f"  goals: {goals}")
-    print(f"  difficulties: {difficulties}")
     # Валидация входных данных
     if not real_name or not real_name.strip():
         raise HTTPException(
