@@ -127,7 +127,7 @@ async function submitProof() {
   }
 
   hapticOK();
-  tg?.showPopup?.({ title: 'Заявка отправлена', message: '✅ Модераторы рассмотрят вашу заявку.' });
+  tg?.showPopup?.({ title: 'Заявка отправлена', message: '✅ Модераторы рассмотрят вашу заявку.', buttons: [{ type: 'ok' }] });
   resetProofForm();
   showScreen('trophies');
 }

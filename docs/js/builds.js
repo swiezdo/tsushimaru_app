@@ -330,15 +330,16 @@ function tgConfirm(title, message) {
   return new Promise((resolve) => {
     const handler = (e) => {
       tg.offEvent('popupClosed', handler);
-      resolve(e?.button_id === 'yes');
+      // Для кнопки OK button_id будет пустым или 'ok', для Cancel - 'cancel'
+      resolve(e?.button_id !== 'cancel');
     };
     tg.onEvent('popupClosed', handler);
     tg.showPopup({
       title: title || 'Подтверждение',
       message: message || '',
       buttons: [
-        {id:'no',  type:'cancel',      text:'Отмена'},
-        {id:'yes', type:'destructive', text:'Удалить'}
+        { type: 'cancel' },
+        { type: 'ok' }
       ]
     });
   });
