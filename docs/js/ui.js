@@ -57,6 +57,17 @@ export function showScreen(name) {
 
 // Загрузка профиля с сервера при открытии экрана профиля
 async function loadProfileOnScreenOpen() {
+  // Очищаем ошибки и анимации при открытии профиля
+  const nameInput = document.getElementById('real_name');
+  const psnInput = document.getElementById('psn_id');
+  const nameError = document.getElementById('nameError');
+  const psnError = document.getElementById('psnError');
+
+  nameInput?.classList.remove('shake');
+  psnInput?.classList.remove('shake');
+  nameError?.classList.add('hidden');
+  psnError?.classList.add('hidden');
+
   try {
     const serverProfile = await fetchProfile();
     
