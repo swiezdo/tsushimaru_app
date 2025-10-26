@@ -542,16 +542,33 @@ function tgConfirm(title, message) {
   });
 }
 
-function deleteBuildById(id) {
-  deleteBuild(id).then(() => {
-    renderMyBuilds(); // Обновляем список моих билдов
-    renderAllBuilds(); // Обновляем список публичных билдов
-    tg?.showPopup?.({ title: 'Удалено', message: 'Билд удалён.', buttons: [{ type:'ok' }] });
+async function deleteBuildById(id) {
+  try {
+    await deleteBuild(id);
+    
+    // Обновляем оба списка параллельно
+    await Promise.all([
+      renderMyBuilds(),
+      renderAllBuilds()
+    ]);
+    
+    // Возвращаемся на страницу билдов
     showScreen('builds');
-  }).catch(err => {
+    
+    // Показываем сообщение об успехе
+    await new Promise(resolve => {
+      tg?.showPopup?.({ 
+        title: 'Удалено', 
+        message: 'Билд удалён.', 
+        buttons: [{ type:'ok' }] 
+      });
+      // Даем время на обновление UI
+      setTimeout(resolve, 100);
+    });
+  } catch (err) {
     tg?.showAlert?.('Ошибка удаления билда: ' + err);
     hapticERR();
-  });
+  }
 }
 
 // Инициализация

@@ -299,7 +299,9 @@ export async function deleteBuild(buildId) {
             throw new Error('Не удалось получить данные авторизации Telegram');
         }
 
-        const url = `${API_BASE}/api/builds.delete?build_id=${buildId}`;
+        // Преобразуем buildId в число для корректной работы на бэкенде
+        const buildIdNum = parseInt(buildId, 10);
+        const url = `${API_BASE}/api/builds.delete?build_id=${buildIdNum}`;
         const response = await fetch(url, {
             method: 'DELETE',
             headers: {
