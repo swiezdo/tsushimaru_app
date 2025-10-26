@@ -186,20 +186,6 @@ export function initProfile() {
   nameInput?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
   psnInput?.addEventListener('focus',  ()=>{ hapticTapSmart(); }, {passive:true});
 
-  // Закрытие клавиатуры при клике вне полей ввода (для iOS)
-  document.addEventListener('click', (e) => {
-    // Проверяем, что клик не по полям ввода и не по их родительским элементам
-    if (!nameInput?.contains(e.target) && !psnInput?.contains(e.target)) {
-      // Добавляем небольшую задержку, чтобы не мешать открытию клавиатуры
-      setTimeout(() => {
-        // Проверяем, что фокус действительно не на наших полях
-        if (document.activeElement !== nameInput && document.activeElement !== psnInput) {
-          hideKeyboard();
-        }
-      }, 100);
-    }
-  });
-
   function isNameOk() {
     return !!(nameInput && (nameInput.value || '').trim());
   }

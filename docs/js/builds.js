@@ -378,28 +378,6 @@ export function initBuilds() {
   buildNameEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
   buildDescEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
 
-  // Закрытие клавиатуры по Enter для textarea (для iOS)
-  buildDescEl?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.ctrlKey) { 
-      e.preventDefault(); 
-      hideKeyboard();
-    }
-  });
-
-  // Закрытие клавиатуры при клике вне полей ввода (для iOS)
-  document.addEventListener('click', (e) => {
-    // Проверяем, что клик не по полям ввода и не по их родительским элементам
-    if (!buildNameEl?.contains(e.target) && !buildDescEl?.contains(e.target)) {
-      // Добавляем небольшую задержку, чтобы не мешать открытию клавиатуры
-      setTimeout(() => {
-        // Проверяем, что фокус действительно не на наших полях
-        if (document.activeElement !== buildNameEl && document.activeElement !== buildDescEl) {
-          hideKeyboard();
-        }
-      }, 100);
-    }
-  });
-
   // «＋ Создать билд» — OK
   createBuildBtn?.addEventListener('click', () => {
     hapticOK();
