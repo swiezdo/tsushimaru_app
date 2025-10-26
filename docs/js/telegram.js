@@ -20,8 +20,9 @@ export const tg = window.Telegram?.WebApp || null;
     const isMobileByPlatform = platform === 'ios' || platform === 'android';
     const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
     
-    const isDesktop = isDesktopByPlatform || (isDesktopByUserAgent && !isMobileByUserAgent);
+    // Приоритет: сначала проверяем мобильные, потом десктоп
     const isMobile = isMobileByPlatform || isMobileByUserAgent;
+    const isDesktop = isDesktopByPlatform || (isDesktopByUserAgent && !isMobile);
     
     console.log('🔍 Platform detection:', {
       tgPlatform: platform,
@@ -34,13 +35,13 @@ export const tg = window.Telegram?.WebApp || null;
       finalIsMobile: isMobile
     });
     
-    if (isDesktop) {
-      // На ПК используем только expand() - НЕ запрашиваем полноэкранный режим
-      console.log('🖥️ Desktop detected - using expand mode only');
-    } else if (isMobile) {
+    if (isMobile) {
       // На мобильных устройствах используем полноэкранный режим
       tg.requestFullscreen();
       console.log('📱 Mobile detected - using fullscreen mode');
+    } else if (isDesktop) {
+      // На ПК используем только expand() - НЕ запрашиваем полноэкранный режим
+      console.log('🖥️ Desktop detected - using expand mode only');
     } else {
       // Если не можем определить - используем только expand()
       console.log('❓ Unknown platform - using expand mode only');
@@ -109,9 +110,11 @@ export function isDesktop() {
     
     const isDesktopByPlatform = platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
     const isDesktopByUserAgent = userAgent.includes('windows') || userAgent.includes('macintosh') || userAgent.includes('linux') || userAgent.includes('x11');
+    const isMobileByPlatform = platform === 'ios' || platform === 'android';
     const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
     
-    return isDesktopByPlatform || (isDesktopByUserAgent && !isMobileByUserAgent);
+    const isMobile = isMobileByPlatform || isMobileByUserAgent;
+    return isDesktopByPlatform || (isDesktopByUserAgent && !isMobile);
   } catch { 
     return false; 
   }
