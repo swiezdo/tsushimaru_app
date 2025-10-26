@@ -4,16 +4,20 @@
 
 import os
 import uvicorn
+import shutil
+import json
 from fastapi import FastAPI, HTTPException, Depends, Header, Form, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from typing import Optional, List
+from PIL import Image
 import re
 
 # Импортируем наши модули
 from security import validate_init_data, get_user_id_from_init_data
-from db import init_db, get_user, upsert_user
+from db import init_db, get_user, upsert_user, create_build, get_build, get_user_builds, get_public_builds, update_build_visibility, delete_build
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -274,6 +278,240 @@ async def get_stats():
         "total_users": user_count,
         "api_version": "1.0.0"
     }
+
+
+# ========== API ЭНДПОИНТЫ ДЛЯ БИЛДОВ ==========
+
+@app.post("/api/builds.create")
+async def create_build_endpoint(
+    user_id: int = Depends(get_current_user),
+    name: str = Form(...),
+    class_name: str = Form(...),
+    tags: str = Form(...),  # JSON строка
+    description: str = Form(""),
+    photo_1: UploadFile = File(...),
+    photo_2: UploadFile = File(...)
+):
+    """
+    Создает новый билд с загрузкой изображений.
+    """
+    # Получаем профиль пользователя для получения psn_id
+    user_profile = get_user(DB_PATH, user_id)
+    if not user_profile:
+        raise HTTPException(
+            status_code=404,
+            detail="Профиль пользователя не найден"
+        )
+    
+    author = user_profile.get('psn_id', '')
+    if not author:
+        raise HTTPException(
+            status_code=400,
+            detail="PSN ID не указан в профиле"
+        )
+    
+    # Валидация названия
+    if not name or not name.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Название билда обязательно"
+        )
+    
+    # Валидация класса
+    if not class_name or not class_name.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Класс обязателен"
+        )
+    
+    # Парсим теги (JSON строка)
+    try:
+        tags_list = json.loads(tags) if tags else []
+    except:
+        tags_list = []
+    
+    # Создаем временный билд для получения build_id
+    build_data = {
+        'user_id': user_id,
+        'author': author,
+        'name': name.strip(),
+        'class': class_name.strip(),
+        'tags': tags_list,
+        'description': description.strip(),
+        'photo_1': '',  # Временно пустое
+        'photo_2': '',  # Временно пустое
+        'is_public': 0
+    }
+    
+    build_id = create_build(DB_PATH, build_data)
+    if not build_id:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка создания билда"
+        )
+    
+    # Создаем директорию для билда
+    builds_dir = os.path.join(os.path.dirname(DB_PATH), 'builds', str(build_id))
+    os.makedirs(builds_dir, exist_ok=True)
+    
+    # Обрабатываем и сохраняем изображения
+    try:
+        # Обработка первого изображения
+        photo_1_path = os.path.join(builds_dir, 'photo_1.jpg')
+        image1 = Image.open(photo_1.file)
+        # Конвертируем в RGB если нужно (PNG с альфа-каналом)
+        if image1.mode in ('RGBA', 'LA', 'P'):
+            background = Image.new('RGB', image1.size, (255, 255, 255))
+            if image1.mode == 'P':
+                image1 = image1.convert('RGBA')
+            background.paste(image1, mask=image1.split()[-1] if image1.mode == 'RGBA' else None)
+            image1 = background
+        image1.save(photo_1_path, 'JPEG', quality=85, optimize=True)
+        photo_1.file.seek(0)  # Возвращаем курсор
+        
+        # Обработка второго изображения
+        photo_2_path = os.path.join(builds_dir, 'photo_2.jpg')
+        image2 = Image.open(photo_2.file)
+        if image2.mode in ('RGBA', 'LA', 'P'):
+            background = Image.new('RGB', image2.size, (255, 255, 255))
+            if image2.mode == 'P':
+                image2 = image2.convert('RGBA')
+            background.paste(image2, mask=image2.split()[-1] if image2.mode == 'RGBA' else None)
+            image2 = background
+        image2.save(photo_2_path, 'JPEG', quality=85, optimize=True)
+        
+        # Обновляем пути к изображениям в БД
+        photo_1_url = f"/builds/{build_id}/photo_1.jpg"
+        photo_2_url = f"/builds/{build_id}/photo_2.jpg"
+        
+        # Обновляем билд с путями
+        import sqlite3
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE builds SET photo_1 = ?, photo_2 = ? WHERE build_id = ?
+        ''', (photo_1_url, photo_2_url, build_id))
+        conn.commit()
+        conn.close()
+        
+    except Exception as e:
+        print(f"Ошибка обработки изображений: {e}")
+        # Удаляем билд при ошибке
+        delete_build(DB_PATH, build_id, user_id)
+        # Удаляем папку
+        if os.path.exists(builds_dir):
+            shutil.rmtree(builds_dir)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка обработки изображений: {str(e)}"
+        )
+    
+    return {
+        "status": "ok",
+        "message": "Билд успешно создан",
+        "build_id": build_id
+    }
+
+
+@app.get("/api/builds.getMy")
+async def get_my_builds(user_id: int = Depends(get_current_user)):
+    """
+    Получает все билды текущего пользователя.
+    """
+    builds = get_user_builds(DB_PATH, user_id)
+    return {
+        "status": "ok",
+        "builds": builds
+    }
+
+
+@app.get("/api/builds.getPublic")
+async def get_public_builds():
+    """
+    Получает все публичные билды.
+    """
+    builds = get_public_builds(DB_PATH)
+    return {
+        "status": "ok",
+        "builds": builds
+    }
+
+
+@app.post("/api/builds.togglePublish")
+async def toggle_build_publish(
+    user_id: int = Depends(get_current_user),
+    build_id: int = Form(...),
+    is_public: int = Form(...)
+):
+    """
+    Переключает публичность билда.
+    """
+    # Валидация is_public
+    if is_public not in (0, 1):
+        raise HTTPException(
+            status_code=400,
+            detail="is_public должен быть 0 или 1"
+        )
+    
+    success = update_build_visibility(DB_PATH, build_id, user_id, is_public)
+    
+    if not success:
+        raise HTTPException(
+            status_code=404,
+            detail="Билд не найден или у вас нет прав на его изменение"
+        )
+    
+    return {
+        "status": "ok",
+        "message": "Видимость билда обновлена"
+    }
+
+
+@app.delete("/api/builds.delete")
+async def delete_build_endpoint(
+    build_id: int,
+    user_id: int = Depends(get_current_user)
+):
+    """
+    Удаляет билд и папку с изображениями.
+    """
+    # Удаляем из БД
+    success = delete_build(DB_PATH, build_id, user_id)
+    
+    if not success:
+        raise HTTPException(
+            status_code=404,
+            detail="Билд не найден или у вас нет прав на его удаление"
+        )
+    
+    # Удаляем папку с изображениями
+    builds_dir = os.path.join(os.path.dirname(DB_PATH), 'builds', str(build_id))
+    if os.path.exists(builds_dir):
+        try:
+            shutil.rmtree(builds_dir)
+        except Exception as e:
+            print(f"Ошибка удаления папки билда: {e}")
+    
+    return {
+        "status": "ok",
+        "message": "Билд успешно удален"
+    }
+
+
+@app.get("/builds/{build_id}/{photo_name}")
+async def get_build_photo(build_id: int, photo_name: str):
+    """
+    Возвращает изображение билда.
+    """
+    photo_path = os.path.join(os.path.dirname(DB_PATH), 'builds', str(build_id), photo_name)
+    
+    if not os.path.exists(photo_path):
+        raise HTTPException(
+            status_code=404,
+            detail="Изображение не найдено"
+        )
+    
+    return FileResponse(photo_path, media_type='image/jpeg')
 
 
 # Обработчик ошибок для CORS

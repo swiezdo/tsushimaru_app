@@ -5,7 +5,7 @@ import sqlite3
 import json
 import time
 import os
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
 
 
 def init_db(db_path: str) -> None:
@@ -39,6 +39,31 @@ def init_db(db_path: str) -> None:
     # Создаем индекс для быстрого поиска
     cursor.execute('''
         CREATE INDEX IF NOT EXISTS idx_users_user_id ON users(user_id)
+    ''')
+    
+    # Создаем таблицу builds
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS builds (
+            build_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            author TEXT NOT NULL,
+            name TEXT NOT NULL,
+            class TEXT NOT NULL,
+            tags TEXT NOT NULL,
+            description TEXT,
+            photo_1 TEXT NOT NULL,
+            photo_2 TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            is_public INTEGER NOT NULL DEFAULT 0
+        )
+    ''')
+    
+    # Создаем индексы для builds
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_builds_user_id ON builds(user_id)
+    ''')
+    cursor.execute('''
+        CREATE INDEX IF NOT EXISTS idx_builds_is_public ON builds(is_public)
     ''')
     
     conn.commit()
@@ -200,5 +225,276 @@ def get_user_count(db_path: str) -> int:
         
     except Exception:
         return 0
+
+
+def create_build(db_path: str, build_data: Dict[str, Any]) -> Optional[int]:
+    """
+    Создает новый билд в базе данных.
+    
+    Args:
+        db_path: Путь к файлу базы данных
+        build_data: Словарь с данными билда (user_id, author, name, class, tags, description, photo_1, photo_2, is_public)
+    
+    Returns:
+        build_id созданного билда или None при ошибке
+    """
+    try:
+        if not os.path.exists(db_path):
+            init_db(db_path)
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        current_time = int(time.time())
+        tags_json = json.dumps(build_data.get('tags', []))
+        
+        cursor.execute('''
+            INSERT INTO builds 
+            (user_id, author, name, class, tags, description, photo_1, photo_2, created_at, is_public)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            build_data.get('user_id'),
+            build_data.get('author', ''),
+            build_data.get('name', ''),
+            build_data.get('class', ''),
+            tags_json,
+            build_data.get('description', ''),
+            build_data.get('photo_1', ''),
+            build_data.get('photo_2', ''),
+            current_time,
+            build_data.get('is_public', 0)
+        ))
+        
+        build_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return build_id
+        
+    except Exception as e:
+        print(f"Ошибка создания билда: {e}")
+        return None
+
+
+def get_build(db_path: str, build_id: int) -> Optional[Dict[str, Any]]:
+    """
+    Получает билд по build_id.
+    
+    Args:
+        db_path: Путь к файлу базы данных
+        build_id: ID билда
+    
+    Returns:
+        Словарь с данными билда или None если не найден
+    """
+    try:
+        if not os.path.exists(db_path):
+            return None
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT build_id, user_id, author, name, class, tags, description, 
+                   photo_1, photo_2, created_at, is_public
+            FROM builds WHERE build_id = ?
+        ''', (build_id,))
+        
+        row = cursor.fetchone()
+        conn.close()
+        
+        if not row:
+            return None
+        
+        return {
+            'build_id': row[0],
+            'user_id': row[1],
+            'author': row[2],
+            'name': row[3],
+            'class': row[4],
+            'tags': json.loads(row[5]) if row[5] else [],
+            'description': row[6],
+            'photo_1': row[7],
+            'photo_2': row[8],
+            'created_at': row[9],
+            'is_public': row[10]
+        }
+        
+    except Exception as e:
+        print(f"Ошибка получения билда: {e}")
+        return None
+
+
+def get_user_builds(db_path: str, user_id: int) -> List[Dict[str, Any]]:
+    """
+    Получает все билды пользователя.
+    
+    Args:
+        db_path: Путь к файлу базы данных
+        user_id: ID пользователя
+    
+    Returns:
+        Список словарей с данными билдов
+    """
+    try:
+        if not os.path.exists(db_path):
+            return []
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT build_id, user_id, author, name, class, tags, description, 
+                   photo_1, photo_2, created_at, is_public
+            FROM builds WHERE user_id = ?
+            ORDER BY created_at DESC
+        ''', (user_id,))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        builds = []
+        for row in rows:
+            builds.append({
+                'build_id': row[0],
+                'user_id': row[1],
+                'author': row[2],
+                'name': row[3],
+                'class': row[4],
+                'tags': json.loads(row[5]) if row[5] else [],
+                'description': row[6],
+                'photo_1': row[7],
+                'photo_2': row[8],
+                'created_at': row[9],
+                'is_public': row[10]
+            })
+        
+        return builds
+        
+    except Exception as e:
+        print(f"Ошибка получения билдов пользователя: {e}")
+        return []
+
+
+def get_public_builds(db_path: str) -> List[Dict[str, Any]]:
+    """
+    Получает все публичные билды.
+    
+    Args:
+        db_path: Путь к файлу базы данных
+    
+    Returns:
+        Список словарей с данными публичных билдов
+    """
+    try:
+        if not os.path.exists(db_path):
+            return []
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT build_id, user_id, author, name, class, tags, description, 
+                   photo_1, photo_2, created_at, is_public
+            FROM builds WHERE is_public = 1
+            ORDER BY created_at DESC
+        ''')
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        builds = []
+        for row in rows:
+            builds.append({
+                'build_id': row[0],
+                'user_id': row[1],
+                'author': row[2],
+                'name': row[3],
+                'class': row[4],
+                'tags': json.loads(row[5]) if row[5] else [],
+                'description': row[6],
+                'photo_1': row[7],
+                'photo_2': row[8],
+                'created_at': row[9],
+                'is_public': row[10]
+            })
+        
+        return builds
+        
+    except Exception as e:
+        print(f"Ошибка получения публичных билдов: {e}")
+        return []
+
+
+def update_build_visibility(db_path: str, build_id: int, user_id: int, is_public: int) -> bool:
+    """
+    Изменяет видимость билда (публичный/приватный).
+    
+    Args:
+        db_path: Путь к файлу базы данных
+        build_id: ID билда
+        user_id: ID пользователя (для проверки прав)
+        is_public: 1 для публичного, 0 для приватного
+    
+    Returns:
+        True при успешном обновлении, иначе False
+    """
+    try:
+        if not os.path.exists(db_path):
+            return False
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            UPDATE builds 
+            SET is_public = ?
+            WHERE build_id = ? AND user_id = ?
+        ''', (is_public, build_id, user_id))
+        
+        success = cursor.rowcount > 0
+        conn.commit()
+        conn.close()
+        
+        return success
+        
+    except Exception as e:
+        print(f"Ошибка обновления видимости билда: {e}")
+        return False
+
+
+def delete_build(db_path: str, build_id: int, user_id: int) -> bool:
+    """
+    Удаляет билд из базы данных.
+    
+    Args:
+        db_path: Путь к файлу базы данных
+        build_id: ID билда
+        user_id: ID пользователя (для проверки прав)
+    
+    Returns:
+        True при успешном удалении, иначе False
+    """
+    try:
+        if not os.path.exists(db_path):
+            return False
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            DELETE FROM builds 
+            WHERE build_id = ? AND user_id = ?
+        ''', (build_id, user_id))
+        
+        success = cursor.rowcount > 0
+        conn.commit()
+        conn.close()
+        
+        return success
+        
+    except Exception as e:
+        print(f"Ошибка удаления билда: {e}")
+        return False
 
 

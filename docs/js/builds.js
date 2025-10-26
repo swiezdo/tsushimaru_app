@@ -1,10 +1,8 @@
 // builds.js
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
-import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate, safeLocalStorageGet, safeLocalStorageSet } from './utils.js';
-
-const LS_KEY_BUILDS      = 'tsu_builds_v1';
-const LS_KEY_PUB_BUILDS  = 'tsu_builds_public_v1';
+import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate } from './utils.js';
+import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, API_BASE } from './api.js';
 
 const CLASS_VALUES = ['Самурай','Охотник','Убийца','Ронин'];
 const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма'];
@@ -118,35 +116,11 @@ function renderShotThumb(idx, src) {
   return btn;
 }
 
-// Storage
-function loadBuilds() {
-  return safeLocalStorageGet(LS_KEY_BUILDS, []);
-}
-
-function saveBuilds(arr) {
-  const success = safeLocalStorageSet(LS_KEY_BUILDS, arr || []);
-  if (!success) {
-    tg?.showPopup?.({
-      title: 'Хранилище заполнено',
-      message: 'Не удалось сохранить билд: лимит хранения исчерпан. Уменьшите размер скриншотов или удалите старые билды.',
-      buttons: [{ type:'ok' }]
-    });
-    hapticERR();
-  }
-  return success;
-}
-
-function loadPublicBuilds() {
-  return safeLocalStorageGet(LS_KEY_PUB_BUILDS, []);
-}
-
-function savePublicBuilds(arr) {
-  return safeLocalStorageSet(LS_KEY_PUB_BUILDS, arr || []);
-}
+// Storage - УДАЛЕНО, теперь работаем через API
 
 // Универсальная функция создания элемента билда
 function createBuildElement(build, isPublic = false) {
-  const row = createButton('button', 'build-item', '', { id: build.id });
+  const row = createButton('button', 'build-item', '', { id: build.build_id || build.id });
 
   const icon = document.createElement('div');
   icon.className = 'build-icon';
@@ -167,7 +141,7 @@ function createBuildElement(build, isPublic = false) {
   if (isPublic) {
     metaDiv.textContent = 'Автор: ' + (build.author || '—');
   } else {
-    const dateStr = formatDate(build.createdAt);
+    const dateStr = build.created_at ? formatDate(new Date(build.created_at * 1000)) : '—';
     metaDiv.textContent = dateStr === '—' ? '—' : 'Создан: ' + dateStr;
   }
   
@@ -178,8 +152,8 @@ function createBuildElement(build, isPublic = false) {
   row.appendChild(title);
   
   const clickHandler = isPublic ? 
-    () => { hapticTapSmart(); openPublicBuildDetail(build.id); } :
-    () => { hapticTapSmart(); openBuildDetail(build.id); };
+    () => { hapticTapSmart(); openPublicBuildDetail(build.build_id || build.id); } :
+    () => { hapticTapSmart(); openBuildDetail(build.build_id || build.id); };
   
   row.addEventListener('click', clickHandler);
   return row;
@@ -209,8 +183,12 @@ function renderBuildsList(container, items, emptyHint, isPublic = false) {
 
 // Рендер списков
 function renderMyBuilds() {
-  const items = loadBuilds();
-  renderBuildsList(myBuildsList, items, noBuildsHint, false);
+  getMyBuilds().then(builds => {
+    renderBuildsList(myBuildsList, builds, noBuildsHint, false);
+  }).catch(err => {
+    tg?.showAlert?.('Ошибка загрузки моих билдов: ' + err);
+    hapticERR();
+  });
 }
 // Функции фильтрации
 function filterBuilds(builds) {
@@ -271,10 +249,13 @@ function updateFilterButtons() {
 }
 
 function applyFilters() {
-  const allItems = loadPublicBuilds();
-  const filteredItems = filterBuilds(allItems);
-  
-  renderFilteredBuilds(filteredItems);
+  getPublicBuilds().then(builds => {
+    const filteredItems = filterBuilds(builds);
+    renderFilteredBuilds(filteredItems);
+  }).catch(err => {
+    tg?.showAlert?.('Ошибка загрузки публичных билдов: ' + err);
+    hapticERR();
+  });
 }
 
 function renderFilteredBuilds(items) {
@@ -403,22 +384,34 @@ function bindShotInput(input, idx){
   });
 }
 
-function isBuildPublished(myId) {
-  const pubs = loadPublicBuilds();
-  return pubs.some(p => String(p.originalId) === String(myId));
-}
 function updatePublishButton(myId) {
   if (!publishBuildBtn) return;
-  const published = isBuildPublished(myId);
-  if (published) {
-    publishBuildBtn.textContent = 'Скрыть';
-    publishBuildBtn.classList.remove('primary');
-    publishBuildBtn.classList.add('danger');
-  } else {
+  
+  // Получаем текущий статус билда из списка моих билдов
+  getMyBuilds().then(builds => {
+    const currentBuild = builds.find(b => (b.build_id || b.id) === myId);
+    if (!currentBuild) {
+      publishBuildBtn.textContent = 'Опубликовать';
+      publishBuildBtn.classList.add('primary');
+      publishBuildBtn.classList.remove('danger');
+      return;
+    }
+    
+    const isPublic = currentBuild.is_public === 1;
+    if (isPublic) {
+      publishBuildBtn.textContent = 'Скрыть';
+      publishBuildBtn.classList.remove('primary');
+      publishBuildBtn.classList.add('danger');
+    } else {
+      publishBuildBtn.textContent = 'Опубликовать';
+      publishBuildBtn.classList.add('primary');
+      publishBuildBtn.classList.remove('danger');
+    }
+  }).catch(err => {
     publishBuildBtn.textContent = 'Опубликовать';
     publishBuildBtn.classList.add('primary');
     publishBuildBtn.classList.remove('danger');
-  }
+  });
 }
 
 // Открытие карточек
@@ -443,62 +436,74 @@ function formatTopbarTitle(name, maxChars = 18) {
 }
 
 function openBuildDetail(id) {
-  const all = loadBuilds();
-  const b = all.find((x) => String(x.id) === String(id));
-  if (!b) { tg?.showAlert?.('Билд не найден'); return; }
-  currentBuildId = b.id;
+  getMyBuilds().then(builds => {
+    const b = builds.find((x) => String(x.build_id || x.id) === String(id));
+    if (!b) { tg?.showAlert?.('Билд не найден'); return; }
+    currentBuildId = b.build_id || b.id;
 
-  if (deleteBuildBtn) deleteBuildBtn.dataset.id = String(b.id);
+    if (deleteBuildBtn) deleteBuildBtn.dataset.id = String(b.build_id || b.id);
 
-  vd_class.textContent = b.class || '—';
-  vd_tags.textContent  = (b.tags && b.tags.length) ? b.tags.join(', ') : '—';
-  vd_desc.textContent  = b.desc || '—';
+    vd_class.textContent = b.class || '—';
+    vd_tags.textContent  = (b.tags && b.tags.length) ? b.tags.join(', ') : '—';
+    vd_desc.textContent  = b.description || b.desc || '—';
 
-  buildDetailShots.innerHTML = '';
-  (b.shots || []).forEach((src) => {
-    const wrap = document.createElement('button');
-    wrap.type = 'button';
-    wrap.className = 'shot-thumb';
-    const img = document.createElement('img');
-    img.src = src;
-    wrap.appendChild(img);
-    wrap.addEventListener('click', () => openLightbox(src));
-    buildDetailShots.appendChild(wrap);
+    buildDetailShots.innerHTML = '';
+    const shots = [b.photo_1, b.photo_2].filter(Boolean);
+    shots.forEach((photoPath) => {
+      const fullUrl = photoPath.startsWith('http') ? photoPath : `${API_BASE}${photoPath}`;
+      const wrap = document.createElement('button');
+      wrap.type = 'button';
+      wrap.className = 'shot-thumb';
+      const img = document.createElement('img');
+      img.src = fullUrl;
+      wrap.appendChild(img);
+      wrap.addEventListener('click', () => openLightbox(fullUrl));
+      buildDetailShots.appendChild(wrap);
+    });
+
+    updatePublishButton(b.build_id || b.id);
+    showScreen('buildDetail');
+    setTopbar(true, formatTopbarTitle(b.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
+  }).catch(err => {
+    tg?.showAlert?.('Ошибка загрузки моего билда: ' + err);
+    hapticERR();
   });
-
-  updatePublishButton(b.id);
-  showScreen('buildDetail');
-  setTopbar(true, formatTopbarTitle(b.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
 }
 function openPublicBuildDetail(pubId) {
-  const pubs = loadPublicBuilds();
-  const p = pubs.find(x => String(x.id) === String(pubId));
-  if (!p) { tg?.showAlert?.('Публикация не найдена'); return; }
+  getPublicBuilds().then(pubs => {
+    const p = pubs.find(x => String(x.build_id || x.id) === String(pubId));
+    if (!p) { tg?.showAlert?.('Публикация не найдена'); return; }
 
-  pd_class.textContent = p.class || '—';
-  pd_tags.textContent  = (p.tags && p.tags.length) ? p.tags.join(', ') : '—';
-  pd_desc.textContent  = p.desc || '—';
-  pd_author.textContent = p.author || '—';
+    pd_class.textContent = p.class || '—';
+    pd_tags.textContent  = (p.tags && p.tags.length) ? p.tags.join(', ') : '—';
+    pd_desc.textContent  = p.description || p.desc || '—';
+    pd_author.textContent = p.author || '—';
 
-  try {
-    const d = new Date(p.publishedAt);
-    pd_date.textContent = isNaN(d.getTime()) ? '—' : d.toLocaleString();
-  } catch { pd_date.textContent = '—'; }
+    try {
+      const d = new Date(p.created_at * 1000);
+      pd_date.textContent = isNaN(d.getTime()) ? '—' : d.toLocaleString('ru-RU');
+    } catch { pd_date.textContent = '—'; }
 
-  publicDetailShots.innerHTML = '';
-  (p.shots || []).forEach((src) => {
-    const wrap = document.createElement('button');
-    wrap.type = 'button';
-    wrap.className = 'shot-thumb';
-    const img = document.createElement('img');
-    img.src = src;
-    wrap.appendChild(img);
-    wrap.addEventListener('click', () => openLightbox(src));
-    publicDetailShots.appendChild(wrap);
+    publicDetailShots.innerHTML = '';
+    const shots = [p.photo_1, p.photo_2].filter(Boolean);
+    shots.forEach((photoPath) => {
+      const fullUrl = photoPath.startsWith('http') ? photoPath : `${API_BASE}${photoPath}`;
+      const wrap = document.createElement('button');
+      wrap.type = 'button';
+      wrap.className = 'shot-thumb';
+      const img = document.createElement('img');
+      img.src = fullUrl;
+      wrap.appendChild(img);
+      wrap.addEventListener('click', () => openLightbox(fullUrl));
+      publicDetailShots.appendChild(wrap);
+    });
+
+    showScreen('buildPublicDetail');
+    setTopbar(true, formatTopbarTitle(p.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
+  }).catch(err => {
+    tg?.showAlert?.('Ошибка загрузки публичной публикации: ' + err);
+    hapticERR();
   });
-
-  showScreen('buildPublicDetail');
-  setTopbar(true, formatTopbarTitle(p.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
 }
 
 // Лайтбокс
@@ -538,17 +543,15 @@ function tgConfirm(title, message) {
 }
 
 function deleteBuildById(id) {
-  const rest = loadBuilds().filter((b) => String(b.id) !== String(id));
-  if (!saveBuilds(rest)) return;
-
-  const pubs = loadPublicBuilds();
-  const pubsRest = pubs.filter(p => String(p.originalId) !== String(id));
-  savePublicBuilds(pubsRest);
-
-  renderMyBuilds();
-  renderAllBuilds();
-  tg?.showPopup?.({ title: 'Удалено', message: 'Билд удалён.', buttons: [{ type:'ok' }] });
-  showScreen('builds');
+  deleteBuild(id).then(() => {
+    updatePublishButton(id);
+    renderAllBuilds();
+    tg?.showPopup?.({ title: 'Удалено', message: 'Билд удалён.', buttons: [{ type:'ok' }] });
+    showScreen('builds');
+  }).catch(err => {
+    tg?.showAlert?.('Ошибка удаления билда: ' + err);
+    hapticERR();
+  });
 }
 
 // Инициализация
@@ -621,25 +624,41 @@ export function initBuilds() {
     if (!klass)  { shake(classChipsEl); hapticERR(); focusAndScrollIntoView(classChipsEl); return; }
     if (!shot1Data || !shot2Data) { shake(shotsTwo); hapticERR(); focusAndScrollIntoView(shotsTwo); return; }
 
-    const item = {
-      id: Date.now(),
+    // Конвертируем Data URL в Blob для отправки
+    const dataURLtoBlob = (dataurl) => {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], {type: mime});
+    };
+
+    const photo1Blob = dataURLtoBlob(shot1Data);
+    const photo2Blob = dataURLtoBlob(shot2Data);
+    photo1Blob.name = 'photo1.jpg';
+    photo2Blob.name = 'photo2.jpg';
+
+    createBuild({
       name,
       class: klass,
       tags,
-      desc,
-      shots: [shot1Data, shot2Data],
-      createdAt: new Date().toISOString()
-    };
+      description: desc,
+      photo_1: photo1Blob,
+      photo_2: photo2Blob
+    }).then(() => {
+      hapticOK();
+      tg?.showPopup?.({ title: 'Билд создан', message: 'Билд успешно сохранен!', buttons: [{ type:'ok' }] });
 
-    const all = loadBuilds();
-    all.push(item);
-    if (!saveBuilds(all)) { return; }
-
-    hapticOK();
-    tg?.showPopup?.({ title: 'Билд создан', message: 'Сохранено локально (макет, без сервера).', buttons: [{ type:'ok' }] });
-
-    renderMyBuilds();
-    showScreen('builds');
+      renderMyBuilds();
+      showScreen('builds');
+    }).catch(err => {
+      tg?.showAlert?.('Ошибка создания билда: ' + err);
+      hapticERR();
+    });
   });
 
   // Публикация/Скрытие — OK
@@ -647,40 +666,31 @@ export function initBuilds() {
     hapticOK();
     if (!currentBuildId) return;
 
-    const myAll = loadBuilds();
-    const me = myAll.find(x => String(x.id) === String(currentBuildId));
-    if (!me) return;
-
-    const pubs = loadPublicBuilds();
-    const already = pubs.find(p => String(p.originalId) === String(me.id));
-
-    if (already) {
-      const rest = pubs.filter(p => String(p.originalId) !== String(me.id));
-      savePublicBuilds(rest);
-      updatePublishButton(me.id);
-      renderAllBuilds();
-      tg?.showPopup?.({ title:'Скрыто', message:'Билд успешно снят с публикации.', buttons:[{type:'ok'}] });
-      return;
-    }
-
-    const uname = tg?.initDataUnsafe?.user?.username || 'Гость';
-    const pubItem = {
-      id: `pub_${Date.now()}`,
-      originalId: me.id,
-      name: me.name,
-      class: me.class,
-      tags: me.tags || [],
-      desc: me.desc || '',
-      shots: me.shots || [],
-      author: '@' + uname,
-      publishedAt: new Date().toISOString()
-    };
-
-    pubs.push(pubItem);
-    savePublicBuilds(pubs);
-    updatePublishButton(me.id);
-    renderAllBuilds();
-    tg?.showPopup?.({ title:'Опубликовано', message:'Билд успешно опубликован.', buttons:[{type:'ok'}] });
+    // Определяем текущий статус и переключаем его
+    getMyBuilds().then(builds => {
+      const currentBuild = builds.find(b => (b.build_id || b.id) === currentBuildId);
+      if (!currentBuild) return;
+      
+      const isCurrentlyPublic = currentBuild.is_public === 1;
+      const newStatus = !isCurrentlyPublic;
+      
+      toggleBuildPublish(currentBuildId, newStatus).then(() => {
+        updatePublishButton(currentBuildId);
+        renderMyBuilds();
+        renderAllBuilds();
+        tg?.showPopup?.({ 
+          title: newStatus ? 'Опубликовано' : 'Скрыто', 
+          message: newStatus ? 'Билд успешно опубликован.' : 'Билд успешно снят с публикации.', 
+          buttons:[{type:'ok'}] 
+        });
+      }).catch(err => {
+        tg?.showAlert?.('Ошибка публикации/скрытия билда: ' + err);
+        hapticERR();
+      });
+    }).catch(err => {
+      tg?.showAlert?.('Ошибка получения билда: ' + err);
+      hapticERR();
+    });
   });
 
   // Удаление — OK

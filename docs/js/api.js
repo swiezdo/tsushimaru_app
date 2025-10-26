@@ -184,5 +184,142 @@ export async function checkUserRegistration() {
     }
 }
 
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С БИЛДАМИ ==========
+
+// Создание билда
+export async function createBuild(buildData) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('name', buildData.name || '');
+        data.append('class_name', buildData.class || '');
+        data.append('tags', JSON.stringify(buildData.tags || []));
+        data.append('description', buildData.description || '');
+        
+        // Добавляем изображения
+        if (buildData.photo_1) data.append('photo_1', buildData.photo_1);
+        if (buildData.photo_2) data.append('photo_2', buildData.photo_2);
+
+        const url = `${API_BASE}/api/builds.create`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка создания билда:', error);
+        throw error;
+    }
+}
+
+// Получение своих билдов
+export async function getMyBuilds() {
+    try {
+        const data = await apiRequest('/api/builds.getMy');
+        return data.builds || [];
+    } catch (error) {
+        console.error('Ошибка получения билдов:', error);
+        throw error;
+    }
+}
+
+// Получение публичных билдов
+export async function getPublicBuilds() {
+    try {
+        const response = await fetch(`${API_BASE}/api/builds.getPublic`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+        const data = await response.json();
+        return data.builds || [];
+    } catch (error) {
+        console.error('Ошибка получения публичных билдов:', error);
+        throw error;
+    }
+}
+
+// Переключение публичности билда
+export async function toggleBuildPublish(buildId, isPublic) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('build_id', buildId);
+        data.append('is_public', isPublic ? 1 : 0);
+
+        const url = `${API_BASE}/api/builds.togglePublish`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка переключения публичности билда:', error);
+        throw error;
+    }
+}
+
+// Удаление билда
+export async function deleteBuild(buildId) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const url = `${API_BASE}/api/builds.delete?build_id=${buildId}`;
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка удаления билда:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };
