@@ -239,6 +239,12 @@ function updateFilterButtons() {
     tagsFilterBtn.textContent = count > 0 ? `Теги (${count})` : 'Теги';
     tagsFilterBtn.classList.toggle('active', count > 0);
   }
+  
+  // Показываем/скрываем кнопку "Сбросить" в зависимости от наличия активных фильтров
+  if (resetFiltersBtn) {
+    const hasActiveFilters = selectedClasses.length > 0 || selectedTags.length > 0;
+    resetFiltersBtn.classList.toggle('hidden', !hasActiveFilters);
+  }
 }
 
 function applyFilters() {
