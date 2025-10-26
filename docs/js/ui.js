@@ -122,43 +122,64 @@ export function focusAndScrollIntoView(el) {
 
 // ===== Закрытие клавиатуры на iOS при тапе вне поля ввода =====
 (function installIOSKeyboardClose() {
-  // Проверяем, что мы на iOS устройстве
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+  // Импортируем утилиты из telegram.js
+  const tg = window.Telegram?.WebApp;
+  
+  // Правильная проверка iOS устройства
+  const isIOS = (tg && tg.platform === 'ios') || 
+                /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   
   if (!isIOS) return; // Если не iOS, ничего не делаем
+  
+  // Функция для проверки, является ли элемент полем ввода
+  function isInputElement(element) {
+    if (!element) return false;
+    const tag = element.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA';
+  }
   
   // Функция для закрытия клавиатуры
   function dismissKeyboard() {
     // Убираем фокус с активного элемента
     const activeElement = document.activeElement;
-    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+    if (activeElement && isInputElement(activeElement)) {
       activeElement.blur();
     }
     
     // Дополнительно пытаемся закрыть клавиатуру через программный способ
-    // Это работает не всегда, но может помочь в некоторых случаях
     if (window.scrollTo) {
       window.scrollTo(0, window.scrollY);
     }
   }
   
-  // Обработчик тапа вне поля ввода
+  // Обработчик тапа вне поля ввода (touchend более надёжен на iOS)
+  document.addEventListener('touchend', function(event) {
+    const target = event.target;
+    
+    // Если тап не по полю ввода или его родительским элементам
+    if (!target.closest('INPUT') && !target.closest('TEXTAREA')) {
+      // Небольшая задержка для корректной работы
+      setTimeout(dismissKeyboard, 10);
+    }
+  });
+  
+  // Дополнительный обработчик для touchstart (без passive для лучшего контроля)
   document.addEventListener('touchstart', function(event) {
     const target = event.target;
     
     // Если тап не по полю ввода или его родительским элементам
-    if (!target.closest('input') && !target.closest('textarea')) {
+    if (!target.closest('INPUT') && !target.closest('TEXTAREA')) {
       dismissKeyboard();
     }
-  }, { passive: true });
+  });
   
-  // Дополнительный обработчик для клика мышью (если используется)
+  // Обработчик для клика мышью (если используется)
   document.addEventListener('click', function(event) {
     const target = event.target;
     
     // Если клик не по полю ввода или его родительским элементам
-    if (!target.closest('input') && !target.closest('textarea')) {
+    if (!target.closest('INPUT') && !target.closest('TEXTAREA')) {
       dismissKeyboard();
     }
   }, { passive: true });
@@ -184,7 +205,8 @@ export function focusAndScrollIntoView(el) {
       dismissKeyboard();
     } else if (event.key === 'Enter') {
       const activeElement = document.activeElement;
-      if (activeElement && activeElement.tagName === 'INPUT' && activeElement.type !== 'textarea') {
+      // Правильная проверка: для INPUT полей, но не для TEXTAREA
+      if (activeElement && activeElement.tagName === 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
         dismissKeyboard();
       }
     }
