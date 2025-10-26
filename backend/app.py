@@ -108,18 +108,19 @@ async def send_telegram_photo(chat_id: str, photo_path: str, caption: str = "", 
     
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     
-    data = aiohttp.FormData()
-    data.add_field('chat_id', chat_id)
-    data.add_field('photo', open(photo_path, 'rb'), filename='photo.jpg')
-    data.add_field('caption', caption)
-    data.add_field('parse_mode', 'HTML')
-    
-    if reply_markup:
-        data.add_field('reply_markup', json.dumps(reply_markup))
-    
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=data) as response:
-            return await response.json()
+    with open(photo_path, 'rb') as photo_file:
+        data = aiohttp.FormData()
+        data.add_field('chat_id', chat_id)
+        data.add_field('photo', photo_file, filename='photo.jpg')
+        data.add_field('caption', caption)
+        data.add_field('parse_mode', 'HTML')
+        
+        if reply_markup:
+            data.add_field('reply_markup', json.dumps(reply_markup))
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data=data) as response:
+                return await response.json()
 
 async def send_telegram_media_group(chat_id: str, photo_paths: List[str], caption: str = ""):
     """
@@ -136,19 +137,29 @@ async def send_telegram_media_group(chat_id: str, photo_paths: List[str], captio
             "media": f"attach://photo_{i}"
         })
     
-    data = aiohttp.FormData()
-    data.add_field('chat_id', chat_id)
-    data.add_field('media', json.dumps(media))
-    data.add_field('parse_mode', 'HTML')
-    
-    # Добавляем файлы
-    for i, photo_path in enumerate(photo_paths):
-        with open(photo_path, 'rb') as photo_file:
+    # Открываем все файлы
+    photo_files = []
+    try:
+        for photo_path in photo_paths:
+            photo_files.append(open(photo_path, 'rb'))
+        
+        data = aiohttp.FormData()
+        data.add_field('chat_id', chat_id)
+        data.add_field('media', json.dumps(media))
+        data.add_field('parse_mode', 'HTML')
+        
+        # Добавляем файлы в FormData
+        for i, photo_file in enumerate(photo_files):
             data.add_field(f'photo_{i}', photo_file, filename=f'photo_{i}.jpg')
-    
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=data) as response:
-            return await response.json()
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data=data) as response:
+                result = await response.json()
+                return result
+    finally:
+        # Закрываем все файлы
+        for photo_file in photo_files:
+            photo_file.close()
 
 # Проверяем обязательные переменные
 if not BOT_TOKEN:
