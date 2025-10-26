@@ -364,11 +364,10 @@ body {
   color: var(--tg-tx);
 }
 .build-title > div:first-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   width: 100%;
   text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .build-author {
   font-size: var(--fs-13);

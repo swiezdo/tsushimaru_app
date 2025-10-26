@@ -153,17 +153,7 @@ function renderMyBuilds() {
     
     const nameDiv = document.createElement('div');
     const name = (b.name || 'Без названия').toString();
-    nameDiv.textContent = name; // Не обрезаем, CSS сделает ellipsis
-    
-    // Адаптивный размер шрифта
-    const textLength = name.length;
-    if (textLength <= 15) {
-      nameDiv.style.fontSize = '16px';
-    } else if (textLength <= 22) {
-      nameDiv.style.fontSize = '14px';
-    } else {
-      nameDiv.style.fontSize = '12px';
-    }
+    nameDiv.textContent = name;
     
     const dateDiv = document.createElement('div');
     dateDiv.className = 'build-author';
@@ -207,17 +197,7 @@ function renderAllBuilds() {
     
     const nameDiv = document.createElement('div');
     const name = (p.name || 'Без названия').toString();
-    nameDiv.textContent = name; // Не обрезаем, CSS сделает ellipsis
-    
-    // Адаптивный размер шрифта
-    const textLength = name.length;
-    if (textLength <= 15) {
-      nameDiv.style.fontSize = '16px';
-    } else if (textLength <= 22) {
-      nameDiv.style.fontSize = '14px';
-    } else {
-      nameDiv.style.fontSize = '12px';
-    }
+    nameDiv.textContent = name;
     
     const authorDiv = document.createElement('div');
     authorDiv.className = 'build-author';
