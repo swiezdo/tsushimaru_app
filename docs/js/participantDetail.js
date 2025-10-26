@@ -77,6 +77,7 @@ async function renderParticipantTrophies(profile) {
             
             if (userTrophies.length === 0) {
                 noParticipantTrophiesHintEl?.classList.remove('hidden');
+                participantTrophiesListEl.textContent = '—';
                 return;
             }
             
@@ -88,7 +89,7 @@ async function renderParticipantTrophies(profile) {
                 return trophy ? `${trophy.name || trophyId} ${trophy.emoji || ''}` : trophyId;
             });
             
-            participantTrophiesListEl.innerHTML = trophyNames.join('<br>');
+            participantTrophiesListEl.textContent = trophyNames.join('\n');
         }
         
     } catch (error) {
