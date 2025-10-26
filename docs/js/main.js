@@ -64,7 +64,7 @@ async function requireRegistration(callback) {
       message: "Эти функции доступны только зарегистрированным пользователям",
       buttons: [
         { id: "cancel", type: "default", text: "Ок" },
-        { id: "register", type: "ok", text: "Создать профиль" }
+        { id: "register", type: "default", text: "Создать профиль" }
       ]
     }, (buttonId) => {
       if (buttonId === "register") {
