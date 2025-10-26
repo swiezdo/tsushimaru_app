@@ -183,7 +183,16 @@ function renderAllBuilds() {
     title.className = 'build-title';
     const name = (p.name || 'Без названия').toString();
     const safeName = name.length > 20 ? (name.slice(0, 20) + '…') : name;
-    title.textContent = safeName;
+    
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = safeName;
+    
+    const authorSpan = document.createElement('span');
+    authorSpan.className = 'build-author';
+    authorSpan.textContent = 'Автор: ' + (p.author || '—');
+    
+    title.appendChild(nameSpan);
+    title.appendChild(authorSpan);
 
     row.appendChild(icon);
     row.appendChild(title);
