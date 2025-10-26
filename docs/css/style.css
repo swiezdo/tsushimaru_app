@@ -368,10 +368,12 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
+  text-align: left;
 }
 .build-author {
   font-size: var(--fs-13);
   color: var(--muted);
+  text-align: left;
 }
 .muted { color: var(--tg-hint); font-size: var(--fs-14); }
 

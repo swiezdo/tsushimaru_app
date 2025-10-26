@@ -161,8 +161,6 @@ function renderMyBuilds() {
       nameDiv.style.fontSize = '16px';
     } else if (textLength <= 22) {
       nameDiv.style.fontSize = '14px';
-    } else if (textLength <= 26) {
-      nameDiv.style.fontSize = '13px';
     } else {
       nameDiv.style.fontSize = '12px';
     }
@@ -217,8 +215,6 @@ function renderAllBuilds() {
       nameDiv.style.fontSize = '16px';
     } else if (textLength <= 22) {
       nameDiv.style.fontSize = '14px';
-    } else if (textLength <= 26) {
-      nameDiv.style.fontSize = '13px';
     } else {
       nameDiv.style.fontSize = '12px';
     }
@@ -454,7 +450,7 @@ export function initBuilds() {
     e.preventDefault();
 
     let name = (buildNameEl?.value || '').trim();
-    if (name.length > 30) name = name.slice(0, 30);
+    if (name.length > 26) name = name.slice(0, 26);
 
     const klass = activeValues(classChipsEl)[0] || '';
     const tags  = activeValues(tagsChipsEl);
