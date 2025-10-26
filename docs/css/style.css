@@ -587,16 +587,16 @@ html.tg .only-browser { display: none; }
 
 .trophy-progress-bar {
   flex: 1;
-  height: 8px;
+  height: 16px;
   background-color: var(--stroke);
-  border-radius: 4px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
 .trophy-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--accent), #2ea6ff);
-  border-radius: 4px;
+  border-radius: 8px;
   transition: width 0.3s ease;
   width: 0%;
 }
