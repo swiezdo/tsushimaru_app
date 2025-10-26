@@ -17,7 +17,7 @@ import re
 
 # Импортируем наши модули
 from security import validate_init_data, get_user_id_from_init_data
-from db import init_db, get_user, upsert_user, create_build, get_build, get_user_builds, get_public_builds, update_build_visibility, delete_build
+from db import init_db, get_user, upsert_user, create_build, get_build, get_user_builds, update_build_visibility, delete_build
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -426,11 +426,12 @@ async def get_my_builds(user_id: int = Depends(get_current_user)):
 
 
 @app.get("/api/builds.getPublic")
-async def get_public_builds():
+async def get_public_builds_endpoint():
     """
     Получает все публичные билды.
     """
-    builds = get_public_builds(DB_PATH)
+    from db import get_public_builds as db_get_public_builds
+    builds = db_get_public_builds(DB_PATH)
     return {
         "status": "ok",
         "builds": builds
