@@ -395,11 +395,71 @@ body {
 .lightbox {
   position: fixed; inset: 0; background: rgba(0, 0, 0, .85);
   display: flex; align-items: center; justify-content: center; z-index: 9999;
+  overflow: hidden;
+  cursor: grab;
 }
+.lightbox:active { cursor: grabbing; }
 .lightbox img {
   max-width: 92vw; max-height: 88vh; border-radius: var(--radius-md); border: 1px solid var(--color-border);
+  transition: transform 0.2s ease-out;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform-origin: center center;
 }
 .lightbox.hidden { display: none !important; }
+
+/* Контролы масштабирования */
+.lightbox-controls {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  gap: var(--space-2);
+  z-index: 10000;
+}
+
+.lightbox-control-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--color-border);
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-16);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.lightbox-control-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.lightbox-control-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Индикатор масштаба */
+.lightbox-scale-indicator {
+  position: absolute;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--fg);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-14);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox-scale-indicator.show {
+  opacity: 1;
+}
 
 /* ========== BUILD DETAIL SCREENS ========== */
 #buildDetailScreen .profile-grid,

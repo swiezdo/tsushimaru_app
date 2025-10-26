@@ -506,19 +506,182 @@ function openPublicBuildDetail(pubId) {
   });
 }
 
-// Лайтбокс
+// Лайтбокс с поддержкой масштабирования
 const lightbox = $('lightbox');
 const lightboxImg = $('lightboxImg');
+const lightboxZoomIn = $('lightboxZoomIn');
+const lightboxZoomOut = $('lightboxZoomOut');
+const lightboxReset = $('lightboxReset');
+const lightboxScaleIndicator = $('lightboxScaleIndicator');
+
+// Состояние масштабирования
+let currentScale = 1;
+let minScale = 0.5;
+let maxScale = 5;
+let isDragging = false;
+let dragStart = { x: 0, y: 0 };
+let imageOffset = { x: 0, y: 0 };
+let lastTouchDistance = 0;
+
+function updateImageTransform() {
+  if (!lightboxImg) return;
+  
+  const translateX = imageOffset.x;
+  const translateY = imageOffset.y;
+  
+  lightboxImg.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
+  
+  // Обновляем индикатор масштаба
+  if (lightboxScaleIndicator) {
+    lightboxScaleIndicator.textContent = Math.round(currentScale * 100) + '%';
+    
+    // Показываем индикатор при изменении масштаба
+    lightboxScaleIndicator.classList.add('show');
+    clearTimeout(lightboxScaleIndicator.hideTimeout);
+    lightboxScaleIndicator.hideTimeout = setTimeout(() => {
+      lightboxScaleIndicator.classList.remove('show');
+    }, 1500);
+  }
+}
+
+function resetImageTransform() {
+  currentScale = 1;
+  imageOffset = { x: 0, y: 0 };
+  updateImageTransform();
+}
+
+function zoomImage(delta) {
+  const newScale = Math.max(minScale, Math.min(maxScale, currentScale + delta));
+  if (newScale !== currentScale) {
+    currentScale = newScale;
+    updateImageTransform();
+  }
+}
+
+function handleDoubleTap(event) {
+  event.preventDefault();
+  
+  if (currentScale > 1) {
+    resetImageTransform();
+  } else {
+    currentScale = 2;
+    updateImageTransform();
+  }
+}
+
+function handleTouchStart(event) {
+  if (event.touches.length === 1) {
+    // Одиночное касание - начало перетаскивания
+    isDragging = true;
+    const touch = event.touches[0];
+    dragStart = { x: touch.clientX, y: touch.clientY };
+  } else if (event.touches.length === 2) {
+    // Двойное касание - начало масштабирования
+    isDragging = false;
+    const touch1 = event.touches[0];
+    const touch2 = event.touches[1];
+    lastTouchDistance = Math.sqrt(
+      Math.pow(touch2.clientX - touch1.clientX, 2) + 
+      Math.pow(touch2.clientY - touch1.clientY, 2)
+    );
+  }
+}
+
+function handleTouchMove(event) {
+  event.preventDefault();
+  
+  if (event.touches.length === 1 && isDragging && currentScale > 1) {
+    // Перетаскивание
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - dragStart.x;
+    const deltaY = touch.clientY - dragStart.y;
+    
+    imageOffset.x += deltaX / currentScale;
+    imageOffset.y += deltaY / currentScale;
+    
+    dragStart = { x: touch.clientX, y: touch.clientY };
+    updateImageTransform();
+  } else if (event.touches.length === 2) {
+    // Масштабирование жестом
+    const touch1 = event.touches[0];
+    const touch2 = event.touches[1];
+    const currentDistance = Math.sqrt(
+      Math.pow(touch2.clientX - touch1.clientX, 2) + 
+      Math.pow(touch2.clientY - touch1.clientY, 2)
+    );
+    
+    if (lastTouchDistance > 0) {
+      const scaleChange = currentDistance / lastTouchDistance;
+      const newScale = Math.max(minScale, Math.min(maxScale, currentScale * scaleChange));
+      
+      if (newScale !== currentScale) {
+        currentScale = newScale;
+        updateImageTransform();
+      }
+    }
+    
+    lastTouchDistance = currentDistance;
+  }
+}
+
+function handleTouchEnd(event) {
+  isDragging = false;
+  lastTouchDistance = 0;
+}
+
 function openLightbox(src) {
   if (!lightbox || !lightboxImg) return;
+  
   lightboxImg.src = src;
   lightbox.classList.remove('hidden');
+  
+  // Сбрасываем состояние при открытии
+  resetImageTransform();
+  
+  // Добавляем обработчики событий
+  lightboxImg.addEventListener('dblclick', handleDoubleTap);
+  lightboxImg.addEventListener('touchstart', handleTouchStart, { passive: false });
+  lightboxImg.addEventListener('touchmove', handleTouchMove, { passive: false });
+  lightboxImg.addEventListener('touchend', handleTouchEnd);
 }
+
 function closeLightbox() {
   if (!lightbox) return;
+  
   lightbox.classList.add('hidden');
+  
+  // Удаляем обработчики событий
+  lightboxImg.removeEventListener('dblclick', handleDoubleTap);
+  lightboxImg.removeEventListener('touchstart', handleTouchStart);
+  lightboxImg.removeEventListener('touchmove', handleTouchMove);
+  lightboxImg.removeEventListener('touchend', handleTouchEnd);
+  
+  // Сбрасываем состояние
+  resetImageTransform();
 }
-lightbox?.addEventListener('click', closeLightbox);
+
+// Обработчики кнопок управления
+lightboxZoomIn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  zoomImage(0.5);
+});
+
+lightboxZoomOut?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  zoomImage(-0.5);
+});
+
+lightboxReset?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  resetImageTransform();
+});
+
+// Закрытие лайтбокса при клике на фон
+lightbox?.addEventListener('click', (e) => {
+  if (e.target === lightbox) {
+    closeLightbox();
+  }
+});
 
 // Подтверждение
 function tgConfirm(title, message) {

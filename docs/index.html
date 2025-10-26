@@ -418,6 +418,18 @@
     <!-- ====== LIGHTBOX ====== -->
     <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true">
       <img id="lightboxImg" alt="Просмотр изображения" />
+      
+      <!-- Контролы масштабирования -->
+      <div class="lightbox-controls">
+        <button type="button" class="lightbox-control-btn" id="lightboxZoomOut" title="Уменьшить">−</button>
+        <button type="button" class="lightbox-control-btn" id="lightboxZoomIn" title="Увеличить">+</button>
+        <button type="button" class="lightbox-control-btn" id="lightboxReset" title="Сбросить масштаб">⌂</button>
+      </div>
+      
+      <!-- Индикатор масштаба -->
+      <div class="lightbox-scale-indicator" id="lightboxScaleIndicator">
+        100%
+      </div>
     </div>
 
     <!-- ====== FILTER MODAL ====== -->
