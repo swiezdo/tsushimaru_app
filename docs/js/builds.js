@@ -509,10 +509,6 @@ function openPublicBuildDetail(pubId) {
 // Лайтбокс с поддержкой масштабирования
 const lightbox = $('lightbox');
 const lightboxImg = $('lightboxImg');
-const lightboxZoomIn = $('lightboxZoomIn');
-const lightboxZoomOut = $('lightboxZoomOut');
-const lightboxReset = $('lightboxReset');
-const lightboxScaleIndicator = $('lightboxScaleIndicator');
 
 // Состояние масштабирования
 let currentScale = 1;
@@ -530,32 +526,12 @@ function updateImageTransform() {
   const translateY = imageOffset.y;
   
   lightboxImg.style.transform = `scale(${currentScale}) translate(${translateX}px, ${translateY}px)`;
-  
-  // Обновляем индикатор масштаба
-  if (lightboxScaleIndicator) {
-    lightboxScaleIndicator.textContent = Math.round(currentScale * 100) + '%';
-    
-    // Показываем индикатор при изменении масштаба
-    lightboxScaleIndicator.classList.add('show');
-    clearTimeout(lightboxScaleIndicator.hideTimeout);
-    lightboxScaleIndicator.hideTimeout = setTimeout(() => {
-      lightboxScaleIndicator.classList.remove('show');
-    }, 1500);
-  }
 }
 
 function resetImageTransform() {
   currentScale = 1;
   imageOffset = { x: 0, y: 0 };
   updateImageTransform();
-}
-
-function zoomImage(delta) {
-  const newScale = Math.max(minScale, Math.min(maxScale, currentScale + delta));
-  if (newScale !== currentScale) {
-    currentScale = newScale;
-    updateImageTransform();
-  }
 }
 
 function handleDoubleTap(event) {
@@ -659,22 +635,6 @@ function closeLightbox() {
   // Сбрасываем состояние
   resetImageTransform();
 }
-
-// Обработчики кнопок управления
-lightboxZoomIn?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  zoomImage(0.5);
-});
-
-lightboxZoomOut?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  zoomImage(-0.5);
-});
-
-lightboxReset?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  resetImageTransform();
-});
 
 // Закрытие лайтбокса при клике на фон
 lightbox?.addEventListener('click', (e) => {
