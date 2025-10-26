@@ -198,9 +198,76 @@
         <!-- ====== ВСЕ БИЛДЫ ====== -->
         <section class="card">
           <h3 class="card-title">Все билды</h3>
+          
+          <!-- Фильтры -->
+          <div class="filters-container">
+            <span class="filter-label">Фильтры:</span>
+            <div class="filter-chips">
+              <button type="button" class="filter-chip" id="classFilterBtn">
+                Класс
+              </button>
+              <button type="button" class="filter-chip" id="tagsFilterBtn">
+                Теги
+              </button>
+            </div>
+            <button type="button" class="reset-filters-btn" id="resetFiltersBtn">
+              Сбросить фильтры
+            </button>
+          </div>
+          
+          <!-- Выпадающие списки фильтров -->
+          <div class="filter-dropdown" id="classDropdown">
+            <div class="filter-options">
+              <label class="filter-option">
+                <input type="checkbox" value="Самурай">
+                <span>Самурай</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" value="Охотник">
+                <span>Охотник</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" value="Убийца">
+                <span>Убийца</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" value="Ронин">
+                <span>Ронин</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="filter-dropdown" id="tagsDropdown">
+            <div class="filter-options">
+              <label class="filter-option">
+                <input type="checkbox" value="HellMode">
+                <span>HellMode</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" value="Спидран">
+                <span>Спидран</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" value="Соло">
+                <span>Соло</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" value="Сюжет">
+                <span>Сюжет</span>
+              </label>
+              <label class="filter-option">
+                <input type="checkbox" value="Соперники">
+                <span>Соперники</span>
+              </label>
+            </div>
+          </div>
+          
           <div id="allBuildsList" class="list-builds"></div>
           <div id="noAllBuildsHint" class="hint muted hidden" style="margin-top: 8px">
             Публикаций пока нет.
+          </div>
+          <div id="noFilteredBuildsHint" class="hint muted hidden" style="margin-top: 8px">
+            Билды не найдены.
           </div>
         </section>
       </section>

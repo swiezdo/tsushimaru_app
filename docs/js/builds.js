@@ -54,10 +54,24 @@ const publicDetailShots = $('publicDetailShots');
 // Списки «Все билды»
 const allBuildsList   = $('allBuildsList');
 const noAllBuildsHint = $('noAllBuildsHint');
+const noFilteredBuildsHint = $('noFilteredBuildsHint');
+
+// Элементы фильтров
+const classFilterBtn = $('classFilterBtn');
+const tagsFilterBtn = $('tagsFilterBtn');
+const resetFiltersBtn = $('resetFiltersBtn');
+const classDropdown = $('classDropdown');
+const tagsDropdown = $('tagsDropdown');
 
 let currentBuildId = null;
 let shot1Data = null;
 let shot2Data = null;
+
+// Состояние фильтров
+let selectedClasses = [];
+let selectedTags = [];
+let isClassDropdownOpen = false;
+let isTagsDropdownOpen = false;
 
 async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
   return new Promise((resolve, reject) => {
@@ -174,11 +188,81 @@ function renderMyBuilds() {
     myBuildsList.appendChild(row);
   });
 }
-function renderAllBuilds() {
-  const items = loadPublicBuilds();
+// Функции фильтрации
+function filterBuilds(builds) {
+  return builds.filter(build => {
+    // Проверка классов (OR внутри категории)
+    const classMatch = selectedClasses.length === 0 || 
+      selectedClasses.includes(build.class);
+    
+    // Проверка тегов (OR внутри категории)
+    const tagsMatch = selectedTags.length === 0 || 
+      (build.tags && build.tags.some(tag => selectedTags.includes(tag)));
+    
+    // AND между категориями
+    return classMatch && tagsMatch;
+  });
+}
+
+function updateFilterSelection(type, value) {
+  if (type === 'class') {
+    const index = selectedClasses.indexOf(value);
+    if (index > -1) {
+      selectedClasses.splice(index, 1);
+    } else {
+      selectedClasses.push(value);
+    }
+  } else if (type === 'tags') {
+    const index = selectedTags.indexOf(value);
+    if (index > -1) {
+      selectedTags.splice(index, 1);
+    } else {
+      selectedTags.push(value);
+    }
+  }
+  
+  updateFilterButtons();
+  applyFilters();
+}
+
+function updateFilterButtons() {
+  // Обновляем текст кнопок с количеством выбранных элементов
+  if (classFilterBtn) {
+    const count = selectedClasses.length;
+    classFilterBtn.textContent = count > 0 ? `Класс (${count})` : 'Класс';
+    classFilterBtn.classList.toggle('active', count > 0);
+  }
+  
+  if (tagsFilterBtn) {
+    const count = selectedTags.length;
+    tagsFilterBtn.textContent = count > 0 ? `Теги (${count})` : 'Теги';
+    tagsFilterBtn.classList.toggle('active', count > 0);
+  }
+}
+
+function applyFilters() {
+  const allItems = loadPublicBuilds();
+  const filteredItems = filterBuilds(allItems);
+  
+  renderFilteredBuilds(filteredItems);
+}
+
+function renderFilteredBuilds(items) {
   allBuildsList.innerHTML = '';
-  if (!items.length) { noAllBuildsHint.classList.remove('hidden'); return; }
+  
+  // Скрываем все подсказки
   noAllBuildsHint.classList.add('hidden');
+  noFilteredBuildsHint.classList.add('hidden');
+  
+  if (!items.length) {
+    // Показываем соответствующую подсказку
+    if (selectedClasses.length > 0 || selectedTags.length > 0) {
+      noFilteredBuildsHint.classList.remove('hidden');
+    } else {
+      noAllBuildsHint.classList.remove('hidden');
+    }
+    return;
+  }
 
   items.slice().reverse().forEach((p) => {
     const row = document.createElement('button');
@@ -212,6 +296,67 @@ function renderAllBuilds() {
     row.addEventListener('click', () => { hapticTapSmart(); openPublicBuildDetail(p.id); });
     allBuildsList.appendChild(row);
   });
+}
+
+function renderAllBuilds() {
+  applyFilters();
+}
+
+// Управление выпадающими списками
+function toggleFilterDropdown(type) {
+  if (type === 'class') {
+    isClassDropdownOpen = !isClassDropdownOpen;
+    isTagsDropdownOpen = false;
+    
+    if (classDropdown) {
+      classDropdown.classList.toggle('open', isClassDropdownOpen);
+    }
+    if (tagsDropdown) {
+      tagsDropdown.classList.remove('open');
+    }
+  } else if (type === 'tags') {
+    isTagsDropdownOpen = !isTagsDropdownOpen;
+    isClassDropdownOpen = false;
+    
+    if (tagsDropdown) {
+      tagsDropdown.classList.toggle('open', isTagsDropdownOpen);
+    }
+    if (classDropdown) {
+      classDropdown.classList.remove('open');
+    }
+  }
+}
+
+function closeAllDropdowns() {
+  isClassDropdownOpen = false;
+  isTagsDropdownOpen = false;
+  
+  if (classDropdown) {
+    classDropdown.classList.remove('open');
+  }
+  if (tagsDropdown) {
+    tagsDropdown.classList.remove('open');
+  }
+}
+
+function resetFilters() {
+  selectedClasses = [];
+  selectedTags = [];
+  
+  // Сбрасываем чекбоксы
+  if (classDropdown) {
+    const checkboxes = classDropdown.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = false);
+  }
+  
+  if (tagsDropdown) {
+    const checkboxes = tagsDropdown.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = false);
+  }
+  
+  updateFilterButtons();
+  applyFilters();
+  closeAllDropdowns();
 }
 
 // Создание билда
@@ -544,6 +689,58 @@ export function initBuilds() {
     const ok = await tgConfirm('Удалить билд', 'Вы уверены, что хотите удалить этот билд?');
     if (!ok) return;
     deleteBuildById(String(id));
+  });
+
+  // Обработчики фильтров
+  if (classFilterBtn) {
+    classFilterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      hapticTapSmart();
+      toggleFilterDropdown('class');
+    });
+  }
+  
+  if (tagsFilterBtn) {
+    tagsFilterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      hapticTapSmart();
+      toggleFilterDropdown('tags');
+    });
+  }
+  
+  if (resetFiltersBtn) {
+    resetFiltersBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      resetFilters();
+    });
+  }
+  
+  // Обработчики чекбоксов в выпадающих списках
+  if (classDropdown) {
+    classDropdown.addEventListener('change', (e) => {
+      if (e.target.type === 'checkbox') {
+        hapticTapSmart();
+        updateFilterSelection('class', e.target.value);
+      }
+    });
+  }
+  
+  if (tagsDropdown) {
+    tagsDropdown.addEventListener('change', (e) => {
+      if (e.target.type === 'checkbox') {
+        hapticTapSmart();
+        updateFilterSelection('tags', e.target.value);
+      }
+    });
+  }
+  
+  // Закрытие выпадающих списков при клике вне их
+  document.addEventListener('click', (e) => {
+    const isFilterElement = e.target.closest('.filters-container') || 
+                           e.target.closest('.filter-dropdown');
+    if (!isFilterElement) {
+      closeAllDropdowns();
+    }
   });
 
   renderMyBuilds();
