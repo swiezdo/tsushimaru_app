@@ -368,6 +368,8 @@ body {
   text-align: left;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  hyphens: none;
+  white-space: pre-line;
 }
 .build-author {
   font-size: var(--fs-13);

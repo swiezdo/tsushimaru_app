@@ -152,7 +152,19 @@ function renderMyBuilds() {
     title.className = 'build-title';
     
     const nameDiv = document.createElement('div');
-    const name = (b.name || 'Без названия').toString();
+    let name = (b.name || 'Без названия').toString();
+    
+    // Защита от длинных слов без пробелов: если есть слово длиннее 18 символов, добавляем перенос
+    const words = name.split(/(\s+)/);
+    for (let i = 0; i < words.length; i += 2) { // i+=2 чтобы пропускать пробелы
+      if (words[i].length > 18) {
+        const part1 = words[i].substring(0, 18);
+        const part2 = words[i].substring(18);
+        words[i] = part1 + '-\n' + part2;
+      }
+    }
+    name = words.join('');
+    
     nameDiv.textContent = name;
     
     const dateDiv = document.createElement('div');
@@ -196,7 +208,19 @@ function renderAllBuilds() {
     title.className = 'build-title';
     
     const nameDiv = document.createElement('div');
-    const name = (p.name || 'Без названия').toString();
+    let name = (p.name || 'Без названия').toString();
+    
+    // Защита от длинных слов без пробелов: если есть слово длиннее 18 символов, добавляем перенос
+    const words = name.split(/(\s+)/);
+    for (let i = 0; i < words.length; i += 2) { // i+=2 чтобы пропускать пробелы
+      if (words[i].length > 18) {
+        const part1 = words[i].substring(0, 18);
+        const part2 = words[i].substring(18);
+        words[i] = part1 + '-\n' + part2;
+      }
+    }
+    name = words.join('');
+    
     nameDiv.textContent = name;
     
     const authorDiv = document.createElement('div');
@@ -445,7 +469,7 @@ export function initBuilds() {
     e.preventDefault();
 
     let name = (buildNameEl?.value || '').trim();
-    if (name.length > 26) name = name.slice(0, 26);
+    if (name.length > 40) name = name.slice(0, 40);
 
     const klass = activeValues(classChipsEl)[0] || '';
     const tags  = activeValues(tagsChipsEl);
