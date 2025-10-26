@@ -7,7 +7,7 @@ const LS_KEY_BUILDS      = 'tsu_builds_v1';
 const LS_KEY_PUB_BUILDS  = 'tsu_builds_public_v1';
 
 const CLASS_VALUES = ['Самурай','Охотник','Убийца','Ронин'];
-const TAG_VALUES   = ['HellMode','Спидран','Соло','Сюжет','Соперники'];
+const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма'];
 
 const CLASS_ICON = {
   'Самурай':'./assets/icons/samurai.svg',
