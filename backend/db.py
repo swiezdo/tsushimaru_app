@@ -563,3 +563,44 @@ def add_trophy_to_user(db_path: str, user_id: int, trophy_id: str) -> bool:
         return False
 
 
+def get_all_users(db_path: str) -> List[Dict[str, Any]]:
+    """
+    Получает список всех пользователей из базы данных.
+    
+    Args:
+        db_path: Путь к файлу базы данных
+    
+    Returns:
+        Список словарей с данными пользователей (user_id и psn_id)
+    """
+    try:
+        if not os.path.exists(db_path):
+            return []
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT user_id, psn_id 
+            FROM users 
+            WHERE psn_id IS NOT NULL AND psn_id != ''
+            ORDER BY psn_id COLLATE NOCASE
+        ''')
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        users = []
+        for row in rows:
+            users.append({
+                'user_id': row[0],
+                'psn_id': row[1]
+            })
+        
+        return users
+        
+    except Exception as e:
+        print(f"Ошибка получения списка пользователей: {e}")
+        return []
+
+

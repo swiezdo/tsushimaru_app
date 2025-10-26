@@ -3,6 +3,7 @@ import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, applySafeInsets, screens } from './ui.js';
 import { initProfile } from './profile.js';
 import { initTrophies } from './trophies.js';
+import { initParticipants } from './participants.js';
 import { initBuilds } from './builds.js';
 import { checkUserRegistration } from './api.js';
 
@@ -45,6 +46,7 @@ function installBackButton() {
       'trophyDetail': 'trophies',
       'profile': 'home',
       'trophies': 'home',
+      'participants': 'home',
       'builds': 'home'
     };
     
@@ -84,6 +86,7 @@ function bindHomeButtons() {
   const map = [
     ['openProfileBtn', () => showScreen('profile')],
     ['trophiesBtn',    () => requireRegistration(() => showScreen('trophies'))],
+    ['participantsBtn', () => requireRegistration(() => showScreen('participants'))],
     ['buildsBtn',      () => requireRegistration(() => showScreen('builds'))],
   ];
   for (const [id, handler] of map) {
@@ -101,6 +104,7 @@ async function startApp() {
 
   initProfile();
   await initTrophies();
+  await initParticipants();
   initBuilds();
 
   showScreen('home');

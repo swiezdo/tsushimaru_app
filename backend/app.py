@@ -19,7 +19,7 @@ import re
 
 # Импортируем наши модули
 from security import validate_init_data, get_user_id_from_init_data
-from db import init_db, get_user, upsert_user, create_build, get_build, get_user_builds, update_build_visibility, delete_build, add_trophy_to_user
+from db import init_db, get_user, upsert_user, create_build, get_build, get_user_builds, update_build_visibility, delete_build, add_trophy_to_user, get_all_users
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -400,6 +400,21 @@ async def save_profile(
         )
 
     return {"status": "ok", "message": "Профиль успешно сохранен"}
+
+
+@app.get("/api/users.list")
+async def get_users_list(user_id: int = Depends(get_current_user)):
+    """
+    Получает список всех пользователей.
+    
+    Args:
+        user_id: ID пользователя (из dependency, для проверки авторизации)
+    
+    Returns:
+        JSON со списком пользователей (user_id и psn_id)
+    """
+    users = get_all_users(DB_PATH)
+    return {"users": users}
 
 
 @app.get("/api/stats")

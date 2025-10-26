@@ -371,5 +371,16 @@ export async function submitTrophyApplication(trophyId, photos, comment) {
     }
 }
 
+// Получение списка всех участников
+export async function fetchParticipants() {
+    try {
+        const data = await apiRequest('/api/users.list');
+        return data.users || [];
+    } catch (error) {
+        console.error('Ошибка получения списка участников:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };
