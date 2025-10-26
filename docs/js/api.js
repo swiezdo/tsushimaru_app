@@ -323,5 +323,47 @@ export async function deleteBuild(buildId) {
     }
 }
 
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С ТРОФЕЯМИ ==========
+
+// Отправка заявки на трофей
+export async function submitTrophyApplication(trophyId, photos, comment) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('trophy_id', trophyId);
+        data.append('comment', comment || '');
+        
+        // Добавляем изображения
+        photos.forEach(photo => {
+            data.append('photos', photo);
+        });
+
+        const url = `${API_BASE}/api/trophies.submit`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка отправки заявки на трофей:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };

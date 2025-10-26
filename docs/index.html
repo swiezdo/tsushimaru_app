@@ -141,16 +141,31 @@
           <h2 class="card-title">Ваши трофеи</h2>
           <div class="profile-grid">
             <div class="field span-2">
-              <label>Полученные трофеи</label>
-              <div class="value lines">Легенда Цусимы 🗡
-Легенда Эдзо 🏔</div>
+              <label>Прогресс</label>
+              <div class="trophy-progress-container">
+                <div class="trophy-progress-bar">
+                  <div class="trophy-progress-fill" id="trophyProgressFill"></div>
+                </div>
+                <div class="trophy-progress-text" id="trophyProgressText">0/0</div>
+              </div>
             </div>
           </div>
         </section>
 
         <section class="card">
-          <h2 class="card-title">Список трофеев</h2>
-          <div id="trophyList" class="list-buttons"></div>
+          <h2 class="card-title">Мои трофеи</h2>
+          <div id="obtainedTrophiesList" class="list-buttons"></div>
+          <div id="noObtainedTrophiesHint" class="hint muted hidden" style="margin-top: 8px">
+            У вас пока нет трофеев. Подайте заявку на получение!
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="card-title">Доступные трофеи</h2>
+          <div id="availableTrophiesList" class="list-buttons"></div>
+          <div id="noAvailableTrophiesHint" class="hint muted hidden" style="margin-top: 8px">
+            Поздравляем! Вы получили все трофеи! 🎉
+          </div>
         </section>
       </section>
 
@@ -161,12 +176,22 @@
           <ul id="trophyDesc" class="desc-list"></ul>
         </section>
 
-        <section class="card">
+        <!-- Карточка для полученного трофея -->
+        <section id="trophyObtainedCard" class="card hidden">
+          <h3 class="card-title">Трофей получен</h3>
+          <div class="trophy-obtained-message">
+            <div class="trophy-obtained-icon">✅</div>
+            <p>Поздравляем! Вы получили этот трофей.</p>
+          </div>
+        </section>
+
+        <!-- Карточка для подачи заявки -->
+        <section id="trophyApplicationCard" class="card">
           <h3 class="card-title">Отправить заявку</h3>
           <form id="proofForm" class="form">
             <div class="input">
-              <label for="proofFiles">Прикрепите скриншоты/видео</label>
-              <input id="proofFiles" type="file" multiple accept="image/*,video/*" style="display:none" />
+              <label for="proofFiles">Прикрепите скриншоты</label>
+              <input id="proofFiles" type="file" multiple accept="image/*" style="display:none" />
               <button type="button" id="proofAddBtn" class="fileline-btn" aria-label="Прикрепить файлы">＋ Прикрепить</button>
               <div id="filePreview" class="thumbs-row"></div>
             </div>

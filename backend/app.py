@@ -17,7 +17,7 @@ import re
 
 # Импортируем наши модули
 from security import validate_init_data, get_user_id_from_init_data
-from db import init_db, get_user, upsert_user, create_build, get_build, get_user_builds, update_build_visibility, delete_build
+from db import init_db, get_user, upsert_user, create_build, get_build, get_user_builds, update_build_visibility, delete_build, add_trophy_to_user
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -33,6 +33,82 @@ app = FastAPI(
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ALLOWED_ORIGIN = os.getenv("ALLOWED_ORIGIN")
 DB_PATH = os.getenv("DB_PATH", "/home/ubuntu/miniapp_api/app.db")
+
+# Переменные для системы трофеев
+TROPHY_GROUP_CHAT_ID = os.getenv("TROPHY_GROUP_CHAT_ID", "-1002348168326")
+TROPHY_GROUP_TOPIC_ID = os.getenv("TROPHY_GROUP_TOPIC_ID", "5675")
+
+# Функции для работы с Telegram Bot API
+async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None):
+    """
+    Отправляет сообщение в Telegram через Bot API.
+    """
+    import aiohttp
+    
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    
+    data = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML"
+    }
+    
+    if reply_markup:
+        data["reply_markup"] = json.dumps(reply_markup)
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data) as response:
+            return await response.json()
+
+async def send_telegram_photo(chat_id: str, photo_path: str, caption: str = "", reply_markup: dict = None):
+    """
+    Отправляет фотографию в Telegram через Bot API.
+    """
+    import aiohttp
+    
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+    
+    data = aiohttp.FormData()
+    data.add_field('chat_id', chat_id)
+    data.add_field('photo', open(photo_path, 'rb'), filename='photo.jpg')
+    data.add_field('caption', caption)
+    data.add_field('parse_mode', 'HTML')
+    
+    if reply_markup:
+        data.add_field('reply_markup', json.dumps(reply_markup))
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data=data) as response:
+            return await response.json()
+
+async def send_telegram_media_group(chat_id: str, photo_paths: List[str], caption: str = ""):
+    """
+    Отправляет группу фотографий в Telegram через Bot API.
+    """
+    import aiohttp
+    
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMediaGroup"
+    
+    media = []
+    for i, photo_path in enumerate(photo_paths):
+        media.append({
+            "type": "photo",
+            "media": f"attach://photo_{i}"
+        })
+    
+    data = aiohttp.FormData()
+    data.add_field('chat_id', chat_id)
+    data.add_field('media', json.dumps(media))
+    data.add_field('parse_mode', 'HTML')
+    
+    # Добавляем файлы
+    for i, photo_path in enumerate(photo_paths):
+        with open(photo_path, 'rb') as photo_file:
+            data.add_field(f'photo_{i}', photo_file, filename=f'photo_{i}.jpg')
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data=data) as response:
+            return await response.json()
 
 # Проверяем обязательные переменные
 if not BOT_TOKEN:
@@ -505,6 +581,319 @@ async def get_build_photo(build_id: int, photo_name: str):
     Возвращает изображение билда.
     """
     photo_path = os.path.join(os.path.dirname(DB_PATH), 'builds', str(build_id), photo_name)
+    
+    if not os.path.exists(photo_path):
+        raise HTTPException(
+            status_code=404,
+            detail="Изображение не найдено"
+        )
+    
+    return FileResponse(photo_path, media_type='image/jpeg')
+
+
+# ========== API ЭНДПОИНТЫ ДЛЯ ТРОФЕЕВ ==========
+
+@app.post("/api/trophies.submit")
+async def submit_trophy_application(
+    user_id: int = Depends(get_current_user),
+    trophy_id: str = Form(...),
+    comment: str = Form(""),
+    photos: List[UploadFile] = File(...)
+):
+    """
+    Отправляет заявку на получение трофея.
+    """
+    # Получаем профиль пользователя для получения psn_id
+    user_profile = get_user(DB_PATH, user_id)
+    if not user_profile:
+        raise HTTPException(
+            status_code=404,
+            detail="Профиль пользователя не найден"
+        )
+    
+    psn_id = user_profile.get('psn_id', '')
+    if not psn_id:
+        raise HTTPException(
+            status_code=400,
+            detail="PSN ID не указан в профиле"
+        )
+    
+    # Валидация trophy_id
+    if not trophy_id or not trophy_id.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="ID трофея обязателен"
+        )
+    
+    # Валидация количества фото
+    if not photos or len(photos) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Необходимо прикрепить хотя бы одно изображение"
+        )
+    
+    if len(photos) > 10:
+        raise HTTPException(
+            status_code=400,
+            detail="Можно прикрепить не более 10 изображений"
+        )
+    
+    # Проверяем что все файлы - изображения
+    for photo in photos:
+        if not photo.content_type or not photo.content_type.startswith('image/'):
+            raise HTTPException(
+                status_code=400,
+                detail="Разрешены только изображения"
+            )
+    
+    # Создаем директорию для заявки
+    trophies_dir = os.path.join(os.path.dirname(DB_PATH), 'trophies', str(user_id), trophy_id)
+    os.makedirs(trophies_dir, exist_ok=True)
+    
+    # Обрабатываем и сохраняем изображения
+    photo_paths = []
+    try:
+        for i, photo in enumerate(photos):
+            photo_path = os.path.join(trophies_dir, f'photo_{i+1}.jpg')
+            
+            # Открываем изображение через Pillow
+            image = Image.open(photo.file)
+            
+            # Конвертируем в RGB если нужно
+            if image.mode in ('RGBA', 'LA', 'P'):
+                background = Image.new('RGB', image.size, (255, 255, 255))
+                if image.mode == 'P':
+                    image = image.convert('RGBA')
+                background.paste(image, mask=image.split()[-1] if image.mode == 'RGBA' else None)
+                image = background
+            
+            # Сохраняем как JPEG
+            image.save(photo_path, 'JPEG', quality=85, optimize=True)
+            photo_paths.append(photo_path)
+            
+            # Возвращаем курсор файла
+            photo.file.seek(0)
+    
+    except Exception as e:
+        # Удаляем папку при ошибке
+        if os.path.exists(trophies_dir):
+            shutil.rmtree(trophies_dir)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка обработки изображений: {str(e)}"
+        )
+    
+    # Загружаем данные трофея из JSON
+    try:
+        trophies_json_path = os.path.join(os.path.dirname(DB_PATH), '..', 'docs', 'assets', 'data', 'trophies.json')
+        with open(trophies_json_path, 'r', encoding='utf-8') as f:
+            trophies_data = json.load(f)
+        
+        trophy_info = trophies_data.get(trophy_id, {})
+        trophy_name = trophy_info.get('name', trophy_id)
+        trophy_emoji = trophy_info.get('emoji', '🏆')
+        trophy_description = trophy_info.get('description', [])
+        
+    except Exception as e:
+        print(f"Ошибка загрузки данных трофея: {e}")
+        trophy_name = trophy_id
+        trophy_emoji = '🏆'
+        trophy_description = []
+    
+    # Формируем сообщение для группы
+    message_text = f"""🏆 <b>Новая заявка на трофей</b>
+
+👤 <b>Пользователь:</b> {psn_id}
+🏆 <b>Трофей:</b> {trophy_name} {trophy_emoji}
+
+📝 <b>Описание трофея:</b>
+"""
+    
+    for desc_line in trophy_description:
+        message_text += f"• {desc_line}\n"
+    
+    if comment.strip():
+        message_text += f"\n💬 <b>Комментарий:</b>\n{comment.strip()}"
+    
+    # Создаем inline кнопки
+    reply_markup = {
+        "inline_keyboard": [[
+            {
+                "text": "✅ Одобрить",
+                "callback_data": f"trophy_approve:{user_id}:{trophy_id}"
+            },
+            {
+                "text": "❌ Отклонить", 
+                "callback_data": f"trophy_reject:{user_id}:{trophy_id}"
+            }
+        ]]
+    }
+    
+    # Отправляем уведомление в группу
+    try:
+        if len(photo_paths) == 1:
+            # Одна фотография - отправляем как фото с подписью
+            await send_telegram_photo(
+                chat_id=TROPHY_GROUP_CHAT_ID,
+                photo_path=photo_paths[0],
+                caption=message_text,
+                reply_markup=reply_markup
+            )
+        else:
+            # Несколько фотографий - отправляем как медиагруппу
+            await send_telegram_media_group(
+                chat_id=TROPHY_GROUP_CHAT_ID,
+                photo_paths=photo_paths,
+                caption=message_text
+            )
+            
+            # Отправляем отдельное сообщение с кнопками
+            await send_telegram_message(
+                chat_id=TROPHY_GROUP_CHAT_ID,
+                text=f"Заявка от {psn_id} на трофей {trophy_name} {trophy_emoji}",
+                reply_markup=reply_markup
+            )
+    
+    except Exception as e:
+        print(f"Ошибка отправки уведомления в группу: {e}")
+        # Не прерываем выполнение, заявка уже сохранена
+    
+    return {
+        "status": "ok",
+        "message": "Заявка на трофей успешно отправлена"
+    }
+
+
+@app.post("/api/trophies.approve")
+async def approve_trophy_application(
+    user_id: int = Form(...),
+    trophy_id: str = Form(...)
+):
+    """
+    Одобряет заявку на трофей (вызывается ботом).
+    """
+    # Добавляем трофей пользователю
+    success = add_trophy_to_user(DB_PATH, user_id, trophy_id)
+    
+    if not success:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка добавления трофея пользователю"
+        )
+    
+    # Удаляем папку с заявкой
+    trophies_dir = os.path.join(os.path.dirname(DB_PATH), 'trophies', str(user_id), trophy_id)
+    if os.path.exists(trophies_dir):
+        try:
+            shutil.rmtree(trophies_dir)
+        except Exception as e:
+            print(f"Ошибка удаления папки заявки: {e}")
+    
+    # Загружаем данные трофея для уведомления
+    try:
+        trophies_json_path = os.path.join(os.path.dirname(DB_PATH), '..', 'docs', 'assets', 'data', 'trophies.json')
+        with open(trophies_json_path, 'r', encoding='utf-8') as f:
+            trophies_data = json.load(f)
+        
+        trophy_info = trophies_data.get(trophy_id, {})
+        trophy_name = trophy_info.get('name', trophy_id)
+        trophy_emoji = trophy_info.get('emoji', '🏆')
+        
+    except Exception as e:
+        print(f"Ошибка загрузки данных трофея: {e}")
+        trophy_name = trophy_id
+        trophy_emoji = '🏆'
+    
+    # Отправляем уведомление пользователю
+    message_text = f"""🎉 <b>Поздравляем!</b>
+
+Вы получили трофей <b>{trophy_name}</b> {trophy_emoji}
+
+Можете посмотреть его в мини-приложении Tsushima.Ru"""
+    
+    # Создаем кнопку для открытия мини-приложения
+    reply_markup = {
+        "inline_keyboard": [[
+            {
+                "text": "🏆 Открыть трофеи",
+                "web_app": {"url": f"{ALLOWED_ORIGIN}/docs/index.html#trophies"}
+            }
+        ]]
+    }
+    
+    try:
+        await send_telegram_message(
+            chat_id=str(user_id),
+            text=message_text,
+            reply_markup=reply_markup
+        )
+    except Exception as e:
+        print(f"Ошибка отправки уведомления пользователю: {e}")
+    
+    return {
+        "status": "ok",
+        "message": "Трофей успешно одобрен"
+    }
+
+
+@app.post("/api/trophies.reject")
+async def reject_trophy_application(
+    user_id: int = Form(...),
+    trophy_id: str = Form(...)
+):
+    """
+    Отклоняет заявку на трофей (вызывается ботом).
+    """
+    # Удаляем папку с заявкой
+    trophies_dir = os.path.join(os.path.dirname(DB_PATH), 'trophies', str(user_id), trophy_id)
+    if os.path.exists(trophies_dir):
+        try:
+            shutil.rmtree(trophies_dir)
+        except Exception as e:
+            print(f"Ошибка удаления папки заявки: {e}")
+    
+    # Загружаем данные трофея для уведомления
+    try:
+        trophies_json_path = os.path.join(os.path.dirname(DB_PATH), '..', 'docs', 'assets', 'data', 'trophies.json')
+        with open(trophies_json_path, 'r', encoding='utf-8') as f:
+            trophies_data = json.load(f)
+        
+        trophy_info = trophies_data.get(trophy_id, {})
+        trophy_name = trophy_info.get('name', trophy_id)
+        trophy_emoji = trophy_info.get('emoji', '🏆')
+        
+    except Exception as e:
+        print(f"Ошибка загрузки данных трофея: {e}")
+        trophy_name = trophy_id
+        trophy_emoji = '🏆'
+    
+    # Отправляем уведомление пользователю
+    message_text = f"""❌ <b>Заявка отклонена</b>
+
+Ваша заявка на трофей <b>{trophy_name}</b> {trophy_emoji} была отклонена.
+
+Попробуйте подать заявку снова с более качественными доказательствами."""
+    
+    try:
+        await send_telegram_message(
+            chat_id=str(user_id),
+            text=message_text
+        )
+    except Exception as e:
+        print(f"Ошибка отправки уведомления пользователю: {e}")
+    
+    return {
+        "status": "ok",
+        "message": "Заявка на трофей отклонена"
+    }
+
+
+@app.get("/trophies/{user_id}/{trophy_id}/{photo_name}")
+async def get_trophy_photo(user_id: int, trophy_id: str, photo_name: str):
+    """
+    Возвращает изображение заявки на трофей.
+    """
+    photo_path = os.path.join(os.path.dirname(DB_PATH), 'trophies', str(user_id), trophy_id, photo_name)
     
     if not os.path.exists(photo_path):
         raise HTTPException(

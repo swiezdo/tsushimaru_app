@@ -107,7 +107,7 @@ def get_user(db_path: str, user_id: int) -> Optional[Dict[str, Any]]:
         'modes': json.loads(row[4]) if row[4] else [],
         'goals': json.loads(row[5]) if row[5] else [],
         'difficulties': json.loads(row[6]) if row[6] else [],
-        'trophies': json.loads(row[7]) if row[7] else [],
+        'trophies': [t.strip() for t in row[7].split(',') if t.strip()] if row[7] else [],
         'updated_at': row[8]
     }
     
@@ -142,7 +142,8 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         modes_json = json.dumps(profile_data.get('modes', []))
         goals_json = json.dumps(profile_data.get('goals', []))
         difficulties_json = json.dumps(profile_data.get('difficulties', []))
-        trophies_json = json.dumps(profile_data.get('trophies', []))
+        # Трофеи сохраняем как строку через запятую
+        trophies_str = ','.join(profile_data.get('trophies', []))
         
         # Выполняем INSERT OR REPLACE
         cursor.execute('''
@@ -157,7 +158,7 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
             modes_json,
             goals_json,
             difficulties_json,
-            trophies_json,
+            trophies_str,
             current_time
         ))
         
@@ -495,6 +496,64 @@ def delete_build(db_path: str, build_id: int, user_id: int) -> bool:
         
     except Exception as e:
         print(f"Ошибка удаления билда: {e}")
+        return False
+
+
+def add_trophy_to_user(db_path: str, user_id: int, trophy_id: str) -> bool:
+    """
+    Добавляет трофей к списку трофеев пользователя.
+    
+    Args:
+        db_path: Путь к файлу базы данных
+        user_id: ID пользователя Telegram
+        trophy_id: ID трофея для добавления
+    
+    Returns:
+        True при успешном добавлении, иначе False
+    """
+    try:
+        if not os.path.exists(db_path):
+            return False
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Получаем текущий список трофеев
+        cursor.execute('SELECT trophies FROM users WHERE user_id = ?', (user_id,))
+        row = cursor.fetchone()
+        
+        if not row:
+            conn.close()
+            return False
+        
+        current_trophies = row[0] or ""
+        
+        # Разбиваем строку на список, добавляем новый трофей если его нет
+        trophy_list = [t.strip() for t in current_trophies.split(',') if t.strip()]
+        
+        if trophy_id not in trophy_list:
+            trophy_list.append(trophy_id)
+            new_trophies = ','.join(trophy_list)
+            
+            # Обновляем поле trophies
+            cursor.execute('''
+                UPDATE users 
+                SET trophies = ?, updated_at = ?
+                WHERE user_id = ?
+            ''', (new_trophies, int(time.time()), user_id))
+            
+            success = cursor.rowcount > 0
+            conn.commit()
+            conn.close()
+            
+            return success
+        else:
+            # Трофей уже есть
+            conn.close()
+            return True
+            
+    except Exception as e:
+        print(f"Ошибка добавления трофея пользователю: {e}")
         return False
 
 

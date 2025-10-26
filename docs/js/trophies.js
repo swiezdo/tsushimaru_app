@@ -1,45 +1,130 @@
 // trophies.js
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView } from './ui.js';
-import { shake, createFileKey, isImageFile, isVideoFile } from './utils.js';
+import { shake, createFileKey, isImageFile } from './utils.js';
+import { fetchProfile, submitTrophyApplication } from './api.js';
 
-const trophyListEl  = $('trophyList');
+// Элементы интерфейса
+const obtainedTrophiesListEl = $('obtainedTrophiesList');
+const availableTrophiesListEl = $('availableTrophiesList');
+const noObtainedTrophiesHintEl = $('noObtainedTrophiesHint');
+const noAvailableTrophiesHintEl = $('noAvailableTrophiesHint');
+const trophyProgressFillEl = $('trophyProgressFill');
+const trophyProgressTextEl = $('trophyProgressText');
+
 const trophyTitleEl = $('trophyTitle');
-const trophyDescEl  = $('trophyDesc');
+const trophyDescEl = $('trophyDesc');
+const trophyObtainedCardEl = $('trophyObtainedCard');
+const trophyApplicationCardEl = $('trophyApplicationCard');
 
-const proofFormEl     = $('proofForm');
-const proofFilesEl    = $('proofFiles');
-const proofSubmitBtn  = $('proofSubmitBtn');
-const commentEl       = $('commentText');
-const previewEl       = $('filePreview');
-const proofAddBtn     = $('proofAddBtn');
-const MAX_PROOF_FILES = 12;
+const proofFormEl = $('proofForm');
+const proofFilesEl = $('proofFiles');
+const proofSubmitBtn = $('proofSubmitBtn');
+const commentEl = $('commentText');
+const previewEl = $('filePreview');
+const proofAddBtn = $('proofAddBtn');
+const MAX_PROOF_FILES = 10;
 
 const TROPHIES_URL = './assets/data/trophies.json';
 
 let TROPHIES = null;
+let USER_PROFILE = null;
+let CURRENT_TROPHY_ID = null;
 
 async function loadTrophies() {
   if (TROPHIES) return TROPHIES;
   try {
     const res = await fetch(TROPHIES_URL, { cache: 'no-store' });
     TROPHIES = await res.json();
-  } catch { TROPHIES = {}; }
+  } catch (error) {
+    console.error('Ошибка загрузки трофеев:', error);
+    TROPHIES = {};
+  }
   return TROPHIES;
 }
 
-function renderTrophyList(data) {
-  if (!trophyListEl) return;
-  trophyListEl.innerHTML = '';
-  Object.keys(data || {}).forEach((key) => {
-    const t = data[key];
+async function loadUserProfile() {
+  try {
+    USER_PROFILE = await fetchProfile();
+  } catch (error) {
+    console.error('Ошибка загрузки профиля:', error);
+    USER_PROFILE = null;
+  }
+  return USER_PROFILE;
+}
+
+function renderProgressBar() {
+  if (!trophyProgressFillEl || !trophyProgressTextEl) return;
+  
+  const totalTrophies = Object.keys(TROPHIES || {}).length;
+  const obtainedTrophies = USER_PROFILE?.trophies?.length || 0;
+  
+  const percentage = totalTrophies > 0 ? (obtainedTrophies / totalTrophies) * 100 : 0;
+  
+  trophyProgressFillEl.style.width = `${percentage}%`;
+  trophyProgressTextEl.textContent = `${obtainedTrophies}/${totalTrophies}`;
+}
+
+function renderObtainedTrophies() {
+  if (!obtainedTrophiesListEl) return;
+  
+  obtainedTrophiesListEl.innerHTML = '';
+  
+  const obtainedTrophyIds = USER_PROFILE?.trophies || [];
+  
+  if (obtainedTrophyIds.length === 0) {
+    noObtainedTrophiesHintEl?.classList.remove('hidden');
+    return;
+  }
+  
+  noObtainedTrophiesHintEl?.classList.add('hidden');
+  
+  obtainedTrophyIds.forEach(trophyId => {
+    const trophy = TROPHIES?.[trophyId];
+    if (!trophy) return;
+    
+    const btn = document.createElement('button');
+    btn.className = 'list-btn trophy-obtained';
+    btn.type = 'button';
+    btn.dataset.id = trophyId;
+    btn.innerHTML = `<span>${trophy.name || trophyId} ${trophy.emoji || ''}</span><span class="right">✓</span>`;
+    btn.addEventListener('click', () => { 
+      hapticTapSmart(); 
+      openTrophyDetail(trophyId, true); 
+    });
+    obtainedTrophiesListEl.appendChild(btn);
+  });
+}
+
+function renderAvailableTrophies() {
+  if (!availableTrophiesListEl) return;
+  
+  availableTrophiesListEl.innerHTML = '';
+  
+  const obtainedTrophyIds = USER_PROFILE?.trophies || [];
+  const availableTrophies = Object.keys(TROPHIES || {}).filter(id => !obtainedTrophyIds.includes(id));
+  
+  if (availableTrophies.length === 0) {
+    noAvailableTrophiesHintEl?.classList.remove('hidden');
+    return;
+  }
+  
+  noAvailableTrophiesHintEl?.classList.add('hidden');
+  
+  availableTrophies.forEach(trophyId => {
+    const trophy = TROPHIES[trophyId];
+    if (!trophy) return;
+    
     const btn = document.createElement('button');
     btn.className = 'list-btn';
     btn.type = 'button';
-    btn.dataset.id = key;
-    btn.innerHTML = `<span>${t.name || key} ${t.emoji || ''}</span><span class="right">›</span>`;
-    btn.addEventListener('click', () => { hapticTapSmart(); openTrophyDetail(key); });
-    trophyListEl.appendChild(btn);
+    btn.dataset.id = trophyId;
+    btn.innerHTML = `<span>${trophy.name || trophyId} ${trophy.emoji || ''}</span><span class="right">›</span>`;
+    btn.addEventListener('click', () => { 
+      hapticTapSmart(); 
+      openTrophyDetail(trophyId, false); 
+    });
+    availableTrophiesListEl.appendChild(btn);
   });
 }
 
@@ -59,7 +144,7 @@ function resetProofForm() {
 }
 
 let proofSelected = [];
-let objectURLs = new Set(); // Отслеживаем созданные objectURL для предотвращения утечек памяти
+let objectURLs = new Set();
 
 function renderProofPreview() {
   if (!previewEl) return;
@@ -83,12 +168,9 @@ function renderProofPreview() {
       objectURLs.add(objectURL);
       img.src = objectURL;
       img.onload = () => {
-        // Не отзываем URL сразу, так как изображение может быть показано снова
         // URL будет отозван при следующем вызове renderProofPreview
       };
       tile.appendChild(img);
-    } else if (isVideoFile(file)) {
-      tile.textContent = '🎥';
     } else {
       tile.textContent = '📄';
     }
@@ -110,17 +192,31 @@ function renderProofPreview() {
   }
 }
 
-function openTrophyDetail(key) {
-  const t = (TROPHIES && TROPHIES[key]) || {};
-  if (trophyTitleEl) trophyTitleEl.textContent = `${t.name || 'Трофей'}${t.emoji ? ' ' + t.emoji : ''}`;
+function openTrophyDetail(trophyId, isObtained = false) {
+  const trophy = (TROPHIES && TROPHIES[trophyId]) || {};
+  CURRENT_TROPHY_ID = trophyId;
+  
+  if (trophyTitleEl) trophyTitleEl.textContent = `${trophy.name || 'Трофей'}${trophy.emoji ? ' ' + trophy.emoji : ''}`;
   if (trophyDescEl) {
     trophyDescEl.innerHTML = '';
-    (t.description || ['Описание скоро будет.']).forEach((line) => {
+    (trophy.description || ['Описание скоро будет.']).forEach((line) => {
       const li = document.createElement('li');
       li.textContent = line;
       trophyDescEl.appendChild(li);
     });
   }
+  
+  // Показываем соответствующую карточку
+  if (isObtained) {
+    trophyObtainedCardEl?.classList.remove('hidden');
+    trophyApplicationCardEl?.classList.add('hidden');
+    proofSubmitBtn?.classList.add('hidden');
+  } else {
+    trophyObtainedCardEl?.classList.add('hidden');
+    trophyApplicationCardEl?.classList.remove('hidden');
+    proofSubmitBtn?.classList.remove('hidden');
+  }
+  
   resetProofForm();
   showScreen('trophyDetail');
 }
@@ -132,26 +228,62 @@ async function submitProof() {
   setTimeout(() => (submitting = false), 1200);
 
   const filesCount = proofSelected.length;
-  const comment    = (commentEl?.value || '').trim();
+  const comment = (commentEl?.value || '').trim();
 
-  if (filesCount === 0 || !comment) {
-    if (!filesCount) { shake(previewEl || proofAddBtn || proofFilesEl); focusAndScrollIntoView(proofAddBtn || previewEl); }
-    if (!comment)    { shake(commentEl); focusAndScrollIntoView(commentEl); }
+  if (filesCount === 0) {
+    shake(previewEl || proofAddBtn || proofFilesEl); 
+    focusAndScrollIntoView(proofAddBtn || previewEl);
     hapticERR();
-    tg?.showPopup?.({ title: 'Ошибка', message: 'Добавьте файл и комментарий.', buttons: [{ type: 'ok' }] });
+    tg?.showPopup?.({ title: 'Ошибка', message: 'Добавьте хотя бы одно изображение.', buttons: [{ type: 'ok' }] });
     return;
   }
 
-  hapticOK();
-  tg?.showPopup?.({ title: 'Заявка отправлена', message: '✅ Модераторы рассмотрят вашу заявку.', buttons: [{ type: 'ok' }] });
-  resetProofForm();
-  showScreen('trophies');
+  try {
+    hapticOK();
+    
+    await submitTrophyApplication(CURRENT_TROPHY_ID, proofSelected, comment);
+    
+    tg?.showPopup?.({ 
+      title: 'Заявка отправлена', 
+      message: '✅ Модераторы рассмотрят вашу заявку.', 
+      buttons: [{ type: 'ok' }] 
+    });
+    
+    resetProofForm();
+    showScreen('trophies');
+    
+    // Перезагружаем данные
+    await loadUserProfile();
+    renderAll();
+    
+  } catch (error) {
+    console.error('Ошибка отправки заявки:', error);
+    hapticERR();
+    tg?.showPopup?.({ 
+      title: 'Ошибка', 
+      message: error.message || 'Произошла ошибка при отправке заявки.', 
+      buttons: [{ type: 'ok' }] 
+    });
+  }
+}
+
+function renderAll() {
+  renderProgressBar();
+  renderObtainedTrophies();
+  renderAvailableTrophies();
 }
 
 export async function initTrophies() {
-  const data = await loadTrophies();
-  renderTrophyList(data);
+  // Загружаем данные
+  await Promise.all([
+    loadTrophies(),
+    loadUserProfile()
+  ]);
+  
+  // Рендерим интерфейс
+  renderAll();
 
+  // Обработчики для формы заявки
   proofAddBtn?.addEventListener('click', () => {
     hapticTapSmart();
     try { proofFilesEl.value = ''; } catch {}
@@ -161,18 +293,33 @@ export async function initTrophies() {
   if (proofFilesEl) {
     proofFilesEl.addEventListener('change', () => {
       const files = Array.from(proofFilesEl.files || []);
-      if (!files.length) { shake(previewEl || proofAddBtn); focusAndScrollIntoView(proofAddBtn || previewEl); return; }
+      if (!files.length) { 
+        shake(previewEl || proofAddBtn); 
+        focusAndScrollIntoView(proofAddBtn || previewEl); 
+        return; 
+      }
+
+      // Фильтруем только изображения
+      const imageFiles = files.filter(file => isImageFile(file));
+      
+      if (imageFiles.length !== files.length) {
+        tg?.showPopup?.({
+          title: 'Неподдерживаемый формат',
+          message: 'Разрешены только изображения.',
+          buttons: [{ type: 'ok' }]
+        });
+      }
 
       const keyOf = (f) => createFileKey(f);
       const existing = new Set(proofSelected.map(keyOf));
       const freeSlots = Math.max(0, MAX_PROOF_FILES - proofSelected.length);
-      const incoming = files.filter(f => !existing.has(keyOf(f)));
+      const incoming = imageFiles.filter(f => !existing.has(keyOf));
 
       if (incoming.length > freeSlots) {
         incoming.length = freeSlots;
         tg?.showPopup?.({
           title: 'Лимит файлов',
-          message: `Можно прикрепить не более ${MAX_PROOF_FILES} файлов.`,
+          message: `Можно прикрепить не более ${MAX_PROOF_FILES} изображений.`,
           buttons: [{ type: 'ok' }]
         });
       }
