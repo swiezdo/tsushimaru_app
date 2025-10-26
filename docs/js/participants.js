@@ -51,7 +51,7 @@ function filterParticipants(searchQuery) {
     const query = searchQuery.toLowerCase().trim();
     const filtered = ALL_PARTICIPANTS.filter(user => {
         const psnId = (user.psn_id || '').toLowerCase();
-        return psnId.includes(query);
+        return psnId.startsWith(query);
     });
     
     renderParticipants(filtered);
