@@ -1,6 +1,8 @@
 // utils.js
 // Общие утилиты для всех модулей приложения
 
+import { hapticTapSmart } from './telegram.js';
+
 // ---------- Анимации и эффекты ----------
 export function shake(el) {
   if (!el) return;
@@ -21,6 +23,7 @@ export function renderChips(container, values, { single = false, onChange } = {}
     b.textContent = v;
     b.dataset.value = v;
     b.addEventListener('click', () => {
+      hapticTapSmart();
       if (single) {
         container.querySelectorAll('.chip-btn').forEach((x) => x.classList.remove('active'));
         b.classList.add('active');

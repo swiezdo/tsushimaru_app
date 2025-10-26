@@ -234,6 +234,10 @@ body {
   display: flex; align-items: center; justify-content: center;
   padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--color-border);
   background: transparent; color: var(--tg-tx); font-size: var(--fs-16); cursor: pointer; text-decoration: none; min-height: 50px;
+  transition: transform 0.1s ease;
+}
+.big-btn:active {
+  transform: translateY(2px);
 }
 .big-btn.primary { background: var(--accent); border-color: transparent; color: #00131f; font-weight: 700; }
 .big-btn.ghost { opacity: .95; }

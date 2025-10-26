@@ -32,6 +32,8 @@ const v_difficulty = $('v_difficulty');
 // ---------- Форма ----------
 const profileForm     = $('profileForm');
 const profileSaveBtn  = $('profileSaveBtn');
+const nameErrorEl     = $('nameError');
+const psnErrorEl      = $('psnError');
 
 // Кеш для элементов чипов
 let chipsCache = null;
@@ -155,6 +157,10 @@ export function initProfile() {
   nameInput?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
   psnInput?.addEventListener('focus',  ()=>{ hapticTapSmart(); }, {passive:true});
 
+  // Скрывать ошибки при начале редактирования
+  nameInput?.addEventListener('input', ()=>{ nameErrorEl?.classList.add('hidden'); });
+  psnInput?.addEventListener('input', ()=>{ psnErrorEl?.classList.add('hidden'); });
+
   function isNameOk() {
     return !!(nameInput && (nameInput.value || '').trim());
   }
@@ -170,18 +176,28 @@ export function initProfile() {
     const okPSN  = isPSNOk();
 
     if (!okName || !okPSN) {
-      const msgs = [];
       let firstBad = null;
-      if (!okName) { msgs.push('Нужно указать Имя.'); shake(nameInput); firstBad = firstBad || nameInput; }
+      
+      if (!okName) { 
+        nameErrorEl?.classList.remove('hidden');
+        shake(nameInput); 
+        firstBad = firstBad || nameInput; 
+      }
+      
       if (!okPSN) {
         const val = (psnInput?.value || '').trim();
-        if (!val) msgs.push('Нужно указать Ник PlayStation.');
-        else msgs.push('Неверный формат ника PlayStation (3–16: A–Z, a–z, 0–9, -, _).');
-        shake(psnInput); if (!firstBad) firstBad = psnInput;
+        if (!val) {
+          psnErrorEl.textContent = 'Укажите ник в PlayStation Network';
+        } else {
+          psnErrorEl.textContent = 'Неверный формат';
+        }
+        psnErrorEl?.classList.remove('hidden');
+        shake(psnInput); 
+        if (!firstBad) firstBad = psnInput;
       }
-      if (firstBad) focusAndScrollIntoView(firstBad); // <— фокус + скролл
+      
+      if (firstBad) focusAndScrollIntoView(firstBad);
       hapticERR();
-      tg?.showPopup?.({ title: 'Ошибка', message: msgs.join('\n'), buttons: [{ type: 'ok' }] });
       return;
     }
 
