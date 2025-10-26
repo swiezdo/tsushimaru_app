@@ -9,6 +9,9 @@ export const tg = window.Telegram?.WebApp || null;
   try {
     tg.ready();
     tg.expand();
+    
+    // Запрашиваем полноэкранный режим
+    tg.requestFullscreen();
 
     const th = tg.themeParams || {};
     if (th.bg_color)   document.documentElement.style.setProperty('--tg-bg', th.bg_color);
@@ -46,4 +49,17 @@ export function hideKeyboard() {
   if (document.activeElement && document.activeElement.blur) {
     document.activeElement.blur();
   }
+}
+
+// Утилиты для управления полноэкранным режимом
+export function enterFullscreen() {
+  try { tg?.requestFullscreen(); } catch {}
+}
+
+export function exitFullscreen() {
+  try { tg?.exitFullscreen(); } catch {}
+}
+
+export function isFullscreen() {
+  try { return tg?.isFullscreen || false; } catch { return false; }
 }
