@@ -190,8 +190,13 @@ export function initProfile() {
   document.addEventListener('click', (e) => {
     // Проверяем, что клик не по полям ввода и не по их родительским элементам
     if (!nameInput?.contains(e.target) && !psnInput?.contains(e.target)) {
-      // Убираем фокус с активного поля
-      hideKeyboard();
+      // Добавляем небольшую задержку, чтобы не мешать открытию клавиатуры
+      setTimeout(() => {
+        // Проверяем, что фокус действительно не на наших полях
+        if (document.activeElement !== nameInput && document.activeElement !== psnInput) {
+          hideKeyboard();
+        }
+      }, 100);
     }
   });
 

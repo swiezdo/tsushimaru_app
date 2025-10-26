@@ -188,8 +188,13 @@ export async function initTrophies() {
   document.addEventListener('click', (e) => {
     // Проверяем, что клик не по полю ввода и не по его родительским элементам
     if (!commentEl?.contains(e.target)) {
-      // Убираем фокус с активного поля
-      hideKeyboard();
+      // Добавляем небольшую задержку, чтобы не мешать открытию клавиатуры
+      setTimeout(() => {
+        // Проверяем, что фокус действительно не на нашем поле
+        if (document.activeElement !== commentEl) {
+          hideKeyboard();
+        }
+      }, 100);
     }
   });
 
