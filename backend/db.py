@@ -107,7 +107,7 @@ def get_user(db_path: str, user_id: int) -> Optional[Dict[str, Any]]:
         'modes': json.loads(row[4]) if row[4] else [],
         'goals': json.loads(row[5]) if row[5] else [],
         'difficulties': json.loads(row[6]) if row[6] else [],
-        'trophies': [t.strip() for t in row[7].split(',') if t.strip()] if row[7] else [],
+        'trophies': [t.strip() for t in row[7].split(',') if t.strip()] if row[7] and row[7] != '[]' else [],
         'updated_at': row[8]
     }
     
@@ -143,7 +143,9 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         goals_json = json.dumps(profile_data.get('goals', []))
         difficulties_json = json.dumps(profile_data.get('difficulties', []))
         # Трофеи сохраняем как строку через запятую
-        trophies_str = ','.join(profile_data.get('trophies', []))
+        trophies_list = profile_data.get('trophies', [])
+        # Фильтруем пустые значения и сохраняем только непустые трофеи
+        trophies_str = ','.join([t.strip() for t in trophies_list if t and t.strip()])
         
         # Выполняем INSERT OR REPLACE
         cursor.execute('''
@@ -527,6 +529,10 @@ def add_trophy_to_user(db_path: str, user_id: int, trophy_id: str) -> bool:
             return False
         
         current_trophies = row[0] or ""
+        
+        # Обрабатываем случай когда в базе может быть '[]' как строка
+        if current_trophies == '[]':
+            current_trophies = ""
         
         # Разбиваем строку на список, добавляем новый трофей если его нет
         trophy_list = [t.strip() for t in current_trophies.split(',') if t.strip()]
