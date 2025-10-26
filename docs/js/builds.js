@@ -23,6 +23,7 @@ const createBuildBtn   = $('createBuildBtn');
 
 const buildForm        = $('buildForm');
 const buildNameEl      = $('build_name');
+const buildNameError   = $('buildNameError');
 const buildDescEl      = $('build_desc');
 
 const classChipsEl     = $('classChips');
@@ -228,6 +229,7 @@ function resetBuildForm() {
     `;
   }
   if (buildDescEl) buildDescEl.style.height = 'auto';
+  buildNameError?.classList.add('hidden');
 }
 function getShotBoxByIdx(idx) {
   return shotsTwo?.querySelector(`.upload-box[data-idx="${idx}"]`) ||
@@ -415,6 +417,9 @@ export function initBuilds() {
   // Tap при фокусе полей — глобальный скролл сам подвинет
   buildNameEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
   buildDescEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
+  
+  // Скрывать ошибку при начале редактирования названия
+  buildNameEl?.addEventListener('input', ()=>{ buildNameError?.classList.add('hidden'); });
 
   // «＋ Создать билд» — OK
   createBuildBtn?.addEventListener('click', () => {
@@ -457,10 +462,10 @@ export function initBuilds() {
     const words = name.split(/\s+/);
     for (const word of words) {
       if (word.length > 15) {
+        buildNameError?.classList.remove('hidden');
         shake(buildNameEl);
         hapticERR();
         focusAndScrollIntoView(buildNameEl);
-        tg?.showAlert?.('Каждое слово в названии должно быть не длиннее 15 символов');
         return;
       }
     }
