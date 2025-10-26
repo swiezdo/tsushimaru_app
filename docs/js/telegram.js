@@ -3,6 +3,24 @@
 
 export const tg = window.Telegram?.WebApp || null;
 
+// Определение платформы (вынесено в отдельную функцию для переиспользования)
+function detectPlatform() {
+  if (!tg) return { isMobile: false, isDesktop: false };
+  
+  const platform = tg.platform || 'unknown';
+  const userAgent = navigator.userAgent.toLowerCase();
+  
+  const isMobileByPlatform = platform === 'ios' || platform === 'android';
+  const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
+  const isDesktopByPlatform = platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
+  const isDesktopByUserAgent = userAgent.includes('windows') || userAgent.includes('macintosh') || userAgent.includes('linux') || userAgent.includes('x11');
+  
+  const isMobile = isMobileByPlatform || isMobileByUserAgent;
+  const isDesktop = isDesktopByPlatform || (isDesktopByUserAgent && !isMobile);
+  
+  return { isMobile, isDesktop };
+}
+
 // Инициализация Telegram WebApp + применение темы
 (function initTG() {
   if (!tg) return;
@@ -10,43 +28,14 @@ export const tg = window.Telegram?.WebApp || null;
     tg.ready();
     tg.expand();
     
-    // Определяем платформу более точно
-    const platform = tg.platform || 'unknown';
-    const userAgent = navigator.userAgent.toLowerCase();
-    
-    // Проверяем по нескольким критериям
-    const isDesktopByPlatform = platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
-    const isDesktopByUserAgent = userAgent.includes('windows') || userAgent.includes('macintosh') || userAgent.includes('linux') || userAgent.includes('x11');
-    const isMobileByPlatform = platform === 'ios' || platform === 'android';
-    const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
-    
-    // Приоритет: сначала проверяем мобильные, потом десктоп
-    const isMobile = isMobileByPlatform || isMobileByUserAgent;
-    const isDesktop = isDesktopByPlatform || (isDesktopByUserAgent && !isMobile);
-    
-    console.log('🔍 Platform detection:', {
-      tgPlatform: platform,
-      userAgent: userAgent,
-      isDesktopByPlatform,
-      isDesktopByUserAgent,
-      isMobileByPlatform,
-      isMobileByUserAgent,
-      finalIsDesktop: isDesktop,
-      finalIsMobile: isMobile
-    });
+    const { isMobile } = detectPlatform();
     
     if (isMobile) {
-      // На мобильных устройствах используем полноэкранный режим
       tg.requestFullscreen();
-      console.log('📱 Mobile detected - using fullscreen mode');
-    } else if (isDesktop) {
-      // На ПК используем только expand() - НЕ запрашиваем полноэкранный режим
-      console.log('🖥️ Desktop detected - using expand mode only');
     } else {
-      // Если не можем определить - используем только expand()
-      console.log('❓ Unknown platform - using expand mode only');
     }
 
+    // Применяем тему
     const th = tg.themeParams || {};
     if (th.bg_color)   document.documentElement.style.setProperty('--tg-bg', th.bg_color);
     if (th.text_color) document.documentElement.style.setProperty('--tg-tx', th.text_color);
@@ -79,57 +68,16 @@ export function scrollTopSmooth() {
 
 // Утилита для закрытия клавиатуры на iOS
 export function hideKeyboard() {
-  // Убираем фокус с активного элемента
   if (document.activeElement && document.activeElement.blur) {
     document.activeElement.blur();
   }
 }
 
-// Утилиты для управления полноэкранным режимом
-export function enterFullscreen() {
-  try { tg?.requestFullscreen(); } catch {}
-}
-
-export function exitFullscreen() {
-  try { tg?.exitFullscreen(); } catch {}
-}
-
-export function isFullscreen() {
-  try { return tg?.isFullscreen || false; } catch { return false; }
-}
-
 // Утилиты для определения платформы
-export function getPlatform() {
-  try { return tg?.platform || 'unknown'; } catch { return 'unknown'; }
-}
-
 export function isDesktop() {
-  try {
-    const platform = tg?.platform || 'unknown';
-    const userAgent = navigator.userAgent.toLowerCase();
-    
-    const isDesktopByPlatform = platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
-    const isDesktopByUserAgent = userAgent.includes('windows') || userAgent.includes('macintosh') || userAgent.includes('linux') || userAgent.includes('x11');
-    const isMobileByPlatform = platform === 'ios' || platform === 'android';
-    const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
-    
-    const isMobile = isMobileByPlatform || isMobileByUserAgent;
-    return isDesktopByPlatform || (isDesktopByUserAgent && !isMobile);
-  } catch { 
-    return false; 
-  }
+  return detectPlatform().isDesktop;
 }
 
 export function isMobile() {
-  try {
-    const platform = tg?.platform || 'unknown';
-    const userAgent = navigator.userAgent.toLowerCase();
-    
-    const isMobileByPlatform = platform === 'ios' || platform === 'android';
-    const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
-    
-    return isMobileByPlatform || isMobileByUserAgent;
-  } catch { 
-    return false; 
-  }
+  return detectPlatform().isMobile;
 }
