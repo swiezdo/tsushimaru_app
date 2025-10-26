@@ -10,17 +10,40 @@ export const tg = window.Telegram?.WebApp || null;
     tg.ready();
     tg.expand();
     
-    // Определяем платформу и выбираем режим отображения
+    // Определяем платформу более точно
     const platform = tg.platform || 'unknown';
-    const isDesktop = platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    // Проверяем по нескольким критериям
+    const isDesktopByPlatform = platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
+    const isDesktopByUserAgent = userAgent.includes('windows') || userAgent.includes('macintosh') || userAgent.includes('linux') || userAgent.includes('x11');
+    const isMobileByPlatform = platform === 'ios' || platform === 'android';
+    const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
+    
+    const isDesktop = isDesktopByPlatform || (isDesktopByUserAgent && !isMobileByUserAgent);
+    const isMobile = isMobileByPlatform || isMobileByUserAgent;
+    
+    console.log('🔍 Platform detection:', {
+      tgPlatform: platform,
+      userAgent: userAgent,
+      isDesktopByPlatform,
+      isDesktopByUserAgent,
+      isMobileByPlatform,
+      isMobileByUserAgent,
+      finalIsDesktop: isDesktop,
+      finalIsMobile: isMobile
+    });
     
     if (isDesktop) {
-      // На ПК используем expand() для максимального размера без полноэкранного режима
-      console.log('🖥️ Desktop platform detected, using expand mode');
-    } else {
+      // На ПК используем только expand() - НЕ запрашиваем полноэкранный режим
+      console.log('🖥️ Desktop detected - using expand mode only');
+    } else if (isMobile) {
       // На мобильных устройствах используем полноэкранный режим
       tg.requestFullscreen();
-      console.log('📱 Mobile platform detected, using fullscreen mode');
+      console.log('📱 Mobile detected - using fullscreen mode');
+    } else {
+      // Если не можем определить - используем только expand()
+      console.log('❓ Unknown platform - using expand mode only');
     }
 
     const th = tg.themeParams || {};
@@ -80,11 +103,30 @@ export function getPlatform() {
 }
 
 export function isDesktop() {
-  const platform = getPlatform();
-  return platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
+  try {
+    const platform = tg?.platform || 'unknown';
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    const isDesktopByPlatform = platform === 'desktop' || platform === 'macos' || platform === 'linux' || platform === 'windows';
+    const isDesktopByUserAgent = userAgent.includes('windows') || userAgent.includes('macintosh') || userAgent.includes('linux') || userAgent.includes('x11');
+    const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
+    
+    return isDesktopByPlatform || (isDesktopByUserAgent && !isMobileByUserAgent);
+  } catch { 
+    return false; 
+  }
 }
 
 export function isMobile() {
-  const platform = getPlatform();
-  return platform === 'ios' || platform === 'android';
+  try {
+    const platform = tg?.platform || 'unknown';
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    const isMobileByPlatform = platform === 'ios' || platform === 'android';
+    const isMobileByUserAgent = userAgent.includes('mobile') || userAgent.includes('android') || userAgent.includes('iphone') || userAgent.includes('ipad');
+    
+    return isMobileByPlatform || isMobileByUserAgent;
+  } catch { 
+    return false; 
+  }
 }
