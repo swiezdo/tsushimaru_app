@@ -544,8 +544,8 @@ function tgConfirm(title, message) {
 
 function deleteBuildById(id) {
   deleteBuild(id).then(() => {
-    updatePublishButton(id);
-    renderAllBuilds();
+    renderMyBuilds(); // Обновляем список моих билдов
+    renderAllBuilds(); // Обновляем список публичных билдов
     tg?.showPopup?.({ title: 'Удалено', message: 'Билд удалён.', buttons: [{ type:'ok' }] });
     showScreen('builds');
   }).catch(err => {
