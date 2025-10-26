@@ -2,48 +2,7 @@
 import { tg, $, hapticTapSmart, hapticERR, hapticOK, hideKeyboard } from './telegram.js';
 import { focusAndScrollIntoView } from './ui.js';
 import { fetchProfile, saveProfile as apiSaveProfile } from './api.js';
-
-// ---------- Утилиты для чипов ----------
-function renderChips(container, values, { single = false, onChange } = {}) {
-  if (!container) return;
-  container.innerHTML = '';
-  values.forEach((v) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'chip-btn';
-    b.textContent = v;
-    b.dataset.value = v;
-    b.addEventListener('click', () => {
-      hapticTapSmart();
-      if (single) {
-        container.querySelectorAll('.chip-btn').forEach((x) => x.classList.remove('active'));
-        b.classList.add('active');
-      } else {
-        b.classList.toggle('active');
-      }
-      onChange?.();
-    });
-    container.appendChild(b);
-  });
-}
-function activeValues(container) {
-  if (!container) return [];
-  return Array.from(container.querySelectorAll('.chip-btn.active')).map((b) => b.dataset.value);
-}
-function setActive(container, arr) {
-  if (!container) return;
-  const set = new Set(arr || []);
-  container.querySelectorAll('.chip-btn').forEach((b) => {
-    b.classList.toggle('active', set.has(b.dataset.value));
-  });
-}
-function prettyLines(arr) { return (arr && arr.length) ? arr.join('\n') : '—'; }
-function shake(el) {
-  if (!el) return;
-  el.classList.remove('shake');
-  void el.offsetWidth;
-  el.classList.add('shake');
-}
+import { renderChips, activeValues, setActive, shake, prettyLines, validatePSNId, safeLocalStorageGet, safeLocalStorageSet } from './utils.js';
 
 // ---------- Константы ----------
 const PLATFORM   = ['🎮 PlayStation','💻 ПК'];
@@ -55,21 +14,11 @@ const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото
 const LS_KEY_PROFILE = 'tsu_profile_v1';
 
 function saveProfile(data) {
-  try {
-    localStorage.setItem(LS_KEY_PROFILE, JSON.stringify(data));
-    return true;
-  } catch {
-    return false;
-  }
+  return safeLocalStorageSet(LS_KEY_PROFILE, data);
 }
 
 function loadProfile() {
-  try {
-    const raw = localStorage.getItem(LS_KEY_PROFILE);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  return safeLocalStorageGet(LS_KEY_PROFILE, null);
 }
 
 // ---------- Отображение ----------
@@ -84,11 +33,27 @@ const v_difficulty = $('v_difficulty');
 const profileForm     = $('profileForm');
 const profileSaveBtn  = $('profileSaveBtn');
 
+// Кеш для элементов чипов
+let chipsCache = null;
+
+function getChipsCache() {
+  if (!chipsCache) {
+    chipsCache = {
+      platform: $('platformChips'),
+      modes: $('modesChips'),
+      goals: $('goalsChips'),
+      difficulty: $('difficultyChips')
+    };
+  }
+  return chipsCache;
+}
+
 function refreshProfileView() {
-  if (v_platform)   v_platform.textContent   = prettyLines(activeValues($('platformChips')));
-  if (v_modes)      v_modes.textContent      = prettyLines(activeValues($('modesChips')));
-  if (v_goals)      v_goals.textContent      = prettyLines(activeValues($('goalsChips')));
-  if (v_difficulty) v_difficulty.textContent = prettyLines(activeValues($('difficultyChips')));
+  const cache = getChipsCache();
+  if (v_platform)   v_platform.textContent   = prettyLines(activeValues(cache.platform));
+  if (v_modes)      v_modes.textContent      = prettyLines(activeValues(cache.modes));
+  if (v_goals)      v_goals.textContent      = prettyLines(activeValues(cache.goals));
+  if (v_difficulty) v_difficulty.textContent = prettyLines(activeValues(cache.difficulty));
 }
 
 function loadProfileToForm(profile) {
@@ -102,11 +67,12 @@ function loadProfileToForm(profile) {
     profileForm.psn_id.value = profile.psn_id || '';
   }
   
-  // Устанавливаем чипы
-  if (profile.platforms) setActive($('platformChips'), profile.platforms);
-  if (profile.modes) setActive($('modesChips'), profile.modes);
-  if (profile.goals) setActive($('goalsChips'), profile.goals);
-  if (profile.difficulties) setActive($('difficultyChips'), profile.difficulties);
+  // Устанавливаем чипы используя кеш
+  const cache = getChipsCache();
+  if (profile.platforms) setActive(cache.platform, profile.platforms);
+  if (profile.modes) setActive(cache.modes, profile.modes);
+  if (profile.goals) setActive(cache.goals, profile.goals);
+  if (profile.difficulties) setActive(cache.difficulty, profile.difficulties);
   
   // Обновляем отображение в карточке "Ваш профиль"
   if (v_real_name) v_real_name.textContent = profile.real_name || '—';
@@ -147,11 +113,14 @@ async function fetchProfileFromServer() {
 }
 
 export function initProfile() {
+  // Получаем кеш элементов чипов
+  const cache = getChipsCache();
+  
   // Чипы
-  renderChips($('platformChips'),   PLATFORM,   { onChange: refreshProfileView });
-  renderChips($('modesChips'),      MODES,      { onChange: refreshProfileView });
-  renderChips($('goalsChips'),      GOALS,      { onChange: refreshProfileView });
-  renderChips($('difficultyChips'), DIFFICULTY, { onChange: refreshProfileView });
+  renderChips(cache.platform,   PLATFORM,   { onChange: refreshProfileView });
+  renderChips(cache.modes,      MODES,      { onChange: refreshProfileView });
+  renderChips(cache.goals,      GOALS,      { onChange: refreshProfileView });
+  renderChips(cache.difficulty, DIFFICULTY, { onChange: refreshProfileView });
 
   // Загружаем сохраненный профиль из LocalStorage и сразу показываем
   const savedProfile = loadProfile();
@@ -191,9 +160,7 @@ export function initProfile() {
   }
   function isPSNOk() {
     if (!psnInput) return false;
-    const val = (psnInput.value || '').trim();
-    if (!val) return false;
-    return /^[A-Za-z0-9_-]{3,16}$/.test(val);
+    return validatePSNId(psnInput.value);
   }
 
   profileForm.addEventListener('submit', async (e) => {
@@ -219,13 +186,14 @@ export function initProfile() {
     }
 
     // Подготавливаем данные профиля
+    const cache = getChipsCache();
     const profileData = {
       real_name: (nameInput?.value || '').trim(),
       psn_id: (psnInput?.value || '').trim(),
-      platforms: activeValues($('platformChips')),
-      modes: activeValues($('modesChips')),
-      goals: activeValues($('goalsChips')),
-      difficulties: activeValues($('difficultyChips'))
+      platforms: activeValues(cache.platform),
+      modes: activeValues(cache.modes),
+      goals: activeValues(cache.goals),
+      difficulties: activeValues(cache.difficulty)
     };
 
     // Показываем индикатор загрузки

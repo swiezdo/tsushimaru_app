@@ -1,6 +1,6 @@
 // main.js
 import { tg, $, hapticTapSmart } from './telegram.js';
-import { showScreen, applySafeInsets } from './ui.js';
+import { showScreen, applySafeInsets, screens } from './ui.js';
 import { initProfile } from './profile.js';
 import { initTrophies } from './trophies.js';
 import { initBuilds } from './builds.js';
@@ -26,21 +26,29 @@ import { initBuilds } from './builds.js';
 })();
 
 // ---------------- BackButton навигация + Tap ----------------
-function isVisible(id) {
-  const el = document.getElementById(id);
-  return el && !el.classList.contains('hidden');
-}
 function installBackButton() {
   tg?.onEvent?.('backButtonClicked', () => {
     hapticTapSmart(); // Tap на Back
-    if (isVisible('buildCreateScreen'))       { showScreen('builds'); return; }
-    if (isVisible('buildDetailScreen'))       { showScreen('builds'); return; }
-    if (isVisible('buildPublicDetailScreen')) { showScreen('builds'); return; }
-    if (isVisible('trophyDetailScreen'))      { showScreen('trophies'); return; }
-    if (isVisible('profileScreen') || isVisible('trophiesScreen') || isVisible('buildsScreen')) {
-      showScreen('home'); return;
-    }
-    showScreen('home');
+    
+    // Определяем текущий экран и следующий экран
+    const currentScreen = Object.keys(screens).find(key => {
+      const screen = screens[key];
+      return screen && !screen.classList.contains('hidden');
+    });
+    
+    // Маппинг экранов для навигации назад
+    const backNavigation = {
+      'buildCreate': 'builds',
+      'buildDetail': 'builds', 
+      'buildPublicDetail': 'builds',
+      'trophyDetail': 'trophies',
+      'profile': 'home',
+      'trophies': 'home',
+      'builds': 'home'
+    };
+    
+    const nextScreen = backNavigation[currentScreen] || 'home';
+    showScreen(nextScreen);
   });
 }
 

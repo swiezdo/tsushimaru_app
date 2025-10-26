@@ -1,7 +1,7 @@
 // builds.js
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
-import { renderChips, activeValues, setActive, shake } from './profile.js';
+import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate, safeLocalStorageGet, safeLocalStorageSet } from './utils.js';
 
 const LS_KEY_BUILDS      = 'tsu_builds_v1';
 const LS_KEY_PUB_BUILDS  = 'tsu_builds_public_v1';
@@ -120,74 +120,97 @@ function renderShotThumb(idx, src) {
 
 // Storage
 function loadBuilds() {
-  try { const raw = localStorage.getItem(LS_KEY_BUILDS); return raw ? JSON.parse(raw) : []; }
-  catch { return []; }
+  return safeLocalStorageGet(LS_KEY_BUILDS, []);
 }
-function saveBuilds(arr){
-  try { localStorage.setItem(LS_KEY_BUILDS, JSON.stringify(arr||[])); return true; }
-  catch {
+
+function saveBuilds(arr) {
+  const success = safeLocalStorageSet(LS_KEY_BUILDS, arr || []);
+  if (!success) {
     tg?.showPopup?.({
       title: 'Хранилище заполнено',
       message: 'Не удалось сохранить билд: лимит хранения исчерпан. Уменьшите размер скриншотов или удалите старые билды.',
       buttons: [{ type:'ok' }]
     });
     hapticERR();
-    return false;
   }
+  return success;
 }
+
 function loadPublicBuilds() {
-  try { const raw = localStorage.getItem(LS_KEY_PUB_BUILDS); return raw ? JSON.parse(raw) : []; }
-  catch { return []; }
+  return safeLocalStorageGet(LS_KEY_PUB_BUILDS, []);
 }
+
 function savePublicBuilds(arr) {
-  try { localStorage.setItem(LS_KEY_PUB_BUILDS, JSON.stringify(arr||[])); return true; }
-  catch { return false; }
+  return safeLocalStorageSet(LS_KEY_PUB_BUILDS, arr || []);
+}
+
+// Универсальная функция создания элемента билда
+function createBuildElement(build, isPublic = false) {
+  const row = createButton('button', 'build-item', '', { id: build.id });
+
+  const icon = document.createElement('div');
+  icon.className = 'build-icon';
+  const img = document.createElement('img');
+  img.alt = build.class || 'Класс';
+  img.src = CLASS_ICON[build.class] || CLASS_ICON['Самурай'];
+  icon.appendChild(img);
+
+  const title = document.createElement('div');
+  title.className = 'build-title';
+  
+  const nameDiv = document.createElement('div');
+  nameDiv.textContent = build.name || 'Без названия';
+  
+  const metaDiv = document.createElement('div');
+  metaDiv.className = 'build-author';
+  
+  if (isPublic) {
+    metaDiv.textContent = 'Автор: ' + (build.author || '—');
+  } else {
+    const dateStr = formatDate(build.createdAt);
+    metaDiv.textContent = dateStr === '—' ? '—' : 'Создан: ' + dateStr;
+  }
+  
+  title.appendChild(nameDiv);
+  title.appendChild(metaDiv);
+
+  row.appendChild(icon);
+  row.appendChild(title);
+  
+  const clickHandler = isPublic ? 
+    () => { hapticTapSmart(); openPublicBuildDetail(build.id); } :
+    () => { hapticTapSmart(); openBuildDetail(build.id); };
+  
+  row.addEventListener('click', clickHandler);
+  return row;
+}
+
+// Универсальная функция рендеринга списка билдов
+function renderBuildsList(container, items, emptyHint, isPublic = false) {
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!items.length) {
+    if (emptyHint) emptyHint.classList.remove('hidden');
+    return;
+  }
+  
+  if (emptyHint) emptyHint.classList.add('hidden');
+  
+  // Используем DocumentFragment для оптимизации
+  const fragment = document.createDocumentFragment();
+  items.slice().reverse().forEach(build => {
+    fragment.appendChild(createBuildElement(build, isPublic));
+  });
+  
+  container.appendChild(fragment);
 }
 
 // Рендер списков
 function renderMyBuilds() {
   const items = loadBuilds();
-  myBuildsList.innerHTML = '';
-  if (!items.length) { noBuildsHint.classList.remove('hidden'); return; }
-  noBuildsHint.classList.add('hidden');
-
-  items.slice().reverse().forEach((b) => {
-    const row = document.createElement('button');
-    row.type = 'button';
-    row.className = 'build-item';
-    row.setAttribute('data-id', b.id);
-
-    const icon = document.createElement('div');
-    icon.className = 'build-icon';
-    const img = document.createElement('img');
-    img.alt = b.class || 'Класс';
-    img.src = CLASS_ICON[b.class] || CLASS_ICON['Самурай'];
-    icon.appendChild(img);
-
-    const title = document.createElement('div');
-    title.className = 'build-title';
-    
-    const nameDiv = document.createElement('div');
-    const name = (b.name || 'Без названия').toString();
-    nameDiv.textContent = name;
-    
-    const dateDiv = document.createElement('div');
-    dateDiv.className = 'build-author';
-    try {
-      const d = new Date(b.createdAt);
-      dateDiv.textContent = isNaN(d.getTime()) ? '—' : 'Создан: ' + d.toLocaleDateString('ru-RU');
-    } catch {
-      dateDiv.textContent = '—';
-    }
-    
-    title.appendChild(nameDiv);
-    title.appendChild(dateDiv);
-
-    row.appendChild(icon);
-    row.appendChild(title);
-    row.addEventListener('click', () => { hapticTapSmart(); openBuildDetail(b.id); });
-    myBuildsList.appendChild(row);
-  });
+  renderBuildsList(myBuildsList, items, noBuildsHint, false);
 }
 // Функции фильтрации
 function filterBuilds(builds) {
@@ -255,8 +278,6 @@ function applyFilters() {
 }
 
 function renderFilteredBuilds(items) {
-  allBuildsList.innerHTML = '';
-  
   // Скрываем все подсказки
   noAllBuildsHint.classList.add('hidden');
   noFilteredBuildsHint.classList.add('hidden');
@@ -271,38 +292,7 @@ function renderFilteredBuilds(items) {
     return;
   }
 
-  items.slice().reverse().forEach((p) => {
-    const row = document.createElement('button');
-    row.type = 'button';
-    row.className = 'build-item';
-    row.setAttribute('data-id', p.id);
-
-    const icon = document.createElement('div');
-    icon.className = 'build-icon';
-    const img = document.createElement('img');
-    img.alt = p.class || 'Класс';
-    img.src = CLASS_ICON[p.class] || CLASS_ICON['Самурай'];
-    icon.appendChild(img);
-
-    const title = document.createElement('div');
-    title.className = 'build-title';
-    
-    const nameDiv = document.createElement('div');
-    const name = (p.name || 'Без названия').toString();
-    nameDiv.textContent = name;
-    
-    const authorDiv = document.createElement('div');
-    authorDiv.className = 'build-author';
-    authorDiv.textContent = 'Автор: ' + (p.author || '—');
-    
-    title.appendChild(nameDiv);
-    title.appendChild(authorDiv);
-
-    row.appendChild(icon);
-    row.appendChild(title);
-    row.addEventListener('click', () => { hapticTapSmart(); openPublicBuildDetail(p.id); });
-    allBuildsList.appendChild(row);
-  });
+  renderBuildsList(allBuildsList, items, null, true);
 }
 
 function renderAllBuilds() {
@@ -616,16 +606,12 @@ export function initBuilds() {
 
     if (!name)   { shake(buildNameEl); hapticERR(); focusAndScrollIntoView(buildNameEl); return; }
     
-    // Проверка на длинные слова (больше 15 символов)
-    const words = name.split(/\s+/);
-    for (const word of words) {
-      if (word.length > 15) {
-        buildNameError?.classList.remove('hidden');
-        shake(buildNameEl);
-        hapticERR();
-        focusAndScrollIntoView(buildNameEl);
-        return;
-      }
+    if (!validateBuildName(name)) {
+      buildNameError?.classList.remove('hidden');
+      shake(buildNameEl);
+      hapticERR();
+      focusAndScrollIntoView(buildNameEl);
+      return;
     }
     
     if (!klass)  { shake(classChipsEl); hapticERR(); focusAndScrollIntoView(classChipsEl); return; }

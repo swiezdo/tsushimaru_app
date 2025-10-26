@@ -3,8 +3,8 @@
 
 export const tg = window.Telegram?.WebApp || null;
 
-// Определение платформы (вынесено в отдельную функцию для переиспользования)
-function detectPlatform() {
+// Определение платформы (вычисляется один раз при загрузке)
+const platformInfo = (() => {
   if (!tg) return { isMobile: false, isDesktop: false };
   
   const platform = tg.platform || 'unknown';
@@ -19,7 +19,7 @@ function detectPlatform() {
   const isDesktop = isDesktopByPlatform || (isDesktopByUserAgent && !isMobile);
   
   return { isMobile, isDesktop };
-}
+})();
 
 // Инициализация Telegram WebApp + применение темы
 (function initTG() {
@@ -28,7 +28,7 @@ function detectPlatform() {
     tg.ready();
     tg.expand();
     
-    const { isMobile } = detectPlatform();
+    const { isMobile } = platformInfo;
     
     if (isMobile) {
       tg.requestFullscreen();
@@ -73,11 +73,11 @@ export function hideKeyboard() {
   }
 }
 
-// Утилиты для определения платформы
+// Утилиты для определения платформы (используют кешированные значения)
 export function isDesktop() {
-  return detectPlatform().isDesktop;
+  return platformInfo.isDesktop;
 }
 
 export function isMobile() {
-  return detectPlatform().isMobile;
+  return platformInfo.isMobile;
 }

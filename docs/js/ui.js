@@ -2,6 +2,8 @@
 // Управление экранами, верхней панелью, безопасными отступами и умным скроллом к полям ввода.
 
 import { tg, scrollTopSmooth } from './telegram.js';
+import { fetchProfile } from './api.js';
+import { saveProfile, loadProfileToForm } from './profile.js';
 
 // Ссылки на экраны
 export const screens = {
@@ -56,14 +58,9 @@ export function showScreen(name) {
 // Загрузка профиля с сервера при открытии экрана профиля
 async function loadProfileOnScreenOpen() {
   try {
-    // Импортируем функцию динамически, чтобы избежать циклических зависимостей
-    const { fetchProfile } = await import('./api.js');
     const serverProfile = await fetchProfile();
     
     if (serverProfile) {
-      // Импортируем функции профиля
-      const { saveProfile, loadProfileToForm } = await import('./profile.js');
-      
       // Сохраняем в LocalStorage
       saveProfile(serverProfile);
       // Обновляем форму и отображение

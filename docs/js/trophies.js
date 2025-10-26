@@ -1,7 +1,7 @@
 // trophies.js
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView } from './ui.js';
-import { shake } from './profile.js';
+import { shake, createFileKey, isImageFile, isVideoFile } from './utils.js';
 
 const trophyListEl  = $('trophyList');
 const trophyTitleEl = $('trophyTitle');
@@ -18,7 +18,6 @@ const MAX_PROOF_FILES = 12;
 const TROPHIES_URL = './assets/data/trophies.json';
 
 let TROPHIES = null;
-let proofSelected = [];
 
 async function loadTrophies() {
   if (TROPHIES) return TROPHIES;
@@ -45,6 +44,10 @@ function renderTrophyList(data) {
 }
 
 function resetProofForm() {
+  // Очищаем objectURL при сбросе формы
+  objectURLs.forEach(url => URL.revokeObjectURL(url));
+  objectURLs.clear();
+  
   if (previewEl) { previewEl.innerHTML = ''; previewEl.classList.remove('shake','error'); }
   if (proofFilesEl) proofFilesEl.value = '';
   proofSelected = [];
@@ -55,8 +58,16 @@ function resetProofForm() {
   }
 }
 
+let proofSelected = [];
+let objectURLs = new Set(); // Отслеживаем созданные objectURL для предотвращения утечек памяти
+
 function renderProofPreview() {
   if (!previewEl) return;
+  
+  // Очищаем старые objectURL
+  objectURLs.forEach(url => URL.revokeObjectURL(url));
+  objectURLs.clear();
+  
   previewEl.innerHTML = '';
   const limit = 4;
   const toShow = proofSelected.slice(0, limit);
@@ -66,12 +77,17 @@ function renderProofPreview() {
     tile.className = 'preview-item removable';
     tile.title = 'Нажмите, чтобы удалить';
 
-    if (file.type.startsWith('image/')) {
+    if (isImageFile(file)) {
       const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      img.onload = () => URL.revokeObjectURL(img.src);
+      const objectURL = URL.createObjectURL(file);
+      objectURLs.add(objectURL);
+      img.src = objectURL;
+      img.onload = () => {
+        // Не отзываем URL сразу, так как изображение может быть показано снова
+        // URL будет отозван при следующем вызове renderProofPreview
+      };
       tile.appendChild(img);
-    } else if (file.type.startsWith('video/')) {
+    } else if (isVideoFile(file)) {
       tile.textContent = '🎥';
     } else {
       tile.textContent = '📄';
@@ -147,7 +163,7 @@ export async function initTrophies() {
       const files = Array.from(proofFilesEl.files || []);
       if (!files.length) { shake(previewEl || proofAddBtn); focusAndScrollIntoView(proofAddBtn || previewEl); return; }
 
-      const keyOf = (f) => `${f.name}::${f.size}::${f.lastModified}`;
+      const keyOf = (f) => createFileKey(f);
       const existing = new Set(proofSelected.map(keyOf));
       const freeSlots = Math.max(0, MAX_PROOF_FILES - proofSelected.length);
       const incoming = files.filter(f => !existing.has(keyOf(f)));
