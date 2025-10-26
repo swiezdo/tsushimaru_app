@@ -11,15 +11,7 @@ const GOALS      = ['🏆 Получение трофеев','🔎 Узнать 
 const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','🏅 Платина','👻 Кошмар','🔥 HellMode'];
 
 // ---------- LocalStorage ----------
-const LS_KEY_PROFILE = 'tsu_profile_v1';
-
-function saveProfile(data) {
-  return safeLocalStorageSet(LS_KEY_PROFILE, data);
-}
-
-function loadProfile() {
-  return safeLocalStorageGet(LS_KEY_PROFILE, null);
-}
+// Удалено: больше не используем localStorage для профиля
 
 // ---------- Отображение ----------
 const v_real_name  = $('v_real_name');
@@ -87,27 +79,28 @@ async function fetchProfileFromServer() {
   try {
     const serverProfile = await fetchProfile();
     if (serverProfile) {
-      // Сохраняем в LocalStorage
-      saveProfile(serverProfile);
       // Обновляем форму и отображение
       loadProfileToForm(serverProfile);
-      console.log('Профиль загружен с сервера и обновлен');
+      console.log('Профиль загружен с сервера');
     }
   } catch (error) {
     console.log('Ошибка загрузки профиля с сервера:', error);
     
-    // Показываем предупреждение только для критических ошибок
+    // Показываем ошибку для всех случаев (online-only режим)
     if (error.status === 401) {
       tg?.showPopup?.({ 
         title: 'Ошибка авторизации', 
         message: 'Не удалось авторизоваться в системе.', 
         buttons: [{ type: 'ok' }] 
       });
-    } else if (error.status !== 404) {
-      // 404 - профиль не создан, это нормально
+    } else if (error.status === 404) {
+      // 404 - профиль не создан, это нормально для первого входа
+      console.log('Профиль не найден - первый вход пользователя');
+    } else {
+      // Любые другие ошибки (сеть, сервер) - показываем ошибку
       tg?.showPopup?.({ 
-        title: 'Предупреждение', 
-        message: 'Не удалось загрузить профиль с сервера. Используются локальные данные.', 
+        title: 'Ошибка сети', 
+        message: 'Не удалось загрузить профиль. Проверьте подключение к интернету.', 
         buttons: [{ type: 'ok' }] 
       });
     }
@@ -124,14 +117,8 @@ export function initProfile() {
   renderChips(cache.goals,      GOALS,      { onChange: refreshProfileView });
   renderChips(cache.difficulty, DIFFICULTY, { onChange: refreshProfileView });
 
-  // Загружаем сохраненный профиль из LocalStorage и сразу показываем
-  const savedProfile = loadProfile();
-  if (savedProfile) {
-    loadProfileToForm(savedProfile);
-  }
-
-  // НЕ загружаем профиль с сервера при инициализации
-  // Это будет сделано только когда пользователь откроет профиль
+  // Профиль не загружается при инициализации
+  // Загрузка происходит только при открытии экрана профиля
 
 
   if (!profileForm) return;
@@ -223,9 +210,6 @@ export function initProfile() {
       // Отправляем данные на сервер
       await apiSaveProfile(profileData);
       
-      // Сохраняем в LocalStorage
-      saveProfile(profileData);
-      
       // Обновляем отображение
       if (v_real_name) v_real_name.textContent = profileData.real_name || '—';
       if (v_psn_id) v_psn_id.textContent = profileData.psn_id || '—';
@@ -265,5 +249,10 @@ export function initProfile() {
   profileSaveBtn?.addEventListener('click', () => profileForm.requestSubmit());
 }
 
+// Функция для загрузки профиля при открытии экрана
+export async function loadProfileOnScreenOpen() {
+  await fetchProfileFromServer();
+}
+
 // Экспорт вспомогательных
-export { renderChips, activeValues, setActive, shake, refreshProfileView, saveProfile, loadProfileToForm };
+export { renderChips, activeValues, setActive, shake, refreshProfileView, loadProfileToForm };

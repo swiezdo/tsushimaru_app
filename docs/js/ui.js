@@ -2,8 +2,7 @@
 // Управление экранами, верхней панелью, безопасными отступами и умным скроллом к полям ввода.
 
 import { tg, scrollTopSmooth } from './telegram.js';
-import { fetchProfile } from './api.js';
-import { saveProfile, loadProfileToForm } from './profile.js';
+import { loadProfileOnScreenOpen } from './profile.js';
 
 // Ссылки на экраны
 export const screens = {
@@ -54,37 +53,6 @@ export function showScreen(name) {
 
   scrollTopSmooth();
 }
-
-// Загрузка профиля с сервера при открытии экрана профиля
-async function loadProfileOnScreenOpen() {
-  // Очищаем ошибки и анимации при открытии профиля
-  const nameInput = document.getElementById('real_name');
-  const psnInput = document.getElementById('psn_id');
-  const nameError = document.getElementById('nameError');
-  const psnError = document.getElementById('psnError');
-
-  nameInput?.classList.remove('shake');
-  psnInput?.classList.remove('shake');
-  nameError?.classList.add('hidden');
-  psnError?.classList.add('hidden');
-
-  try {
-    const serverProfile = await fetchProfile();
-    
-    if (serverProfile) {
-      // Сохраняем в LocalStorage
-      saveProfile(serverProfile);
-      // Обновляем форму и отображение
-      loadProfileToForm(serverProfile);
-      console.log('Профиль загружен с сервера при открытии экрана');
-    }
-  } catch (error) {
-    console.log('Ошибка загрузки профиля с сервера при открытии экрана:', error);
-    // Не показываем ошибку пользователю, так как это не критично
-  }
-}
-
-// Безопасные отступы (верх, низ, бока)
 export function applySafeInsets() {
   const root = document.querySelector('main.container');
   if (!root) return;
