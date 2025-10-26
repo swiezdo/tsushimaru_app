@@ -6,12 +6,14 @@ import os
 import uvicorn
 import shutil
 import json
+import time
+import requests
 from fastapi import FastAPI, HTTPException, Depends, Header, Form, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from PIL import Image
 import re
 
@@ -37,6 +39,44 @@ DB_PATH = os.getenv("DB_PATH", "/home/ubuntu/miniapp_api/app.db")
 # Переменные для системы трофеев
 TROPHY_GROUP_CHAT_ID = os.getenv("TROPHY_GROUP_CHAT_ID", "-1002348168326")
 TROPHY_GROUP_TOPIC_ID = os.getenv("TROPHY_GROUP_TOPIC_ID", "5675")
+
+# Кеш для данных трофеев
+_trophies_cache: Dict[str, Any] = {}
+_trophies_cache_time: float = 0
+CACHE_TTL = 3600  # 1 час
+
+def load_trophies_data() -> Dict[str, Any]:
+    """
+    Загружает данные трофеев с фронтенда с кешированием.
+    """
+    global _trophies_cache, _trophies_cache_time
+    
+    current_time = time.time()
+    
+    # Проверяем кеш
+    if _trophies_cache and (current_time - _trophies_cache_time) < CACHE_TTL:
+        return _trophies_cache
+    
+    # Загружаем с фронтенда
+    try:
+        frontend_url = os.getenv('FRONTEND_URL', ALLOWED_ORIGIN)
+        trophies_url = f"{frontend_url}/docs/assets/data/trophies.json"
+        
+        response = requests.get(trophies_url, timeout=10)
+        response.raise_for_status()
+        
+        _trophies_cache = response.json()
+        _trophies_cache_time = current_time
+        
+        return _trophies_cache
+    except Exception as e:
+        print(f"Ошибка загрузки данных трофея с URL: {e}")
+        
+        # Если есть старый кеш, используем его
+        if _trophies_cache:
+            return _trophies_cache
+        
+        raise HTTPException(status_code=500, detail="Не удалось загрузить данные трофеев")
 
 # Функции для работы с Telegram Bot API
 async def send_telegram_message(chat_id: str, text: str, reply_markup: dict = None):
@@ -683,14 +723,9 @@ async def submit_trophy_application(
             detail=f"Ошибка обработки изображений: {str(e)}"
         )
     
-    # Загружаем данные трофея из JSON
+    # Загружаем данные трофея из фронтенда
     try:
-        # Определяем путь к проекту относительно текущего файла
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        trophies_json_path = os.path.join(project_root, 'docs', 'assets', 'data', 'trophies.json')
-        with open(trophies_json_path, 'r', encoding='utf-8') as f:
-            trophies_data = json.load(f)
-        
+        trophies_data = load_trophies_data()
         trophy_info = trophies_data.get(trophy_id, {})
         trophy_name = trophy_info.get('name', trophy_id)
         trophy_emoji = trophy_info.get('emoji', '🏆')
@@ -793,12 +828,7 @@ async def approve_trophy_application(
     
     # Загружаем данные трофея для уведомления
     try:
-        # Определяем путь к проекту относительно текущего файла
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        trophies_json_path = os.path.join(project_root, 'docs', 'assets', 'data', 'trophies.json')
-        with open(trophies_json_path, 'r', encoding='utf-8') as f:
-            trophies_data = json.load(f)
-        
+        trophies_data = load_trophies_data()
         trophy_info = trophies_data.get(trophy_id, {})
         trophy_name = trophy_info.get('name', trophy_id)
         trophy_emoji = trophy_info.get('emoji', '🏆')
@@ -858,12 +888,7 @@ async def reject_trophy_application(
     
     # Загружаем данные трофея для уведомления
     try:
-        # Определяем путь к проекту относительно текущего файла
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        trophies_json_path = os.path.join(project_root, 'docs', 'assets', 'data', 'trophies.json')
-        with open(trophies_json_path, 'r', encoding='utf-8') as f:
-            trophies_data = json.load(f)
-        
+        trophies_data = load_trophies_data()
         trophy_info = trophies_data.get(trophy_id, {})
         trophy_name = trophy_info.get('name', trophy_id)
         trophy_emoji = trophy_info.get('emoji', '🏆')
