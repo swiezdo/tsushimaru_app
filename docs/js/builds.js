@@ -153,8 +153,19 @@ function renderMyBuilds() {
     
     const nameDiv = document.createElement('div');
     const name = (b.name || 'Без названия').toString();
-    const safeName = name.length > 20 ? (name.slice(0, 20) + '…') : name;
-    nameDiv.textContent = safeName;
+    nameDiv.textContent = name; // Не обрезаем, CSS сделает ellipsis
+    
+    // Адаптивный размер шрифта
+    const textLength = name.length;
+    if (textLength <= 15) {
+      nameDiv.style.fontSize = '16px';
+    } else if (textLength <= 22) {
+      nameDiv.style.fontSize = '14px';
+    } else if (textLength <= 26) {
+      nameDiv.style.fontSize = '13px';
+    } else {
+      nameDiv.style.fontSize = '12px';
+    }
     
     const dateDiv = document.createElement('div');
     dateDiv.className = 'build-author';
@@ -198,8 +209,19 @@ function renderAllBuilds() {
     
     const nameDiv = document.createElement('div');
     const name = (p.name || 'Без названия').toString();
-    const safeName = name.length > 20 ? (name.slice(0, 20) + '…') : name;
-    nameDiv.textContent = safeName;
+    nameDiv.textContent = name; // Не обрезаем, CSS сделает ellipsis
+    
+    // Адаптивный размер шрифта
+    const textLength = name.length;
+    if (textLength <= 15) {
+      nameDiv.style.fontSize = '16px';
+    } else if (textLength <= 22) {
+      nameDiv.style.fontSize = '14px';
+    } else if (textLength <= 26) {
+      nameDiv.style.fontSize = '13px';
+    } else {
+      nameDiv.style.fontSize = '12px';
+    }
     
     const authorDiv = document.createElement('div');
     authorDiv.className = 'build-author';
@@ -270,6 +292,11 @@ function updatePublishButton(myId) {
 }
 
 // Открытие карточек
+function formatTopbarTitle(name, maxChars = 18) {
+  if (!name || name.length <= maxChars) return name;
+  return name.substring(0, maxChars) + '-\n' + name.substring(maxChars);
+}
+
 function openBuildDetail(id) {
   const all = loadBuilds();
   const b = all.find((x) => String(x.id) === String(id));
@@ -296,7 +323,7 @@ function openBuildDetail(id) {
 
   updatePublishButton(b.id);
   showScreen('buildDetail');
-  setTopbar(true, b.name || 'Билд'); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
+  setTopbar(true, formatTopbarTitle(b.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
 }
 function openPublicBuildDetail(pubId) {
   const pubs = loadPublicBuilds();
@@ -326,7 +353,7 @@ function openPublicBuildDetail(pubId) {
   });
 
   showScreen('buildPublicDetail');
-  setTopbar(true, p.name || 'Билд'); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
+  setTopbar(true, formatTopbarTitle(p.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
 }
 
 // Лайтбокс
@@ -427,7 +454,7 @@ export function initBuilds() {
     e.preventDefault();
 
     let name = (buildNameEl?.value || '').trim();
-    if (name.length > 20) name = name.slice(0, 20);
+    if (name.length > 30) name = name.slice(0, 30);
 
     const klass = activeValues(classChipsEl)[0] || '';
     const tags  = activeValues(tagsChipsEl);
