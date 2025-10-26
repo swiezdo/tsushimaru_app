@@ -150,9 +150,23 @@ function renderMyBuilds() {
 
     const title = document.createElement('div');
     title.className = 'build-title';
+    
+    const nameDiv = document.createElement('div');
     const name = (b.name || 'Без названия').toString();
     const safeName = name.length > 20 ? (name.slice(0, 20) + '…') : name;
-    title.textContent = safeName;
+    nameDiv.textContent = safeName;
+    
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'build-author';
+    try {
+      const d = new Date(b.createdAt);
+      dateDiv.textContent = isNaN(d.getTime()) ? '—' : 'Создан: ' + d.toLocaleDateString('ru-RU');
+    } catch {
+      dateDiv.textContent = '—';
+    }
+    
+    title.appendChild(nameDiv);
+    title.appendChild(dateDiv);
 
     row.appendChild(icon);
     row.appendChild(title);
@@ -181,18 +195,18 @@ function renderAllBuilds() {
 
     const title = document.createElement('div');
     title.className = 'build-title';
+    
+    const nameDiv = document.createElement('div');
     const name = (p.name || 'Без названия').toString();
     const safeName = name.length > 20 ? (name.slice(0, 20) + '…') : name;
+    nameDiv.textContent = safeName;
     
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = safeName;
+    const authorDiv = document.createElement('div');
+    authorDiv.className = 'build-author';
+    authorDiv.textContent = 'Автор: ' + (p.author || '—');
     
-    const authorSpan = document.createElement('span');
-    authorSpan.className = 'build-author';
-    authorSpan.textContent = 'Автор: ' + (p.author || '—');
-    
-    title.appendChild(nameSpan);
-    title.appendChild(authorSpan);
+    title.appendChild(nameDiv);
+    title.appendChild(authorDiv);
 
     row.appendChild(icon);
     row.appendChild(title);

@@ -343,7 +343,7 @@ body {
 /* ========== BUILDS ========== */
 .list-builds { display: grid; gap: var(--space-2); }
 .build-item {
-  display: grid; grid-template-columns: 48px 1fr; align-items: center;
+  display: grid; grid-template-columns: 48px 1fr; gap: var(--space-2); align-items: center;
   padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-border);
   background: transparent; cursor: pointer; min-height: 48px; color: var(--tg-tx);
 }
@@ -355,15 +355,18 @@ body {
   margin-right: var(--space-3);
 }
 .build-icon img { width: 70%; height: 70%; object-fit: contain; opacity: .95; }
-.build-title { 
-  font-size: var(--fs-16); 
-  overflow: hidden; 
-  color: var(--tg-tx);
+.build-title {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: center;
+  gap: var(--space-1);
+  font-size: var(--fs-16);
+  color: var(--tg-tx);
 }
-.build-author { color: var(--tg-hint); font-size: var(--fs-14); }
+.build-author {
+  font-size: var(--fs-13);
+  color: var(--muted);
+}
 .muted { color: var(--tg-hint); font-size: var(--fs-14); }
 
 /* ========== SHOTS GRID ========== */
