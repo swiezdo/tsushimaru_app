@@ -119,3 +119,78 @@ export function focusAndScrollIntoView(el) {
     }
   });
 })();
+
+// ===== Закрытие клавиатуры на iOS при тапе вне поля ввода =====
+(function installIOSKeyboardClose() {
+  // Проверяем, что мы на iOS устройстве
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  if (!isIOS) return; // Если не iOS, ничего не делаем
+  
+  // Функция для закрытия клавиатуры
+  function dismissKeyboard() {
+    // Убираем фокус с активного элемента
+    const activeElement = document.activeElement;
+    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+      activeElement.blur();
+    }
+    
+    // Дополнительно пытаемся закрыть клавиатуру через программный способ
+    // Это работает не всегда, но может помочь в некоторых случаях
+    if (window.scrollTo) {
+      window.scrollTo(0, window.scrollY);
+    }
+  }
+  
+  // Обработчик тапа вне поля ввода
+  document.addEventListener('touchstart', function(event) {
+    const target = event.target;
+    
+    // Если тап не по полю ввода или его родительским элементам
+    if (!target.closest('input') && !target.closest('textarea')) {
+      dismissKeyboard();
+    }
+  }, { passive: true });
+  
+  // Дополнительный обработчик для клика мышью (если используется)
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    
+    // Если клик не по полю ввода или его родительским элементам
+    if (!target.closest('input') && !target.closest('textarea')) {
+      dismissKeyboard();
+    }
+  }, { passive: true });
+  
+  // Обработчик для кнопок - закрываем клавиатуру при нажатии на кнопки
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    
+    // Если клик по кнопке, ссылке или другому интерактивному элементу
+    if (target.tagName === 'BUTTON' || 
+        target.tagName === 'A' || 
+        target.classList.contains('btn') ||
+        target.classList.contains('card') ||
+        target.classList.contains('list-btn')) {
+      dismissKeyboard();
+    }
+  }, { passive: true });
+  
+  // Обработчик клавиш для закрытия клавиатуры
+  document.addEventListener('keydown', function(event) {
+    // Закрываем клавиатуру при нажатии Escape или Enter (для однострочных полей)
+    if (event.key === 'Escape') {
+      dismissKeyboard();
+    } else if (event.key === 'Enter') {
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.tagName === 'INPUT' && activeElement.type !== 'textarea') {
+        dismissKeyboard();
+      }
+    }
+  });
+  
+  // Дополнительная функция для программного закрытия клавиатуры
+  // Можно вызывать из других частей приложения
+  window.dismissIOSKeyboard = dismissKeyboard;
+})();

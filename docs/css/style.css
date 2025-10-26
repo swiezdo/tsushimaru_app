@@ -639,3 +639,59 @@ html.tg .only-browser { display: none; }
   font-size: var(--fs-16);
   margin: 0;
 }
+
+/* ========== iOS KEYBOARD IMPROVEMENTS ========== */
+/* Улучшения для работы с клавиатурой на iOS */
+
+/* Предотвращаем зум при фокусе на полях ввода на iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .input input,
+  .input textarea {
+    font-size: 16px; /* Минимальный размер шрифта для предотвращения зума */
+  }
+}
+
+/* Улучшаем визуальную обратную связь при тапе */
+.input input:active,
+.input textarea:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Стили для лучшего отображения клавиатуры на iOS */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari */
+  .input input,
+  .input textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: var(--radius-md);
+  }
+  
+  /* Убираем стандартные стили iOS для полей ввода */
+  .input input[type="text"],
+  .input input[type="email"],
+  .input input[type="password"],
+  .input textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-border-radius: var(--radius-md);
+    border-radius: var(--radius-md);
+  }
+}
+
+/* Дополнительные стили для улучшения UX на мобильных устройствах */
+@media (max-width: 768px) {
+  .input input,
+  .input textarea {
+    /* Увеличиваем область тапа для лучшего UX */
+    min-height: 44px;
+    padding: var(--space-3) var(--space-3);
+  }
+  
+  /* Улучшаем читаемость текста на мобильных */
+  .input input::placeholder,
+  .input textarea::placeholder {
+    opacity: 0.7;
+  }
+}
