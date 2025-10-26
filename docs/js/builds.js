@@ -154,12 +154,12 @@ function renderMyBuilds() {
     const nameDiv = document.createElement('div');
     let name = (b.name || 'Без названия').toString();
     
-    // Защита от длинных слов без пробелов: если есть слово длиннее 18 символов, добавляем перенос
+    // Защита от длинных слов без пробелов: если есть слово длиннее 17 символов, добавляем перенос
     const words = name.split(/(\s+)/);
     for (let i = 0; i < words.length; i += 2) { // i+=2 чтобы пропускать пробелы
-      if (words[i].length > 18) {
-        const part1 = words[i].substring(0, 18);
-        const part2 = words[i].substring(18);
+      if (words[i].length > 17) {
+        const part1 = words[i].substring(0, 17);
+        const part2 = words[i].substring(17);
         words[i] = part1 + '-\n' + part2;
       }
     }
@@ -210,12 +210,12 @@ function renderAllBuilds() {
     const nameDiv = document.createElement('div');
     let name = (p.name || 'Без названия').toString();
     
-    // Защита от длинных слов без пробелов: если есть слово длиннее 18 символов, добавляем перенос
+    // Защита от длинных слов без пробелов: если есть слово длиннее 17 символов, добавляем перенос
     const words = name.split(/(\s+)/);
     for (let i = 0; i < words.length; i += 2) { // i+=2 чтобы пропускать пробелы
-      if (words[i].length > 18) {
-        const part1 = words[i].substring(0, 18);
-        const part2 = words[i].substring(18);
+      if (words[i].length > 17) {
+        const part1 = words[i].substring(0, 17);
+        const part2 = words[i].substring(17);
         words[i] = part1 + '-\n' + part2;
       }
     }
@@ -295,7 +295,25 @@ function updatePublishButton(myId) {
 function formatTopbarTitle(name, maxChars = 18) {
   if (!name || name.length <= maxChars) return name;
   
-  // Ищем последний пробел до maxChars, чтобы не разбивать слово
+  // Проверяем, есть ли длинное слово без пробелов (длиннее 17 символов)
+  const words = name.split(/(\s+)/);
+  let hasLongWord = false;
+  for (let i = 0; i < words.length; i += 2) {
+    if (words[i].length > 17) {
+      hasLongWord = true;
+      // Разбиваем длинное слово с дефисом
+      const part1 = words[i].substring(0, 17);
+      const part2 = words[i].substring(17);
+      words[i] = part1 + '-\n' + part2;
+    }
+  }
+  
+  // Если был длинный номер слова, возвращаем результат
+  if (hasLongWord) {
+    return words.join('');
+  }
+  
+  // Иначе ищем последний пробел до maxChars, чтобы не разбивать слово
   let splitIndex = maxChars;
   for (let i = maxChars; i >= 0; i--) {
     if (name[i] === ' ') {
