@@ -278,6 +278,11 @@ function applyFilters() {
 }
 
 function renderFilteredBuilds(items) {
+  // Очищаем контейнер в любом случае
+  if (allBuildsList) {
+    allBuildsList.innerHTML = '';
+  }
+  
   // Скрываем все подсказки
   noAllBuildsHint.classList.add('hidden');
   noFilteredBuildsHint.classList.add('hidden');
