@@ -183,7 +183,7 @@ function renderBuildsList(container, items, emptyHint, isPublic = false) {
 
 // Рендер списков
 function renderMyBuilds() {
-  getMyBuilds().then(builds => {
+  return getMyBuilds().then(builds => {
     renderBuildsList(myBuildsList, builds, noBuildsHint, false);
   }).catch(err => {
     tg?.showAlert?.('Ошибка загрузки моих билдов: ' + err);
@@ -249,7 +249,7 @@ function updateFilterButtons() {
 }
 
 function applyFilters() {
-  getPublicBuilds().then(builds => {
+  return getPublicBuilds().then(builds => {
     const filteredItems = filterBuilds(builds);
     renderFilteredBuilds(filteredItems);
   }).catch(err => {
@@ -281,7 +281,7 @@ function renderFilteredBuilds(items) {
 }
 
 function renderAllBuilds() {
-  applyFilters();
+  return applyFilters();
 }
 
 // Управление модальным окном фильтров
