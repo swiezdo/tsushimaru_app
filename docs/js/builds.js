@@ -60,8 +60,10 @@ const noFilteredBuildsHint = $('noFilteredBuildsHint');
 const classFilterBtn = $('classFilterBtn');
 const tagsFilterBtn = $('tagsFilterBtn');
 const resetFiltersBtn = $('resetFiltersBtn');
-const classDropdown = $('classDropdown');
-const tagsDropdown = $('tagsDropdown');
+const filterModal = $('filterModal');
+const filterModalTitle = $('filterModalTitle');
+const filterModalOptions = $('filterModalOptions');
+const filterModalOkBtn = $('filterModalOkBtn');
 
 let currentBuildId = null;
 let shot1Data = null;
@@ -70,8 +72,7 @@ let shot2Data = null;
 // Состояние фильтров
 let selectedClasses = [];
 let selectedTags = [];
-let isClassDropdownOpen = false;
-let isTagsDropdownOpen = false;
+let currentFilterType = null;
 
 async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
   return new Promise((resolve, reject) => {
@@ -302,61 +303,67 @@ function renderAllBuilds() {
   applyFilters();
 }
 
-// Управление выпадающими списками
-function toggleFilterDropdown(type) {
+// Управление модальным окном фильтров
+function openFilterModal(type) {
+  currentFilterType = type;
+  
+  if (!filterModal || !filterModalTitle || !filterModalOptions) return;
+  
+  // Устанавливаем заголовок
   if (type === 'class') {
-    isClassDropdownOpen = !isClassDropdownOpen;
-    isTagsDropdownOpen = false;
-    
-    if (classDropdown) {
-      classDropdown.classList.toggle('open', isClassDropdownOpen);
-    }
-    if (tagsDropdown) {
-      tagsDropdown.classList.remove('open');
-    }
+    filterModalTitle.textContent = 'Класс';
+    renderModalOptions(CLASS_VALUES, selectedClasses);
   } else if (type === 'tags') {
-    isTagsDropdownOpen = !isTagsDropdownOpen;
-    isClassDropdownOpen = false;
-    
-    if (tagsDropdown) {
-      tagsDropdown.classList.toggle('open', isTagsDropdownOpen);
-    }
-    if (classDropdown) {
-      classDropdown.classList.remove('open');
-    }
+    filterModalTitle.textContent = 'Теги';
+    renderModalOptions(TAG_VALUES, selectedTags);
   }
+  
+  filterModal.classList.remove('hidden');
 }
 
-function closeAllDropdowns() {
-  isClassDropdownOpen = false;
-  isTagsDropdownOpen = false;
+function renderModalOptions(values, selectedValues) {
+  if (!filterModalOptions) return;
   
-  if (classDropdown) {
-    classDropdown.classList.remove('open');
+  filterModalOptions.innerHTML = '';
+  
+  values.forEach(value => {
+    const label = document.createElement('label');
+    label.className = 'filter-option';
+    
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = value;
+    checkbox.checked = selectedValues.includes(value);
+    
+    const span = document.createElement('span');
+    span.textContent = value;
+    
+    label.appendChild(checkbox);
+    label.appendChild(span);
+    
+    checkbox.addEventListener('change', (e) => {
+      hapticTapSmart();
+      updateFilterSelection(currentFilterType, e.target.value);
+    });
+    
+    filterModalOptions.appendChild(label);
+  });
+}
+
+function closeFilterModal() {
+  if (filterModal) {
+    filterModal.classList.add('hidden');
   }
-  if (tagsDropdown) {
-    tagsDropdown.classList.remove('open');
-  }
+  currentFilterType = null;
 }
 
 function resetFilters() {
   selectedClasses = [];
   selectedTags = [];
   
-  // Сбрасываем чекбоксы
-  if (classDropdown) {
-    const checkboxes = classDropdown.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(cb => cb.checked = false);
-  }
-  
-  if (tagsDropdown) {
-    const checkboxes = tagsDropdown.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(cb => cb.checked = false);
-  }
-  
   updateFilterButtons();
   applyFilters();
-  closeAllDropdowns();
+  closeFilterModal();
 }
 
 // Создание билда
@@ -693,18 +700,16 @@ export function initBuilds() {
 
   // Обработчики фильтров
   if (classFilterBtn) {
-    classFilterBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
+    classFilterBtn.addEventListener('click', () => {
       hapticTapSmart();
-      toggleFilterDropdown('class');
+      openFilterModal('class');
     });
   }
   
   if (tagsFilterBtn) {
-    tagsFilterBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
+    tagsFilterBtn.addEventListener('click', () => {
       hapticTapSmart();
-      toggleFilterDropdown('tags');
+      openFilterModal('tags');
     });
   }
   
@@ -715,33 +720,22 @@ export function initBuilds() {
     });
   }
   
-  // Обработчики чекбоксов в выпадающих списках
-  if (classDropdown) {
-    classDropdown.addEventListener('change', (e) => {
-      if (e.target.type === 'checkbox') {
-        hapticTapSmart();
-        updateFilterSelection('class', e.target.value);
-      }
+  // Обработчик кнопки ОК в модальном окне
+  if (filterModalOkBtn) {
+    filterModalOkBtn.addEventListener('click', () => {
+      hapticOK();
+      closeFilterModal();
     });
   }
   
-  if (tagsDropdown) {
-    tagsDropdown.addEventListener('change', (e) => {
-      if (e.target.type === 'checkbox') {
-        hapticTapSmart();
-        updateFilterSelection('tags', e.target.value);
+  // Закрытие модального окна при клике на фон
+  if (filterModal) {
+    filterModal.addEventListener('click', (e) => {
+      if (e.target === filterModal) {
+        closeFilterModal();
       }
     });
   }
-  
-  // Закрытие выпадающих списков при клике вне их
-  document.addEventListener('click', (e) => {
-    const isFilterElement = e.target.closest('.filters-container') || 
-                           e.target.closest('.filter-dropdown');
-    if (!isFilterElement) {
-      closeAllDropdowns();
-    }
-  });
 
   renderMyBuilds();
   renderAllBuilds();

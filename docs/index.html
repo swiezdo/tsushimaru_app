@@ -201,65 +201,15 @@
           
           <!-- Фильтры -->
           <div class="filters-container">
-            <span class="filter-label">Фильтры:</span>
-            <div class="filter-chips">
-              <button type="button" class="filter-chip" id="classFilterBtn">
-                Класс
-              </button>
-              <button type="button" class="filter-chip" id="tagsFilterBtn">
-                Теги
-              </button>
-            </div>
-            <button type="button" class="reset-filters-btn" id="resetFiltersBtn">
-              Сбросить фильтры
+            <button type="button" class="filter-chip" id="classFilterBtn">
+              Класс
             </button>
-          </div>
-          
-          <!-- Выпадающие списки фильтров -->
-          <div class="filter-dropdown" id="classDropdown">
-            <div class="filter-options">
-              <label class="filter-option">
-                <input type="checkbox" value="Самурай">
-                <span>Самурай</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" value="Охотник">
-                <span>Охотник</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" value="Убийца">
-                <span>Убийца</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" value="Ронин">
-                <span>Ронин</span>
-              </label>
-            </div>
-          </div>
-          
-          <div class="filter-dropdown" id="tagsDropdown">
-            <div class="filter-options">
-              <label class="filter-option">
-                <input type="checkbox" value="HellMode">
-                <span>HellMode</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" value="Спидран">
-                <span>Спидран</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" value="Соло">
-                <span>Соло</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" value="Сюжет">
-                <span>Сюжет</span>
-              </label>
-              <label class="filter-option">
-                <input type="checkbox" value="Соперники">
-                <span>Соперники</span>
-              </label>
-            </div>
+            <button type="button" class="filter-chip" id="tagsFilterBtn">
+              Теги
+            </button>
+            <button type="button" class="reset-filters-btn" id="resetFiltersBtn">
+              Сбросить
+            </button>
           </div>
           
           <div id="allBuildsList" class="list-builds"></div>
@@ -441,6 +391,17 @@
     <!-- ====== LIGHTBOX ====== -->
     <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true">
       <img id="lightboxImg" alt="Просмотр изображения" />
+    </div>
+
+    <!-- ====== FILTER MODAL ====== -->
+    <div id="filterModal" class="filter-modal hidden" role="dialog" aria-modal="true">
+      <div class="filter-modal-content">
+        <h3 class="filter-modal-title" id="filterModalTitle">Фильтр</h3>
+        <div class="filter-modal-options" id="filterModalOptions">
+          <!-- Динамически заполняется JavaScript -->
+        </div>
+        <button type="button" class="btn primary wide" id="filterModalOkBtn">ОК</button>
+      </div>
     </div>
 
     <!-- Модульный бандл -->
