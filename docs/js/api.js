@@ -6,7 +6,7 @@ import { tg } from './telegram.js';
 // Конфигурация endpoints
 const LOCAL_PI_IP = '192.168.0.192';
 const DOMAIN_URL = 'https://tsushimaru.com';
-const LOCAL_URL = `http://${LOCAL_PI_IP}:8000`;
+const LOCAL_URL = `https://${LOCAL_PI_IP}:8000`;
 const STORAGE_KEY = 'tsushima_api_endpoint';
 
 // Функция определения endpoint
