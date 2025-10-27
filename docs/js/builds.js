@@ -447,6 +447,11 @@ function openBuildDetail(id) {
     vd_tags.textContent  = (b.tags && b.tags.length) ? b.tags.join(', ') : '—';
     vd_desc.textContent  = b.description || b.desc || '—';
 
+    const vd_build_id = $('vd_build_id');
+    if (vd_build_id) {
+      vd_build_id.textContent = `#${b.build_id || b.id}`;
+    }
+
     buildDetailShots.innerHTML = '';
     const shots = [b.photo_1, b.photo_2].filter(Boolean);
     shots.forEach((photoPath) => {
@@ -478,6 +483,11 @@ function openPublicBuildDetail(pubId) {
     pd_tags.textContent  = (p.tags && p.tags.length) ? p.tags.join(', ') : '—';
     pd_desc.textContent  = p.description || p.desc || '—';
     pd_author.textContent = p.author || '—';
+
+    const pd_build_id = $('pd_build_id');
+    if (pd_build_id) {
+      pd_build_id.textContent = `#${p.build_id || p.id}`;
+    }
 
     try {
       const d = new Date(p.created_at * 1000);
