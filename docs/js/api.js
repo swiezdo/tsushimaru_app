@@ -11,11 +11,9 @@ const STORAGE_KEY = 'tsushima_api_endpoint';
 
 // Функция определения endpoint
 async function detectApiEndpoint() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        console.log('Используем сохраненный endpoint:', saved);
-        return saved;
-    }
+    // Автоматический сброс localStorage при каждом входе
+    console.log('Сбрасываем localStorage для переопределения endpoint...');
+    localStorage.removeItem(STORAGE_KEY);
 
     console.log('Проверяем доступность домена...');
     try {
