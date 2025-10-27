@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from typing import Optional, List, Dict, Any
-from PIL import Image
+from PIL import Image, ImageOps
 import re
 
 # Импортируем наши модули
@@ -549,6 +549,8 @@ async def create_build_endpoint(
         # Обработка первого изображения
         photo_1_path = os.path.join(builds_dir, 'photo_1.jpg')
         image1 = Image.open(photo_1.file)
+        # Исправляем ориентацию согласно EXIF-метаданным
+        image1 = ImageOps.exif_transpose(image1)
         # Конвертируем в RGB если нужно (PNG с альфа-каналом)
         if image1.mode in ('RGBA', 'LA', 'P'):
             background = Image.new('RGB', image1.size, (255, 255, 255))
@@ -562,6 +564,8 @@ async def create_build_endpoint(
         # Обработка второго изображения
         photo_2_path = os.path.join(builds_dir, 'photo_2.jpg')
         image2 = Image.open(photo_2.file)
+        # Исправляем ориентацию согласно EXIF-метаданным
+        image2 = ImageOps.exif_transpose(image2)
         if image2.mode in ('RGBA', 'LA', 'P'):
             background = Image.new('RGB', image2.size, (255, 255, 255))
             if image2.mode == 'P':
@@ -823,6 +827,9 @@ async def submit_trophy_application(
             
             # Открываем изображение через Pillow
             image = Image.open(photo.file)
+            
+            # Исправляем ориентацию согласно EXIF-метаданным
+            image = ImageOps.exif_transpose(image)
             
             # Конвертируем в RGB если нужно
             if image.mode in ('RGBA', 'LA', 'P'):
