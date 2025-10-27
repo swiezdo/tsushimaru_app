@@ -386,8 +386,7 @@ async def save_profile(
         "platforms": platforms,
         "modes": modes,
         "goals": goals,
-        "difficulties": difficulties,
-        "trophies": []
+        "difficulties": difficulties
     }
 
     # Сохраняем профиль

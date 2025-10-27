@@ -147,22 +147,44 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         # Фильтруем пустые значения и сохраняем только непустые трофеи
         trophies_str = ','.join([t.strip() for t in trophies_list if t and t.strip()])
         
-        # Выполняем INSERT OR REPLACE
-        cursor.execute('''
-            INSERT OR REPLACE INTO users 
-            (user_id, real_name, psn_id, platforms, modes, goals, difficulties, trophies, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            user_id,
-            profile_data.get('real_name', ''),
-            profile_data.get('psn_id', ''),
-            platforms_str,
-            modes_str,
-            goals_str,
-            difficulties_str,
-            trophies_str,
-            current_time
-        ))
+        # Проверяем существует ли пользователь
+        cursor.execute('SELECT user_id FROM users WHERE user_id = ?', (user_id,))
+        exists = cursor.fetchone() is not None
+
+        if exists:
+            # UPDATE существующего пользователя БЕЗ поля trophies
+            cursor.execute('''
+                UPDATE users 
+                SET real_name = ?, psn_id = ?, platforms = ?, modes = ?, 
+                    goals = ?, difficulties = ?, updated_at = ?
+                WHERE user_id = ?
+            ''', (
+                profile_data.get('real_name', ''),
+                profile_data.get('psn_id', ''),
+                platforms_str,
+                modes_str,
+                goals_str,
+                difficulties_str,
+                current_time,
+                user_id
+            ))
+        else:
+            # INSERT нового пользователя с пустым trophies
+            cursor.execute('''
+                INSERT INTO users 
+                (user_id, real_name, psn_id, platforms, modes, goals, difficulties, trophies, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                user_id,
+                profile_data.get('real_name', ''),
+                profile_data.get('psn_id', ''),
+                platforms_str,
+                modes_str,
+                goals_str,
+                difficulties_str,
+                trophies_str,
+                current_time
+            ))
         
         conn.commit()
         conn.close()
