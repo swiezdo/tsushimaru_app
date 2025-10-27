@@ -997,8 +997,8 @@ async def approve_trophy_application(
     reply_markup = {
         "inline_keyboard": [[
             {
-                "text": "🏆 Открыть трофеи",
-                "url": f"https://t.me/{BOT_USERNAME}?startapp=trophies"
+                "text": "🏆 Открыть приложение",
+                "url": f"https://t.me/{BOT_USERNAME}?startapp=command&mode=fullscreen"
             }
         ]]
     }
