@@ -3,8 +3,62 @@
 
 import { tg } from './telegram.js';
 
-// Базовый URL API (обновите на ваш Cloudflare Tunnel URL)
-const API_BASE = 'https://painting-quarters-compound-promote.trycloudflare.com';
+// Конфигурация endpoints
+const LOCAL_PI_IP = '192.168.0.192';
+const DOMAIN_URL = 'https://tsushimaru.com';
+const LOCAL_URL = `http://${LOCAL_PI_IP}:8000`;
+const STORAGE_KEY = 'tsushima_api_endpoint';
+
+// Функция определения endpoint
+async function detectApiEndpoint() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        console.log('Используем сохраненный endpoint:', saved);
+        return saved;
+    }
+
+    console.log('Проверяем доступность домена...');
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+        const response = await fetch(`${DOMAIN_URL}/health`, {
+            signal: controller.signal,
+            method: 'GET',
+        });
+        
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+            console.log('Домен доступен:', DOMAIN_URL);
+            localStorage.setItem(STORAGE_KEY, DOMAIN_URL);
+            return DOMAIN_URL;
+        }
+    } catch (error) {
+        console.log('Домен недоступен:', error.message);
+    }
+
+    console.log('Используем локальный IP:', LOCAL_URL);
+    localStorage.setItem(STORAGE_KEY, LOCAL_URL);
+    return LOCAL_URL;
+}
+
+// Инициализация API_BASE
+let API_BASE = DOMAIN_URL;
+
+(async () => {
+    API_BASE = await detectApiEndpoint();
+    console.log('API_BASE установлен:', API_BASE);
+})();
+
+// Функция сброса для консоли
+window.resetApiEndpoint = async () => {
+    localStorage.removeItem(STORAGE_KEY);
+    console.log('Сброс endpoint...');
+    API_BASE = await detectApiEndpoint();
+    console.log('Новый API_BASE:', API_BASE);
+    alert(`API изменен на: ${API_BASE}\nПерезагрузите приложение`);
+};
 
 // Получение initData из Telegram WebApp
 function getInitData() {
