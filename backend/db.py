@@ -103,10 +103,10 @@ def get_user(db_path: str, user_id: int) -> Optional[Dict[str, Any]]:
         'user_id': row[0],
         'real_name': row[1],
         'psn_id': row[2],
-        'platforms': json.loads(row[3]) if row[3] else [],
-        'modes': json.loads(row[4]) if row[4] else [],
-        'goals': json.loads(row[5]) if row[5] else [],
-        'difficulties': json.loads(row[6]) if row[6] else [],
+        'platforms': [p.strip() for p in row[3].split(',') if p.strip()] if row[3] else [],
+        'modes': [m.strip() for m in row[4].split(',') if m.strip()] if row[4] else [],
+        'goals': [g.strip() for g in row[5].split(',') if g.strip()] if row[5] else [],
+        'difficulties': [d.strip() for d in row[6].split(',') if d.strip()] if row[6] else [],
         'trophies': [t.strip() for t in row[7].split(',') if t.strip()] if row[7] and row[7] != '[]' else [],
         'updated_at': row[8]
     }
@@ -137,11 +137,11 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
         # Подготавливаем данные для сохранения
         current_time = int(time.time())
         
-        # Преобразуем списки в JSON строки
-        platforms_json = json.dumps(profile_data.get('platforms', []))
-        modes_json = json.dumps(profile_data.get('modes', []))
-        goals_json = json.dumps(profile_data.get('goals', []))
-        difficulties_json = json.dumps(profile_data.get('difficulties', []))
+        # Преобразуем списки в строки через запятую
+        platforms_str = ','.join(profile_data.get('platforms', []))
+        modes_str = ','.join(profile_data.get('modes', []))
+        goals_str = ','.join(profile_data.get('goals', []))
+        difficulties_str = ','.join(profile_data.get('difficulties', []))
         # Трофеи сохраняем как строку через запятую
         trophies_list = profile_data.get('trophies', [])
         # Фильтруем пустые значения и сохраняем только непустые трофеи
@@ -156,10 +156,10 @@ def upsert_user(db_path: str, user_id: int, profile_data: Dict[str, Any]) -> boo
             user_id,
             profile_data.get('real_name', ''),
             profile_data.get('psn_id', ''),
-            platforms_json,
-            modes_json,
-            goals_json,
-            difficulties_json,
+            platforms_str,
+            modes_str,
+            goals_str,
+            difficulties_str,
             trophies_str,
             current_time
         ))
@@ -249,7 +249,7 @@ def create_build(db_path: str, build_data: Dict[str, Any]) -> Optional[int]:
         cursor = conn.cursor()
         
         current_time = int(time.time())
-        tags_json = json.dumps(build_data.get('tags', []))
+        tags_str = ','.join(build_data.get('tags', []))
         
         cursor.execute('''
             INSERT INTO builds 
@@ -260,7 +260,7 @@ def create_build(db_path: str, build_data: Dict[str, Any]) -> Optional[int]:
             build_data.get('author', ''),
             build_data.get('name', ''),
             build_data.get('class', ''),
-            tags_json,
+            tags_str,
             build_data.get('description', ''),
             build_data.get('photo_1', ''),
             build_data.get('photo_2', ''),
@@ -315,7 +315,7 @@ def get_build(db_path: str, build_id: int) -> Optional[Dict[str, Any]]:
             'author': row[2],
             'name': row[3],
             'class': row[4],
-            'tags': json.loads(row[5]) if row[5] else [],
+            'tags': [t.strip() for t in row[5].split(',') if t.strip()] if row[5] else [],
             'description': row[6],
             'photo_1': row[7],
             'photo_2': row[8],
@@ -364,7 +364,7 @@ def get_user_builds(db_path: str, user_id: int) -> List[Dict[str, Any]]:
                 'author': row[2],
                 'name': row[3],
                 'class': row[4],
-                'tags': json.loads(row[5]) if row[5] else [],
+                'tags': [t.strip() for t in row[5].split(',') if t.strip()] if row[5] else [],
                 'description': row[6],
                 'photo_1': row[7],
                 'photo_2': row[8],
@@ -414,7 +414,7 @@ def get_public_builds(db_path: str) -> List[Dict[str, Any]]:
                 'author': row[2],
                 'name': row[3],
                 'class': row[4],
-                'tags': json.loads(row[5]) if row[5] else [],
+                'tags': [t.strip() for t in row[5].split(',') if t.strip()] if row[5] else [],
                 'description': row[6],
                 'photo_1': row[7],
                 'photo_2': row[8],

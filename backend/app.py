@@ -514,9 +514,9 @@ async def create_build_endpoint(
             detail="Класс обязателен"
         )
     
-    # Парсим теги (JSON строка)
+    # Парсим теги (строка через запятую)
     try:
-        tags_list = json.loads(tags) if tags else []
+        tags_list = [t.strip() for t in tags.split(',') if t.strip()] if tags else []
     except:
         tags_list = []
     
