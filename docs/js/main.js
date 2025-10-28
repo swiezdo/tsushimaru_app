@@ -72,6 +72,19 @@ function installBackButton() {
       return;
     }
     
+    // Обработка возврата из профиля участника к деталям билда
+    if (nextScreen === 'buildPublicDetail' && previousScreen && previousScreen.startsWith('buildPublicDetail:')) {
+      const buildId = previousScreen.split(':')[1];
+      // Импортируем функцию открытия деталей публичного билда
+      import('./builds.js').then(module => {
+        module.openPublicBuildDetail(buildId);
+      }).catch(error => {
+        console.error('Ошибка импорта builds.js:', error);
+        showScreen('builds');
+      });
+      return;
+    }
+    
     // Очищаем sessionStorage после использования
     if (previousScreen) {
       sessionStorage.removeItem('previousScreen');

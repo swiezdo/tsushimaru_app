@@ -487,7 +487,36 @@ function openPublicBuildDetail(pubId) {
     pd_class.textContent = p.class || '—';
     pd_tags.textContent  = (p.tags && p.tags.length) ? p.tags.join(', ') : '—';
     pd_desc.textContent  = p.description || p.desc || '—';
-    pd_author.textContent = p.author || '—';
+    
+    // Настройка кликабельного чипа автора
+    if (pd_author) {
+      pd_author.textContent = p.author || '—';
+      
+      // Удаляем старый обработчик, если он есть
+      pd_author.removeEventListener('click', pd_author._authorClickHandler);
+      
+      // Создаем новый обработчик клика для перехода к профилю автора
+      pd_author._authorClickHandler = () => {
+        hapticTapSmart();
+        if (p.user_id) {
+          // Сохраняем информацию о том, откуда мы пришли
+          sessionStorage.setItem('previousScreen', `buildPublicDetail:${pubId}`);
+          
+          // Импортируем и вызываем функцию открытия профиля участника
+          import('./participantDetail.js').then(module => {
+            module.openParticipantDetail(p.user_id);
+          }).catch(error => {
+            console.error('Ошибка импорта participantDetail.js:', error);
+            tg?.showAlert?.('Ошибка открытия профиля автора');
+          });
+        } else {
+          tg?.showAlert?.('Информация об авторе недоступна');
+        }
+      };
+      
+      // Добавляем обработчик клика
+      pd_author.addEventListener('click', pd_author._authorClickHandler);
+    }
 
     const pd_build_id = $('pd_build_id');
     if (pd_build_id) {
