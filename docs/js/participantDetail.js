@@ -187,8 +187,10 @@ export async function openParticipantDetail(userId) {
     try {
         currentParticipantId = userId;
         
-        // Сохраняем информацию о том, откуда мы пришли
-        sessionStorage.setItem('previousScreen', 'participants');
+        // Сохраняем информацию о том, откуда мы пришли, только если она еще не установлена
+        if (!sessionStorage.getItem('previousScreen')) {
+            sessionStorage.setItem('previousScreen', 'participants');
+        }
         
         // Загружаем данные участника параллельно
         const [profile, builds] = await Promise.all([

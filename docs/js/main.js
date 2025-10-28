@@ -54,7 +54,7 @@ function installBackButton() {
       'participants': 'home',
       'builds': 'home',
       'whatsNew': 'home',
-      'participantDetail': previousScreen || 'participants'
+      'participantDetail': previousScreen ? (previousScreen.startsWith('buildPublicDetail:') ? 'buildPublicDetail' : 'participants') : 'participants'
     };
     
     let nextScreen = backNavigation[currentScreen] || 'home';
@@ -74,6 +74,19 @@ function installBackButton() {
     
     // Обработка возврата из профиля участника к деталям билда
     if (nextScreen === 'buildPublicDetail' && previousScreen && previousScreen.startsWith('buildPublicDetail:')) {
+      const buildId = previousScreen.split(':')[1];
+      // Импортируем функцию открытия деталей публичного билда
+      import('./builds.js').then(module => {
+        module.openPublicBuildDetail(buildId);
+      }).catch(error => {
+        console.error('Ошибка импорта builds.js:', error);
+        showScreen('builds');
+      });
+      return;
+    }
+    
+    // Обработка возврата из профиля участника к деталям билда (когда пришли из buildPublicDetail)
+    if (currentScreen === 'participantDetail' && previousScreen && previousScreen.startsWith('buildPublicDetail:')) {
       const buildId = previousScreen.split(':')[1];
       // Импортируем функцию открытия деталей публичного билда
       import('./builds.js').then(module => {
