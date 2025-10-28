@@ -87,7 +87,7 @@ function createVersionCard(versionData) {
 }
 
 // Рендеринг всех карточек
-async function renderWhatsNewCards() {
+export async function renderWhatsNewCards() {
   try {
     const data = await loadWhatsNewData();
     
@@ -123,13 +123,6 @@ async function renderWhatsNewCards() {
 
 // Инициализация экрана "Что нового?"
 export function initWhatsNew() {
-  // Обработчик кнопки
-  const whatsNewBtn = $('whatsNewBtn');
-  if (whatsNewBtn) {
-    whatsNewBtn.addEventListener('click', () => {
-      hapticTapSmart();
-      showScreen('whatsNew');
-      renderWhatsNewCards();
-    });
-  }
+  // Обработчик кнопки уже настроен в main.js через bindHomeButtons()
+  // Здесь только инициализируем экран при необходимости
 }
