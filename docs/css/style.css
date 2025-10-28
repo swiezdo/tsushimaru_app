@@ -255,6 +255,44 @@ body {
 #backToListBtn, #trophiesHomeBtn, #homeBtn, #buildsHomeBtn, #backToBuildsBtn { margin-bottom: calc(var(--space-8) + var(--safe-bottom)); }
 #submitInlineBtn { margin-bottom: var(--space-2); }
 
+/* ========== WHAT'S NEW ========== */
+.whats-new-container {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.version-date {
+  font-size: var(--fs-14);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.changelog-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.changelog-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  line-height: var(--lh-normal);
+}
+
+.changelog-icon {
+  font-size: var(--fs-16);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.changelog-text {
+  flex: 1;
+  font-size: var(--fs-15);
+}
+
 /* ========== LIST ========== */
 .list-buttons { display: grid; gap: var(--space-2); }
 .list-btn {

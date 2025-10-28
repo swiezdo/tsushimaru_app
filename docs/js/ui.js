@@ -16,6 +16,7 @@ export const screens = {
   buildCreate:        document.getElementById('buildCreateScreen'),
   buildDetail:        document.getElementById('buildDetailScreen'),
   buildPublicDetail:  document.getElementById('buildPublicDetailScreen'),
+  whatsNew:           document.getElementById('whatsNewScreen'),
 };
 
 // Топбар
@@ -35,7 +36,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','trophies','participants','participantDetail','builds','buildCreate','buildDetail','buildPublicDetail','trophyDetail'];
+    const withBack = ['profile','trophies','participants','participantDetail','builds','buildCreate','buildDetail','buildPublicDetail','trophyDetail','whatsNew'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -54,6 +55,7 @@ export function showScreen(name) {
   else if (name === 'buildCreate')     setTopbar(true, 'Создать билд');
   else if (name === 'buildDetail')     setTopbar(true, 'Билд');
   else if (name === 'buildPublicDetail') setTopbar(true, 'Билд');
+  else if (name === 'whatsNew')        setTopbar(true, 'Что нового?');
 
   scrollTopSmooth();
 }
