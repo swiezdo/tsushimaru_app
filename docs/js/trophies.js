@@ -57,7 +57,7 @@ async function loadUserProfile() {
 function renderProgressBar() {
   if (!trophyProgressFillEl || !trophyProgressTextEl) return;
   
-  const totalTrophies = Object.keys(TROPHIES || {}).length;
+  const totalTrophies = (TROPHIES || []).length;
   const obtainedTrophies = USER_PROFILE?.trophies?.length || 0;
   
   const percentage = totalTrophies > 0 ? (obtainedTrophies / totalTrophies) * 100 : 0;
@@ -71,9 +71,8 @@ function renderObtainedTrophies() {
   
   obtainedTrophiesListEl.innerHTML = '';
   
-  // Получаем трофеи из строки через запятую
-  const trophiesString = USER_PROFILE?.trophies || '';
-  const obtainedTrophyNames = trophiesString ? trophiesString.split(',').map(t => t.trim()).filter(t => t) : [];
+  // Получаем трофеи из массива (теперь API возвращает массив)
+  const obtainedTrophyNames = USER_PROFILE?.trophies || [];
   
   if (obtainedTrophyNames.length === 0) {
     noObtainedTrophiesHintEl?.classList.remove('hidden');
@@ -105,9 +104,8 @@ function renderAvailableTrophies() {
   
   availableTrophiesListEl.innerHTML = '';
   
-  // Получаем полученные трофеи из строки через запятую
-  const trophiesString = USER_PROFILE?.trophies || '';
-  const obtainedTrophyNames = trophiesString ? trophiesString.split(',').map(t => t.trim()).filter(t => t) : [];
+  // Получаем полученные трофеи из массива (теперь API возвращает массив)
+  const obtainedTrophyNames = USER_PROFILE?.trophies || [];
   
   // Фильтруем доступные трофеи (те, которых нет у пользователя)
   const availableTrophies = (TROPHIES || []).filter(trophy => !obtainedTrophyNames.includes(trophy.trophy_name));
