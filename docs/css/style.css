@@ -259,7 +259,6 @@ body {
 .whats-new-container {
   display: grid;
   gap: var(--space-4);
-  margin: var(--space-4);
 }
 
 .version-date {
