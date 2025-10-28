@@ -122,6 +122,11 @@ function renderShotThumb(idx, src) {
 function createBuildElement(build, isPublic = false) {
   const row = createButton('button', 'build-item', '', { id: build.build_id || build.id });
 
+  // Добавляем класс 'published' для опубликованных билдов в разделе "Мои билды"
+  if (!isPublic && build.is_public === 1) {
+    row.classList.add('published');
+  }
+
   const icon = document.createElement('div');
   icon.className = 'build-icon';
   const img = document.createElement('img');

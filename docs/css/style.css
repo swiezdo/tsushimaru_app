@@ -360,6 +360,7 @@ body {
   background: transparent; cursor: pointer; min-height: 48px; color: var(--tg-tx);
 }
 .build-item:active { transform: translateY(1px); }
+.build-item.published { border-color: #007AFF; }
 .build-icon {
   width: 48px; height: 48px; border-radius: var(--radius-sm); border: 1px solid var(--color-border);
   display: flex; align-items: center; justify-content: center;
