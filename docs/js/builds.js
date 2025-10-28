@@ -799,12 +799,21 @@ export function initBuilds() {
       description: desc,
       photo_1: photo1Blob,
       photo_2: photo2Blob
-    }).then(() => {
+    }).then((response) => {
       hapticOK();
       tg?.showPopup?.({ title: 'Билд создан', message: 'Билд успешно сохранен!', buttons: [{ type:'ok' }] });
 
+      // Обновляем список билдов в фоне
       renderMyBuilds();
-      showScreen('builds');
+      
+      // Переходим на страницу деталей только что созданного билда
+      const buildId = response.build_id;
+      if (buildId) {
+        openBuildDetail(buildId);
+      } else {
+        // Fallback на случай, если build_id не пришел
+        showScreen('builds');
+      }
     }).catch(err => {
       tg?.showAlert?.('Ошибка создания билда: ' + err);
       hapticERR();
