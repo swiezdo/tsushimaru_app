@@ -1,7 +1,7 @@
 // participantDetail.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
-import { fetchUserProfile, fetchUserBuilds, API_BASE } from './api.js';
+import { fetchUserProfile, fetchUserBuilds, fetchTrophies, API_BASE } from './api.js';
 import { prettyLines, formatDate } from './utils.js';
 
 // Элементы интерфейса
@@ -26,14 +26,11 @@ let currentParticipantProfile = null;
 // Функция для загрузки данных трофеев
 async function loadTrophiesData() {
     try {
-        const response = await fetch('./assets/data/trophies.json');
-        if (!response.ok) {
-            throw new Error('Не удалось загрузить данные трофеев');
-        }
-        return await response.json();
+        const trophies = await fetchTrophies();
+        return trophies || [];
     } catch (error) {
         console.error('Ошибка загрузки данных трофеев:', error);
-        return {};
+        return [];
     }
 }
 
@@ -54,12 +51,11 @@ async function renderParticipantTrophies(profile) {
     if (!profile) return;
     
     try {
-        const trophiesData = await loadTrophiesData();
-        const allTrophies = trophiesData || {};
+        const allTrophies = await loadTrophiesData();
         const userTrophies = profile.trophies || [];
         
         // Обновляем прогресс-бар
-        const totalTrophies = Object.keys(allTrophies).length;
+        const totalTrophies = allTrophies.length;
         const obtainedTrophies = userTrophies.length;
         const progressPercent = totalTrophies > 0 ? (obtainedTrophies / totalTrophies) * 100 : 0;
         
@@ -84,10 +80,7 @@ async function renderParticipantTrophies(profile) {
             noParticipantTrophiesHintEl?.classList.add('hidden');
             
             // Создаем простой текстовый список
-            const trophyNames = userTrophies.map(trophyId => {
-                const trophy = allTrophies[trophyId];
-                return trophy ? `${trophy.name || trophyId} ${trophy.emoji || ''}` : trophyId;
-            });
+            const trophyNames = userTrophies.map(trophyName => trophyName);
             
             participantTrophiesListEl.textContent = trophyNames.join('\n');
         }
