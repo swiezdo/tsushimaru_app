@@ -2,7 +2,7 @@
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView } from './ui.js';
 import { shake, createFileKey, isImageFile } from './utils.js';
-import { fetchProfile, submitTrophyApplication } from './api.js';
+import { fetchProfile, submitTrophyApplication, fetchTrophies } from './api.js';
 
 // Элементы интерфейса
 const obtainedTrophiesListEl = $('obtainedTrophiesList');
@@ -34,11 +34,12 @@ let CURRENT_TROPHY_ID = null;
 async function loadTrophies() {
   if (TROPHIES) return TROPHIES;
   try {
-    const res = await fetch(TROPHIES_URL, { cache: 'no-store' });
-    TROPHIES = await res.json();
+    // Загружаем трофеи из API вместо JSON файла
+    TROPHIES = await fetchTrophies();
+    console.log('Загружены трофеи из API:', TROPHIES);
   } catch (error) {
     console.error('Ошибка загрузки трофеев:', error);
-    TROPHIES = {};
+    TROPHIES = [];
   }
   return TROPHIES;
 }
@@ -70,27 +71,30 @@ function renderObtainedTrophies() {
   
   obtainedTrophiesListEl.innerHTML = '';
   
-  const obtainedTrophyIds = USER_PROFILE?.trophies || [];
+  // Получаем трофеи из строки через запятую
+  const trophiesString = USER_PROFILE?.trophies || '';
+  const obtainedTrophyNames = trophiesString ? trophiesString.split(',').map(t => t.trim()).filter(t => t) : [];
   
-  if (obtainedTrophyIds.length === 0) {
+  if (obtainedTrophyNames.length === 0) {
     noObtainedTrophiesHintEl?.classList.remove('hidden');
     return;
   }
   
   noObtainedTrophiesHintEl?.classList.add('hidden');
   
-  obtainedTrophyIds.forEach(trophyId => {
-    const trophy = TROPHIES?.[trophyId];
+  obtainedTrophyNames.forEach(trophyName => {
+    // Находим трофей в списке по названию
+    const trophy = TROPHIES?.find(t => t.trophy_name === trophyName);
     if (!trophy) return;
     
     const btn = document.createElement('button');
     btn.className = 'list-btn trophy-obtained';
     btn.type = 'button';
-    btn.dataset.id = trophyId;
-    btn.innerHTML = `<span>${trophy.name || trophyId} ${trophy.emoji || ''}</span><span class="right">✓</span>`;
+    btn.dataset.id = trophy.trophy_id;
+    btn.innerHTML = `<span>${trophy.trophy_name}</span><span class="right">✓</span>`;
     btn.addEventListener('click', () => { 
       hapticTapSmart(); 
-      openTrophyDetail(trophyId, true); 
+      openTrophyDetail(trophy.trophy_id, true); 
     });
     obtainedTrophiesListEl.appendChild(btn);
   });
@@ -101,8 +105,12 @@ function renderAvailableTrophies() {
   
   availableTrophiesListEl.innerHTML = '';
   
-  const obtainedTrophyIds = USER_PROFILE?.trophies || [];
-  const availableTrophies = Object.keys(TROPHIES || {}).filter(id => !obtainedTrophyIds.includes(id));
+  // Получаем полученные трофеи из строки через запятую
+  const trophiesString = USER_PROFILE?.trophies || '';
+  const obtainedTrophyNames = trophiesString ? trophiesString.split(',').map(t => t.trim()).filter(t => t) : [];
+  
+  // Фильтруем доступные трофеи (те, которых нет у пользователя)
+  const availableTrophies = (TROPHIES || []).filter(trophy => !obtainedTrophyNames.includes(trophy.trophy_name));
   
   if (availableTrophies.length === 0) {
     noAvailableTrophiesHintEl?.classList.remove('hidden');
@@ -111,18 +119,15 @@ function renderAvailableTrophies() {
   
   noAvailableTrophiesHintEl?.classList.add('hidden');
   
-  availableTrophies.forEach(trophyId => {
-    const trophy = TROPHIES[trophyId];
-    if (!trophy) return;
-    
+  availableTrophies.forEach(trophy => {
     const btn = document.createElement('button');
     btn.className = 'list-btn';
     btn.type = 'button';
-    btn.dataset.id = trophyId;
-    btn.innerHTML = `<span>${trophy.name || trophyId} ${trophy.emoji || ''}</span><span class="right">›</span>`;
+    btn.dataset.id = trophy.trophy_id;
+    btn.innerHTML = `<span>${trophy.trophy_name}</span><span class="right">›</span>`;
     btn.addEventListener('click', () => { 
       hapticTapSmart(); 
-      openTrophyDetail(trophyId, false); 
+      openTrophyDetail(trophy.trophy_id, false); 
     });
     availableTrophiesListEl.appendChild(btn);
   });
@@ -193,13 +198,17 @@ function renderProofPreview() {
 }
 
 function openTrophyDetail(trophyId, isObtained = false) {
-  const trophy = (TROPHIES && TROPHIES[trophyId]) || {};
+  // Находим трофей в массиве по trophy_id
+  const trophy = (TROPHIES || []).find(t => t.trophy_id == trophyId) || {};
   CURRENT_TROPHY_ID = trophyId;
   
-  if (trophyTitleEl) trophyTitleEl.textContent = `${trophy.name || 'Трофей'}${trophy.emoji ? ' ' + trophy.emoji : ''}`;
+  if (trophyTitleEl) trophyTitleEl.textContent = trophy.trophy_name || 'Трофей';
   if (trophyDescEl) {
     trophyDescEl.innerHTML = '';
-    (trophy.description || ['Описание скоро будет.']).forEach((line) => {
+    const description = trophy.description || 'Описание скоро будет.';
+    // Разбиваем описание по переносам строк
+    const lines = description.split('\n').filter(line => line.trim());
+    lines.forEach((line) => {
       const li = document.createElement('li');
       li.textContent = line;
       trophyDescEl.appendChild(li);

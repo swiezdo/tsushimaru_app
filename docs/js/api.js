@@ -406,5 +406,16 @@ export async function fetchUserBuilds(userId) {
     }
 }
 
+// Получение списка всех трофеев
+export async function fetchTrophies() {
+    try {
+        const data = await apiRequest('/api/trophies.list');
+        return data || [];
+    } catch (error) {
+        console.error('Ошибка получения трофеев:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };
