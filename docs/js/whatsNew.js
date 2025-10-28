@@ -29,7 +29,9 @@ async function loadWhatsNewData() {
 
 // Форматирование даты
 function formatDate(dateString) {
-  const date = new Date(dateString);
+  // Парсим формат ДД-ММ-ГГГГ
+  const [day, month, year] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
   return date.toLocaleDateString('ru-RU', {
     year: 'numeric',
     month: 'long',
@@ -102,8 +104,8 @@ export async function renderWhatsNewCards() {
       return;
     }
     
-    // Сортируем по дате (новые сверху)
-    const sortedData = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Сортируем по дате (новые сверху - последние записи в JSON показываются первыми)
+    const sortedData = data.sort((a, b) => new Date(a.date) - new Date(b.date));
     
     // Создаем карточки для каждой версии
     sortedData.forEach(versionData => {
