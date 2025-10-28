@@ -256,11 +256,6 @@ body {
 #submitInlineBtn { margin-bottom: var(--space-2); }
 
 /* ========== WHAT'S NEW ========== */
-.whats-new-container {
-  display: grid;
-  gap: var(--space-4);
-}
-
 .version-date {
   font-size: var(--fs-14);
   color: var(--color-text-secondary);
