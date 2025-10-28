@@ -104,8 +104,8 @@ export async function renderWhatsNewCards() {
       return;
     }
     
-    // Сортируем по дате (новые сверху - последние записи в JSON показываются первыми)
-    const sortedData = data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Обращаем порядок массива (последние записи в JSON показываются первыми)
+    const sortedData = data.slice().reverse();
     
     // Создаем карточки для каждой версии
     sortedData.forEach(versionData => {
