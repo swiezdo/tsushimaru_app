@@ -366,6 +366,10 @@ function renderClassTabs() {
   sortIcon.src = './assets/icons/sort.svg';
   sortIcon.alt = 'Сортировка';
   sortTab.title = sortOrder === 'desc' ? 'Сначала новые' : 'Сначала старые';
+  // Подсветка активного состояния при альтернативном порядке (asc)
+  if (sortOrder === 'asc') {
+    sortTab.classList.add('active');
+  }
   sortTab.appendChild(sortIcon);
   sortTab.addEventListener('click', () => {
     hapticTapSmart();
