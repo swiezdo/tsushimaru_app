@@ -682,6 +682,60 @@ function formatTopbarTitle(name, maxChars = 18) {
   return name.substring(0, splitIndex).trim() + '\n' + name.substring(splitIndex).trim();
 }
 
+async function shareBuildCommand(buildId) {
+  const command = `/билд ${buildId}`;
+  
+  try {
+    // Пытаемся использовать современный Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(command);
+      hapticOK();
+      tg?.showPopup?.({
+        title: 'Готово',
+        message: 'Команда скопирована! Вставьте её в чат',
+        buttons: [{ type: 'ok' }]
+      });
+    } else {
+      // Fallback для старых браузеров
+      const textArea = document.createElement('textarea');
+      textArea.value = command;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+          hapticOK();
+          tg?.showPopup?.({
+            title: 'Готово',
+            message: 'Команда скопирована! Вставьте её в чат',
+            buttons: [{ type: 'ok' }]
+          });
+        } else {
+          throw new Error('execCommand failed');
+        }
+      } catch (err) {
+        document.body.removeChild(textArea);
+        throw err;
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка копирования в буфер обмена:', error);
+    hapticERR();
+    tg?.showPopup?.({
+      title: 'Ошибка',
+      message: 'Не удалось скопировать команду. Скопируйте вручную: ' + command,
+      buttons: [{ type: 'ok' }]
+    });
+  }
+}
+
 function openBuildDetail(id) {
   getMyBuilds().then(builds => {
     const b = builds.find((x) => String(x.build_id || x.id) === String(id));
@@ -694,9 +748,22 @@ function openBuildDetail(id) {
     vd_tags.textContent  = (b.tags && b.tags.length) ? b.tags.join(', ') : '—';
     vd_desc.textContent  = b.description || b.desc || '—';
 
-    const vd_build_id = $('vd_build_id');
-    if (vd_build_id) {
-      vd_build_id.textContent = `#${b.build_id || b.id}`;
+    // Настройка кнопки поделиться
+    const vd_build_share_btn = $('vd_build_share_btn');
+    if (vd_build_share_btn) {
+      const buildId = b.build_id || b.id;
+      vd_build_share_btn.setAttribute('data-build-id', buildId);
+      
+      // Удаляем старый обработчик, если он есть
+      vd_build_share_btn.removeEventListener('click', vd_build_share_btn._shareClickHandler);
+      
+      // Создаем новый обработчик клика для поделиться
+      vd_build_share_btn._shareClickHandler = () => {
+        shareBuildCommand(buildId);
+      };
+      
+      // Добавляем обработчик клика
+      vd_build_share_btn.addEventListener('click', vd_build_share_btn._shareClickHandler);
     }
 
     buildDetailShots.innerHTML = '';
@@ -762,9 +829,22 @@ function openPublicBuildDetail(pubId) {
       pd_author.addEventListener('click', pd_author._authorClickHandler);
     }
 
-    const pd_build_id = $('pd_build_id');
-    if (pd_build_id) {
-      pd_build_id.textContent = `#${p.build_id || p.id}`;
+    // Настройка кнопки поделиться
+    const pd_build_share_btn = $('pd_build_share_btn');
+    if (pd_build_share_btn) {
+      const buildId = p.build_id || p.id;
+      pd_build_share_btn.setAttribute('data-build-id', buildId);
+      
+      // Удаляем старый обработчик, если он есть
+      pd_build_share_btn.removeEventListener('click', pd_build_share_btn._shareClickHandler);
+      
+      // Создаем новый обработчик клика для поделиться
+      pd_build_share_btn._shareClickHandler = () => {
+        shareBuildCommand(buildId);
+      };
+      
+      // Добавляем обработчик клика
+      pd_build_share_btn.addEventListener('click', pd_build_share_btn._shareClickHandler);
     }
 
     try {
