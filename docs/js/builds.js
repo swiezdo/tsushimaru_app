@@ -522,6 +522,11 @@ function populateEditForm(build) {
     buildEditDescEl.value = build.description || build.desc || '';
     buildEditDescEl.style.height = 'auto';
     buildEditDescEl.style.height = Math.min(buildEditDescEl.scrollHeight, 200) + 'px';
+    // Принудительно вызываем авто-рост после небольшой задержки
+    setTimeout(() => {
+      buildEditDescEl.style.height = 'auto';
+      buildEditDescEl.style.height = Math.min(buildEditDescEl.scrollHeight, 200) + 'px';
+    }, 100);
   }
 
   // Выбираем класс и теги
@@ -1084,12 +1089,14 @@ export function initBuilds() {
 
   // Авто-рост описания для редактирования
   if (buildEditDescEl) {
-    const autoResize = () => {
+    const autoResizeEdit = () => {
       buildEditDescEl.style.height = 'auto';
       buildEditDescEl.style.height = Math.min(buildEditDescEl.scrollHeight, 200) + 'px';
     };
-    buildEditDescEl.addEventListener('input', autoResize);
-    setTimeout(autoResize, 0);
+    buildEditDescEl.addEventListener('input', autoResizeEdit);
+    // Также вызываем при изменении значения программно
+    buildEditDescEl.addEventListener('change', autoResizeEdit);
+    setTimeout(autoResizeEdit, 0);
   }
 
   // Tap при фокусе полей редактирования
