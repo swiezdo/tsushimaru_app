@@ -18,6 +18,7 @@ export const screens = {
   buildDetail:        document.getElementById('buildDetailScreen'),
   buildPublicDetail:  document.getElementById('buildPublicDetailScreen'),
   whatsNew:           document.getElementById('whatsNewScreen'),
+  feedback:           document.getElementById('feedbackScreen'),
 };
 
 // Топбар
@@ -37,7 +38,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','trophies','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','trophyDetail','whatsNew'];
+    const withBack = ['profile','trophies','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','trophyDetail','whatsNew','feedback'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -58,6 +59,7 @@ export function showScreen(name) {
   else if (name === 'buildDetail')     setTopbar(true, 'Билд');
   else if (name === 'buildPublicDetail') setTopbar(true, 'Билд');
   else if (name === 'whatsNew')        setTopbar(true, 'Что нового?');
+  else if (name === 'feedback')        setTopbar(true, 'Отправить отзыв');
 
   scrollTopSmooth();
 }

@@ -4,6 +4,7 @@ import { showScreen } from './ui.js';
 
 // Элементы
 const whatsNewContainer = $('whatsNewContainer');
+const sendFeedbackBtn = $('sendFeedbackBtn');
 
 // Иконки для типов изменений
 const CHANGE_ICONS = {
@@ -126,5 +127,9 @@ export async function renderWhatsNewCards() {
 // Инициализация экрана "Что нового?"
 export function initWhatsNew() {
   // Обработчик кнопки уже настроен в main.js через bindHomeButtons()
-  // Здесь только инициализируем экран при необходимости
+  // Обработчик кнопки отправки отзыва
+  sendFeedbackBtn?.addEventListener('click', () => {
+    hapticTapSmart();
+    showScreen('feedback');
+  });
 }

@@ -7,6 +7,7 @@ import { initParticipants } from './participants.js';
 import { initBuilds } from './builds.js';
 import { initParticipantDetail } from './participantDetail.js';
 import { initWhatsNew, renderWhatsNewCards } from './whatsNew.js';
+import { initFeedback } from './feedback.js';
 import { checkUserRegistration } from './api.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
@@ -55,6 +56,7 @@ function installBackButton() {
       'participants': 'home',
       'builds': 'home',
       'whatsNew': 'home',
+      'feedback': 'whatsNew',
       'participantDetail': previousScreen ? (previousScreen.startsWith('buildPublicDetail:') ? 'buildPublicDetail' : 'participants') : 'participants'
     };
     
@@ -162,6 +164,7 @@ async function startApp() {
   initBuilds();
   initParticipantDetail();
   initWhatsNew();
+  initFeedback();
 
   showScreen('home');
 }

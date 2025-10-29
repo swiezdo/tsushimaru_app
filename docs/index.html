@@ -586,8 +586,39 @@
 
       <!-- ====== ЧТО НОВОГО ====== -->
       <section id="whatsNewScreen" class="hidden">
+        <div class="actions-bar">
+          <button id="sendFeedbackBtn" class="btn primary wide" type="button">Отправить отзыв</button>
+        </div>
         <div id="whatsNewContainer">
           <!-- Карточки версий будут добавлены динамически -->
+        </div>
+      </section>
+
+      <!-- ====== ОТПРАВКА ОТЗЫВА ====== -->
+      <section id="feedbackScreen" class="hidden">
+        <section class="card">
+          <h2 class="card-title">Отправить отзыв</h2>
+          <form id="feedbackForm" class="form">
+            <div class="input">
+              <label for="feedbackText">Описание</label>
+              <textarea
+                id="feedbackText"
+                rows="1"
+                placeholder="Нашли баг? Есть идеи? Опишите"
+              ></textarea>
+            </div>
+
+            <div class="input">
+              <label for="feedbackFiles">Прикрепите файлы (необязательно)</label>
+              <input id="feedbackFiles" type="file" multiple accept="image/*" style="display:none" />
+              <button type="button" id="feedbackAddBtn" class="fileline-btn" aria-label="Прикрепить файлы">＋ Прикрепить</button>
+              <div id="feedbackPreview" class="thumbs-row"></div>
+            </div>
+          </form>
+        </section>
+
+        <div class="actions-bar">
+          <button type="button" id="feedbackSubmitBtn" class="btn primary wide">Отправить</button>
         </div>
       </section>
     </main>

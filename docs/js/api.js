@@ -423,6 +423,47 @@ export async function submitTrophyApplication(trophyId, photos, comment) {
     }
 }
 
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С ОТЗЫВАМИ ==========
+
+// Отправка отзыва
+export async function submitFeedback(description, photos = []) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('description', description);
+        
+        // Добавляем изображения, если они есть
+        photos.forEach(photo => {
+            data.append('photos', photo);
+        });
+
+        const url = `${API_BASE}/api/feedback.submit`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка отправки отзыва:', error);
+        throw error;
+    }
+}
+
 // Получение списка всех участников
 export async function fetchParticipants() {
     try {
