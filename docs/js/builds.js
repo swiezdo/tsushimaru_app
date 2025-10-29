@@ -37,6 +37,7 @@ const vd_class         = $('vd_class');
 const vd_tags          = $('vd_tags');
 const vd_desc          = $('vd_desc');
 const buildDetailShots = $('buildDetailShots');
+const vd_build_id       = $('vd_build_id');
 
 const publishBuildBtn  = $('publishBuildBtn');
 const deleteBuildBtn   = $('deleteBuildBtn');
@@ -70,6 +71,7 @@ const pd_desc           = $('pd_desc');
 const pd_author         = $('pd_author');
 const pd_date           = $('pd_date');
 const publicDetailShots = $('publicDetailShots');
+const pd_build_id       = $('pd_build_id');
 
 // Списки «Все билды»
 const allBuildsList   = $('allBuildsList');
@@ -747,6 +749,10 @@ function openBuildDetail(id) {
     vd_class.textContent = b.class || '—';
     vd_tags.textContent  = (b.tags && b.tags.length) ? b.tags.join(', ') : '—';
     vd_desc.textContent  = b.description || b.desc || '—';
+    if (vd_build_id) {
+      const buildIdVal = b.build_id || b.id;
+      vd_build_id.textContent = buildIdVal ? `#${buildIdVal}` : '—';
+    }
 
     // Настройка кнопки поделиться
     const vd_build_share_btn = $('vd_build_share_btn');
@@ -798,6 +804,10 @@ function openPublicBuildDetail(pubId) {
     pd_class.textContent = p.class || '—';
     pd_tags.textContent  = (p.tags && p.tags.length) ? p.tags.join(', ') : '—';
     pd_desc.textContent  = p.description || p.desc || '—';
+    if (pd_build_id) {
+      const buildIdVal = p.build_id || p.id;
+      pd_build_id.textContent = buildIdVal ? `#${buildIdVal}` : '—';
+    }
     
     // Настройка кликабельного чипа автора
     if (pd_author) {
