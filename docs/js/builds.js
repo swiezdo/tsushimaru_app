@@ -56,7 +56,6 @@ const noFilteredBuildsHint = $('noFilteredBuildsHint');
 const classTabsContainer = $('classTabsContainer');
 
 // Элементы фильтров
-const resetFiltersBtn = $('resetFiltersBtn');
 const filterModal = $('filterModal');
 const filterModalTitle = $('filterModalTitle');
 const filterModalOptions = $('filterModalOptions');
@@ -70,7 +69,6 @@ let shot2Data = null;
 let selectedClasses = [];
 let selectedTags = [];
 let currentFilterType = null;
-let selectedClassTab = null; // null = все билды, иначе название класса
 
 async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
   return new Promise((resolve, reject) => {
@@ -198,9 +196,6 @@ function renderMyBuilds() {
 // Функции фильтрации
 function filterBuilds(builds) {
   return builds.filter(build => {
-    // Проверка вкладки класса (если выбрана)
-    const tabMatch = selectedClassTab === null || build.class === selectedClassTab;
-    
     // Проверка классов (OR внутри категории)
     const classMatch = selectedClasses.length === 0 || 
       selectedClasses.includes(build.class);
@@ -210,7 +205,7 @@ function filterBuilds(builds) {
       (build.tags && build.tags.some(tag => selectedTags.includes(tag)));
     
     // AND между категориями
-    return tabMatch && classMatch && tagsMatch;
+    return classMatch && tagsMatch;
   });
 }
 
@@ -237,11 +232,8 @@ function updateFilterSelection(type, value) {
 }
 
 function updateFilterButtons() {
-  // Показываем/скрываем кнопку "Сбросить" в зависимости от наличия активных фильтров
-  if (resetFiltersBtn) {
-    const hasActiveFilters = selectedClasses.length > 0 || selectedTags.length > 0 || selectedClassTab !== null;
-    resetFiltersBtn.classList.toggle('hidden', !hasActiveFilters);
-  }
+  // Функция больше не нужна, но оставляем для совместимости
+  // Кнопка "Сбросить" удалена
 }
 
 function applyFilters() {
@@ -287,7 +279,7 @@ function renderClassTabs() {
     tab.type = 'button';
     tab.className = 'class-tab';
     tab.dataset.class = className;
-    if (selectedClassTab === className) {
+    if (selectedClasses.includes(className)) {
       tab.classList.add('active');
     }
     
@@ -298,11 +290,12 @@ function renderClassTabs() {
     
     tab.addEventListener('click', () => {
       hapticTapSmart();
-      // Если кликнули на активную вкладку, сбрасываем выбор (показываем все)
-      if (selectedClassTab === className) {
-        selectedClassTab = null;
+      // Переключаем выбор класса (добавляем/удаляем из массива)
+      const index = selectedClasses.indexOf(className);
+      if (index > -1) {
+        selectedClasses.splice(index, 1);
       } else {
-        selectedClassTab = className;
+        selectedClasses.push(className);
       }
       updateClassTabs();
       applyFilters();
@@ -344,15 +337,13 @@ function updateClassTabs() {
     if (tabType === 'tags') {
       // Для вкладки тегов проверяем наличие выбранных тегов
       tab.classList.toggle('active', selectedTags.length > 0);
-    } else if (tabClass === selectedClassTab) {
+    } else if (tabClass && selectedClasses.includes(tabClass)) {
+      // Для вкладки класса проверяем наличие в массиве selectedClasses
       tab.classList.add('active');
     } else {
       tab.classList.remove('active');
     }
   });
-  
-  // Обновляем кнопку сброса
-  updateFilterButtons();
 }
 
 function renderAllBuilds() {
@@ -412,17 +403,6 @@ function closeFilterModal() {
     filterModal.classList.add('hidden');
   }
   currentFilterType = null;
-}
-
-function resetFilters() {
-  selectedClasses = [];
-  selectedTags = [];
-  selectedClassTab = null;
-  
-  updateFilterButtons();
-  updateClassTabs();
-  applyFilters();
-  closeFilterModal();
 }
 
 // Создание билда
@@ -970,14 +950,6 @@ export function initBuilds() {
     deleteBuildById(String(id));
   });
 
-  // Обработчик кнопки сброса фильтров
-  if (resetFiltersBtn) {
-    resetFiltersBtn.addEventListener('click', () => {
-      hapticTapSmart();
-      resetFilters();
-    });
-  }
-  
   // Обработчик кнопки ОК в модальном окне
   if (filterModalOkBtn) {
     filterModalOkBtn.addEventListener('click', () => {

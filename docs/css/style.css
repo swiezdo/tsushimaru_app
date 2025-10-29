@@ -484,8 +484,8 @@ html.tg .only-browser { display: none; }
 .class-tabs-container {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-3);
   flex-wrap: wrap;
 }
 
