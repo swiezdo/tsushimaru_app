@@ -5,7 +5,7 @@ import { renderChips, activeValues, setActive, shake, createButton, validateBuil
 import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, updateBuild, API_BASE } from './api.js';
 
 const CLASS_VALUES = ['Самурай','Охотник','Убийца','Ронин'];
-const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма'];
+const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма','Негативные эффекты'];
 
 const CLASS_ICON = {
   'Самурай':'./assets/icons/samurai.svg',
