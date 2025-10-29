@@ -691,7 +691,7 @@ async function shareBuildCommand(buildId) {
       await navigator.clipboard.writeText(command);
       hapticOK();
       tg?.showPopup?.({
-        title: 'Готово',
+        title: 'Поделиться билдом',
         message: 'Команда скопирована! Вставьте её в чат',
         buttons: [{ type: 'ok' }]
       });
@@ -713,7 +713,7 @@ async function shareBuildCommand(buildId) {
         if (successful) {
           hapticOK();
           tg?.showPopup?.({
-            title: 'Готово',
+            title: 'Поделиться билдом',
             message: 'Команда скопирована! Вставьте её в чат',
             buttons: [{ type: 'ok' }]
           });
