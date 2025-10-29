@@ -535,7 +535,9 @@ function populateEditForm(build) {
     if (build.photo_1) {
       const fullUrl = build.photo_1.startsWith('http') ? build.photo_1 : `${API_BASE}${build.photo_1}`;
       shotEdit1OriginalUrl = fullUrl;
-      const thumb = renderEditShotThumb('1', fullUrl);
+      // Добавляем timestamp для предотвращения кеширования при редактировании
+      const urlWithCacheBust = `${fullUrl}?t=${Date.now()}`;
+      const thumb = renderEditShotThumb('1', urlWithCacheBust);
       shotsEditTwo.appendChild(thumb);
     } else {
       const btn = document.createElement('button');
@@ -550,7 +552,9 @@ function populateEditForm(build) {
     if (build.photo_2) {
       const fullUrl = build.photo_2.startsWith('http') ? build.photo_2 : `${API_BASE}${build.photo_2}`;
       shotEdit2OriginalUrl = fullUrl;
-      const thumb = renderEditShotThumb('2', fullUrl);
+      // Добавляем timestamp для предотвращения кеширования при редактировании
+      const urlWithCacheBust = `${fullUrl}?t=${Date.now()}`;
+      const thumb = renderEditShotThumb('2', urlWithCacheBust);
       shotsEditTwo.appendChild(thumb);
     } else {
       const btn = document.createElement('button');
@@ -677,11 +681,13 @@ function openBuildDetail(id) {
     const shots = [b.photo_1, b.photo_2].filter(Boolean);
     shots.forEach((photoPath) => {
       const fullUrl = photoPath.startsWith('http') ? photoPath : `${API_BASE}${photoPath}`;
+      // Добавляем timestamp для предотвращения кеширования
+      const urlWithCacheBust = `${fullUrl}?t=${Date.now()}`;
       const wrap = document.createElement('button');
       wrap.type = 'button';
       wrap.className = 'shot-thumb';
       const img = document.createElement('img');
-      img.src = fullUrl;
+      img.src = urlWithCacheBust;
       wrap.appendChild(img);
       wrap.addEventListener('click', () => openLightbox(fullUrl));
       buildDetailShots.appendChild(wrap);
@@ -748,11 +754,13 @@ function openPublicBuildDetail(pubId) {
     const shots = [p.photo_1, p.photo_2].filter(Boolean);
     shots.forEach((photoPath) => {
       const fullUrl = photoPath.startsWith('http') ? photoPath : `${API_BASE}${photoPath}`;
+      // Добавляем timestamp для предотвращения кеширования
+      const urlWithCacheBust = `${fullUrl}?t=${Date.now()}`;
       const wrap = document.createElement('button');
       wrap.type = 'button';
       wrap.className = 'shot-thumb';
       const img = document.createElement('img');
-      img.src = fullUrl;
+      img.src = urlWithCacheBust;
       wrap.appendChild(img);
       wrap.addEventListener('click', () => openLightbox(fullUrl));
       publicDetailShots.appendChild(wrap);
@@ -1196,8 +1204,10 @@ export function initBuilds() {
       renderMyBuilds();
       renderAllBuilds();
       
-      // Переходим на страницу деталей отредактированного билда
-      openBuildDetail(editingBuildId);
+      // Ждем немного чтобы данные обновились, затем переходим на страницу деталей
+      setTimeout(() => {
+        openBuildDetail(editingBuildId);
+      }, 300);
     }).catch(err => {
       tg?.showAlert?.('Ошибка обновления билда: ' + err);
       hapticERR();

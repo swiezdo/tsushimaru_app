@@ -251,8 +251,16 @@ export async function updateBuild(buildId, buildData) {
         data.append('description', buildData.description || '');
         
         // Добавляем изображения только если они были изменены (являются Blob)
-        if (buildData.photo_1) data.append('photo_1', buildData.photo_1);
-        if (buildData.photo_2) data.append('photo_2', buildData.photo_2);
+        if (buildData.photo_1) {
+            data.append('photo_1', buildData.photo_1, 'photo_1.jpg');
+            console.log('📤 Отправка photo_1, размер:', buildData.photo_1.size, 'байт');
+        }
+        if (buildData.photo_2) {
+            data.append('photo_2', buildData.photo_2, 'photo_2.jpg');
+            console.log('📤 Отправка photo_2, размер:', buildData.photo_2.size, 'байт');
+        }
+        
+        console.log('📋 FormData поля:', Array.from(data.keys()));
 
         const url = `${API_BASE}/api/builds.update`;
         const response = await fetch(url, {
