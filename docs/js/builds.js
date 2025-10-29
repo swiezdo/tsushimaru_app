@@ -1229,11 +1229,25 @@ export function initBuilds() {
   });
 
   // Кнопка редактирования
-  buildEditBtn?.addEventListener('click', () => {
+  buildEditBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     hapticOK();
     if (!currentBuildId) return;
     openBuildEdit(currentBuildId);
   });
+
+  // Также обрабатываем клик по изображению внутри кнопки
+  const editBtnImg = buildEditBtn?.querySelector('img');
+  if (editBtnImg) {
+    editBtnImg.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      hapticOK();
+      if (!currentBuildId) return;
+      openBuildEdit(currentBuildId);
+    });
+  }
 
   // Публикация/Скрытие — OK
   publishBuildBtn?.addEventListener('click', () => {
