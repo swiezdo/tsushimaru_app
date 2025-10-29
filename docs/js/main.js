@@ -46,6 +46,7 @@ function installBackButton() {
     // Маппинг экранов для навигации назад
     const backNavigation = {
       'buildCreate': 'builds',
+      'buildEdit': 'buildDetail',
       'buildDetail': 'builds', 
       'buildPublicDetail': previousScreen ? (previousScreen.startsWith('participantDetail:') ? 'participantDetail' : 'builds') : 'builds',
       'trophyDetail': 'trophies',

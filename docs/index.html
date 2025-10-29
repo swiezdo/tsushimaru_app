@@ -415,6 +415,92 @@
         </div>
       </section>
 
+      <!-- ====== РЕДАКТИРОВАТЬ БИЛД ====== -->
+      <section id="buildEditScreen" class="hidden">
+        <section class="card">
+          <form id="buildEditForm" class="form" autocomplete="off">
+            <div class="input">
+              <label for="buildEdit_name">Название</label>
+              <input
+                id="buildEdit_name"
+                name="buildEdit_name"
+                type="text"
+                maxlength="40"
+                placeholder="Название билда"
+              />
+              <div id="buildEditNameError" class="error-text hidden">Не используйте длинные слова</div>
+            </div>
+
+            <div class="input">
+              <label>Класс</label>
+              <div id="classEditChips" class="chips"></div>
+            </div>
+
+            <div class="input">
+              <label>Теги</label>
+              <div id="tagsEditChips" class="chips"></div>
+            </div>
+
+            <div class="input">
+              <label for="buildEdit_desc">Описание</label>
+              <textarea
+                id="buildEdit_desc"
+                rows="1"
+                placeholder="Опишите как работает билд"
+              ></textarea>
+            </div>
+
+            <div class="input">
+              <label>Скриншоты («Техники» и «Снаряжение»)</label>
+
+              <input
+                id="buildEdit_shot1"
+                data-idx="1"
+                type="file"
+                accept="image/*"
+                style="display: none"
+              />
+              <input
+                id="buildEdit_shot2"
+                data-idx="2"
+                type="file"
+                accept="image/*"
+                style="display: none"
+              />
+
+              <div class="shots-two" id="shotsEditTwo">
+                <button
+                  type="button"
+                  class="upload-box"
+                  data-idx="1"
+                  aria-label="Загрузить первое изображение"
+                >
+                  ＋
+                </button>
+                <button
+                  type="button"
+                  class="upload-box"
+                  data-idx="2"
+                  aria-label="Загрузить второе изображение"
+                >
+                  ＋
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <div class="actions-bar">
+          <button
+            type="button"
+            id="buildEditSubmitBtn"
+            class="btn primary wide"
+          >
+            Обновить
+          </button>
+        </div>
+      </section>
+
       <!-- ====== ДЕТАЛИ МОЕГО БИЛДА (с кнопками) ====== -->
       <section id="buildDetailScreen" class="hidden">
         <div class="actions-bar">
@@ -429,7 +515,7 @@
 
         <section class="card">
           <div class="build-id-chip" id="vd_build_id"></div>
-          <button type="button" class="build-edit-btn" disabled aria-label="Редактировать билд">
+          <button type="button" class="build-edit-btn" id="buildEditBtn" aria-label="Редактировать билд">
             <img src="./assets/icons/edit.svg" alt="Редактировать" />
           </button>
           <div class="profile-grid">

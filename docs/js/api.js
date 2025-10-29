@@ -235,6 +235,48 @@ export async function createBuild(buildData) {
     }
 }
 
+// Обновление билда
+export async function updateBuild(buildId, buildData) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('build_id', buildId);
+        data.append('name', buildData.name || '');
+        data.append('class_name', buildData.class || '');
+        data.append('tags', JSON.stringify(buildData.tags || []));
+        data.append('description', buildData.description || '');
+        
+        // Добавляем изображения только если они были изменены (являются Blob)
+        if (buildData.photo_1) data.append('photo_1', buildData.photo_1);
+        if (buildData.photo_2) data.append('photo_2', buildData.photo_2);
+
+        const url = `${API_BASE}/api/builds.update`;
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка обновления билда:', error);
+        throw error;
+    }
+}
+
 // Получение своих билдов
 export async function getMyBuilds() {
     try {

@@ -2,7 +2,7 @@
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
 import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate } from './utils.js';
-import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, API_BASE } from './api.js';
+import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, updateBuild, API_BASE } from './api.js';
 
 const CLASS_VALUES = ['Самурай','Охотник','Убийца','Ронин'];
 const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма'];
@@ -40,6 +40,28 @@ const buildDetailShots = $('buildDetailShots');
 
 const publishBuildBtn  = $('publishBuildBtn');
 const deleteBuildBtn   = $('deleteBuildBtn');
+const buildEditBtn     = $('buildEditBtn');
+
+// Элементы формы редактирования
+const buildEditForm        = $('buildEditForm');
+const buildEditNameEl      = $('buildEdit_name');
+const buildEditNameError   = $('buildEditNameError');
+const buildEditDescEl      = $('buildEdit_desc');
+
+const classEditChipsEl     = $('classEditChips');
+const tagsEditChipsEl      = $('tagsEditChips');
+
+const shotEditInput1       = $('buildEdit_shot1');
+const shotEditInput2       = $('buildEdit_shot2');
+const shotsEditTwo         = $('shotsEditTwo');
+
+const buildEditSubmitBtn   = $('buildEditSubmitBtn');
+
+let editingBuildId = null;
+let shotEdit1Data = null;
+let shotEdit2Data = null;
+let shotEdit1OriginalUrl = null;
+let shotEdit2OriginalUrl = null;
 
 // Публичные детали
 const pd_class          = $('pd_class');
@@ -96,6 +118,7 @@ async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
 }
 
 function getShotInputByIdx(idx) { return idx === '1' ? shotInput1 : shotInput2; }
+function getShotEditInputByIdx(idx) { return idx === '1' ? shotEditInput1 : shotEditInput2; }
 function renderShotThumb(idx, src) {
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -422,6 +445,146 @@ function resetBuildForm() {
   if (buildDescEl) buildDescEl.style.height = 'auto';
   buildNameError?.classList.add('hidden');
 }
+
+// Функции для редактирования билда
+function resetEditForm() {
+  try { buildEditForm?.reset(); } catch {}
+  setActive(classEditChipsEl, []); setActive(tagsEditChipsEl, []);
+  if (shotEditInput1) shotEditInput1.value = '';
+  if (shotEditInput2) shotEditInput2.value = '';
+  shotEdit1Data = null;
+  shotEdit2Data = null;
+  shotEdit1OriginalUrl = null;
+  shotEdit2OriginalUrl = null;
+  editingBuildId = null;
+
+  if (shotsEditTwo) {
+    shotsEditTwo.innerHTML = `
+      <button type="button" class="upload-box" data-idx="1" aria-label="Загрузить первое изображение">＋</button>
+      <button type="button" class="upload-box" data-idx="2" aria-label="Загрузить второе изображение">＋</button>
+    `;
+  }
+  if (buildEditDescEl) buildEditDescEl.style.height = 'auto';
+  buildEditNameError?.classList.add('hidden');
+}
+
+function getShotEditBoxByIdx(idx) {
+  return shotsEditTwo?.querySelector(`.upload-box[data-idx="${idx}"]`) ||
+         shotsEditTwo?.querySelector(`.shot-thumb[data-idx="${idx}"]`);
+}
+
+function renderEditShotThumb(idx, src) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'shot-thumb';
+  btn.dataset.idx = String(idx);
+  const img = document.createElement('img');
+  img.src = src;
+  btn.appendChild(img);
+  btn.addEventListener('click', () => {
+    hapticTapSmart();
+    const input = getShotEditInputByIdx(String(idx));
+    if (!input) return;
+    try { input.value = ''; } catch {}
+    input.click();
+  });
+  return btn;
+}
+
+function bindShotEditInput(input, idx){
+  input?.addEventListener('change', async ()=>{
+    const file = input.files && input.files[0];
+    if(!file) return;
+    try{
+      const data = await compressImageFile(file, { maxEdge: 1280, quality: 0.7 });
+      const targetEl = getShotEditBoxByIdx(idx);
+      const thumb = renderEditShotThumb(idx, data);
+      if(targetEl && targetEl.parentNode){ targetEl.parentNode.replaceChild(thumb, targetEl); }
+      else if (shotsEditTwo){ shotsEditTwo.appendChild(thumb); }
+      if(idx === '1') {
+        shotEdit1Data = data;
+        shotEdit1OriginalUrl = null; // Помечаем что фото изменено
+      } else {
+        shotEdit2Data = data;
+        shotEdit2OriginalUrl = null; // Помечаем что фото изменено
+      }
+      hapticTapSmart();
+    }catch(_){ shake(shotsEditTwo); }
+  });
+}
+
+function populateEditForm(build) {
+  if (!build) return;
+
+  // Заполняем название и описание
+  if (buildEditNameEl) buildEditNameEl.value = build.name || '';
+  if (buildEditDescEl) {
+    buildEditDescEl.value = build.description || build.desc || '';
+    buildEditDescEl.style.height = 'auto';
+    buildEditDescEl.style.height = Math.min(buildEditDescEl.scrollHeight, 200) + 'px';
+  }
+
+  // Выбираем класс и теги
+  if (build.class) setActive(classEditChipsEl, [build.class]);
+  if (build.tags && build.tags.length) setActive(tagsEditChipsEl, build.tags);
+
+  // Отображаем существующие фото
+  if (shotsEditTwo) {
+    shotsEditTwo.innerHTML = '';
+    
+    if (build.photo_1) {
+      const fullUrl = build.photo_1.startsWith('http') ? build.photo_1 : `${API_BASE}${build.photo_1}`;
+      shotEdit1OriginalUrl = fullUrl;
+      const thumb = renderEditShotThumb('1', fullUrl);
+      shotsEditTwo.appendChild(thumb);
+    } else {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'upload-box';
+      btn.dataset.idx = '1';
+      btn.setAttribute('aria-label', 'Загрузить первое изображение');
+      btn.textContent = '＋';
+      shotsEditTwo.appendChild(btn);
+    }
+
+    if (build.photo_2) {
+      const fullUrl = build.photo_2.startsWith('http') ? build.photo_2 : `${API_BASE}${build.photo_2}`;
+      shotEdit2OriginalUrl = fullUrl;
+      const thumb = renderEditShotThumb('2', fullUrl);
+      shotsEditTwo.appendChild(thumb);
+    } else {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'upload-box';
+      btn.dataset.idx = '2';
+      btn.setAttribute('aria-label', 'Загрузить второе изображение');
+      btn.textContent = '＋';
+      shotsEditTwo.appendChild(btn);
+    }
+  }
+
+  // Сбрасываем флаги изменений фото
+  shotEdit1Data = null;
+  shotEdit2Data = null;
+}
+
+function openBuildEdit(buildId) {
+  getMyBuilds().then(builds => {
+    const b = builds.find((x) => String(x.build_id || x.id) === String(buildId));
+    if (!b) { 
+      tg?.showAlert?.('Билд не найден'); 
+      return; 
+    }
+    
+    editingBuildId = b.build_id || b.id;
+    populateEditForm(b);
+    showScreen('buildEdit');
+  }).catch(err => {
+    tg?.showAlert?.('Ошибка загрузки билда для редактирования: ' + err);
+    hapticERR();
+  });
+}
+
 function getShotBoxByIdx(idx) {
   return shotsTwo?.querySelector(`.upload-box[data-idx="${idx}"]`) ||
          shotsTwo?.querySelector(`.shot-thumb[data-idx="${idx}"]`);
@@ -905,6 +1068,171 @@ export function initBuilds() {
       tg?.showAlert?.('Ошибка создания билда: ' + err);
       hapticERR();
     });
+  });
+
+  // Инициализация формы редактирования
+  renderChips(classEditChipsEl, CLASS_VALUES, { single: true });
+  renderChips(tagsEditChipsEl, TAG_VALUES);
+
+  // Авто-рост описания для редактирования
+  if (buildEditDescEl) {
+    const autoResize = () => {
+      buildEditDescEl.style.height = 'auto';
+      buildEditDescEl.style.height = Math.min(buildEditDescEl.scrollHeight, 200) + 'px';
+    };
+    buildEditDescEl.addEventListener('input', autoResize);
+    setTimeout(autoResize, 0);
+  }
+
+  // Tap при фокусе полей редактирования
+  buildEditNameEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
+  buildEditDescEl?.addEventListener('focus', ()=>{ hapticTapSmart(); }, {passive:true});
+  
+  // Скрывать ошибку при начале редактирования названия
+  buildEditNameEl?.addEventListener('input', ()=>{ buildEditNameError?.classList.add('hidden'); });
+
+  // Слоты изображений для редактирования
+  bindShotEditInput(shotEditInput1, '1');
+  bindShotEditInput(shotEditInput2, '2');
+
+  // Делегирование клика по квадратам редактирования
+  shotsEditTwo?.addEventListener('click', (e) => {
+    hapticTapSmart();
+    const box = e.target.closest('.upload-box');
+    if (!box) return;
+    const idx = box.dataset.idx;
+    const input = getShotEditInputByIdx(idx);
+    if (!input) return;
+    try { input.value = ''; } catch {}
+    input.click();
+  });
+
+  // Сабмит формы редактирования
+  buildEditSubmitBtn?.addEventListener('click', () => buildEditForm?.requestSubmit());
+  buildEditForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!editingBuildId) {
+      tg?.showAlert?.('Ошибка: билд для редактирования не найден');
+      return;
+    }
+
+    let name = (buildEditNameEl?.value || '').trim();
+    if (name.length > 40) name = name.slice(0, 40);
+
+    const klass = activeValues(classEditChipsEl)[0] || '';
+    const tags  = activeValues(tagsEditChipsEl);
+    const desc  = (buildEditDescEl?.value || '').trim();
+
+    if (!name)   { shake(buildEditNameEl); hapticERR(); focusAndScrollIntoView(buildEditNameEl); return; }
+    
+    if (!validateBuildName(name)) {
+      buildEditNameError?.classList.remove('hidden');
+      shake(buildEditNameEl);
+      hapticERR();
+      focusAndScrollIntoView(buildEditNameEl);
+      return;
+    }
+    
+    if (!klass)  { shake(classEditChipsEl); hapticERR(); focusAndScrollIntoView(classEditChipsEl); return; }
+    
+    // Проверяем наличие фото (либо новых, либо старых)
+    if (!shotEdit1Data && !shotEdit1OriginalUrl) { 
+      shake(shotsEditTwo); 
+      hapticERR(); 
+      focusAndScrollIntoView(shotsEditTwo); 
+      return; 
+    }
+    if (!shotEdit2Data && !shotEdit2OriginalUrl) { 
+      shake(shotsEditTwo); 
+      hapticERR(); 
+      focusAndScrollIntoView(shotsEditTwo); 
+      return; 
+    }
+
+    // Конвертируем Data URL в Blob для отправки
+    const dataURLtoBlob = (dataurl) => {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], {type: mime});
+    };
+
+    // Подготавливаем данные для отправки
+    const buildData = {
+      name,
+      class: klass,
+      tags,
+      description: desc,
+    };
+
+    // Функция для загрузки изображения по URL и конвертации в Blob
+    const urlToBlob = async (url) => {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        blob.name = 'photo.jpg';
+        return blob;
+      } catch (error) {
+        console.error('Ошибка загрузки изображения:', error);
+        return null;
+      }
+    };
+
+    // Выполняем обновление после подготовки всех данных
+    Promise.resolve().then(async () => {
+      // Добавляем фото: если изменены - берем новые данные, иначе загружаем оригинальные
+      if (shotEdit1Data) {
+        const photo1Blob = dataURLtoBlob(shotEdit1Data);
+        photo1Blob.name = 'photo1.jpg';
+        buildData.photo_1 = photo1Blob;
+      } else if (shotEdit1OriginalUrl) {
+        // Если фото не изменено, загружаем оригинальное с сервера
+        const originalBlob = await urlToBlob(shotEdit1OriginalUrl);
+        if (originalBlob) {
+          buildData.photo_1 = originalBlob;
+        }
+      }
+
+      if (shotEdit2Data) {
+        const photo2Blob = dataURLtoBlob(shotEdit2Data);
+        photo2Blob.name = 'photo2.jpg';
+        buildData.photo_2 = photo2Blob;
+      } else if (shotEdit2OriginalUrl) {
+        // Если фото не изменено, загружаем оригинальное с сервера
+        const originalBlob = await urlToBlob(shotEdit2OriginalUrl);
+        if (originalBlob) {
+          buildData.photo_2 = originalBlob;
+        }
+      }
+      
+      return updateBuild(editingBuildId, buildData);
+    }).then((response) => {
+      hapticOK();
+      tg?.showPopup?.({ title: 'Билд обновлён', message: 'Билд успешно обновлён!', buttons: [{ type:'ok' }] });
+
+      // Обновляем список билдов в фоне
+      renderMyBuilds();
+      renderAllBuilds();
+      
+      // Переходим на страницу деталей отредактированного билда
+      openBuildDetail(editingBuildId);
+    }).catch(err => {
+      tg?.showAlert?.('Ошибка обновления билда: ' + err);
+      hapticERR();
+    });
+  });
+
+  // Кнопка редактирования
+  buildEditBtn?.addEventListener('click', () => {
+    hapticOK();
+    if (!currentBuildId) return;
+    openBuildEdit(currentBuildId);
   });
 
   // Публикация/Скрытие — OK
