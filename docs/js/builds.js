@@ -56,8 +56,6 @@ const noFilteredBuildsHint = $('noFilteredBuildsHint');
 const classTabsContainer = $('classTabsContainer');
 
 // Элементы фильтров
-const classFilterBtn = $('classFilterBtn');
-const tagsFilterBtn = $('tagsFilterBtn');
 const resetFiltersBtn = $('resetFiltersBtn');
 const filterModal = $('filterModal');
 const filterModalTitle = $('filterModalTitle');
@@ -234,26 +232,14 @@ function updateFilterSelection(type, value) {
   }
   
   updateFilterButtons();
+  updateClassTabs();
   applyFilters();
 }
 
 function updateFilterButtons() {
-  // Обновляем текст кнопок с количеством выбранных элементов
-  if (classFilterBtn) {
-    const count = selectedClasses.length;
-    classFilterBtn.textContent = count > 0 ? `Класс (${count})` : 'Класс';
-    classFilterBtn.classList.toggle('active', count > 0);
-  }
-  
-  if (tagsFilterBtn) {
-    const count = selectedTags.length;
-    tagsFilterBtn.textContent = count > 0 ? `Теги (${count})` : 'Теги';
-    tagsFilterBtn.classList.toggle('active', count > 0);
-  }
-  
   // Показываем/скрываем кнопку "Сбросить" в зависимости от наличия активных фильтров
   if (resetFiltersBtn) {
-    const hasActiveFilters = selectedClasses.length > 0 || selectedTags.length > 0;
+    const hasActiveFilters = selectedClasses.length > 0 || selectedTags.length > 0 || selectedClassTab !== null;
     resetFiltersBtn.classList.toggle('hidden', !hasActiveFilters);
   }
 }
@@ -324,6 +310,27 @@ function renderClassTabs() {
     
     classTabsContainer.appendChild(tab);
   });
+  
+  // Создаем вкладку тегов
+  const tagsTab = document.createElement('button');
+  tagsTab.type = 'button';
+  tagsTab.className = 'class-tab';
+  tagsTab.dataset.type = 'tags';
+  if (selectedTags.length > 0) {
+    tagsTab.classList.add('active');
+  }
+  
+  const tagsIcon = document.createElement('img');
+  tagsIcon.src = './assets/icons/tag.svg';
+  tagsIcon.alt = 'Теги';
+  tagsTab.appendChild(tagsIcon);
+  
+  tagsTab.addEventListener('click', () => {
+    hapticTapSmart();
+    openFilterModal('tags');
+  });
+  
+  classTabsContainer.appendChild(tagsTab);
 }
 
 function updateClassTabs() {
@@ -332,12 +339,20 @@ function updateClassTabs() {
   const tabs = classTabsContainer.querySelectorAll('.class-tab');
   tabs.forEach(tab => {
     const tabClass = tab.dataset.class;
-    if (tabClass === selectedClassTab) {
+    const tabType = tab.dataset.type;
+    
+    if (tabType === 'tags') {
+      // Для вкладки тегов проверяем наличие выбранных тегов
+      tab.classList.toggle('active', selectedTags.length > 0);
+    } else if (tabClass === selectedClassTab) {
       tab.classList.add('active');
     } else {
       tab.classList.remove('active');
     }
   });
+  
+  // Обновляем кнопку сброса
+  updateFilterButtons();
 }
 
 function renderAllBuilds() {
@@ -955,21 +970,7 @@ export function initBuilds() {
     deleteBuildById(String(id));
   });
 
-  // Обработчики фильтров
-  if (classFilterBtn) {
-    classFilterBtn.addEventListener('click', () => {
-      hapticTapSmart();
-      openFilterModal('class');
-    });
-  }
-  
-  if (tagsFilterBtn) {
-    tagsFilterBtn.addEventListener('click', () => {
-      hapticTapSmart();
-      openFilterModal('tags');
-    });
-  }
-  
+  // Обработчик кнопки сброса фильтров
   if (resetFiltersBtn) {
     resetFiltersBtn.addEventListener('click', () => {
       hapticTapSmart();
