@@ -520,13 +520,8 @@ function populateEditForm(build) {
   if (buildEditNameEl) buildEditNameEl.value = build.name || '';
   if (buildEditDescEl) {
     buildEditDescEl.value = build.description || build.desc || '';
-    buildEditDescEl.style.height = 'auto';
-    buildEditDescEl.style.height = Math.min(buildEditDescEl.scrollHeight, 200) + 'px';
-    // Принудительно вызываем авто-рост после небольшой задержки
-    setTimeout(() => {
-      buildEditDescEl.style.height = 'auto';
-      buildEditDescEl.style.height = Math.min(buildEditDescEl.scrollHeight, 200) + 'px';
-    }, 100);
+    // Высота будет установлена после показа экрана в openBuildEdit
+    // Здесь просто устанавливаем значение
   }
 
   // Выбираем класс и теги
@@ -588,6 +583,28 @@ function openBuildEdit(buildId) {
     editingBuildId = b.build_id || b.id;
     populateEditForm(b);
     showScreen('buildEdit');
+    
+    // ОБЯЗАТЕЛЬНО вызываем авто-рост ПОСЛЕ показа экрана, чтобы элемент был видимым
+    // и scrollHeight рассчитывался правильно
+    if (buildEditDescEl) {
+      // Используем несколько подходов для надежности
+      const updateHeight = () => {
+        buildEditDescEl.style.height = 'auto';
+        const scrollHeight = buildEditDescEl.scrollHeight;
+        buildEditDescEl.style.height = Math.min(scrollHeight, 200) + 'px';
+      };
+      
+      // Вызываем через requestAnimationFrame для правильного расчета после рендера
+      requestAnimationFrame(() => {
+        updateHeight();
+        // Также через небольшую задержку на случай если DOM еще не полностью обновился
+        setTimeout(() => {
+          updateHeight();
+          // Еще одна попытка через небольшую задержку для надежности
+          setTimeout(updateHeight, 50);
+        }, 50);
+      });
+    }
   }).catch(err => {
     tg?.showAlert?.('Ошибка загрузки билда для редактирования: ' + err);
     hapticERR();
