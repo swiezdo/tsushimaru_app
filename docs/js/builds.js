@@ -93,6 +93,7 @@ let shot2Data = null;
 let selectedClasses = [];
 let selectedTags = [];
 let currentFilterType = null;
+let sortOrder = 'desc'; // 'desc' — сначала новые, 'asc' — сначала старые
 
 async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
   return new Promise((resolve, reject) => {
@@ -202,7 +203,14 @@ function renderBuildsList(container, items, emptyHint, isPublic = false) {
   
   // Используем DocumentFragment для оптимизации
   const fragment = document.createDocumentFragment();
-  items.slice().reverse().forEach(build => {
+  // Сортировка: для «Все билды» по sortOrder, для «Мои билды» всегда новые сверху
+  const order = isPublic ? sortOrder : 'desc';
+  const sorted = items.slice().sort((a, b) => {
+    const ca = Number(a?.created_at || 0);
+    const cb = Number(b?.created_at || 0);
+    return order === 'desc' ? (cb - ca) : (ca - cb);
+  });
+  sorted.forEach(build => {
     fragment.appendChild(createBuildElement(build, isPublic));
   });
   
@@ -349,6 +357,24 @@ function renderClassTabs() {
   });
   
   classTabsContainer.appendChild(tagsTab);
+
+  // Кнопка сортировки справа
+  const sortTab = document.createElement('button');
+  sortTab.type = 'button';
+  sortTab.className = 'class-tab sort-tab';
+  const sortIcon = document.createElement('img');
+  sortIcon.src = './assets/icons/sort.svg';
+  sortIcon.alt = 'Сортировка';
+  sortTab.title = sortOrder === 'desc' ? 'Сначала новые' : 'Сначала старые';
+  sortTab.appendChild(sortIcon);
+  sortTab.addEventListener('click', () => {
+    hapticTapSmart();
+    sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+    // Обновим заголовок и перерисуем список и вкладки
+    renderClassTabs();
+    applyFilters();
+  });
+  classTabsContainer.appendChild(sortTab);
 }
 
 function updateClassTabs() {
