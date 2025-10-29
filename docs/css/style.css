@@ -4,16 +4,22 @@
   --bg: #0e1621;
   --fg: #fff;
   --muted: #aeb7c2;
-  --card: rgba(255,255,255,0.04);
   --accent: #2ea6ff;
-  --stroke: rgba(255,255,255,0.08);
 
   /* Semantic Colors */
   --color-error: #ff4444;
   --color-success: #4caf50;
   --color-warning: #ff9800;
-  --color-border: var(--stroke);
   --color-text-secondary: var(--muted);
+  
+  /* Theme-adaptive colors (set by JavaScript) */
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --stroke-color: rgba(255, 255, 255, 0.08);
+  --elem-bg: rgba(255, 255, 255, 0.06);
+  --hover-bg: rgba(255, 255, 255, 0.04);
+  --lightbox-bg: rgba(0, 0, 0, 0.85);
+  --modal-bg: var(--bg);
+  --color-border: var(--stroke-color);
 
   /* Typography Scale */
   --fs-12: 12px;
@@ -80,7 +86,7 @@ body {
 
 /* ========== CARD ========== */
 .card {
-  background: var(--card);
+  background: var(--card-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
@@ -155,7 +161,7 @@ body {
   aspect-ratio: 1 / 1;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--card-bg);
   font-size: 28px;
   line-height: 1;
   display: flex;
@@ -172,7 +178,7 @@ body {
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--elem-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -337,7 +343,7 @@ body {
   height: 52px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--elem-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -363,7 +369,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 26px;
-  color: rgba(255, 255, 255, .85);
+  color: var(--tg-tx);
   background: rgba(0, 0, 0, .25);
   opacity: .35;
   pointer-events: none;
@@ -397,7 +403,7 @@ body {
 .build-icon {
   width: 48px; height: 48px; border-radius: var(--radius-sm); border: 1px solid var(--color-border);
   display: flex; align-items: center; justify-content: center;
-  background: rgba(255, 255, 255, 0.04); overflow: hidden;
+  background: var(--card-bg); overflow: hidden;
 }
 .build-icon img { width: 70%; height: 70%; object-fit: contain; opacity: .95; }
 .build-title {
@@ -428,14 +434,14 @@ body {
 .shots-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
 .shots-grid .shot-thumb {
   width: 100%; height: 160px; border-radius: var(--radius-sm); border: 1px solid var(--color-border);
-  overflow: hidden; background: rgba(255, 255, 255, 0.06);
+  overflow: hidden; background: var(--elem-bg);
   display: flex; align-items: center; justify-content: center;
 }
 .shot-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ========== LIGHTBOX ========== */
 .lightbox {
-  position: fixed; inset: 0; background: rgba(0, 0, 0, .85);
+  position: fixed; inset: 0; background: var(--lightbox-bg);
   display: flex; align-items: center; justify-content: center; z-index: 9999;
   overflow: hidden;
   cursor: grab;
@@ -533,7 +539,7 @@ html.tg .only-browser { display: none; }
 }
 
 .class-tab:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--hover-bg);
 }
 
 .class-tab:hover:not(.active) img {
@@ -596,7 +602,7 @@ html.tg .only-browser { display: none; }
 .filter-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--lightbox-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -609,7 +615,7 @@ html.tg .only-browser { display: none; }
 }
 
 .filter-modal-content {
-  background: var(--bg);
+  background: var(--modal-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
@@ -643,7 +649,7 @@ html.tg .only-browser { display: none; }
 }
 
 .filter-option:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--hover-bg);
 }
 
 .filter-option input[type="checkbox"] {
@@ -724,7 +730,7 @@ html.tg .only-browser { display: none; }
 .trophy-progress-bar {
   flex: 1;
   height: 8px;
-  background-color: var(--stroke);
+  background-color: var(--stroke-color);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -859,7 +865,7 @@ html.tg .only-browser { display: none; }
   height: 32px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--card-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -873,7 +879,7 @@ html.tg .only-browser { display: none; }
 .build-edit-btn:hover,
 .build-edit-btn:active {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--hover-bg);
 }
 
 .build-edit-btn img,

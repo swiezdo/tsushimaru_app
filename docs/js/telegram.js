@@ -21,6 +21,85 @@ const platformInfo = (() => {
   return { isMobile, isDesktop };
 })();
 
+// Определение светлой/темной темы по цвету фона
+function isLightTheme(bgColor) {
+  if (!bgColor) return false;
+  
+  // Если цвет в формате #RRGGBB, конвертируем в RGB
+  let r, g, b;
+  if (bgColor.startsWith('#')) {
+    r = parseInt(bgColor.slice(1, 3), 16);
+    g = parseInt(bgColor.slice(3, 5), 16);
+    b = parseInt(bgColor.slice(5, 7), 16);
+  } else if (bgColor.startsWith('rgb')) {
+    // Если rgb(r, g, b) или rgba(r, g, b, a)
+    const match = bgColor.match(/\d+/g);
+    if (match && match.length >= 3) {
+      r = parseInt(match[0]);
+      g = parseInt(match[1]);
+      b = parseInt(match[2]);
+    } else {
+      return false;
+    }
+  } else if (/^[0-9a-fA-F]{6}$/.test(bgColor)) {
+    // Если цвет без # (например, "ffffff")
+    r = parseInt(bgColor.slice(0, 2), 16);
+    g = parseInt(bgColor.slice(2, 4), 16);
+    b = parseInt(bgColor.slice(4, 6), 16);
+  } else {
+    return false;
+  }
+  
+  // Проверяем на валидность
+  if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    return false;
+  }
+  
+  // Вычисляем яркость по формуле W3C
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128;
+}
+
+// Применение темы с адаптивными цветами
+function applyTheme() {
+  if (!tg) return;
+  
+  const th = tg.themeParams || {};
+  const bgColor = th.bg_color || '#0e1621';
+  const textColor = th.text_color || '#ffffff';
+  const hintColor = th.hint_color || '#aeb7c2';
+  
+  const isLight = isLightTheme(bgColor);
+  
+  // Применяем базовые цвета Telegram
+  document.documentElement.style.setProperty('--tg-bg', bgColor);
+  document.documentElement.style.setProperty('--tg-tx', textColor);
+  document.documentElement.style.setProperty('--tg-hint', hintColor);
+  
+  // Адаптивные цвета для карточек и элементов
+  if (isLight) {
+    // Светлая тема: используем темные полупрозрачные цвета с увеличенной контрастностью
+    document.documentElement.style.setProperty('--card-bg', 'rgba(0, 0, 0, 0.06)');
+    document.documentElement.style.setProperty('--stroke-color', 'rgba(0, 0, 0, 0.15)');
+    document.documentElement.style.setProperty('--elem-bg', 'rgba(0, 0, 0, 0.08)');
+    document.documentElement.style.setProperty('--hover-bg', 'rgba(0, 0, 0, 0.12)');
+    document.documentElement.style.setProperty('--lightbox-bg', 'rgba(0, 0, 0, 0.75)');
+    document.documentElement.style.setProperty('--modal-bg', bgColor);
+  } else {
+    // Темная тема: используем светлые полупрозрачные цвета
+    document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.04)');
+    document.documentElement.style.setProperty('--stroke-color', 'rgba(255, 255, 255, 0.08)');
+    document.documentElement.style.setProperty('--elem-bg', 'rgba(255, 255, 255, 0.06)');
+    document.documentElement.style.setProperty('--hover-bg', 'rgba(255, 255, 255, 0.04)');
+    document.documentElement.style.setProperty('--lightbox-bg', 'rgba(0, 0, 0, 0.85)');
+    document.documentElement.style.setProperty('--modal-bg', bgColor);
+  }
+  
+  // Добавляем класс для CSS-селекторов при необходимости
+  document.documentElement.classList.toggle('theme-light', isLight);
+  document.documentElement.classList.toggle('theme-dark', !isLight);
+}
+
 // Инициализация Telegram WebApp + применение темы
 (function initTG() {
   if (!tg) return;
@@ -32,17 +111,18 @@ const platformInfo = (() => {
     
     if (isMobile) {
       tg.requestFullscreen();
-    } else {
     }
-
-    // Применяем тему
-    const th = tg.themeParams || {};
-    if (th.bg_color)   document.documentElement.style.setProperty('--tg-bg', th.bg_color);
-    if (th.text_color) document.documentElement.style.setProperty('--tg-tx', th.text_color);
-    if (th.hint_color) document.documentElement.style.setProperty('--tg-hint', th.hint_color);
-
+    
+    // Применяем тему при инициализации
+    applyTheme();
+    
     document.documentElement.classList.add('tg');
     tg.MainButton.hide();
+    
+    // Обработчик изменения темы в реальном времени
+    tg.onEvent('themeChanged', () => {
+      applyTheme();
+    });
   } catch (_) {}
 })();
 
