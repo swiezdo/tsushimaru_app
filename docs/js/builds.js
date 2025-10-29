@@ -53,6 +53,7 @@ const publicDetailShots = $('publicDetailShots');
 const allBuildsList   = $('allBuildsList');
 const noAllBuildsHint = $('noAllBuildsHint');
 const noFilteredBuildsHint = $('noFilteredBuildsHint');
+const classTabsContainer = $('classTabsContainer');
 
 // Элементы фильтров
 const classFilterBtn = $('classFilterBtn');
@@ -71,6 +72,7 @@ let shot2Data = null;
 let selectedClasses = [];
 let selectedTags = [];
 let currentFilterType = null;
+let selectedClassTab = null; // null = все билды, иначе название класса
 
 async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
   return new Promise((resolve, reject) => {
@@ -198,6 +200,9 @@ function renderMyBuilds() {
 // Функции фильтрации
 function filterBuilds(builds) {
   return builds.filter(build => {
+    // Проверка вкладки класса (если выбрана)
+    const tabMatch = selectedClassTab === null || build.class === selectedClassTab;
+    
     // Проверка классов (OR внутри категории)
     const classMatch = selectedClasses.length === 0 || 
       selectedClasses.includes(build.class);
@@ -207,7 +212,7 @@ function filterBuilds(builds) {
       (build.tags && build.tags.some(tag => selectedTags.includes(tag)));
     
     // AND между категориями
-    return classMatch && tagsMatch;
+    return tabMatch && classMatch && tagsMatch;
   });
 }
 
@@ -285,7 +290,58 @@ function renderFilteredBuilds(items) {
   renderBuildsList(allBuildsList, items, null, true);
 }
 
+function renderClassTabs() {
+  if (!classTabsContainer) return;
+  
+  classTabsContainer.innerHTML = '';
+  
+  // Создаем вкладки для каждого класса
+  CLASS_VALUES.forEach(className => {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'class-tab';
+    tab.dataset.class = className;
+    if (selectedClassTab === className) {
+      tab.classList.add('active');
+    }
+    
+    const icon = document.createElement('img');
+    icon.src = CLASS_ICON[className];
+    icon.alt = className;
+    tab.appendChild(icon);
+    
+    tab.addEventListener('click', () => {
+      hapticTapSmart();
+      // Если кликнули на активную вкладку, сбрасываем выбор (показываем все)
+      if (selectedClassTab === className) {
+        selectedClassTab = null;
+      } else {
+        selectedClassTab = className;
+      }
+      updateClassTabs();
+      applyFilters();
+    });
+    
+    classTabsContainer.appendChild(tab);
+  });
+}
+
+function updateClassTabs() {
+  if (!classTabsContainer) return;
+  
+  const tabs = classTabsContainer.querySelectorAll('.class-tab');
+  tabs.forEach(tab => {
+    const tabClass = tab.dataset.class;
+    if (tabClass === selectedClassTab) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+}
+
 function renderAllBuilds() {
+  renderClassTabs();
   return applyFilters();
 }
 
@@ -346,8 +402,10 @@ function closeFilterModal() {
 function resetFilters() {
   selectedClasses = [];
   selectedTags = [];
+  selectedClassTab = null;
   
   updateFilterButtons();
+  updateClassTabs();
   applyFilters();
   closeFilterModal();
 }

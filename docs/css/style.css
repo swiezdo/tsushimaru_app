@@ -473,12 +473,65 @@ body {
 }
 
 /* ========== TOUCH ========== */
-button, .btn, .big-btn, .list-btn, .chip-btn, .build-item, .upload-box {
+button, .btn, .big-btn, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   -webkit-user-select: none; -moz-user-select: none; user-select: none;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
 
 html.tg .only-browser { display: none; }
+
+/* ========== CLASS TABS ========== */
+.class-tabs-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.class-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.class-tab:active {
+  transform: translateY(1px);
+}
+
+.class-tab img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.class-tab.active {
+  background: var(--accent);
+  border-color: transparent;
+}
+
+.class-tab.active img {
+  opacity: 1;
+  filter: brightness(0) saturate(100%) invert(8%) sepia(19%) saturate(3011%) hue-rotate(179deg) brightness(95%) contrast(99%);
+}
+
+.class-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.class-tab:hover:not(.active) img {
+  opacity: 1;
+}
 
 /* ========== FILTERS ========== */
 .filters-container {
