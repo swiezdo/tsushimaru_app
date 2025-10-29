@@ -1171,44 +1171,20 @@ export function initBuilds() {
       description: desc,
     };
 
-    // Функция для загрузки изображения по URL и конвертации в Blob
-    const urlToBlob = async (url) => {
-      try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        blob.name = 'photo.jpg';
-        return blob;
-      } catch (error) {
-        console.error('Ошибка загрузки изображения:', error);
-        return null;
-      }
-    };
-
     // Выполняем обновление после подготовки всех данных
     Promise.resolve().then(async () => {
-      // Добавляем фото: если изменены - берем новые данные, иначе загружаем оригинальные
+      // Добавляем фото только если они были изменены (есть новые данные)
+      // Если фото не изменены, не отправляем их - бэкенд сохранит существующие
       if (shotEdit1Data) {
         const photo1Blob = dataURLtoBlob(shotEdit1Data);
         photo1Blob.name = 'photo1.jpg';
         buildData.photo_1 = photo1Blob;
-      } else if (shotEdit1OriginalUrl) {
-        // Если фото не изменено, загружаем оригинальное с сервера
-        const originalBlob = await urlToBlob(shotEdit1OriginalUrl);
-        if (originalBlob) {
-          buildData.photo_1 = originalBlob;
-        }
       }
 
       if (shotEdit2Data) {
         const photo2Blob = dataURLtoBlob(shotEdit2Data);
         photo2Blob.name = 'photo2.jpg';
         buildData.photo_2 = photo2Blob;
-      } else if (shotEdit2OriginalUrl) {
-        // Если фото не изменено, загружаем оригинальное с сервера
-        const originalBlob = await urlToBlob(shotEdit2OriginalUrl);
-        if (originalBlob) {
-          buildData.photo_2 = originalBlob;
-        }
       }
       
       return updateBuild(editingBuildId, buildData);

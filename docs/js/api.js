@@ -256,7 +256,7 @@ export async function updateBuild(buildId, buildData) {
 
         const url = `${API_BASE}/api/builds.update`;
         const response = await fetch(url, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'X-Telegram-Init-Data': initData,
             },
