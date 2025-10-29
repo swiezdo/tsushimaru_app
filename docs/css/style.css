@@ -561,9 +561,6 @@ html.tg .only-browser { display: none; }
   opacity: 1;
 }
 
-/* Кнопка сортировки — прижать вправо, сохраняя ряд */
-.sort-tab { margin-left: auto; }
-
 /* ========== FILTERS ========== */
 .filters-container {
   display: flex;
