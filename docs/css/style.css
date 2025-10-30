@@ -661,7 +661,7 @@ html.tg .only-browser { display: none; }
   box-shadow:
     0 0 0 1px rgba(255, 68, 68, 0.6),
     0 0 14px rgba(255, 68, 68, 0.35);
-  background-image: url('../assets/background2.jpg');
+  background-image: url('../assets/background2.gif');
   background-repeat: no-repeat;
   background-position: center;
   background-size: 160% auto; /* ~60% изображения в кнопку */
