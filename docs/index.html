@@ -12,6 +12,18 @@
   </head>
 
   <body>
+    <!-- ====== MAINTENANCE GATE OVERLAY (simple client-only) ====== -->
+    <div id="gateOverlay" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.9);z-index:99999;color:#fff;">
+      <div style="width:min(92vw,420px);background:#111;border:1px solid #2a2a2a;border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+        <h2 style="margin:0 0 8px 0;font-size:20px;text-align:center;">Технические работы</h2>
+        <p style="margin:0 0 16px 0;color:#ccc;text-align:center;">Вход только для администраторов</p>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="gatePassword" type="password" placeholder="Пароль" autocomplete="current-password" style="flex:1;padding:10px 12px;border-radius:8px;border:1px solid #2a2a2a;background:#0b0b0b;color:#fff;outline:none;" />
+          <button id="gateEnterBtn" style="padding:10px 14px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#fff;cursor:pointer;">Войти</button>
+        </div>
+        <div id="gateError" style="margin-top:10px;color:#ff6b6b;min-height:18px;font-size:13px;text-align:center;"></div>
+      </div>
+    </div>
     <main class="container">
       <!-- ====== TOPBAR ====== -->
       <header class="topbar">
@@ -651,7 +663,73 @@
       </div>
     </div>
 
-    <!-- Модульный бандл -->
-    <script type="module" src="./js/main.js"></script>
+    <!-- Модульный бандл загружается УСЛОВНО после прохождения «шторки» -->
+    <script>
+      // ====== ПРОСТАЯ НАСТРОЙКА «ШТОРКИ» ======
+      // Установите SHA-256 от вашего пароля ниже. Пример получения:
+      //   echo -n 'мой_пароль' | sha256sum
+      // Возьмите первые 64 символа хэша без пробелов и переноса строки
+      const GATE_ENABLED = true; // выключите, когда шторка больше не нужна
+      const GATE_PASSWORD_SHA256 = "9ccd75ebef5ef0166ea18cd46abd5eed4e70f93155a004d5337405eb4f737a03"; // <= ВСТАВЬТЕ СЮДА ХЭШ ПАРОЛЯ
+
+      // ====== УТИЛИТЫ ======
+      async function sha256Hex(text) {
+        const enc = new TextEncoder().encode(text);
+        const buf = await crypto.subtle.digest('SHA-256', enc);
+        const bytes = new Uint8Array(buf);
+        let hex = "";
+        for (let i = 0; i < bytes.length; i++) {
+          const h = bytes[i].toString(16).padStart(2, '0');
+          hex += h;
+        }
+        return hex;
+      }
+
+      function loadMainBundle() {
+        const s = document.createElement('script');
+        s.type = 'module';
+        s.src = './js/main.js';
+        document.body.appendChild(s);
+      }
+
+      function showGate() {
+        const overlay = document.getElementById('gateOverlay');
+        const input = document.getElementById('gatePassword');
+        const btn = document.getElementById('gateEnterBtn');
+        const err = document.getElementById('gateError');
+        overlay.style.display = 'flex';
+
+        async function tryEnter() {
+          err.textContent = "";
+          const val = input.value || "";
+          if (!val) { err.textContent = "Введите пароль"; return; }
+          try {
+            const hash = await sha256Hex(val);
+            if (hash === GATE_PASSWORD_SHA256) {
+              localStorage.setItem('gateOK', '1');
+              overlay.style.display = 'none';
+              loadMainBundle();
+            } else {
+              err.textContent = "Неверный пароль";
+            }
+          } catch(e) {
+            err.textContent = "Ошибка проверки";
+          }
+        }
+
+        btn.addEventListener('click', tryEnter);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryEnter(); });
+        setTimeout(() => input.focus(), 0);
+      }
+
+      (function gateBoot(){
+        if (!GATE_ENABLED) { loadMainBundle(); return; }
+        try {
+          const ok = localStorage.getItem('gateOK') === '1';
+          if (ok) { loadMainBundle(); return; }
+        } catch(e) { /* ignore */ }
+        showGate();
+      })();
+    </script>
   </body>
 </html>
