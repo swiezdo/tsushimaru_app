@@ -113,8 +113,8 @@ function createBadgeButton(category, currentLevel) {
     const progress = calculateProgress(currentLevel, maxLevels);
     const styles = getButtonStyles(category, currentLevel);
     
-    // Название уровня или "Базовый уровень" если level = 0
-    const levelName = currentLevel > 0 && levelData ? levelData.name : 'Базовый уровень';
+    // Название уровня или название категории если level = 0
+    const levelName = currentLevel > 0 && levelData ? levelData.name : (category.name || category.key);
     
     // Создаём элемент кнопки
     const button = document.createElement('button');
