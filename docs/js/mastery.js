@@ -2,7 +2,6 @@
 // Модуль для работы с системой мастерства
 
 import { fetchMastery } from './api.js';
-import { $ } from './telegram.js';
 
 // Кэш конфига
 let masteryConfig = null;
@@ -189,29 +188,43 @@ function createBadgeButton(category, currentLevel) {
 
 // Рендеринг всех кнопок мастерства
 export async function renderMasteryButtons() {
-    const container = $('#masteryButtonsContainer');
+    console.log('🎯 renderMasteryButtons вызван');
+    
+    // Пробуем найти контейнер разными способами
+    let container = document.getElementById('masteryButtonsContainer');
     if (!container) {
-        console.error('Контейнер для кнопок мастерства не найден');
+        // Если не найден по ID, пробуем через селектор
+        container = document.querySelector('#masteryButtonsContainer');
+    }
+    if (!container) {
+        console.error('❌ Контейнер для кнопок мастерства не найден');
+        console.log('Поиск всех элементов с id:', document.querySelectorAll('[id*="mastery"]'));
         return;
     }
+    
+    console.log('✅ Контейнер найден:', container);
     
     // Очищаем контейнер
     container.innerHTML = '';
     
     // Загружаем конфиг
+    console.log('📋 Загрузка конфига мастерства...');
     const config = await loadMasteryConfig();
     if (!config) {
-        console.error('Не удалось загрузить конфиг мастерства');
+        console.error('❌ Не удалось загрузить конфиг мастерства');
         container.innerHTML = '<div class="hint muted">Ошибка загрузки данных мастерства</div>';
         return;
     }
+    console.log('✅ Конфиг загружен, категорий:', config.categories?.length);
     
     // Загружаем уровни пользователя
+    console.log('📊 Загрузка уровней пользователя...');
     let levels;
     try {
         levels = await fetchMastery();
+        console.log('✅ Уровни получены:', levels);
     } catch (error) {
-        console.error('Ошибка получения уровней мастерства:', error);
+        console.error('❌ Ошибка получения уровней мастерства:', error);
         levels = { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
     }
     
@@ -219,17 +232,22 @@ export async function renderMasteryButtons() {
     const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun'];
     
     // Создаём кнопки для каждой категории
+    let buttonsCreated = 0;
     for (const key of categoryOrder) {
         const category = getCategoryByKey(config, key);
         if (!category) {
-            console.warn(`Категория ${key} не найдена в конфиге`);
+            console.warn(`⚠️ Категория ${key} не найдена в конфиге`);
             continue;
         }
         
         const currentLevel = levels[key] || 0;
+        console.log(`🔨 Создание кнопки для ${key}, уровень: ${currentLevel}`);
         const button = createBadgeButton(category, currentLevel);
         container.appendChild(button);
+        buttonsCreated++;
     }
+    
+    console.log(`✅ Рендеринг завершён. Создано кнопок: ${buttonsCreated}`);
 }
 
 // Инициализация модуля

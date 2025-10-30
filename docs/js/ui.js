@@ -62,7 +62,10 @@ export function showScreen(name) {
   else if (name === 'mastery')         {
     setTopbar(true, 'Мастерство');
     // Загружаем и рендерим кнопки мастерства при открытии экрана
-    renderMasteryButtons();
+    // Используем setTimeout чтобы убедиться, что экран уже показан
+    setTimeout(() => {
+      renderMasteryButtons();
+    }, 50);
   }
 
   scrollTopSmooth();
