@@ -594,10 +594,11 @@ html.tg .only-browser { display: none; }
   font-size: var(--fs-14);
   color: var(--tg-hint);
   white-space: nowrap;
-  /* свечение уровня для читабельности на ярком фоне */
+  /* чёрная светящаяся тень для читабельности */
   text-shadow:
-    0 0 6px rgba(255, 255, 255, 0.35),
-    0 0 12px rgba(255, 255, 255, 0.25);
+    0 1px 2px rgba(0, 0, 0, 0.85),
+    0 0 8px rgba(0, 0, 0, 0.5),
+    0 0 2px rgba(0, 0, 0, 0.6);
 }
 .badge-progress {
   position: relative;
@@ -620,18 +621,18 @@ html.tg .only-browser { display: none; }
 
 /* модификаторы (резерв на будущее, если понадобится уникальный декор) */
 .solo-badge {
-  border-color: rgba(46, 166, 255, 0.7);
+  border-color: rgba(255, 68, 68, 0.7);
   box-shadow:
-    0 0 0 1px rgba(46, 166, 255, 0.6),
-    0 0 14px rgba(46, 166, 255, 0.35);
+    0 0 0 1px rgba(255, 68, 68, 0.6),
+    0 0 14px rgba(255, 68, 68, 0.35);
 }
 .solo-badge .badge-progress {
-  border-color: rgba(46, 166, 255, 0.8);
+  border-color: rgba(255, 68, 68, 0.85);
   box-shadow:
-    0 0 0 1px rgba(46, 166, 255, 0.6),
-    0 0 14px rgba(46, 166, 255, 0.35);
+    0 0 0 1px rgba(255, 68, 68, 0.6),
+    0 0 14px rgba(255, 68, 68, 0.35);
 }
-.solo-badge .badge-level { color: #d8ecff; }
+.solo-badge .badge-level { text-shadow: 0 1px 2px rgba(0,0,0,.85), 0 0 8px rgba(0,0,0,.5); }
 
 .hellmode-badge {
   border-color: rgba(255, 68, 68, 0.7);
@@ -644,7 +645,8 @@ html.tg .only-browser { display: none; }
   background-size: 160% auto; /* ~60% изображения в кнопку */
 }
 .hellmode-badge .badge-progress-fill {
-  background: linear-gradient(90deg, #a64b00 0%, #0a0a0a 100%);
+  /* как у первой кнопки: кроваво-красный → светло-чёрный */
+  background: linear-gradient(90deg, #8b0000 0%, #0a0a0a 100%);
 }
 .hellmode-badge .badge-progress {
   border-color: rgba(255, 68, 68, 0.85);
@@ -652,28 +654,29 @@ html.tg .only-browser { display: none; }
     0 0 0 1px rgba(255, 68, 68, 0.6),
     0 0 14px rgba(255, 68, 68, 0.35);
 }
-.hellmode-badge .badge-level { color: #ffd4d4; }
+.hellmode-badge .badge-level { text-shadow: 0 1px 2px rgba(0,0,0,.85), 0 0 8px rgba(0,0,0,.5); }
 
 .raid-badge {
-  border-color: rgba(76, 175, 80, 0.75);
+  border-color: rgba(255, 68, 68, 0.7);
   box-shadow:
-    0 0 0 1px rgba(76, 175, 80, 0.65),
-    0 0 14px rgba(76, 175, 80, 0.35);
+    0 0 0 1px rgba(255, 68, 68, 0.6),
+    0 0 14px rgba(255, 68, 68, 0.35);
   background-image: url('../assets/background2.jpg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: 160% auto; /* ~60% изображения в кнопку */
 }
 .raid-badge .badge-progress-fill {
-  background: linear-gradient(90deg, #18a558 0%, #0a0a0a 100%);
+  /* как у первой кнопки: кроваво-красный → светло-чёрный */
+  background: linear-gradient(90deg, #8b0000 0%, #0a0a0a 100%);
 }
 .raid-badge .badge-progress {
-  border-color: rgba(76, 175, 80, 0.9);
+  border-color: rgba(255, 68, 68, 0.85);
   box-shadow:
-    0 0 0 1px rgba(76, 175, 80, 0.65),
-    0 0 16px rgba(76, 175, 80, 0.45);
+    0 0 0 1px rgba(255, 68, 68, 0.6),
+    0 0 16px rgba(255, 68, 68, 0.45);
 }
-.raid-badge .badge-level { color: #e7ffe8; text-shadow: 0 0 8px rgba(76, 175, 80, 0.6), 0 0 14px rgba(76, 175, 80, 0.4); }
+.raid-badge .badge-level { text-shadow: 0 1px 2px rgba(0,0,0,.85), 0 0 8px rgba(0,0,0,.5); }
 
 /* золотой заголовок и иконка для raid */
 .raid-badge .badge-title {
