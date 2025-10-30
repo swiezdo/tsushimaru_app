@@ -451,5 +451,19 @@ export async function fetchUserBuilds(userId) {
 }
 
 
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С МАСТЕРСТВОМ ==========
+
+// Получение уровней мастерства
+export async function fetchMastery() {
+    try {
+        const data = await apiRequest('/api/mastery.get');
+        return data;
+    } catch (error) {
+        console.error('Ошибка получения уровней мастерства:', error);
+        // При ошибке возвращаем нулевые уровни
+        return { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };

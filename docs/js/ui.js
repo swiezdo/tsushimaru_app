@@ -3,6 +3,7 @@
 
 import { tg, scrollTopSmooth } from './telegram.js';
 import { loadProfileOnScreenOpen } from './profile.js';
+import { renderMasteryButtons } from './mastery.js';
 
 // Ссылки на экраны
 export const screens = {
@@ -37,7 +38,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback'];
+    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','mastery'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -58,7 +59,11 @@ export function showScreen(name) {
   else if (name === 'buildPublicDetail') setTopbar(true, 'Билд');
   else if (name === 'whatsNew')        setTopbar(true, 'Что нового?');
   else if (name === 'feedback')        setTopbar(true, 'Отправить отзыв');
-  else if (name === 'mastery')         setTopbar(true, 'Мастерство');
+  else if (name === 'mastery')         {
+    setTopbar(true, 'Мастерство');
+    // Загружаем и рендерим кнопки мастерства при открытии экрана
+    renderMasteryButtons();
+  }
 
   scrollTopSmooth();
 }

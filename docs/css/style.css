@@ -620,81 +620,34 @@ html.tg .only-browser { display: none; }
   background: linear-gradient(90deg, #ffffff 0%, #8b0000 100%);
 }
 
-/* модификаторы (резерв на будущее, если понадобится уникальный декор) */
-.solo-badge {
+/* Базовые стили для всех категорий мастерства */
+.badge-btn.has-glow {
   border-color: rgba(255, 68, 68, 0.6);
   box-shadow:
     0 0 0 1px rgba(255, 68, 68, 0.5),
     0 0 8px rgba(255, 68, 68, 0.28);
 }
-.solo-badge .badge-progress {
+
+.badge-btn.has-glow .badge-progress {
   border-color: rgba(255, 68, 68, 0.75);
   box-shadow:
     0 0 0 1px rgba(255, 68, 68, 0.5),
     0 0 8px rgba(255, 68, 68, 0.28);
 }
-.solo-badge .badge-level { color: var(--tg-tx); }
 
-.hellmode-badge {
-  border-color: rgba(255, 68, 68, 0.6);
-  box-shadow:
-    0 0 0 1px rgba(255, 68, 68, 0.5),
-    0 0 8px rgba(255, 68, 68, 0.28);
-  background-image: url('../assets/background.jpg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 160% auto; /* ~60% изображения в кнопку */
+.badge-btn .badge-level { 
+  color: var(--tg-tx); 
 }
-.hellmode-badge .badge-progress-fill { background: linear-gradient(90deg, #ffffff 0%, #8b0000 100%); }
-.hellmode-badge .badge-progress {
-  border-color: rgba(255, 68, 68, 0.75);
-  box-shadow:
-    0 0 0 1px rgba(255, 68, 68, 0.5),
-    0 0 8px rgba(255, 68, 68, 0.28);
-}
-.hellmode-badge .badge-level { color: var(--tg-tx); }
 
-.raid-badge {
-  border-color: rgba(255, 68, 68, 0.6);
-  box-shadow:
-    0 0 0 1px rgba(255, 68, 68, 0.5),
-    0 0 8px rgba(255, 68, 68, 0.28);
-  background-image: url('../assets/background2.gif');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 160% auto; /* ~60% изображения в кнопку */
+.badge-btn .badge-progress-fill { 
+  background: linear-gradient(90deg, #ffffff 0%, #8b0000 100%); 
 }
-.raid-badge .badge-progress-fill { background: linear-gradient(90deg, #ffffff 0%, #8b0000 100%); }
-.raid-badge .badge-progress {
-  border-color: rgba(255, 68, 68, 0.75);
-  box-shadow:
-    0 0 0 1px rgba(255, 68, 68, 0.5),
-    0 0 8px rgba(255, 68, 68, 0.28);
-}
-.raid-badge .badge-level { color: var(--tg-tx); }
 
-/* золотой заголовок и иконка для raid */
-.raid-badge .badge-title {
-  color: var(--tg-tx);
-  /* чёрная тень как и у остальных заголовков */
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.85),
-    0 0 8px rgba(0, 0, 0, 0.5),
-    0 0 2px rgba(255, 255, 255, 0.12);
+/* Поддержка inline-flex для заголовков с иконкой */
+.badge-btn .badge-title[style*="inline-flex"] {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-}
-.raid-badge .badge-title::before {
-  content: "";
-  width: 32px;
-  height: 32px;
-  background-image: url('../assets/icon.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
-  opacity: 0.95;
 }
 
 /* ========== FILTERS ========== */
