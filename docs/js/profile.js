@@ -7,7 +7,7 @@ import { renderChips, activeValues, setActive, shake, prettyLines, validatePSNId
 // ---------- Константы ----------
 const PLATFORM   = ['🎮 PlayStation','💻 ПК'];
 const MODES      = ['📖 Сюжет','🏹 Выживание','🗻 Испытания Иё','⚔️ Соперники','📜 Главы'];
-const GOALS      = ['🏆 Получение трофеев','🔎 Узнать что-то новое','👥 Поиск тиммейтов'];
+const GOALS      = ['🔎 Узнать что-то новое','👥 Поиск тиммейтов'];
 const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','🏅 Платина','👻 Кошмар','🔥 HellMode'];
 
 // ---------- LocalStorage ----------

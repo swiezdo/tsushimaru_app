@@ -1,6 +1,6 @@
 # Tsushima Mini App
 
-Telegram Mini App для игры Ghost of Tsushima: Legends - создание и управление профилями игроков, трофеями и билдами.
+Telegram Mini App для игры Ghost of Tsushima: Legends - создание и управление профилями игроков и билдами.
 
 ## Структура проекта
 
