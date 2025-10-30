@@ -601,16 +601,47 @@ html.tg .only-browser { display: none; }
 .badge-progress-fill {
   position: absolute;
   top: 0;
-  right: 0; /* заполняем справа налево */
+  left: 0; /* заполняем слева направо */
   height: 100%;
   width: var(--progress, 0%);
-  background: linear-gradient(270deg, #8b0000 0%, #0a0a0a 100%);
+  background: linear-gradient(90deg, #8b0000 0%, #0a0a0a 100%);
 }
 
 /* модификаторы (резерв на будущее, если понадобится уникальный декор) */
-.solo-badge {}
-.hellmode-badge {}
-.raid-badge {}
+.solo-badge {
+  border-color: rgba(46, 166, 255, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(46, 166, 255, 0.6),
+    0 0 14px rgba(46, 166, 255, 0.35);
+}
+
+.hellmode-badge {
+  border-color: rgba(255, 68, 68, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(255, 68, 68, 0.6),
+    0 0 14px rgba(255, 68, 68, 0.35);
+  background-image: url('../assets/background.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 160% auto; /* ~60% изображения в кнопку */
+}
+.hellmode-badge .badge-progress-fill {
+  background: linear-gradient(90deg, #a64b00 0%, #0a0a0a 100%);
+}
+
+.raid-badge {
+  border-color: rgba(76, 175, 80, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(76, 175, 80, 0.65),
+    0 0 14px rgba(76, 175, 80, 0.35);
+  background-image: url('../assets/background2.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 160% auto; /* ~60% изображения в кнопку */
+}
+.raid-badge .badge-progress-fill {
+  background: linear-gradient(90deg, #18a558 0%, #0a0a0a 100%);
+}
 
 /* ========== FILTERS ========== */
 .filters-container {
