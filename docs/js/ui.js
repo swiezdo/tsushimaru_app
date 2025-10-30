@@ -8,8 +8,6 @@ import { loadProfileOnScreenOpen } from './profile.js';
 export const screens = {
   home:               document.getElementById('homeScreen'),
   profile:            document.getElementById('profileScreen'),
-  trophies:           document.getElementById('trophiesScreen'),
-  trophyDetail:       document.getElementById('trophyDetailScreen'),
   participants:       document.getElementById('participantsScreen'),
   participantDetail:  document.getElementById('participantDetailScreen'),
   builds:             document.getElementById('buildsScreen'),
@@ -38,7 +36,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','trophies','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','trophyDetail','whatsNew','feedback'];
+    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -49,8 +47,7 @@ export function showScreen(name) {
     // Загружаем профиль с сервера при открытии экрана профиля
     loadProfileOnScreenOpen();
   }
-  else if (name === 'trophies')        setTopbar(true, 'Трофеи');
-  else if (name === 'trophyDetail')    setTopbar(true, 'Трофеи');
+  
   else if (name === 'participants')    setTopbar(true, 'Участники');
   else if (name === 'participantDetail') setTopbar(true, 'Участник');
   else if (name === 'builds')          setTopbar(true, 'Билды');

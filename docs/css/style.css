@@ -259,7 +259,7 @@ body {
 
 /* ========== FOOTER ACTIONS ========== */
 .footer-actions { margin: var(--space-2) 0 calc(var(--space-8) + var(--safe-bottom)); }
-#backToListBtn, #trophiesHomeBtn, #homeBtn, #buildsHomeBtn, #backToBuildsBtn { margin-bottom: calc(var(--space-8) + var(--safe-bottom)); }
+#backToListBtn, #homeBtn, #buildsHomeBtn, #backToBuildsBtn { margin-bottom: calc(var(--space-8) + var(--safe-bottom)); }
 #submitInlineBtn { margin-bottom: var(--space-2); }
 
 /* ========== WHAT'S NEW ========== */
@@ -306,10 +306,7 @@ body {
 .list-btn:active { transform: translateY(1px); }
 .list-btn .right { opacity: .7; }
 
-/* ========== TROPHY DETAIL ========== */
-.desc-list { margin-left: 18px; display: grid; gap: var(--space-1); }
-.desc-list li { line-height: var(--lh-normal); }
-#trophiesScreen .value { white-space: pre-line; line-height: var(--lh-tight); }
+/* Трофейные стили удалены */
 
 /* ========== FILE LINE ========== */
 .fileline-btn {
@@ -719,8 +716,6 @@ html.tg .only-browser { display: none; }
 }
 
 #profileScreen,
-#trophiesScreen,
-#trophyDetailScreen,
 #buildsScreen,
 #buildCreateScreen,
 #buildDetailScreen,
@@ -733,69 +728,7 @@ html.tg .only-browser { display: none; }
   margin-top: 0;
 }
 
-/* ========== СТИЛИ ДЛЯ ТРОФЕЕВ ========== */
-
-/* Прогресс-бар трофеев */
-.trophy-progress-container {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.trophy-progress-bar {
-  flex: 1;
-  height: 8px;
-  background-color: var(--stroke-color);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.trophy-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ff8400, #00aee5);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-  width: 0%;
-}
-
-.trophy-progress-text {
-  font-size: var(--fs-14);
-  font-weight: 600;
-  color: var(--tg-tx);
-  min-width: 40px;
-  text-align: right;
-}
-
-/* Полученные трофеи */
-.trophy-obtained {
-  border-color: #10b981 !important;
-  background-color: rgba(16, 185, 129, 0.1) !important;
-}
-
-.trophy-obtained span:first-child {
-  color: #10b981 !important;
-}
-
-.trophy-obtained .right {
-  color: #10b981 !important;
-}
-
-/* Карточка полученного трофея */
-.trophy-obtained-message {
-  text-align: center;
-  padding: var(--space-5);
-}
-
-.trophy-obtained-icon {
-  font-size: 48px;
-  margin-bottom: var(--space-3);
-}
-
-.trophy-obtained-message p {
-  color: var(--color-text-secondary);
-  font-size: var(--fs-16);
-  margin: 0;
-}
+/* Трофейные стили удалены */
 
 /* ========== iOS KEYBOARD IMPROVEMENTS ========== */
 /* Улучшения для работы с клавиатурой на iOS */

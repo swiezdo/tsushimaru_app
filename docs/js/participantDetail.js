@@ -1,7 +1,7 @@
 // participantDetail.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
-import { fetchUserProfile, fetchUserBuilds, fetchTrophies, API_BASE } from './api.js';
+import { fetchUserProfile, fetchUserBuilds } from './api.js';
 import { prettyLines, formatDate } from './utils.js';
 
 // Элементы интерфейса
@@ -12,10 +12,7 @@ const participantModesEl = $('participant_modes');
 const participantGoalsEl = $('participant_goals');
 const participantDifficultyEl = $('participant_difficulty');
 
-const participantTrophyProgressFillEl = $('participantTrophyProgressFill');
-const participantTrophyProgressTextEl = $('participantTrophyProgressText');
-const participantTrophiesListEl = $('participantTrophiesList');
-const noParticipantTrophiesHintEl = $('noParticipantTrophiesHint');
+// Трофеи удалены
 
 const participantBuildsListEl = $('participantBuildsList');
 const noParticipantBuildsHintEl = $('noParticipantBuildsHint');
@@ -23,16 +20,7 @@ const noParticipantBuildsHintEl = $('noParticipantBuildsHint');
 let currentParticipantId = null;
 let currentParticipantProfile = null;
 
-// Функция для загрузки данных трофеев
-async function loadTrophiesData() {
-    try {
-        const trophies = await fetchTrophies();
-        return trophies || [];
-    } catch (error) {
-        console.error('Ошибка загрузки данных трофеев:', error);
-        return [];
-    }
-}
+// Трофеи удалены
 
 // Рендеринг профиля участника
 function renderParticipantProfile(profile) {
@@ -46,49 +34,7 @@ function renderParticipantProfile(profile) {
     if (participantDifficultyEl) participantDifficultyEl.textContent = prettyLines(profile.difficulties || []);
 }
 
-// Рендеринг трофеев участника
-async function renderParticipantTrophies(profile) {
-    if (!profile) return;
-    
-    try {
-        const allTrophies = await loadTrophiesData();
-        const userTrophies = profile.trophies || [];
-        
-        // Обновляем прогресс-бар
-        const totalTrophies = allTrophies.length;
-        const obtainedTrophies = userTrophies.length;
-        const progressPercent = totalTrophies > 0 ? (obtainedTrophies / totalTrophies) * 100 : 0;
-        
-        if (participantTrophyProgressFillEl) {
-            participantTrophyProgressFillEl.style.width = `${progressPercent}%`;
-        }
-        
-        if (participantTrophyProgressTextEl) {
-            participantTrophyProgressTextEl.textContent = `${obtainedTrophies}/${totalTrophies}`;
-        }
-        
-        // Рендерим список трофеев
-        if (participantTrophiesListEl) {
-            participantTrophiesListEl.innerHTML = '';
-            
-            if (userTrophies.length === 0) {
-                noParticipantTrophiesHintEl?.classList.remove('hidden');
-                participantTrophiesListEl.textContent = '—';
-                return;
-            }
-            
-            noParticipantTrophiesHintEl?.classList.add('hidden');
-            
-            // Создаем простой текстовый список
-            const trophyNames = userTrophies.map(trophyName => trophyName);
-            
-            participantTrophiesListEl.textContent = trophyNames.join('\n');
-        }
-        
-    } catch (error) {
-        console.error('Ошибка рендеринга трофеев участника:', error);
-    }
-}
+// Трофеи удалены
 
 // Рендеринг билдов участника
 function renderParticipantBuilds(builds) {
@@ -202,7 +148,7 @@ export async function openParticipantDetail(userId) {
         
         // Рендерим все данные
         renderParticipantProfile(profile);
-        await renderParticipantTrophies(profile);
+        // Трофеи удалены
         renderParticipantBuilds(builds);
         
         // Показываем экран
