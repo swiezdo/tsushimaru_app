@@ -571,6 +571,24 @@ html.tg .only-browser { display: none; }
   cursor: pointer;
   min-height: 64px;
   text-align: left;
+  position: relative;
+}
+
+/* Полупрозрачный overlay для фоновых изображений */
+.badge-btn[style*="background-image"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Контент должен быть поверх overlay */
+.badge-btn > * {
+  position: relative;
+  z-index: 1;
 }
 .badge-btn:active { transform: translateY(1px); }
 .badge-title {
