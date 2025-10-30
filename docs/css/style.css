@@ -680,7 +680,7 @@ html.tg .only-browser { display: none; }
 
 /* золотой заголовок и иконка для raid */
 .raid-badge .badge-title {
-  color: #d4af37;
+  color: var(--tg-tx);
   /* чёрная тень как и у остальных заголовков */
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.85),
