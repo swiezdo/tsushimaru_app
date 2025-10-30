@@ -580,6 +580,16 @@ html.tg .only-browser { display: none; }
   word-break: break-word;
   /* лёгкое общее свечение для читабельности */
   text-shadow: 0 0 6px rgba(255, 255, 255, 0.18);
+  /* чёрная обводка для лучшей читаемости на пёстром фоне */
+  -webkit-text-stroke: 0.8px rgba(0, 0, 0, 0.9);
+  text-stroke: 0.8px rgba(0, 0, 0, 0.9);
+  /* fallback-обводка через множественные тени */
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.18),
+    0 1px 0 rgba(0,0,0,0.9), 0 -1px 0 rgba(0,0,0,0.9),
+    1px 0 0 rgba(0,0,0,0.9), -1px 0 0 rgba(0,0,0,0.9),
+    1px 1px 0 rgba(0,0,0,0.9), -1px -1px 0 rgba(0,0,0,0.9),
+    -1px 1px 0 rgba(0,0,0,0.9), 1px -1px 0 rgba(0,0,0,0.9);
 }
 .badge-progress-row {
   display: grid;
@@ -684,8 +694,8 @@ html.tg .only-browser { display: none; }
 }
 .raid-badge .badge-title::before {
   content: "";
-  width: 16px;
-  height: 16px;
+  width: 32px;
+  height: 32px;
   background-image: url('../assets/icon.svg');
   background-repeat: no-repeat;
   background-position: center;
