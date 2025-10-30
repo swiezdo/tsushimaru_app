@@ -558,6 +558,60 @@ html.tg .only-browser { display: none; }
   opacity: 1;
 }
 
+/* ========== MASTERY BADGES ========== */
+.badge-btn {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--tg-tx);
+  cursor: pointer;
+  min-height: 64px;
+  text-align: left;
+}
+.badge-btn:active { transform: translateY(1px); }
+.badge-title {
+  font-size: var(--fs-16);
+  font-weight: 600;
+  line-height: var(--lh-normal);
+  word-break: break-word;
+}
+.badge-progress-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+.badge-level {
+  font-size: var(--fs-14);
+  color: var(--tg-hint);
+  white-space: nowrap;
+}
+.badge-progress {
+  position: relative;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--elem-bg);
+  overflow: hidden;
+}
+.badge-progress-fill {
+  position: absolute;
+  top: 0;
+  right: 0; /* заполняем справа налево */
+  height: 100%;
+  width: var(--progress, 0%);
+  background: linear-gradient(270deg, #8b0000 0%, #0a0a0a 100%);
+}
+
+/* модификаторы (резерв на будущее, если понадобится уникальный декор) */
+.solo-badge {}
+.hellmode-badge {}
+.raid-badge {}
+
 /* ========== FILTERS ========== */
 .filters-container {
   display: flex;

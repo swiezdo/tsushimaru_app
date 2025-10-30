@@ -54,6 +54,7 @@ function installBackButton() {
       'builds': 'home',
       'whatsNew': 'home',
       'feedback': 'whatsNew',
+      'mastery': 'home',
       'participantDetail': previousScreen ? (previousScreen.startsWith('buildPublicDetail:') ? 'buildPublicDetail' : 'participants') : 'participants'
     };
     
@@ -140,6 +141,7 @@ function bindHomeButtons() {
     ['participantsBtn', () => requireRegistration(() => showScreen('participants'))],
     ['buildsBtn',      () => requireRegistration(() => showScreen('builds'))],
     ['whatsNewBtn',    () => { showScreen('whatsNew'); renderWhatsNewCards(); }],
+    ['masteryBtn',     () => requireRegistration(() => showScreen('mastery'))],
   ];
   for (const [id, handler] of map) {
     const el = $(id);

@@ -17,6 +17,7 @@ export const screens = {
   buildPublicDetail:  document.getElementById('buildPublicDetailScreen'),
   whatsNew:           document.getElementById('whatsNewScreen'),
   feedback:           document.getElementById('feedbackScreen'),
+  mastery:            document.getElementById('masteryScreen'),
 };
 
 // Топбар
@@ -57,6 +58,7 @@ export function showScreen(name) {
   else if (name === 'buildPublicDetail') setTopbar(true, 'Билд');
   else if (name === 'whatsNew')        setTopbar(true, 'Что нового?');
   else if (name === 'feedback')        setTopbar(true, 'Отправить отзыв');
+  else if (name === 'mastery')         setTopbar(true, 'Мастерство');
 
   scrollTopSmooth();
 }
