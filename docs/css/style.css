@@ -671,6 +671,9 @@ html.tg .only-browser { display: none; }
 #masteryDetailContainer .reward-detail-header {
   gap: 0 !important;
   margin-bottom: 0 !important;
+  font-size: var(--fs-16) !important;
+  font-weight: 600 !important;
+  line-height: var(--lh-normal) !important;
 }
 
 #masteryDetailContainer .reward-detail-header[style*="inline-flex"] {
