@@ -118,8 +118,7 @@ function createBadgeButton(category, currentLevel) {
     // Создаём элемент кнопки
     const button = document.createElement('button');
     button.type = 'button';
-    // Убираем классы свечения
-    button.className = '';
+    button.className = 'badge-btn';
     
     // Применяем фоновое изображение если есть
     if (styles.backgroundImage) {
