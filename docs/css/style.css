@@ -674,6 +674,10 @@ html.tg .only-browser { display: none; }
 }
 
 /* ========== MASTERY DETAIL SCREEN ========== */
+#masteryDetailContainer .card {
+  padding: var(--space-2) var(--space-4);
+}
+
 #masteryDetailContainer .reward-detail-header {
   gap: 0 !important;
   margin-bottom: 0 !important;
