@@ -668,6 +668,38 @@ html.tg .only-browser { display: none; }
   gap: 8px;
 }
 
+/* ========== MASTERY DETAIL SCREEN ========== */
+.mastery-level-card {
+  margin-bottom: var(--space-4);
+}
+
+.mastery-level-card.current-level {
+  border-left: 4px solid var(--color-success);
+}
+
+.mastery-level-card.next-level {
+  border-left: 4px solid var(--accent);
+  opacity: 0.95;
+}
+
+.mastery-level-card.max-level {
+  border-left: 4px solid rgba(212, 175, 55, 0.7);
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.mastery-description {
+  font-size: var(--fs-15);
+  line-height: var(--lh-normal);
+  color: var(--tg-tx);
+  margin-top: var(--space-2);
+}
+
+.mastery-proof {
+  font-size: var(--fs-14);
+  color: var(--tg-hint);
+  line-height: var(--lh-normal);
+}
+
 /* ========== FILTERS ========== */
 .filters-container {
   display: flex;

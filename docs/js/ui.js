@@ -19,6 +19,7 @@ export const screens = {
   whatsNew:           document.getElementById('whatsNewScreen'),
   feedback:           document.getElementById('feedbackScreen'),
   mastery:            document.getElementById('masteryScreen'),
+  masteryDetail:      document.getElementById('masteryDetailScreen'),
 };
 
 // Топбар
@@ -38,7 +39,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','mastery'];
+    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','mastery','masteryDetail'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -67,6 +68,7 @@ export function showScreen(name) {
       renderMasteryButtons();
     }, 50);
   }
+  else if (name === 'masteryDetail')   setTopbar(true, 'Прогресс');
 
   scrollTopSmooth();
 }

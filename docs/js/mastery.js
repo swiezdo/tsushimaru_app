@@ -2,6 +2,8 @@
 // Модуль для работы с системой мастерства
 
 import { fetchMastery } from './api.js';
+import { hapticTapSmart } from './telegram.js';
+import { showScreen } from './ui.js';
 
 // Кэш конфига
 let masteryConfig = null;
@@ -183,6 +185,12 @@ function createBadgeButton(category, currentLevel) {
     button.appendChild(titleDiv);
     button.appendChild(progressRow);
     
+    // Добавляем обработчик клика для открытия детального экрана
+    button.addEventListener('click', () => {
+        hapticTapSmart();
+        openMasteryDetail(category.key);
+    });
+    
     return button;
 }
 
@@ -248,6 +256,175 @@ export async function renderMasteryButtons() {
     }
     
     console.log(`✅ Рендеринг завершён. Создано кнопок: ${buttonsCreated}`);
+}
+
+// Открытие детального экрана мастерства
+export async function openMasteryDetail(categoryKey) {
+    console.log('🎯 Открытие детального экрана для категории:', categoryKey);
+    
+    // Загружаем конфиг
+    const config = await loadMasteryConfig();
+    if (!config) {
+        console.error('Не удалось загрузить конфиг мастерства');
+        return;
+    }
+    
+    // Находим категорию
+    const category = getCategoryByKey(config, categoryKey);
+    if (!category) {
+        console.error(`Категория ${categoryKey} не найдена`);
+        return;
+    }
+    
+    // Загружаем уровни пользователя
+    let levels;
+    try {
+        levels = await fetchMastery();
+    } catch (error) {
+        console.error('Ошибка получения уровней мастерства:', error);
+        levels = { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
+    }
+    
+    const currentLevel = levels[categoryKey] || 0;
+    
+    // Рендерим детальный экран
+    renderMasteryDetail(category, currentLevel);
+    
+    // Показываем экран
+    showScreen('masteryDetail');
+}
+
+// Рендеринг детального экрана мастерства
+function renderMasteryDetail(category, currentLevel) {
+    const container = document.getElementById('masteryDetailContainer');
+    if (!container) {
+        console.error('Контейнер для детального экрана не найден');
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    const maxLevels = category.maxLevels;
+    const progress = calculateProgress(currentLevel, maxLevels);
+    
+    // Заголовок с названием категории и уровнем
+    const headerCard = document.createElement('section');
+    headerCard.className = 'card';
+    
+    const headerTitle = document.createElement('h2');
+    headerTitle.className = 'card-title';
+    headerTitle.textContent = `${category.name} — Уровень ${currentLevel} из ${maxLevels}`;
+    headerCard.appendChild(headerTitle);
+    
+    // Прогресс-бар для всей категории
+    const categoryProgressRow = document.createElement('div');
+    categoryProgressRow.className = 'badge-progress-row';
+    categoryProgressRow.style.marginTop = 'var(--space-2)';
+    
+    const categoryProgressDiv = document.createElement('div');
+    categoryProgressDiv.className = 'badge-progress';
+    categoryProgressDiv.style.height = '20px';
+    
+    const categoryProgressFill = document.createElement('div');
+    categoryProgressFill.className = 'badge-progress-fill';
+    categoryProgressFill.style.setProperty('--progress', `${progress}%`);
+    
+    categoryProgressDiv.appendChild(categoryProgressFill);
+    categoryProgressRow.appendChild(categoryProgressDiv);
+    
+    const progressText = document.createElement('div');
+    progressText.className = 'badge-level';
+    progressText.textContent = `${progress}%`;
+    categoryProgressRow.appendChild(progressText);
+    
+    headerCard.appendChild(categoryProgressRow);
+    container.appendChild(headerCard);
+    
+    // Текущий уровень (если level > 0)
+    if (currentLevel > 0) {
+        const currentLevelData = getLevelByNumber(category, currentLevel);
+        if (currentLevelData) {
+            const currentCard = document.createElement('section');
+            currentCard.className = 'card mastery-level-card current-level';
+            
+            const currentTitle = document.createElement('h3');
+            currentTitle.className = 'card-title';
+            currentTitle.innerHTML = `✅ ${currentLevelData.name}`;
+            currentCard.appendChild(currentTitle);
+            
+            const currentDesc = document.createElement('div');
+            currentDesc.className = 'mastery-description';
+            currentDesc.style.whiteSpace = 'pre-line';
+            currentDesc.textContent = currentLevelData.description;
+            currentCard.appendChild(currentDesc);
+            
+            const currentProof = document.createElement('div');
+            currentProof.className = 'mastery-proof';
+            currentProof.style.marginTop = 'var(--space-3)';
+            currentProof.style.paddingTop = 'var(--space-3)';
+            currentProof.style.borderTop = '1px solid var(--color-border)';
+            currentProof.style.fontSize = 'var(--fs-14)';
+            currentProof.style.color = 'var(--tg-hint)';
+            currentProof.textContent = `📸 ${currentLevelData.proof}`;
+            currentCard.appendChild(currentProof);
+            
+            container.appendChild(currentCard);
+        }
+    }
+    
+    // Следующий уровень или максимальный
+    if (currentLevel < maxLevels) {
+        const nextLevelNum = currentLevel + 1;
+        const nextLevelData = getLevelByNumber(category, nextLevelNum);
+        
+        if (nextLevelData) {
+            const nextCard = document.createElement('section');
+            nextCard.className = 'card mastery-level-card next-level';
+            
+            const nextTitle = document.createElement('h3');
+            nextTitle.className = 'card-title';
+            nextTitle.innerHTML = `➡️ Следующий уровень: ${nextLevelData.name}`;
+            nextCard.appendChild(nextTitle);
+            
+            const nextDesc = document.createElement('div');
+            nextDesc.className = 'mastery-description';
+            nextDesc.style.whiteSpace = 'pre-line';
+            nextDesc.textContent = nextLevelData.description;
+            nextCard.appendChild(nextDesc);
+            
+            const nextProof = document.createElement('div');
+            nextProof.className = 'mastery-proof';
+            nextProof.style.marginTop = 'var(--space-3)';
+            nextProof.style.paddingTop = 'var(--space-3)';
+            nextProof.style.borderTop = '1px solid var(--color-border)';
+            nextProof.style.fontSize = 'var(--fs-14)';
+            nextProof.style.color = 'var(--tg-hint)';
+            nextProof.textContent = `📸 ${nextLevelData.proof}`;
+            nextCard.appendChild(nextProof);
+            
+            container.appendChild(nextCard);
+        }
+    } else {
+        // Максимальный уровень достигнут
+        const maxCard = document.createElement('section');
+        maxCard.className = 'card mastery-level-card max-level';
+        
+        const maxTitle = document.createElement('h3');
+        maxTitle.className = 'card-title';
+        maxTitle.innerHTML = '🎉 Вы достигли максимального уровня!';
+        maxCard.appendChild(maxTitle);
+        
+        const maxLevelData = getLevelByNumber(category, maxLevels);
+        if (maxLevelData) {
+            const maxDesc = document.createElement('div');
+            maxDesc.className = 'mastery-description';
+            maxDesc.style.whiteSpace = 'pre-line';
+            maxDesc.textContent = maxLevelData.description;
+            maxCard.appendChild(maxDesc);
+        }
+        
+        container.appendChild(maxCard);
+    }
 }
 
 // Инициализация модуля

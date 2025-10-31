@@ -55,6 +55,7 @@ function installBackButton() {
       'whatsNew': 'home',
       'feedback': 'whatsNew',
       'mastery': 'home',
+      'masteryDetail': 'mastery',
       'participantDetail': previousScreen ? (previousScreen.startsWith('buildPublicDetail:') ? 'buildPublicDetail' : 'participants') : 'participants'
     };
     
