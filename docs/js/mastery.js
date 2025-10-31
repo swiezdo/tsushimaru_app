@@ -57,8 +57,8 @@ function getButtonStyles(category, currentLevel) {
         return styles;
     }
     
-    // Уровень 1+: красный контур (добавляется через CSS класс)
-    styles.classes.push('has-glow');
+    // Уровень 1+: контур (свечение отключено)
+    // styles.classes.push('has-glow');
     
     // Правила для разных количеств уровней
     if (maxLevels === 3) {
