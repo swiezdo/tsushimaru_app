@@ -70,6 +70,8 @@ function getButtonStyles(category, currentLevel) {
         }
         if (currentLevel >= 3) {
             styles.backgroundImage = `url('./assets/mastery/${category.key}/background.gif')`;
+            styles.backgroundSize = 'cover';
+            styles.backgroundPosition = 'center';
             styles.showIcon = true;
         }
     } else if (maxLevels === 4) {
@@ -81,6 +83,8 @@ function getButtonStyles(category, currentLevel) {
         }
         if (currentLevel >= 3) {
             styles.backgroundImage = `url('./assets/mastery/${category.key}/background.gif')`;
+            styles.backgroundSize = 'cover';
+            styles.backgroundPosition = 'center';
         }
         if (currentLevel >= 4) {
             styles.showIcon = true;
@@ -99,6 +103,8 @@ function getButtonStyles(category, currentLevel) {
         }
         if (currentLevel >= 4) {
             styles.backgroundImage = `url('./assets/mastery/${category.key}/background.gif')`;
+            styles.backgroundSize = 'cover';
+            styles.backgroundPosition = 'center';
         }
         if (currentLevel >= 5) {
             styles.showIcon = true;
