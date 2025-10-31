@@ -110,18 +110,16 @@ function getButtonStyles(category, currentLevel) {
 
 // Создание HTML кнопки
 function createBadgeButton(category, currentLevel) {
-    const levelData = getLevelByNumber(category, currentLevel);
     const maxLevels = category.maxLevels;
     const progress = calculateProgress(currentLevel, maxLevels);
     const styles = getButtonStyles(category, currentLevel);
-    
-    // Название уровня или название категории если level = 0
-    const levelName = currentLevel > 0 && levelData ? levelData.name : (category.name || category.key);
+    const isMaxLevel = currentLevel === maxLevels;
     
     // Создаём элемент кнопки
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = styles.classes.join(' ');
+    // Убираем классы свечения
+    button.className = '';
     
     // Применяем фоновое изображение если есть
     if (styles.backgroundImage) {
@@ -131,59 +129,111 @@ function createBadgeButton(category, currentLevel) {
         button.style.backgroundSize = styles.backgroundSize || '160% auto';
     }
     
-    // Заголовок с иконкой если нужно
-    const titleDiv = document.createElement('div');
-    titleDiv.className = 'badge-title';
-    if (styles.showIcon) {
-        titleDiv.style.display = 'inline-flex';
-        titleDiv.style.alignItems = 'center';
-        titleDiv.style.gap = '8px';
-        
-        // Добавляем иконку как первый элемент
-        const iconSpan = document.createElement('span');
-        iconSpan.style.cssText = `
-            width: 32px;
-            height: 32px;
+    // Если максимальный уровень - показываем иконку
+    if (isMaxLevel && styles.showIcon) {
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'badge-max-icon';
+        iconDiv.style.cssText = `
+            width: 64px;
+            height: 64px;
             background-image: url('./assets/mastery/${category.key}/icon.svg');
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
             filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
             opacity: 0.95;
-            flex-shrink: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
         `;
-        titleDiv.appendChild(iconSpan);
+        button.appendChild(iconDiv);
+    } else {
+        // Градиент для прогресса (уникальный ID для каждой кнопки)
+        const gradientId = `progressGradient-${category.key}-${Date.now()}-${Math.random()}`;
+        
+        // Круговой прогресс-бар (SVG)
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'badge-circular-progress');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        svg.style.cssText = `
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        `;
+        
+        // Градиент для прогресса
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+        gradient.setAttribute('id', gradientId);
+        gradient.setAttribute('x1', '0%');
+        gradient.setAttribute('y1', '0%');
+        gradient.setAttribute('x2', '100%');
+        gradient.setAttribute('y2', '0%');
+        
+        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop1.setAttribute('offset', '0%');
+        stop1.setAttribute('stop-color', '#ffffff');
+        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop2.setAttribute('offset', '100%');
+        stop2.setAttribute('stop-color', '#8b0000');
+        
+        gradient.appendChild(stop1);
+        gradient.appendChild(stop2);
+        defs.appendChild(gradient);
+        
+        // Фоновый круг
+        const bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        bgCircle.setAttribute('cx', '50');
+        bgCircle.setAttribute('cy', '50');
+        bgCircle.setAttribute('r', '45');
+        bgCircle.setAttribute('fill', 'none');
+        bgCircle.setAttribute('stroke', 'rgba(255, 255, 255, 0.1)');
+        bgCircle.setAttribute('stroke-width', '4');
+        
+        // Прогресс круг
+        const progressCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        progressCircle.setAttribute('cx', '50');
+        progressCircle.setAttribute('cy', '50');
+        progressCircle.setAttribute('r', '45');
+        progressCircle.setAttribute('fill', 'none');
+        progressCircle.setAttribute('stroke', `url(#${gradientId})`);
+        progressCircle.setAttribute('stroke-width', '4');
+        progressCircle.setAttribute('stroke-linecap', 'round');
+        progressCircle.setAttribute('transform', 'rotate(-90 50 50)');
+        
+        // Вычисляем stroke-dasharray для прогресса
+        const circumference = 2 * Math.PI * 45; // 2πr
+        const offset = circumference - (progress / 100) * circumference;
+        progressCircle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
+        progressCircle.setAttribute('stroke-dashoffset', offset);
+        svg.appendChild(defs);
+        svg.appendChild(bgCircle);
+        svg.appendChild(progressCircle);
+        button.appendChild(svg);
+        
+        // Цифра уровня по центру
+        const levelDiv = document.createElement('div');
+        levelDiv.className = 'badge-level-number';
+        levelDiv.textContent = currentLevel.toString();
+        levelDiv.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--tg-tx);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.45);
+            z-index: 2;
+        `;
+        button.appendChild(levelDiv);
     }
-    // Добавляем текст названия
-    const titleText = document.createTextNode(levelName);
-    titleDiv.appendChild(titleText);
-    
-    // Строка с прогресс-баром и уровнем
-    const progressRow = document.createElement('div');
-    progressRow.className = 'badge-progress-row';
-    
-    // Прогресс-бар
-    const progressDiv = document.createElement('div');
-    progressDiv.className = 'badge-progress';
-    progressDiv.setAttribute('aria-label', 'Прогресс');
-    
-    const progressFill = document.createElement('div');
-    progressFill.className = 'badge-progress-fill';
-    progressFill.style.setProperty('--progress', `${progress}%`);
-    
-    progressDiv.appendChild(progressFill);
-    
-    // Текст уровня
-    const levelDiv = document.createElement('div');
-    levelDiv.className = 'badge-level';
-    levelDiv.textContent = currentLevel > 0 ? `Ур. ${currentLevel}` : 'Ур. 0';
-    
-    progressRow.appendChild(progressDiv);
-    progressRow.appendChild(levelDiv);
-    
-    // Собираем кнопку
-    button.appendChild(titleDiv);
-    button.appendChild(progressRow);
     
     // Добавляем обработчик клика для открытия детального экрана
     button.addEventListener('click', () => {

@@ -560,16 +560,16 @@ html.tg .only-browser { display: none; }
 
 /* ========== MASTERY BADGES ========== */
 .badge-btn {
-  display: grid;
-  grid-template-columns: 1fr;
-  padding: var(--space-4) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  padding: var(--space-4);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   background: transparent;
   color: var(--tg-tx);
   cursor: pointer;
-  min-height: 64px;
-  text-align: left;
   position: relative;
 }
 
@@ -665,6 +665,12 @@ html.tg .only-browser { display: none; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+/* ========== MASTERY SCREEN ========== */
+.list-buttons#masteryButtonsContainer {
+  gap: var(--space-2);
+  grid-template-columns: repeat(2, 1fr);
 }
 
 /* ========== MASTERY DETAIL SCREEN ========== */
