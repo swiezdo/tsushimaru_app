@@ -404,6 +404,12 @@ function renderMasteryDetail(category, currentLevel) {
     // Заголовок с названием текущего уровня
     const headerCard = document.createElement('section');
     headerCard.className = 'card';
+    headerCard.style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+    `;
     
     // Применяем фоновое изображение если есть
     if (styles.backgroundImage) {
@@ -422,52 +428,127 @@ function renderMasteryDetail(category, currentLevel) {
         headerTitleText = category.name;
     }
     
-    // Создаём заголовок с иконкой если нужно
-    const headerTitle = document.createElement('h2');
-    headerTitle.className = 'card-title reward-detail-header';
+    // Левая часть - название
+    const titleContainer = document.createElement('h2');
+    titleContainer.className = 'card-title reward-detail-header';
+    titleContainer.style.cssText = `
+        margin: 0;
+        flex: 1;
+        z-index: 2;
+        position: relative;
+    `;
+    titleContainer.textContent = headerTitleText;
+    headerCard.appendChild(titleContainer);
     
-    if (styles.showIcon) {
-        headerTitle.style.display = 'inline-flex';
-        headerTitle.style.alignItems = 'center';
-        headerTitle.style.gap = '0px';
-        headerTitle.style.marginBottom = '0px';
-        
-        // Добавляем иконку как первый элемент
-        const iconSpan = document.createElement('span');
-        iconSpan.style.cssText = `
-            width: 32px;
-            height: 32px;
+    // Правая часть - круговой прогресс или иконка
+    const progressContainer = document.createElement('div');
+    progressContainer.style.cssText = `
+        position: relative;
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        z-index: 2;
+    `;
+    
+    const isMaxLevel = currentLevel === maxLevels && styles.showIcon;
+    
+    if (isMaxLevel) {
+        // Максимальный уровень - иконка
+        const icon = document.createElement('div');
+        icon.style.cssText = `
+            width: 100%;
+            height: 100%;
             background-image: url('./assets/mastery/${category.key}/icon.svg');
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
             filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
             opacity: 0.95;
-            flex-shrink: 0;
         `;
-        headerTitle.appendChild(iconSpan);
+        progressContainer.appendChild(icon);
+    } else {
+        // Не максимальный уровень - круговой прогресс + цифра
+        const gradientId = `grad-detail-${category.key}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // SVG контейнер
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        svg.style.cssText = `
+            width: 100%;
+            height: 100%;
+        `;
+        
+        // Defs с градиентом
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+        gradient.setAttribute('id', gradientId);
+        gradient.setAttribute('x1', '0%');
+        gradient.setAttribute('y1', '0%');
+        gradient.setAttribute('x2', '100%');
+        gradient.setAttribute('y2', '0%');
+        
+        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop1.setAttribute('offset', '0%');
+        stop1.setAttribute('stop-color', '#ffffff');
+        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop2.setAttribute('offset', '100%');
+        stop2.setAttribute('stop-color', '#8b0000');
+        
+        gradient.appendChild(stop1);
+        gradient.appendChild(stop2);
+        defs.appendChild(gradient);
+        
+        // Фоновый круг
+        const bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        bgCircle.setAttribute('cx', '50');
+        bgCircle.setAttribute('cy', '50');
+        bgCircle.setAttribute('r', '45');
+        bgCircle.setAttribute('fill', 'none');
+        bgCircle.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
+        bgCircle.setAttribute('stroke-width', '5');
+        
+        // Прогресс круг
+        const circumference = 2 * Math.PI * 45;
+        const offset = circumference - (progress / 100) * circumference;
+        
+        const progressCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        progressCircle.setAttribute('cx', '50');
+        progressCircle.setAttribute('cy', '50');
+        progressCircle.setAttribute('r', '45');
+        progressCircle.setAttribute('fill', 'none');
+        progressCircle.setAttribute('stroke', `url(#${gradientId})`);
+        progressCircle.setAttribute('stroke-width', '5');
+        progressCircle.setAttribute('stroke-linecap', 'round');
+        progressCircle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
+        progressCircle.setAttribute('stroke-dashoffset', offset);
+        progressCircle.setAttribute('transform', 'rotate(-90 50 50)');
+        
+        svg.appendChild(defs);
+        svg.appendChild(bgCircle);
+        svg.appendChild(progressCircle);
+        progressContainer.appendChild(svg);
+        
+        // Цифра уровня по центру (показываем только если уровень > 0)
+        if (currentLevel > 0) {
+            const levelNumber = document.createElement('div');
+            levelNumber.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 14px;
+                font-weight: 700;
+                color: var(--tg-tx);
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
+                pointer-events: none;
+                line-height: 1;
+            `;
+            levelNumber.textContent = currentLevel.toString();
+            progressContainer.appendChild(levelNumber);
+        }
     }
     
-    // Добавляем текст названия
-    const titleText = document.createTextNode(headerTitleText);
-    headerTitle.appendChild(titleText);
-    headerCard.appendChild(headerTitle);
-    
-    // Прогресс-бар для всей категории
-    const categoryProgressRow = document.createElement('div');
-    categoryProgressRow.style.marginTop = 'var(--space-2)';
-    
-    const categoryProgressDiv = document.createElement('div');
-    categoryProgressDiv.className = 'badge-progress';
-    
-    const categoryProgressFill = document.createElement('div');
-    categoryProgressFill.className = 'badge-progress-fill';
-    categoryProgressFill.style.setProperty('--progress', `${progress}%`);
-    
-    categoryProgressDiv.appendChild(categoryProgressFill);
-    categoryProgressRow.appendChild(categoryProgressDiv);
-    
-    headerCard.appendChild(categoryProgressRow);
+    headerCard.appendChild(progressContainer);
     container.appendChild(headerCard);
     
     // Текущий уровень (если level > 0 и не максимальный)
