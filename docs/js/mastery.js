@@ -332,9 +332,34 @@ function renderMasteryDetail(category, currentLevel) {
         headerTitleText = category.name;
     }
     
+    // Создаём заголовок с иконкой если нужно
     const headerTitle = document.createElement('h2');
     headerTitle.className = 'card-title';
-    headerTitle.textContent = headerTitleText;
+    
+    if (styles.showIcon) {
+        headerTitle.style.display = 'inline-flex';
+        headerTitle.style.alignItems = 'center';
+        headerTitle.style.gap = '8px';
+        
+        // Добавляем иконку как первый элемент
+        const iconSpan = document.createElement('span');
+        iconSpan.style.cssText = `
+            width: 32px;
+            height: 32px;
+            background-image: url('./assets/mastery/${category.key}/icon.svg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
+            opacity: 0.95;
+            flex-shrink: 0;
+        `;
+        headerTitle.appendChild(iconSpan);
+    }
+    
+    // Добавляем текст названия
+    const titleText = document.createTextNode(headerTitleText);
+    headerTitle.appendChild(titleText);
     headerCard.appendChild(headerTitle);
     
     // Прогресс-бар для всей категории
@@ -354,8 +379,8 @@ function renderMasteryDetail(category, currentLevel) {
     headerCard.appendChild(categoryProgressRow);
     container.appendChild(headerCard);
     
-    // Текущий уровень (если level > 0)
-    if (currentLevel > 0) {
+    // Текущий уровень (если level > 0 и не максимальный)
+    if (currentLevel > 0 && currentLevel < maxLevels) {
         const currentLevelData = getLevelByNumber(category, currentLevel);
         if (currentLevelData) {
             const currentCard = document.createElement('section');
