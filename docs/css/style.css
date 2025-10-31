@@ -620,7 +620,7 @@ html.tg .only-browser { display: none; }
 }
 .badge-progress {
   position: relative;
-  height: 14px;
+  height: 7px;
   border-radius: 999px;
   border: 1px solid var(--color-border);
   background: var(--elem-bg);

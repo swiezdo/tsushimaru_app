@@ -306,24 +306,31 @@ function renderMasteryDetail(category, currentLevel) {
     
     const maxLevels = category.maxLevels;
     const progress = calculateProgress(currentLevel, maxLevels);
+    const styles = getButtonStyles(category, currentLevel);
     
     // Заголовок с названием категории и уровнем
     const headerCard = document.createElement('section');
-    headerCard.className = 'card';
+    headerCard.className = `card ${styles.classes.join(' ')}`;
+    
+    // Применяем фоновое изображение если есть
+    if (styles.backgroundImage) {
+        headerCard.style.backgroundImage = styles.backgroundImage;
+        headerCard.style.backgroundRepeat = 'no-repeat';
+        headerCard.style.backgroundPosition = styles.backgroundPosition || 'center';
+        headerCard.style.backgroundSize = styles.backgroundSize || '160% auto';
+    }
     
     const headerTitle = document.createElement('h2');
     headerTitle.className = 'card-title';
-    headerTitle.textContent = `${category.name} — Уровень ${currentLevel} из ${maxLevels}`;
+    headerTitle.textContent = `${category.name} — Ур. ${currentLevel} из ${maxLevels}`;
     headerCard.appendChild(headerTitle);
     
     // Прогресс-бар для всей категории
     const categoryProgressRow = document.createElement('div');
-    categoryProgressRow.className = 'badge-progress-row';
     categoryProgressRow.style.marginTop = 'var(--space-2)';
     
     const categoryProgressDiv = document.createElement('div');
     categoryProgressDiv.className = 'badge-progress';
-    categoryProgressDiv.style.height = '20px';
     
     const categoryProgressFill = document.createElement('div');
     categoryProgressFill.className = 'badge-progress-fill';
@@ -331,11 +338,6 @@ function renderMasteryDetail(category, currentLevel) {
     
     categoryProgressDiv.appendChild(categoryProgressFill);
     categoryProgressRow.appendChild(categoryProgressDiv);
-    
-    const progressText = document.createElement('div');
-    progressText.className = 'badge-level';
-    progressText.textContent = `${progress}%`;
-    categoryProgressRow.appendChild(progressText);
     
     headerCard.appendChild(categoryProgressRow);
     container.appendChild(headerCard);
@@ -357,16 +359,6 @@ function renderMasteryDetail(category, currentLevel) {
             currentDesc.style.whiteSpace = 'pre-line';
             currentDesc.textContent = currentLevelData.description;
             currentCard.appendChild(currentDesc);
-            
-            const currentProof = document.createElement('div');
-            currentProof.className = 'mastery-proof';
-            currentProof.style.marginTop = 'var(--space-3)';
-            currentProof.style.paddingTop = 'var(--space-3)';
-            currentProof.style.borderTop = '1px solid var(--color-border)';
-            currentProof.style.fontSize = 'var(--fs-14)';
-            currentProof.style.color = 'var(--tg-hint)';
-            currentProof.textContent = `📸 ${currentLevelData.proof}`;
-            currentCard.appendChild(currentProof);
             
             container.appendChild(currentCard);
         }
