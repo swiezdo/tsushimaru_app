@@ -3,7 +3,7 @@
 
 import { fetchMastery } from './api.js';
 import { hapticTapSmart } from './telegram.js';
-import { showScreen } from './ui.js';
+import { showScreen, setTopbar } from './ui.js';
 
 // Кэш конфига
 let masteryConfig = null;
@@ -308,7 +308,10 @@ function renderMasteryDetail(category, currentLevel) {
     const progress = calculateProgress(currentLevel, maxLevels);
     const styles = getButtonStyles(category, currentLevel);
     
-    // Заголовок с названием категории и уровнем
+    // Обновляем топбар с названием категории и уровнем
+    setTopbar(true, `${category.name} — Ур. ${currentLevel} из ${maxLevels}`);
+    
+    // Заголовок с названием текущего уровня
     const headerCard = document.createElement('section');
     headerCard.className = `card ${styles.classes.join(' ')}`;
     
@@ -320,9 +323,18 @@ function renderMasteryDetail(category, currentLevel) {
         headerCard.style.backgroundSize = styles.backgroundSize || '160% auto';
     }
     
+    // Определяем название для заголовка карточки
+    let headerTitleText;
+    if (currentLevel > 0) {
+        const levelData = getLevelByNumber(category, currentLevel);
+        headerTitleText = levelData ? levelData.name : category.name;
+    } else {
+        headerTitleText = category.name;
+    }
+    
     const headerTitle = document.createElement('h2');
     headerTitle.className = 'card-title';
-    headerTitle.textContent = `${category.name} — Ур. ${currentLevel} из ${maxLevels}`;
+    headerTitle.textContent = headerTitleText;
     headerCard.appendChild(headerTitle);
     
     // Прогресс-бар для всей категории

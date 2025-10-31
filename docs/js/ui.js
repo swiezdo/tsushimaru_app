@@ -68,7 +68,10 @@ export function showScreen(name) {
       renderMasteryButtons();
     }, 50);
   }
-  else if (name === 'rewardDetail')    setTopbar(true, 'Прогресс');
+  else if (name === 'rewardDetail')    {
+    // Топбар устанавливается динамически в renderMasteryDetail()
+    setTopbar(true, 'Прогресс');
+  }
 
   scrollTopSmooth();
 }
