@@ -561,9 +561,10 @@ html.tg .only-browser { display: none; }
 /* ========== MASTERY BADGES ========== */
 .badge-btn {
   display: block;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1;
   width: 100%;
   padding: 0;
+  margin: 0;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   background: transparent;
@@ -571,6 +572,7 @@ html.tg .only-browser { display: none; }
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Полупрозрачный overlay для фоновых изображений */

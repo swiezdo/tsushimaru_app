@@ -113,7 +113,7 @@ function createBadgeButton(category, currentLevel) {
     const maxLevels = category.maxLevels;
     const progress = calculateProgress(currentLevel, maxLevels);
     const styles = getButtonStyles(category, currentLevel);
-    const isMaxLevel = currentLevel === maxLevels;
+    const isMaxLevel = currentLevel === maxLevels && styles.showIcon;
     
     // Создаём элемент кнопки
     const button = document.createElement('button');
@@ -124,15 +124,19 @@ function createBadgeButton(category, currentLevel) {
     if (styles.backgroundImage) {
         button.style.backgroundImage = styles.backgroundImage;
         button.style.backgroundRepeat = 'no-repeat';
-        button.style.backgroundPosition = styles.backgroundPosition || 'center';
-        button.style.backgroundSize = styles.backgroundSize || '160% auto';
+        button.style.backgroundPosition = 'center';
+        button.style.backgroundSize = 'cover';
     }
     
-    // Если максимальный уровень - показываем иконку
-    if (isMaxLevel && styles.showIcon) {
-        const iconDiv = document.createElement('div');
-        iconDiv.className = 'badge-max-icon';
-        iconDiv.style.cssText = `
+    if (isMaxLevel) {
+        // Максимальный уровень - только иконка
+        const icon = document.createElement('div');
+        icon.className = 'badge-max-icon';
+        icon.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 50%;
             height: 50%;
             max-width: 64px;
@@ -143,34 +147,29 @@ function createBadgeButton(category, currentLevel) {
             background-size: contain;
             filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
             opacity: 0.95;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
+            z-index: 10;
         `;
-        button.appendChild(iconDiv);
+        button.appendChild(icon);
     } else {
-        // Градиент для прогресса (уникальный ID для каждой кнопки)
-        const gradientId = `progressGradient-${category.key}-${Date.now()}-${Math.random()}`;
+        // Не максимальный уровень - круговой прогресс + цифра
         
-        // Круговой прогресс-бар (SVG)
+        // Уникальный ID для градиента
+        const gradientId = `grad-${category.key}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // SVG контейнер
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('class', 'badge-circular-progress');
         svg.setAttribute('viewBox', '0 0 100 100');
         svg.style.cssText = `
             position: absolute;
-            width: 70%;
-            height: 70%;
-            min-width: 70px;
-            min-height: 70px;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            width: 75%;
+            height: 75%;
             z-index: 1;
         `;
         
-        // Градиент для прогресса
+        // Defs с градиентом
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
         const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
         gradient.setAttribute('id', gradientId);
@@ -196,50 +195,51 @@ function createBadgeButton(category, currentLevel) {
         bgCircle.setAttribute('cy', '50');
         bgCircle.setAttribute('r', '45');
         bgCircle.setAttribute('fill', 'none');
-        bgCircle.setAttribute('stroke', 'rgba(255, 255, 255, 0.1)');
-        bgCircle.setAttribute('stroke-width', '4');
+        bgCircle.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
+        bgCircle.setAttribute('stroke-width', '5');
         
         // Прогресс круг
+        const circumference = 2 * Math.PI * 45;
+        const offset = circumference - (progress / 100) * circumference;
+        
         const progressCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         progressCircle.setAttribute('cx', '50');
         progressCircle.setAttribute('cy', '50');
         progressCircle.setAttribute('r', '45');
         progressCircle.setAttribute('fill', 'none');
         progressCircle.setAttribute('stroke', `url(#${gradientId})`);
-        progressCircle.setAttribute('stroke-width', '4');
+        progressCircle.setAttribute('stroke-width', '5');
         progressCircle.setAttribute('stroke-linecap', 'round');
-        progressCircle.setAttribute('transform', 'rotate(-90 50 50)');
-        
-        // Вычисляем stroke-dasharray для прогресса
-        const circumference = 2 * Math.PI * 45; // 2πr
-        const offset = circumference - (progress / 100) * circumference;
         progressCircle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
         progressCircle.setAttribute('stroke-dashoffset', offset);
+        progressCircle.setAttribute('transform', 'rotate(-90 50 50)');
+        
         svg.appendChild(defs);
         svg.appendChild(bgCircle);
         svg.appendChild(progressCircle);
         button.appendChild(svg);
         
-        // Цифра уровня по центру
-        const levelDiv = document.createElement('div');
-        levelDiv.className = 'badge-level-number';
-        levelDiv.textContent = currentLevel.toString();
-        levelDiv.style.cssText = `
+        // Цифра уровня
+        const levelNumber = document.createElement('div');
+        levelNumber.className = 'badge-level-number';
+        levelNumber.textContent = currentLevel.toString();
+        levelNumber.style.cssText = `
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: clamp(24px, 8vw, 32px);
+            font-size: 36px;
             font-weight: 700;
             color: var(--tg-tx);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.45);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
             z-index: 2;
             pointer-events: none;
+            line-height: 1;
         `;
-        button.appendChild(levelDiv);
+        button.appendChild(levelNumber);
     }
     
-    // Добавляем обработчик клика для открытия детального экрана
+    // Обработчик клика
     button.addEventListener('click', () => {
         hapticTapSmart();
         openMasteryDetail(category.key);
