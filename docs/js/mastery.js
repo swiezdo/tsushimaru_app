@@ -339,7 +339,8 @@ function renderMasteryDetail(category, currentLevel) {
     if (styles.showIcon) {
         headerTitle.style.display = 'inline-flex';
         headerTitle.style.alignItems = 'center';
-        headerTitle.style.gap = '0';
+        headerTitle.style.gap = '0px';
+        headerTitle.style.marginBottom = '0px';
         
         // Добавляем иконку как первый элемент
         const iconSpan = document.createElement('span');
