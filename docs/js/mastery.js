@@ -65,7 +65,7 @@ function getButtonStyles(category, currentLevel) {
         // 3 уровня: 2 - background.jpg, 3 - background.gif + иконка
         if (currentLevel >= 2) {
             styles.backgroundImage = `url('./assets/mastery/${category.key}/background.jpg')`;
-            styles.backgroundSize = '160% auto';
+            styles.backgroundSize = 'cover';
             styles.backgroundPosition = 'center';
         }
         if (currentLevel >= 3) {
@@ -76,7 +76,7 @@ function getButtonStyles(category, currentLevel) {
         // 4 уровня: 2 - background.jpg, 3 - background.gif, 4 - background.gif + иконка
         if (currentLevel >= 2) {
             styles.backgroundImage = `url('./assets/mastery/${category.key}/background.jpg')`;
-            styles.backgroundSize = '160% auto';
+            styles.backgroundSize = 'cover';
             styles.backgroundPosition = 'center';
         }
         if (currentLevel >= 3) {
@@ -89,12 +89,12 @@ function getButtonStyles(category, currentLevel) {
         // 5 уровней: 2 - background.jpg, 3 - background2.jpg, 4 - background.gif, 5 - background.gif + иконка
         if (currentLevel >= 2) {
             styles.backgroundImage = `url('./assets/mastery/${category.key}/background.jpg')`;
-            styles.backgroundSize = '160% auto';
+            styles.backgroundSize = 'cover';
             styles.backgroundPosition = 'center';
         }
         if (currentLevel >= 3) {
             styles.backgroundImage = `url('./assets/mastery/${category.key}/background2.jpg')`;
-            styles.backgroundSize = '160% auto';
+            styles.backgroundSize = 'cover';
             styles.backgroundPosition = 'center';
         }
         if (currentLevel >= 4) {
@@ -126,7 +126,7 @@ function createBadgeButton(category, currentLevel) {
         button.style.backgroundImage = styles.backgroundImage;
         button.style.backgroundRepeat = 'no-repeat';
         button.style.backgroundPosition = styles.backgroundPosition || 'center';
-        button.style.backgroundSize = styles.backgroundSize || '160% auto';
+        button.style.backgroundSize = styles.backgroundSize || 'cover';
     }
     
     // Левая часть - тексты
@@ -416,7 +416,7 @@ function renderMasteryDetail(category, currentLevel) {
         headerCard.style.backgroundImage = styles.backgroundImage;
         headerCard.style.backgroundRepeat = 'no-repeat';
         headerCard.style.backgroundPosition = styles.backgroundPosition || 'center';
-        headerCard.style.backgroundSize = styles.backgroundSize || '160% auto';
+        headerCard.style.backgroundSize = styles.backgroundSize || 'cover';
     }
     
     // Определяем название для заголовка карточки
