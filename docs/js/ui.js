@@ -18,8 +18,8 @@ export const screens = {
   buildPublicDetail:  document.getElementById('buildPublicDetailScreen'),
   whatsNew:           document.getElementById('whatsNewScreen'),
   feedback:           document.getElementById('feedbackScreen'),
-  mastery:            document.getElementById('masteryScreen'),
-  masteryDetail:      document.getElementById('masteryDetailScreen'),
+  reward:             document.getElementById('rewardScreen'),
+  rewardDetail:       document.getElementById('rewardDetailScreen'),
 };
 
 // Топбар
@@ -39,7 +39,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','mastery','masteryDetail'];
+    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','reward','rewardDetail'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -60,15 +60,15 @@ export function showScreen(name) {
   else if (name === 'buildPublicDetail') setTopbar(true, 'Билд');
   else if (name === 'whatsNew')        setTopbar(true, 'Что нового?');
   else if (name === 'feedback')        setTopbar(true, 'Отправить отзыв');
-  else if (name === 'mastery')         {
-    setTopbar(true, 'Мастерство');
+  else if (name === 'reward')          {
+    setTopbar(true, 'Награды');
     // Загружаем и рендерим кнопки мастерства при открытии экрана
     // Используем setTimeout чтобы убедиться, что экран уже показан
     setTimeout(() => {
       renderMasteryButtons();
     }, 50);
   }
-  else if (name === 'masteryDetail')   setTopbar(true, 'Прогресс');
+  else if (name === 'rewardDetail')    setTopbar(true, 'Прогресс');
 
   scrollTopSmooth();
 }

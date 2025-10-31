@@ -291,7 +291,7 @@ export async function openMasteryDetail(categoryKey) {
     renderMasteryDetail(category, currentLevel);
     
     // Показываем экран
-    showScreen('masteryDetail');
+    showScreen('rewardDetail');
 }
 
 // Рендеринг детального экрана мастерства

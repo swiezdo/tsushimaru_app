@@ -562,7 +562,6 @@ html.tg .only-browser { display: none; }
 .badge-btn {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-2);
   padding: var(--space-4) var(--space-4);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
