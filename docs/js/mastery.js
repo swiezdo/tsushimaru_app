@@ -173,8 +173,8 @@ function createBadgeButton(category, currentLevel) {
     const progressContainer = document.createElement('div');
     progressContainer.style.cssText = `
         position: relative;
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
         flex-shrink: 0;
         z-index: 2;
     `;
@@ -262,7 +262,7 @@ function createBadgeButton(category, currentLevel) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--tg-tx);
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);

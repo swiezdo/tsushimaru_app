@@ -571,7 +571,7 @@ html.tg .only-browser { display: none; }
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  min-height: 56px;
+  min-height: 52px;
 }
 
 /* Полупрозрачный overlay для фоновых изображений */
