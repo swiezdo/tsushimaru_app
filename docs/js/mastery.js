@@ -345,7 +345,7 @@ function renderMasteryDetail(category, currentLevel) {
         const currentLevelData = getLevelByNumber(category, currentLevel);
         if (currentLevelData) {
             const currentCard = document.createElement('section');
-            currentCard.className = 'card mastery-level-card current-level';
+            currentCard.className = 'card current-level';
             
             const currentTitle = document.createElement('h3');
             currentTitle.className = 'card-title';
@@ -379,7 +379,7 @@ function renderMasteryDetail(category, currentLevel) {
         
         if (nextLevelData) {
             const nextCard = document.createElement('section');
-            nextCard.className = 'card mastery-level-card next-level';
+            nextCard.className = 'card next-level';
             
             const nextTitle = document.createElement('h3');
             nextTitle.className = 'card-title';
@@ -407,7 +407,7 @@ function renderMasteryDetail(category, currentLevel) {
     } else {
         // Максимальный уровень достигнут
         const maxCard = document.createElement('section');
-        maxCard.className = 'card mastery-level-card max-level';
+        maxCard.className = 'card max-level';
         
         const maxTitle = document.createElement('h3');
         maxTitle.className = 'card-title';
