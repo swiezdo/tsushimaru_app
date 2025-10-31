@@ -113,60 +113,96 @@ function createBadgeButton(category, currentLevel) {
     const maxLevels = category.maxLevels;
     const progress = calculateProgress(currentLevel, maxLevels);
     const styles = getButtonStyles(category, currentLevel);
+    const levelData = getLevelByNumber(category, currentLevel);
     const isMaxLevel = currentLevel === maxLevels && styles.showIcon;
     
     // Создаём элемент кнопки
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'badge-btn';
+    button.className = styles.classes.join(' ');
     
     // Применяем фоновое изображение если есть
     if (styles.backgroundImage) {
         button.style.backgroundImage = styles.backgroundImage;
         button.style.backgroundRepeat = 'no-repeat';
-        button.style.backgroundPosition = 'center';
-        button.style.backgroundSize = 'cover';
+        button.style.backgroundPosition = styles.backgroundPosition || 'center';
+        button.style.backgroundSize = styles.backgroundSize || '160% auto';
     }
     
+    // Левая часть - тексты
+    const textContainer = document.createElement('div');
+    textContainer.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-1);
+        flex: 1;
+        z-index: 2;
+        position: relative;
+    `;
+    
+    // Первая строка - название категории
+    const categoryName = document.createElement('div');
+    categoryName.className = 'badge-category-name';
+    categoryName.textContent = category.name;
+    categoryName.style.cssText = `
+        font-size: var(--fs-14);
+        color: var(--tg-hint);
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.45);
+    `;
+    textContainer.appendChild(categoryName);
+    
+    // Вторая строка - название уровня (если level > 0)
+    if (currentLevel > 0 && levelData) {
+        const levelName = document.createElement('div');
+        levelName.className = 'badge-level-name';
+        levelName.textContent = levelData.name;
+        levelName.style.cssText = `
+            font-size: var(--fs-16);
+            font-weight: 600;
+            color: var(--tg-tx);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.5);
+        `;
+        textContainer.appendChild(levelName);
+    }
+    
+    button.appendChild(textContainer);
+    
+    // Правая часть - круговой прогресс
+    const progressContainer = document.createElement('div');
+    progressContainer.style.cssText = `
+        position: relative;
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+        z-index: 2;
+    `;
+    
     if (isMaxLevel) {
-        // Максимальный уровень - только иконка
+        // Максимальный уровень - иконка
         const icon = document.createElement('div');
-        icon.className = 'badge-max-icon';
         icon.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50%;
-            height: 50%;
-            max-width: 64px;
-            max-height: 64px;
+            width: 100%;
+            height: 100%;
             background-image: url('./assets/mastery/${category.key}/icon.svg');
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
             filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
             opacity: 0.95;
-            z-index: 10;
         `;
-        button.appendChild(icon);
+        progressContainer.appendChild(icon);
     } else {
         // Не максимальный уровень - круговой прогресс + цифра
-        
-        // Уникальный ID для градиента
         const gradientId = `grad-${category.key}-${Math.random().toString(36).substr(2, 9)}`;
         
         // SVG контейнер
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('viewBox', '0 0 100 100');
         svg.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 75%;
-            height: 75%;
-            z-index: 1;
+            width: 100%;
+            height: 100%;
         `;
         
         // Defs с градиентом
@@ -217,27 +253,27 @@ function createBadgeButton(category, currentLevel) {
         svg.appendChild(defs);
         svg.appendChild(bgCircle);
         svg.appendChild(progressCircle);
-        button.appendChild(svg);
+        progressContainer.appendChild(svg);
         
-        // Цифра уровня
+        // Цифра уровня по центру
         const levelNumber = document.createElement('div');
-        levelNumber.className = 'badge-level-number';
-        levelNumber.textContent = currentLevel.toString();
         levelNumber.style.cssText = `
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--tg-tx);
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
-            z-index: 2;
             pointer-events: none;
             line-height: 1;
         `;
-        button.appendChild(levelNumber);
+        levelNumber.textContent = currentLevel.toString();
+        progressContainer.appendChild(levelNumber);
     }
+    
+    button.appendChild(progressContainer);
     
     // Обработчик клика
     button.addEventListener('click', () => {
