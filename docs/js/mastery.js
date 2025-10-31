@@ -367,7 +367,7 @@ function renderMasteryDetail(category, currentLevel) {
     
     // Заголовок с названием текущего уровня
     const headerCard = document.createElement('section');
-    headerCard.className = `card ${styles.classes.join(' ')}`;
+    headerCard.className = 'card';
     
     // Применяем фоновое изображение если есть
     if (styles.backgroundImage) {
