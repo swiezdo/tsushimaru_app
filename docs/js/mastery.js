@@ -228,7 +228,7 @@ function createBadgeButton(category, currentLevel) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 36px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--tg-tx);
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
