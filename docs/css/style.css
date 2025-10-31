@@ -564,6 +564,8 @@ html.tg .only-browser { display: none; }
   align-items: center;
   justify-content: center;
   aspect-ratio: 1 / 1;
+  width: 100%;
+  min-height: 0;
   padding: var(--space-4);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
@@ -571,6 +573,7 @@ html.tg .only-browser { display: none; }
   color: var(--tg-tx);
   cursor: pointer;
   position: relative;
+  overflow: hidden;
 }
 
 /* Полупрозрачный overlay для фоновых изображений */

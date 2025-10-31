@@ -134,8 +134,10 @@ function createBadgeButton(category, currentLevel) {
         const iconDiv = document.createElement('div');
         iconDiv.className = 'badge-max-icon';
         iconDiv.style.cssText = `
-            width: 64px;
-            height: 64px;
+            width: 50%;
+            height: 50%;
+            max-width: 64px;
+            max-height: 64px;
             background-image: url('./assets/mastery/${category.key}/icon.svg');
             background-repeat: no-repeat;
             background-position: center;
@@ -159,8 +161,10 @@ function createBadgeButton(category, currentLevel) {
         svg.setAttribute('viewBox', '0 0 100 100');
         svg.style.cssText = `
             position: absolute;
-            width: 80%;
-            height: 80%;
+            width: 70%;
+            height: 70%;
+            min-width: 70px;
+            min-height: 70px;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -226,11 +230,12 @@ function createBadgeButton(category, currentLevel) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 32px;
+            font-size: clamp(24px, 8vw, 32px);
             font-weight: 700;
             color: var(--tg-tx);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.45);
             z-index: 2;
+            pointer-events: none;
         `;
         button.appendChild(levelDiv);
     }
