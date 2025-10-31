@@ -70,7 +70,7 @@ export function showScreen(name) {
   }
   else if (name === 'rewardDetail')    {
     // Топбар устанавливается динамически в renderMasteryDetail()
-    setTopbar(true, 'Прогресс');
+    // Временный заголовок не нужен, т.к. он сразу обновляется
   }
 
   scrollTopSmooth();

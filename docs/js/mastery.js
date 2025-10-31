@@ -262,6 +262,9 @@ export async function renderMasteryButtons() {
 export async function openMasteryDetail(categoryKey) {
     console.log('🎯 Открытие детального экрана для категории:', categoryKey);
     
+    // Показываем экран сначала (чтобы топбар был виден)
+    showScreen('rewardDetail');
+    
     // Загружаем конфиг
     const config = await loadMasteryConfig();
     if (!config) {
@@ -287,11 +290,8 @@ export async function openMasteryDetail(categoryKey) {
     
     const currentLevel = levels[categoryKey] || 0;
     
-    // Рендерим детальный экран
+    // Рендерим детальный экран (это обновит топбар)
     renderMasteryDetail(category, currentLevel);
-    
-    // Показываем экран
-    showScreen('rewardDetail');
 }
 
 // Рендеринг детального экрана мастерства
