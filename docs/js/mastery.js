@@ -334,12 +334,12 @@ function renderMasteryDetail(category, currentLevel) {
     
     // Создаём заголовок с иконкой если нужно
     const headerTitle = document.createElement('h2');
-    headerTitle.className = 'card-title';
+    headerTitle.className = 'card-title reward-detail-header';
     
     if (styles.showIcon) {
         headerTitle.style.display = 'inline-flex';
         headerTitle.style.alignItems = 'center';
-        headerTitle.style.gap = '8px';
+        headerTitle.style.gap = '0';
         
         // Добавляем иконку как первый элемент
         const iconSpan = document.createElement('span');

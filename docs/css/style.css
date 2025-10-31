@@ -668,6 +668,14 @@ html.tg .only-browser { display: none; }
 }
 
 /* ========== MASTERY DETAIL SCREEN ========== */
+.reward-detail-header {
+  gap: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.reward-detail-header > span {
+  margin-right: 8px;
+}
 .card.current-level {
   border-left: 4px solid var(--color-success);
 }
