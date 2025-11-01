@@ -34,6 +34,7 @@ const avatarPreview = $('avatarPreview');
 const avatarPlaceholder = $('avatarPlaceholder');
 let selectedAvatarFile = null; // Временное хранилище выбранного файла
 let currentUserId = null; // ID текущего пользователя
+let currentAvatarObjectUrl = null; // URL для локального превью
 
 // Кеш для элементов чипов
 let chipsCache = null;
@@ -83,7 +84,8 @@ function loadProfileToForm(profile) {
   
   // Обновляем аватарку
   if (profile.avatar_url) {
-    avatarPreview.src = API_BASE + profile.avatar_url;
+    // Добавляем параметр времени чтобы браузер перезагрузил изображение
+    avatarPreview.src = API_BASE + profile.avatar_url + '?t=' + Date.now();
     avatarPreview.classList.remove('hidden');
     avatarPlaceholder.classList.add('hidden');
     avatarUploadBtn.classList.add('has-avatar');
@@ -176,9 +178,14 @@ export function initProfile() {
         return;
       }
       
+      // Освобождаем предыдущий objectUrl если он был
+      if (currentAvatarObjectUrl) {
+        URL.revokeObjectURL(currentAvatarObjectUrl);
+      }
+      
       // Создаем превью
-      const objectUrl = URL.createObjectURL(file);
-      avatarPreview.src = objectUrl;
+      currentAvatarObjectUrl = URL.createObjectURL(file);
+      avatarPreview.src = currentAvatarObjectUrl;
       avatarPreview.classList.remove('hidden');
       avatarPlaceholder.classList.add('hidden');
       avatarUploadBtn.classList.add('has-avatar');
@@ -283,6 +290,11 @@ export function initProfile() {
       if (selectedAvatarFile && currentUserId) {
         try {
           await uploadAvatar(currentUserId, selectedAvatarFile);
+          // Освобождаем objectUrl локального превью
+          if (currentAvatarObjectUrl) {
+            URL.revokeObjectURL(currentAvatarObjectUrl);
+            currentAvatarObjectUrl = null;
+          }
           // Перезагружаем профиль чтобы получить обновленную аватарку
           await fetchProfileFromServer();
           selectedAvatarFile = null; // Очищаем после успешной загрузки
