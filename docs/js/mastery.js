@@ -154,15 +154,11 @@ function createProgressCircle(category, currentLevel, progress) {
     svg.appendChild(bgCircle);
     svg.appendChild(progressCircle);
     
-    // Цифра уровня по центру (показываем только если уровень > 0)
-    if (currentLevel > 0) {
-        const levelNumber = document.createElement('div');
-        levelNumber.className = 'mastery-level-number';
-        levelNumber.textContent = currentLevel.toString();
-        return { container: svg, levelNumber };
-    }
-    
-    return { container: svg, levelNumber: null };
+    // Цифра уровня по центру
+    const levelNumber = document.createElement('div');
+    levelNumber.className = 'mastery-level-number';
+    levelNumber.textContent = currentLevel.toString();
+    return { container: svg, levelNumber };
 }
 
 // Создание иконки максимального уровня
@@ -317,9 +313,7 @@ function createBadgeButton(category, currentLevel) {
         // Круговой прогресс + цифра
         const { container: svg, levelNumber } = createProgressCircle(category, currentLevel, progress);
         progressContainer.appendChild(svg);
-        if (levelNumber) {
-            progressContainer.appendChild(levelNumber);
-        }
+        progressContainer.appendChild(levelNumber);
     }
     
     button.appendChild(progressContainer);
@@ -485,9 +479,7 @@ function renderMasteryDetail(category, currentLevel) {
         // Круговой прогресс + цифра
         const { container: svg, levelNumber } = createProgressCircle(category, currentLevel, progress);
         progressContainer.appendChild(svg);
-        if (levelNumber) {
-            progressContainer.appendChild(levelNumber);
-        }
+        progressContainer.appendChild(levelNumber);
     }
     
     headerCard.appendChild(progressContainer);
