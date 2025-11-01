@@ -62,11 +62,8 @@ export function showScreen(name) {
   else if (name === 'feedback')        setTopbar(true, 'Отправить отзыв');
   else if (name === 'reward')          {
     setTopbar(true, 'Награды');
-    // Загружаем и рендерим кнопки мастерства при открытии экрана
-    // Используем setTimeout чтобы убедиться, что экран уже показан
-    setTimeout(() => {
-      renderMasteryButtons();
-    }, 50);
+    // Рендерим кнопки мастерства (рендер произойдет только один раз за сессию)
+    renderMasteryButtons();
   }
   else if (name === 'rewardDetail')    {
     // Топбар устанавливается динамически в renderMasteryDetail()

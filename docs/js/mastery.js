@@ -8,6 +8,9 @@ import { showScreen, setTopbar } from './ui.js';
 // Кэш конфига
 let masteryConfig = null;
 
+// Флаг: отрендерено ли уже мастерство за эту сессию
+let masteryRendered = false;
+
 // Lookup table для правил фонов по уровню
 const MASTERY_LEVEL_RULES = {
     3: [
@@ -332,7 +335,13 @@ function createBadgeButton(category, currentLevel) {
 
 // Рендеринг всех кнопок мастерства
 export async function renderMasteryButtons() {
-    console.log('🎯 renderMasteryButtons вызван');
+    // Если уже отрендерено - ничего не делаем
+    if (masteryRendered) {
+        console.log('⚡ Мастерство уже отрендерено, пропускаем');
+        return;
+    }
+    
+    console.log('🎯 Первый рендеринг мастерства');
     
     // Пробуем найти контейнер разными способами
     let container = document.getElementById('masteryButtonsContainer');
@@ -348,10 +357,10 @@ export async function renderMasteryButtons() {
     
     console.log('✅ Контейнер найден:', container);
     
-    // Очищаем контейнер
+    // Очищаем контейнер только перед первым рендером
     container.innerHTML = '';
     
-    // Загружаем конфиг
+    // Загружаем данные (из кэша если уже загружены)
     console.log('📋 Загрузка конфига мастерства...');
     const config = await loadMasteryConfig();
     if (!config) {
@@ -365,10 +374,6 @@ export async function renderMasteryButtons() {
     console.log('📊 Загрузка уровней пользователя...');
     const levels = await fetchMasteryWithRetry();
     console.log('✅ Уровни получены:', levels);
-    
-    // Предзагружаем изображения для достигнутых уровней
-    console.log('🖼️ Предзагрузка изображений...');
-    await preloadMasteryAssets(config, levels);
     
     // Порядок категорий для отображения
     const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun'];
@@ -389,7 +394,9 @@ export async function renderMasteryButtons() {
         buttonsCreated++;
     }
     
-    console.log(`✅ Рендеринг завершён. Создано кнопок: ${buttonsCreated}`);
+    // Помечаем как отрендеренное
+    masteryRendered = true;
+    console.log(`✅ Рендеринг мастерства завершён (один раз за сессию). Создано кнопок: ${buttonsCreated}`);
 }
 
 // Открытие детального экрана мастерства
@@ -460,7 +467,7 @@ function renderMasteryDetail(category, currentLevel) {
     
     // Левая часть - название
     const titleContainer = document.createElement('h2');
-    titleContainer.className = 'card-title reward-detail-header mastery-header-title';
+    titleContainer.className = 'card-title reward-detail-header mastery-level-name';
     titleContainer.textContent = headerTitleText;
     headerCard.appendChild(titleContainer);
     
@@ -563,9 +570,29 @@ function renderMasteryDetail(category, currentLevel) {
     }
 }
 
-// Инициализация модуля
+// Предзагрузка данных без рендеринга (вызывается при старте приложения)
+async function preloadMasteryData() {
+    console.log('🎯 Предзагрузка данных мастерства...');
+    
+    // Загружаем конфиг
+    const config = await loadMasteryConfig();
+    if (!config) {
+        console.error('❌ Не удалось загрузить конфиг мастерства');
+        return;
+    }
+    
+    // Загружаем уровни пользователя
+    const levels = await fetchMasteryWithRetry();
+    
+    // Предзагружаем изображения
+    await preloadMasteryAssets(config, levels);
+    
+    console.log('✅ Данные мастерства предзагружены');
+}
+
+// Инициализация модуля (вызывается при старте приложения)
 export function initMastery() {
-    // Модуль инициализируется при открытии экрана мастерства
-    // Рендеринг вызывается через renderMasteryButtons()
+    // Запускаем предзагрузку данных в фоне
+    preloadMasteryData();
 }
 

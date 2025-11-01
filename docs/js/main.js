@@ -7,6 +7,7 @@ import { initBuilds } from './builds.js';
 import { initParticipantDetail } from './participantDetail.js';
 import { initWhatsNew, renderWhatsNewCards } from './whatsNew.js';
 import { initFeedback } from './feedback.js';
+import { initMastery } from './mastery.js';
 import { checkUserRegistration } from './api.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
@@ -163,6 +164,9 @@ async function startApp() {
   initParticipantDetail();
   initWhatsNew();
   initFeedback();
+  
+  // Предзагрузка мастерства в фоне (не await - загружается параллельно)
+  initMastery();
 
   showScreen('home');
 }
