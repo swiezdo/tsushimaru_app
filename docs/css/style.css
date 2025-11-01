@@ -673,6 +673,90 @@ html.tg .only-browser { display: none; }
   gap: 8px;
 }
 
+/* ========== MASTERY COMPONENTS ========== */
+/* Контейнер для текста (левая часть badge) */
+.mastery-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  flex: 1;
+  z-index: 2;
+  position: relative;
+}
+
+/* Название категории */
+.mastery-category-name {
+  font-size: var(--fs-14);
+  color: var(--tg-hint);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.45);
+}
+
+/* Название уровня */
+.mastery-level-name {
+  font-size: var(--fs-16);
+  font-weight: 600;
+  color: var(--tg-tx);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Контейнер для прогресса/иконки (правая часть badge) */
+.mastery-progress-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+/* Иконка максимального уровня */
+.mastery-icon {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
+  opacity: 0.95;
+}
+
+/* Цифра уровня в центре прогресса */
+.mastery-level-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--tg-tx);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* SVG контейнер для прогресса */
+.mastery-progress-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Header card в детальном экране */
+.mastery-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* Заголовок в header card */
+.mastery-header-title {
+  margin: 0;
+  flex: 1;
+  z-index: 2;
+  position: relative;
+}
+
 /* ========== MASTERY SCREEN ========== */
 .list-buttons#masteryButtonsContainer {
   gap: var(--space-2);

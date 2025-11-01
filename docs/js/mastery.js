@@ -8,18 +8,70 @@ import { showScreen, setTopbar } from './ui.js';
 // Кэш конфига
 let masteryConfig = null;
 
-// Загрузка конфига из JSON
+// Lookup table для правил фонов по уровню
+const MASTERY_LEVEL_RULES = {
+    3: [
+        { level: 2, bg: 'background.jpg' },
+        { level: 3, bg: 'background.gif', icon: true }
+    ],
+    4: [
+        { level: 2, bg: 'background.jpg' },
+        { level: 3, bg: 'background.gif' },
+        { level: 4, icon: true }
+    ],
+    5: [
+        { level: 2, bg: 'background.jpg' },
+        { level: 3, bg: 'background2.jpg' },
+        { level: 4, bg: 'background.gif' },
+        { level: 5, icon: true }
+    ]
+};
+
+// Загрузка конфига из JSON с retry-логикой
 async function loadMasteryConfig() {
     if (masteryConfig) return masteryConfig;
     
-    try {
-        const response = await fetch('./mastery-config.json');
-        if (!response.ok) throw new Error('Не удалось загрузить конфиг');
-        masteryConfig = await response.json();
-        return masteryConfig;
-    } catch (error) {
-        console.error('Ошибка загрузки конфига мастерства:', error);
-        return null;
+    const maxAttempts = 3;
+    const retryDelay = 1000; // 1 секунда
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const response = await fetch('./mastery-config.json');
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            masteryConfig = await response.json();
+            console.log(`✅ Конфиг мастерства загружен с попытки ${attempt}`);
+            return masteryConfig;
+        } catch (error) {
+            if (attempt === maxAttempts) {
+                console.error(`❌ Не удалось загрузить конфиг мастерства после ${maxAttempts} попыток:`, error);
+                return null;
+            }
+            console.warn(`⚠️ Попытка ${attempt}/${maxAttempts} не удалась, повтор через ${retryDelay}мс`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+    }
+}
+
+// Получение уровней с retry-логикой
+async function fetchMasteryWithRetry() {
+    const maxAttempts = 2;
+    const retryDelay = 500; // 0.5 секунды
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const levels = await fetchMastery();
+            if (attempt > 1) {
+                console.log(`✅ Уровни мастерства получены с попытки ${attempt}`);
+            }
+            return levels;
+        } catch (error) {
+            if (attempt === maxAttempts) {
+                console.error(`❌ Не удалось получить уровни мастерства после ${maxAttempts} попыток:`, error);
+                return { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
+            }
+            console.warn(`⚠️ Попытка ${attempt}/${maxAttempts} не удалась, повтор через ${retryDelay}мс`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
     }
 }
 
@@ -41,14 +93,99 @@ function calculateProgress(currentLevel, maxLevels) {
     return Math.round((currentLevel / maxLevels) * 100);
 }
 
+// Создание SVG кругового прогресса
+function createProgressCircle(category, currentLevel, progress) {
+    const gradientId = `grad-${category.key}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // SVG контейнер
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.className = 'mastery-progress-svg';
+    
+    // Defs с градиентом
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    gradient.setAttribute('id', gradientId);
+    gradient.setAttribute('x1', '0%');
+    gradient.setAttribute('y1', '0%');
+    gradient.setAttribute('x2', '100%');
+    gradient.setAttribute('y2', '0%');
+    
+    const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop1.setAttribute('offset', '0%');
+    stop1.setAttribute('stop-color', '#ffffff');
+    const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    stop2.setAttribute('offset', '100%');
+    stop2.setAttribute('stop-color', '#8b0000');
+    
+    gradient.appendChild(stop1);
+    gradient.appendChild(stop2);
+    defs.appendChild(gradient);
+    
+    // Фоновый круг
+    const bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    bgCircle.setAttribute('cx', '50');
+    bgCircle.setAttribute('cy', '50');
+    bgCircle.setAttribute('r', '45');
+    bgCircle.setAttribute('fill', 'none');
+    bgCircle.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
+    bgCircle.setAttribute('stroke-width', '5');
+    
+    // Прогресс круг
+    const circumference = 2 * Math.PI * 45;
+    const offset = circumference - (progress / 100) * circumference;
+    
+    const progressCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    progressCircle.setAttribute('cx', '50');
+    progressCircle.setAttribute('cy', '50');
+    progressCircle.setAttribute('r', '45');
+    progressCircle.setAttribute('fill', 'none');
+    progressCircle.setAttribute('stroke', `url(#${gradientId})`);
+    progressCircle.setAttribute('stroke-width', '5');
+    progressCircle.setAttribute('stroke-linecap', 'round');
+    progressCircle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
+    progressCircle.setAttribute('stroke-dashoffset', offset);
+    progressCircle.setAttribute('transform', 'rotate(-90 50 50)');
+    
+    svg.appendChild(defs);
+    svg.appendChild(bgCircle);
+    svg.appendChild(progressCircle);
+    
+    // Цифра уровня по центру (показываем только если уровень > 0)
+    if (currentLevel > 0) {
+        const levelNumber = document.createElement('div');
+        levelNumber.className = 'mastery-level-number';
+        levelNumber.textContent = currentLevel.toString();
+        return { container: svg, levelNumber };
+    }
+    
+    return { container: svg, levelNumber: null };
+}
+
+// Создание иконки максимального уровня
+function createMaxLevelIcon(categoryKey) {
+    const icon = document.createElement('div');
+    icon.className = 'mastery-icon';
+    icon.style.backgroundImage = `url('./assets/mastery/${categoryKey}/icon.svg')`;
+    return icon;
+}
+
+// Применение фоновых стилей к элементу
+function applyBackgroundStyles(element, backgroundImage) {
+    if (backgroundImage) {
+        element.style.backgroundImage = backgroundImage;
+        element.style.backgroundRepeat = 'no-repeat';
+        element.style.backgroundPosition = 'center';
+        element.style.backgroundSize = 'cover';
+    }
+}
+
 // Определение стилей кнопки в зависимости от уровня
 function getButtonStyles(category, currentLevel) {
     const maxLevels = category.maxLevels;
     const styles = {
         classes: ['badge-btn', `${category.key}-badge`],
         backgroundImage: null,
-        backgroundSize: null,
-        backgroundPosition: null,
         showIcon: false
     };
     
@@ -57,61 +194,43 @@ function getButtonStyles(category, currentLevel) {
         return styles;
     }
     
-    // Уровень 1+: контур (свечение отключено)
-    // styles.classes.push('has-glow');
-    
-    // Правила для разных количеств уровней
-    if (maxLevels === 3) {
-        // 3 уровня: 2 - background.jpg, 3 - background.gif + иконка
-        if (currentLevel >= 2) {
-            styles.backgroundImage = `url('./assets/mastery/${category.key}/background.jpg')`;
-            styles.backgroundSize = 'cover';
-            styles.backgroundPosition = 'center';
-        }
-        if (currentLevel >= 3) {
-            styles.backgroundImage = `url('./assets/mastery/${category.key}/background.gif')`;
-            styles.backgroundSize = 'cover';
-            styles.backgroundPosition = 'center';
-            styles.showIcon = true;
-        }
-    } else if (maxLevels === 4) {
-        // 4 уровня: 2 - background.jpg, 3 - background.gif, 4 - background.gif + иконка
-        if (currentLevel >= 2) {
-            styles.backgroundImage = `url('./assets/mastery/${category.key}/background.jpg')`;
-            styles.backgroundSize = 'cover';
-            styles.backgroundPosition = 'center';
-        }
-        if (currentLevel >= 3) {
-            styles.backgroundImage = `url('./assets/mastery/${category.key}/background.gif')`;
-            styles.backgroundSize = 'cover';
-            styles.backgroundPosition = 'center';
-        }
-        if (currentLevel >= 4) {
-            styles.showIcon = true;
-        }
-    } else if (maxLevels === 5) {
-        // 5 уровней: 2 - background.jpg, 3 - background2.jpg, 4 - background.gif, 5 - background.gif + иконка
-        if (currentLevel >= 2) {
-            styles.backgroundImage = `url('./assets/mastery/${category.key}/background.jpg')`;
-            styles.backgroundSize = 'cover';
-            styles.backgroundPosition = 'center';
-        }
-        if (currentLevel >= 3) {
-            styles.backgroundImage = `url('./assets/mastery/${category.key}/background2.jpg')`;
-            styles.backgroundSize = 'cover';
-            styles.backgroundPosition = 'center';
-        }
-        if (currentLevel >= 4) {
-            styles.backgroundImage = `url('./assets/mastery/${category.key}/background.gif')`;
-            styles.backgroundSize = 'cover';
-            styles.backgroundPosition = 'center';
-        }
-        if (currentLevel >= 5) {
-            styles.showIcon = true;
+    const rules = MASTERY_LEVEL_RULES[maxLevels] || [];
+    for (const rule of rules) {
+        if (currentLevel >= rule.level) {
+            if (rule.bg) {
+                styles.backgroundImage = `url('./assets/mastery/${category.key}/${rule.bg}')`;
+            }
+            if (rule.icon) {
+                styles.showIcon = true;
+            }
         }
     }
     
     return styles;
+}
+
+// Получение списка необходимых изображений для уровня
+function getRequiredAssets(category, currentLevel) {
+    if (currentLevel === 0) return [];
+    
+    const maxLevels = category.maxLevels;
+    const assets = [];
+    const rules = MASTERY_LEVEL_RULES[maxLevels] || [];
+    const processedBgs = new Set();
+    
+    for (const rule of rules) {
+        if (currentLevel >= rule.level) {
+            if (rule.bg && !processedBgs.has(rule.bg)) {
+                assets.push(rule.bg);
+                processedBgs.add(rule.bg);
+            }
+            if (rule.icon) {
+                assets.push('icon.svg');
+            }
+        }
+    }
+    
+    return assets;
 }
 
 // Предзагрузка изображений для достигнутых уровней
@@ -122,71 +241,18 @@ async function preloadMasteryAssets(config, levels) {
     
     for (const category of config.categories) {
         const currentLevel = levels[category.key] || 0;
-        const maxLevels = category.maxLevels;
+        if (currentLevel === 0) continue;
         
-        if (currentLevel === 0) continue; // Нет необходимости предзагружать для уровня 0
+        const assets = getRequiredAssets(category, currentLevel);
         
-        // background.jpg нужен если currentLevel >= 2
-        if (currentLevel >= 2) {
-            const img1 = new Image();
-            const promise1 = new Promise((resolve, reject) => {
-                img1.onload = resolve;
-                img1.onerror = reject;
-                img1.src = `./assets/mastery/${category.key}/background.jpg`;
+        for (const asset of assets) {
+            const img = new Image();
+            const promise = new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = `./assets/mastery/${category.key}/${asset}`;
             });
-            preloadPromises.push(promise1);
-        }
-        
-        // background2.jpg нужен только для 5 уровней и если currentLevel >= 3
-        if (maxLevels === 5 && currentLevel >= 3) {
-            const img2 = new Image();
-            const promise2 = new Promise((resolve, reject) => {
-                img2.onload = resolve;
-                img2.onerror = reject;
-                img2.src = `./assets/mastery/${category.key}/background2.jpg`;
-            });
-            preloadPromises.push(promise2);
-        }
-        
-        // background.gif нужен:
-        // - Для 3 уровней: если currentLevel >= 3
-        // - Для 4 уровней: если currentLevel >= 3
-        // - Для 5 уровней: если currentLevel >= 4
-        if (maxLevels === 3 && currentLevel >= 3) {
-            const gif = new Image();
-            const promiseGif = new Promise((resolve, reject) => {
-                gif.onload = resolve;
-                gif.onerror = reject;
-                gif.src = `./assets/mastery/${category.key}/background.gif`;
-            });
-            preloadPromises.push(promiseGif);
-        } else if (maxLevels === 4 && currentLevel >= 3) {
-            const gif = new Image();
-            const promiseGif = new Promise((resolve, reject) => {
-                gif.onload = resolve;
-                gif.onerror = reject;
-                gif.src = `./assets/mastery/${category.key}/background.gif`;
-            });
-            preloadPromises.push(promiseGif);
-        } else if (maxLevels === 5 && currentLevel >= 4) {
-            const gif = new Image();
-            const promiseGif = new Promise((resolve, reject) => {
-                gif.onload = resolve;
-                gif.onerror = reject;
-                gif.src = `./assets/mastery/${category.key}/background.gif`;
-            });
-            preloadPromises.push(promiseGif);
-        }
-        
-        // icon.svg нужен если достигнут максимальный уровень
-        if (currentLevel >= maxLevels && maxLevels > 0) {
-            const icon = new Image();
-            const promiseIcon = new Promise((resolve, reject) => {
-                icon.onload = resolve;
-                icon.onerror = reject;
-                icon.src = `./assets/mastery/${category.key}/icon.svg`;
-            });
-            preloadPromises.push(promiseIcon);
+            preloadPromises.push(promise);
         }
     }
     
@@ -213,156 +279,44 @@ function createBadgeButton(category, currentLevel) {
     button.type = 'button';
     button.className = styles.classes.join(' ');
     
-    // Применяем фоновое изображение если есть
-    if (styles.backgroundImage) {
-        button.style.backgroundImage = styles.backgroundImage;
-        button.style.backgroundRepeat = 'no-repeat';
-        button.style.backgroundPosition = styles.backgroundPosition || 'center';
-        button.style.backgroundSize = styles.backgroundSize || 'cover';
-    }
+    // Применяем фоновое изображение
+    applyBackgroundStyles(button, styles.backgroundImage);
     
     // Левая часть - тексты
     const textContainer = document.createElement('div');
-    textContainer.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-1);
-        flex: 1;
-        z-index: 2;
-        position: relative;
-    `;
+    textContainer.className = 'mastery-text-container';
     
-    // Первая строка - название категории
+    // Название категории
     const categoryName = document.createElement('div');
-    categoryName.className = 'badge-category-name';
+    categoryName.className = 'mastery-category-name';
     categoryName.textContent = category.name;
-    categoryName.style.cssText = `
-        font-size: var(--fs-14);
-        color: var(--tg-hint);
-        font-weight: 500;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.45);
-    `;
     textContainer.appendChild(categoryName);
     
-    // Вторая строка - название уровня (если level > 0)
+    // Название уровня (если level > 0)
     if (currentLevel > 0 && levelData) {
         const levelName = document.createElement('div');
-        levelName.className = 'badge-level-name';
+        levelName.className = 'mastery-level-name';
         levelName.textContent = levelData.name;
-        levelName.style.cssText = `
-            font-size: var(--fs-16);
-            font-weight: 600;
-            color: var(--tg-tx);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.5);
-        `;
         textContainer.appendChild(levelName);
     }
     
     button.appendChild(textContainer);
     
-    // Правая часть - круговой прогресс
+    // Правая часть - круговой прогресс или иконка
     const progressContainer = document.createElement('div');
-    progressContainer.style.cssText = `
-        position: relative;
-        width: 40px;
-        height: 40px;
-        flex-shrink: 0;
-        z-index: 2;
-    `;
+    progressContainer.className = 'mastery-progress-container';
     
     if (isMaxLevel) {
         // Максимальный уровень - иконка
-        const icon = document.createElement('div');
-        icon.style.cssText = `
-            width: 100%;
-            height: 100%;
-            background-image: url('./assets/mastery/${category.key}/icon.svg');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
-            opacity: 0.95;
-        `;
+        const icon = createMaxLevelIcon(category.key);
         progressContainer.appendChild(icon);
     } else {
-        // Не максимальный уровень - круговой прогресс + цифра
-        const gradientId = `grad-${category.key}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        // SVG контейнер
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('viewBox', '0 0 100 100');
-        svg.style.cssText = `
-            width: 100%;
-            height: 100%;
-        `;
-        
-        // Defs с градиентом
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-        gradient.setAttribute('id', gradientId);
-        gradient.setAttribute('x1', '0%');
-        gradient.setAttribute('y1', '0%');
-        gradient.setAttribute('x2', '100%');
-        gradient.setAttribute('y2', '0%');
-        
-        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        stop1.setAttribute('offset', '0%');
-        stop1.setAttribute('stop-color', '#ffffff');
-        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        stop2.setAttribute('offset', '100%');
-        stop2.setAttribute('stop-color', '#8b0000');
-        
-        gradient.appendChild(stop1);
-        gradient.appendChild(stop2);
-        defs.appendChild(gradient);
-        
-        // Фоновый круг
-        const bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        bgCircle.setAttribute('cx', '50');
-        bgCircle.setAttribute('cy', '50');
-        bgCircle.setAttribute('r', '45');
-        bgCircle.setAttribute('fill', 'none');
-        bgCircle.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
-        bgCircle.setAttribute('stroke-width', '5');
-        
-        // Прогресс круг
-        const circumference = 2 * Math.PI * 45;
-        const offset = circumference - (progress / 100) * circumference;
-        
-        const progressCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        progressCircle.setAttribute('cx', '50');
-        progressCircle.setAttribute('cy', '50');
-        progressCircle.setAttribute('r', '45');
-        progressCircle.setAttribute('fill', 'none');
-        progressCircle.setAttribute('stroke', `url(#${gradientId})`);
-        progressCircle.setAttribute('stroke-width', '5');
-        progressCircle.setAttribute('stroke-linecap', 'round');
-        progressCircle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
-        progressCircle.setAttribute('stroke-dashoffset', offset);
-        progressCircle.setAttribute('transform', 'rotate(-90 50 50)');
-        
-        svg.appendChild(defs);
-        svg.appendChild(bgCircle);
-        svg.appendChild(progressCircle);
+        // Круговой прогресс + цифра
+        const { container: svg, levelNumber } = createProgressCircle(category, currentLevel, progress);
         progressContainer.appendChild(svg);
-        
-        // Цифра уровня по центру
-        const levelNumber = document.createElement('div');
-        levelNumber.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--tg-tx);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
-            pointer-events: none;
-            line-height: 1;
-        `;
-        levelNumber.textContent = currentLevel.toString();
-        progressContainer.appendChild(levelNumber);
+        if (levelNumber) {
+            progressContainer.appendChild(levelNumber);
+        }
     }
     
     button.appendChild(progressContainer);
@@ -409,14 +363,8 @@ export async function renderMasteryButtons() {
     
     // Загружаем уровни пользователя
     console.log('📊 Загрузка уровней пользователя...');
-    let levels;
-    try {
-        levels = await fetchMastery();
-        console.log('✅ Уровни получены:', levels);
-    } catch (error) {
-        console.error('❌ Ошибка получения уровней мастерства:', error);
-        levels = { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
-    }
+    const levels = await fetchMasteryWithRetry();
+    console.log('✅ Уровни получены:', levels);
     
     // Предзагружаем изображения для достигнутых уровней
     console.log('🖼️ Предзагрузка изображений...');
@@ -466,14 +414,7 @@ export async function openMasteryDetail(categoryKey) {
     }
     
     // Загружаем уровни пользователя
-    let levels;
-    try {
-        levels = await fetchMastery();
-    } catch (error) {
-        console.error('Ошибка получения уровней мастерства:', error);
-        levels = { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
-    }
-    
+    const levels = await fetchMasteryWithRetry();
     const currentLevel = levels[categoryKey] || 0;
     
     // Предзагружаем изображения для этой категории (на случай если они еще не были загружены)
@@ -503,21 +444,10 @@ function renderMasteryDetail(category, currentLevel) {
     
     // Заголовок с названием текущего уровня
     const headerCard = document.createElement('section');
-    headerCard.className = 'card';
-    headerCard.style.cssText = `
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: var(--space-3);
-    `;
+    headerCard.className = 'card mastery-header-card';
     
-    // Применяем фоновое изображение если есть
-    if (styles.backgroundImage) {
-        headerCard.style.backgroundImage = styles.backgroundImage;
-        headerCard.style.backgroundRepeat = 'no-repeat';
-        headerCard.style.backgroundPosition = styles.backgroundPosition || 'center';
-        headerCard.style.backgroundSize = styles.backgroundSize || 'cover';
-    }
+    // Применяем фоновое изображение
+    applyBackgroundStyles(headerCard, styles.backgroundImage);
     
     // Определяем название для заголовка карточки
     let headerTitleText;
@@ -530,120 +460,25 @@ function renderMasteryDetail(category, currentLevel) {
     
     // Левая часть - название
     const titleContainer = document.createElement('h2');
-    titleContainer.className = 'card-title reward-detail-header';
-    titleContainer.style.cssText = `
-        margin: 0;
-        flex: 1;
-        z-index: 2;
-        position: relative;
-    `;
+    titleContainer.className = 'card-title reward-detail-header mastery-header-title';
     titleContainer.textContent = headerTitleText;
     headerCard.appendChild(titleContainer);
     
     // Правая часть - круговой прогресс или иконка
     const progressContainer = document.createElement('div');
-    progressContainer.style.cssText = `
-        position: relative;
-        width: 40px;
-        height: 40px;
-        flex-shrink: 0;
-        z-index: 2;
-    `;
+    progressContainer.className = 'mastery-progress-container';
     
     const isMaxLevel = currentLevel === maxLevels && styles.showIcon;
     
     if (isMaxLevel) {
         // Максимальный уровень - иконка
-        const icon = document.createElement('div');
-        icon.style.cssText = `
-            width: 100%;
-            height: 100%;
-            background-image: url('./assets/mastery/${category.key}/icon.svg');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-            filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
-            opacity: 0.95;
-        `;
+        const icon = createMaxLevelIcon(category.key);
         progressContainer.appendChild(icon);
     } else {
-        // Не максимальный уровень - круговой прогресс + цифра
-        const gradientId = `grad-detail-${category.key}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        // SVG контейнер
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('viewBox', '0 0 100 100');
-        svg.style.cssText = `
-            width: 100%;
-            height: 100%;
-        `;
-        
-        // Defs с градиентом
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-        gradient.setAttribute('id', gradientId);
-        gradient.setAttribute('x1', '0%');
-        gradient.setAttribute('y1', '0%');
-        gradient.setAttribute('x2', '100%');
-        gradient.setAttribute('y2', '0%');
-        
-        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        stop1.setAttribute('offset', '0%');
-        stop1.setAttribute('stop-color', '#ffffff');
-        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        stop2.setAttribute('offset', '100%');
-        stop2.setAttribute('stop-color', '#8b0000');
-        
-        gradient.appendChild(stop1);
-        gradient.appendChild(stop2);
-        defs.appendChild(gradient);
-        
-        // Фоновый круг
-        const bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        bgCircle.setAttribute('cx', '50');
-        bgCircle.setAttribute('cy', '50');
-        bgCircle.setAttribute('r', '45');
-        bgCircle.setAttribute('fill', 'none');
-        bgCircle.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
-        bgCircle.setAttribute('stroke-width', '5');
-        
-        // Прогресс круг
-        const circumference = 2 * Math.PI * 45;
-        const offset = circumference - (progress / 100) * circumference;
-        
-        const progressCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        progressCircle.setAttribute('cx', '50');
-        progressCircle.setAttribute('cy', '50');
-        progressCircle.setAttribute('r', '45');
-        progressCircle.setAttribute('fill', 'none');
-        progressCircle.setAttribute('stroke', `url(#${gradientId})`);
-        progressCircle.setAttribute('stroke-width', '5');
-        progressCircle.setAttribute('stroke-linecap', 'round');
-        progressCircle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
-        progressCircle.setAttribute('stroke-dashoffset', offset);
-        progressCircle.setAttribute('transform', 'rotate(-90 50 50)');
-        
-        svg.appendChild(defs);
-        svg.appendChild(bgCircle);
-        svg.appendChild(progressCircle);
+        // Круговой прогресс + цифра
+        const { container: svg, levelNumber } = createProgressCircle(category, currentLevel, progress);
         progressContainer.appendChild(svg);
-        
-        // Цифра уровня по центру (показываем только если уровень > 0)
-        if (currentLevel > 0) {
-            const levelNumber = document.createElement('div');
-            levelNumber.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 14px;
-                font-weight: 700;
-                color: var(--tg-tx);
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
-                pointer-events: none;
-                line-height: 1;
-            `;
-            levelNumber.textContent = currentLevel.toString();
+        if (levelNumber) {
             progressContainer.appendChild(levelNumber);
         }
     }
