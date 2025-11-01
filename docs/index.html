@@ -8,7 +8,7 @@
     />
     <title></title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/style.css?v=2" />
   </head>
 
   <body>
@@ -36,9 +36,9 @@
           <div class="brand">
             <img class="logo" src="./assets/logo/logo.png" alt="Tsushima.Ru" />
           </div>
-          <div class="home-buttons">
+          <div class="grid-list">
             <a
-              class="big-btn primary"
+              class="btn primary"
               href="https://t.me/+ZFiVYVrz-PEzYjBi"
               target="_blank"
               rel="noopener"
@@ -46,11 +46,11 @@
               🏯 Группа Tsushima.Ru
             </a>
 
-            <button id="openProfileBtn" class="big-btn">👤 Мой профиль</button>
-            <button id="rewardBtn" class="big-btn">🏆 Награды</button>
-            <button id="participantsBtn" class="big-btn">👥 Участники</button>
-            <button id="buildsBtn" class="big-btn ghost">🛠️ Билды</button>
-            <button id="whatsNewBtn" class="big-btn">📰 Что нового?</button>
+            <button id="openProfileBtn" class="btn">👤 Мой профиль</button>
+            <button id="rewardBtn" class="btn">🏆 Награды</button>
+            <button id="participantsBtn" class="btn">👥 Участники</button>
+            <button id="buildsBtn" class="btn ghost">🛠️ Билды</button>
+            <button id="whatsNewBtn" class="btn">📰 Что нового?</button>
           </div>
         </section>
       </section>
@@ -166,7 +166,7 @@
 
         <section class="card">
           <h3 class="card-title">Список участников</h3>
-          <div id="participantsList" class="list-buttons"></div>
+          <div id="participantsList" class="grid-list"></div>
           <div id="noParticipantsHint" class="hint muted hidden" style="margin-top: 8px">
             Участники не найдены.
           </div>
@@ -214,7 +214,7 @@
 
         <section class="card">
           <h2 class="card-title">Билды участника</h2>
-          <div id="participantBuildsList" class="list-builds"></div>
+          <div id="participantBuildsList" class="grid-list"></div>
           <div id="noParticipantBuildsHint" class="hint muted hidden" style="margin-top: 8px">
             У участника пока нет публичных билдов.
           </div>
@@ -229,7 +229,7 @@
 
         <section class="card">
           <h3 class="card-title">Мои билды</h3>
-          <div id="myBuildsList" class="list-builds"></div>
+          <div id="myBuildsList" class="grid-list"></div>
           <div id="noBuildsHint" class="hint muted hidden" style="margin-top: 8px">
             Создайте свой первый билд.
           </div>
@@ -242,7 +242,7 @@
           <!-- Вкладки классов -->
           <div class="class-tabs-container" id="classTabsContainer"></div>
           
-          <div id="allBuildsList" class="list-builds"></div>
+          <div id="allBuildsList" class="grid-list"></div>
           <div id="noAllBuildsHint" class="hint muted hidden" style="margin-top: 8px">
             Публикаций пока нет.
           </div>
@@ -561,7 +561,7 @@
       <section id="rewardScreen" class="hidden">
         <section class="card">
           <h2 class="card-title">Мастерство</h2>
-          <div id="masteryButtonsContainer" class="list-buttons">
+          <div id="masteryButtonsContainer" class="grid-list">
             <!-- Кнопки будут добавлены динамически через mastery.js -->
           </div>
         </section>

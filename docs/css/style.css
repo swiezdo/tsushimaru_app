@@ -263,18 +263,6 @@ body {
   -webkit-user-drag: none; 
 }
 .brand-title { font-size: var(--fs-22); font-weight: 700; letter-spacing: .3px; }
-.home-buttons { display: grid; gap: var(--space-2); }
-.big-btn {
-  display: flex; align-items: center; justify-content: center;
-  padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--color-border);
-  background: transparent; color: var(--tg-tx); font-size: var(--fs-16); cursor: pointer; text-decoration: none; min-height: calc(var(--size-touch) + var(--space-1));
-  transition: var(--transition-fast);
-}
-.big-btn:active {
-  transform: translateY(2px);
-}
-.big-btn.primary { background: var(--accent); border-color: transparent; color: var(--color-accent-contrast); font-weight: 700; }
-.big-btn.ghost { opacity: var(--opacity-hover); }
 
 /* ========== FOOTER ACTIONS ========== */
 .footer-actions { margin: var(--space-2) 0 calc(var(--space-8) + var(--safe-bottom)); }
@@ -315,7 +303,7 @@ body {
 }
 
 /* ========== LIST ========== */
-.list-buttons { display: grid; gap: var(--space-2); }
+.grid-list { display: grid; gap: var(--space-2); }
 .list-btn {
   display: flex; justify-content: space-between; align-items: center;
   padding: var(--space-3) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md);
@@ -407,7 +395,6 @@ body {
 .shake { animation: shake .3s; }
 
 /* ========== BUILDS ========== */
-.list-builds { display: grid; gap: var(--space-2); }
 .build-item {
   display: grid; grid-template-columns: var(--size-icon) 1fr; gap: var(--space-3); align-items: center;
   padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-border);
