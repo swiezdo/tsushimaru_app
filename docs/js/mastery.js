@@ -103,7 +103,7 @@ function createProgressCircle(category, currentLevel, progress) {
     // SVG контейнер
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 100 100');
-    svg.className = 'mastery-progress-svg';
+    svg.setAttribute('class', 'mastery-progress-svg');
     
     // Defs с градиентом
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
