@@ -371,7 +371,7 @@ body {
   flex-wrap: wrap;
 }
 
-.mastery-icon {
+.list-btn .mastery-icon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
