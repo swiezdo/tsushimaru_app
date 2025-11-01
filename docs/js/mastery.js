@@ -114,6 +114,92 @@ function getButtonStyles(category, currentLevel) {
     return styles;
 }
 
+// Предзагрузка изображений для достигнутых уровней
+async function preloadMasteryAssets(config, levels) {
+    if (!config || !config.categories || !levels) return;
+    
+    const preloadPromises = [];
+    
+    for (const category of config.categories) {
+        const currentLevel = levels[category.key] || 0;
+        const maxLevels = category.maxLevels;
+        
+        if (currentLevel === 0) continue; // Нет необходимости предзагружать для уровня 0
+        
+        // background.jpg нужен если currentLevel >= 2
+        if (currentLevel >= 2) {
+            const img1 = new Image();
+            const promise1 = new Promise((resolve, reject) => {
+                img1.onload = resolve;
+                img1.onerror = reject;
+                img1.src = `./assets/mastery/${category.key}/background.jpg`;
+            });
+            preloadPromises.push(promise1);
+        }
+        
+        // background2.jpg нужен только для 5 уровней и если currentLevel >= 3
+        if (maxLevels === 5 && currentLevel >= 3) {
+            const img2 = new Image();
+            const promise2 = new Promise((resolve, reject) => {
+                img2.onload = resolve;
+                img2.onerror = reject;
+                img2.src = `./assets/mastery/${category.key}/background2.jpg`;
+            });
+            preloadPromises.push(promise2);
+        }
+        
+        // background.gif нужен:
+        // - Для 3 уровней: если currentLevel >= 3
+        // - Для 4 уровней: если currentLevel >= 3
+        // - Для 5 уровней: если currentLevel >= 4
+        if (maxLevels === 3 && currentLevel >= 3) {
+            const gif = new Image();
+            const promiseGif = new Promise((resolve, reject) => {
+                gif.onload = resolve;
+                gif.onerror = reject;
+                gif.src = `./assets/mastery/${category.key}/background.gif`;
+            });
+            preloadPromises.push(promiseGif);
+        } else if (maxLevels === 4 && currentLevel >= 3) {
+            const gif = new Image();
+            const promiseGif = new Promise((resolve, reject) => {
+                gif.onload = resolve;
+                gif.onerror = reject;
+                gif.src = `./assets/mastery/${category.key}/background.gif`;
+            });
+            preloadPromises.push(promiseGif);
+        } else if (maxLevels === 5 && currentLevel >= 4) {
+            const gif = new Image();
+            const promiseGif = new Promise((resolve, reject) => {
+                gif.onload = resolve;
+                gif.onerror = reject;
+                gif.src = `./assets/mastery/${category.key}/background.gif`;
+            });
+            preloadPromises.push(promiseGif);
+        }
+        
+        // icon.svg нужен если достигнут максимальный уровень
+        if (currentLevel >= maxLevels && maxLevels > 0) {
+            const icon = new Image();
+            const promiseIcon = new Promise((resolve, reject) => {
+                icon.onload = resolve;
+                icon.onerror = reject;
+                icon.src = `./assets/mastery/${category.key}/icon.svg`;
+            });
+            preloadPromises.push(promiseIcon);
+        }
+    }
+    
+    // Запускаем все предзагрузки параллельно
+    try {
+        await Promise.all(preloadPromises);
+        console.log('✅ Предзагрузка изображений завершена');
+    } catch (error) {
+        // Игнорируем ошибки - если изображение не найдено, это не критично
+        console.warn('⚠️ Некоторые изображения не удалось предзагрузить:', error);
+    }
+}
+
 // Создание HTML кнопки
 function createBadgeButton(category, currentLevel) {
     const maxLevels = category.maxLevels;
@@ -332,6 +418,10 @@ export async function renderMasteryButtons() {
         levels = { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
     }
     
+    // Предзагружаем изображения для достигнутых уровней
+    console.log('🖼️ Предзагрузка изображений...');
+    await preloadMasteryAssets(config, levels);
+    
     // Порядок категорий для отображения
     const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun'];
     
@@ -385,6 +475,10 @@ export async function openMasteryDetail(categoryKey) {
     }
     
     const currentLevel = levels[categoryKey] || 0;
+    
+    // Предзагружаем изображения для этой категории (на случай если они еще не были загружены)
+    const categoryLevels = { [categoryKey]: currentLevel };
+    await preloadMasteryAssets(config, categoryLevels);
     
     // Рендерим детальный экран (это обновит топбар)
     renderMasteryDetail(category, currentLevel);
