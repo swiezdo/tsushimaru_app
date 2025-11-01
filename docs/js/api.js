@@ -465,5 +465,50 @@ export async function fetchMastery() {
     }
 }
 
+// Отправка заявки на повышение уровня мастерства
+export async function submitMasteryApplication(categoryKey, currentLevel, nextLevel, comment = '', photos = []) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('category_key', categoryKey);
+        data.append('current_level', currentLevel.toString());
+        data.append('next_level', nextLevel.toString());
+        
+        if (comment) {
+            data.append('comment', comment);
+        }
+        
+        // Добавляем изображения
+        photos.forEach(photo => {
+            data.append('photos', photo);
+        });
+
+        const url = `${API_BASE}/api/mastery.submitApplication`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка отправки заявки на повышение уровня:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };
