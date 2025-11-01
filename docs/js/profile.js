@@ -1,7 +1,7 @@
 // profile.js
 import { tg, $, hapticTapSmart, hapticERR, hapticOK, hideKeyboard } from './telegram.js';
 import { focusAndScrollIntoView } from './ui.js';
-import { fetchProfile, saveProfile as apiSaveProfile } from './api.js';
+import { fetchProfile, saveProfile as apiSaveProfile, uploadAvatar, API_BASE } from './api.js';
 import { renderChips, activeValues, setActive, shake, prettyLines, validatePSNId, safeLocalStorageGet, safeLocalStorageSet } from './utils.js';
 
 // ---------- Константы ----------
@@ -26,6 +26,14 @@ const profileForm     = $('profileForm');
 const profileSaveBtn  = $('profileSaveBtn');
 const nameErrorEl     = $('nameError');
 const psnErrorEl      = $('psnError');
+
+// ---------- Аватарка ----------
+const avatarUploadBtn = $('avatarUploadBtn');
+const avatarFileInput = $('avatarFileInput');
+const avatarPreview = $('avatarPreview');
+const avatarPlaceholder = $('avatarPlaceholder');
+let selectedAvatarFile = null; // Временное хранилище выбранного файла
+let currentUserId = null; // ID текущего пользователя
 
 // Кеш для элементов чипов
 let chipsCache = null;
@@ -72,6 +80,18 @@ function loadProfileToForm(profile) {
   if (v_real_name) v_real_name.textContent = profile.real_name || '—';
   if (v_psn_id) v_psn_id.textContent = profile.psn_id || '—';
   refreshProfileView();
+  
+  // Обновляем аватарку
+  if (profile.avatar_url) {
+    avatarPreview.src = API_BASE + profile.avatar_url;
+    avatarPreview.classList.remove('hidden');
+    avatarPlaceholder.classList.add('hidden');
+    avatarUploadBtn.classList.add('has-avatar');
+  } else {
+    avatarPreview.classList.add('hidden');
+    avatarPlaceholder.classList.remove('hidden');
+    avatarUploadBtn.classList.remove('has-avatar');
+  }
 }
 
 // Загрузка профиля с сервера
@@ -79,6 +99,8 @@ async function fetchProfileFromServer() {
   try {
     const serverProfile = await fetchProfile();
     if (serverProfile) {
+      // Сохраняем user_id из профиля для загрузки аватарки
+      currentUserId = serverProfile.user_id;
       // Обновляем форму и отображение
       loadProfileToForm(serverProfile);
       console.log('Профиль загружен с сервера');
@@ -120,6 +142,53 @@ export function initProfile() {
   // Профиль не загружается при инициализации
   // Загрузка происходит только при открытии экрана профиля
 
+  // Обработчики аватарки
+  if (avatarUploadBtn && avatarFileInput) {
+    avatarUploadBtn.addEventListener('click', () => {
+      avatarFileInput.click();
+    });
+    
+    avatarFileInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      
+      // Валидация типа файла
+      if (!file.type.startsWith('image/')) {
+        tg?.showPopup?.({ 
+          title: 'Ошибка', 
+          message: 'Разрешены только изображения.', 
+          buttons: [{ type: 'ok' }] 
+        });
+        hapticERR();
+        e.target.value = ''; // Очищаем input
+        return;
+      }
+      
+      // Валидация размера (10 МБ)
+      if (file.size > 10 * 1024 * 1024) {
+        tg?.showPopup?.({ 
+          title: 'Ошибка', 
+          message: 'Размер файла не должен превышать 10 МБ.', 
+          buttons: [{ type: 'ok' }] 
+        });
+        hapticERR();
+        e.target.value = '';
+        return;
+      }
+      
+      // Создаем превью
+      const objectUrl = URL.createObjectURL(file);
+      avatarPreview.src = objectUrl;
+      avatarPreview.classList.remove('hidden');
+      avatarPlaceholder.classList.add('hidden');
+      avatarUploadBtn.classList.add('has-avatar');
+      
+      // Сохраняем файл для загрузки
+      selectedAvatarFile = file;
+      
+      hapticTapSmart();
+    });
+  }
 
   if (!profileForm) return;
   const nameInput = profileForm.real_name;
@@ -210,10 +279,24 @@ export function initProfile() {
       // Отправляем данные на сервер
       await apiSaveProfile(profileData);
       
-      // Обновляем отображение
-      if (v_real_name) v_real_name.textContent = profileData.real_name || '—';
-      if (v_psn_id) v_psn_id.textContent = profileData.psn_id || '—';
-      refreshProfileView();
+      // Загружаем аватарку если выбрана
+      if (selectedAvatarFile && currentUserId) {
+        try {
+          await uploadAvatar(currentUserId, selectedAvatarFile);
+          // Перезагружаем профиль чтобы получить обновленную аватарку
+          await fetchProfileFromServer();
+          selectedAvatarFile = null; // Очищаем после успешной загрузки
+          console.log('Аватарка загружена');
+        } catch (avatarError) {
+          console.error('Ошибка загрузки аватарки:', avatarError);
+          // Не прерываем успех сохранения профиля, просто логируем ошибку
+        }
+      } else {
+        // Обновляем отображение только если аватарка не загружалась
+        if (v_real_name) v_real_name.textContent = profileData.real_name || '—';
+        if (v_psn_id) v_psn_id.textContent = profileData.psn_id || '—';
+        refreshProfileView();
+      }
 
       hapticOK();
       tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены на сервере.', buttons: [{ type: 'ok' }] });
@@ -251,6 +334,7 @@ export function initProfile() {
 
 // Функция для загрузки профиля при открытии экрана
 export async function loadProfileOnScreenOpen() {
+  selectedAvatarFile = null; // Сбрасываем выбранный файл при загрузке профиля
   await fetchProfileFromServer();
 }
 
