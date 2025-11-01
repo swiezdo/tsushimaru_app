@@ -1,7 +1,7 @@
 // participantDetail.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
-import { fetchUserProfile, fetchUserBuilds } from './api.js';
+import { fetchUserProfile, fetchUserBuilds, API_BASE } from './api.js';
 import { prettyLines, formatDate } from './utils.js';
 
 // Элементы интерфейса
@@ -11,6 +11,7 @@ const participantPlatformEl = $('participant_platform');
 const participantModesEl = $('participant_modes');
 const participantGoalsEl = $('participant_goals');
 const participantDifficultyEl = $('participant_difficulty');
+const participantAvatarEl = $('participantAvatar');
 
 // Трофеи удалены
 
@@ -32,6 +33,14 @@ function renderParticipantProfile(profile) {
     if (participantModesEl) participantModesEl.textContent = prettyLines(profile.modes || []);
     if (participantGoalsEl) participantGoalsEl.textContent = prettyLines(profile.goals || []);
     if (participantDifficultyEl) participantDifficultyEl.textContent = prettyLines(profile.difficulties || []);
+    
+    // Обновляем аватарку
+    if (participantAvatarEl) {
+        const avatarSrc = profile.avatar_url 
+            ? `${API_BASE}${profile.avatar_url}` 
+            : './assets/default-avatar.svg';
+        participantAvatarEl.src = avatarSrc;
+    }
 }
 
 // Трофеи удалены
