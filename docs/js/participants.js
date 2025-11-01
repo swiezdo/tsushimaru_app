@@ -1,7 +1,7 @@
 // participants.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen } from './ui.js';
-import { fetchParticipants } from './api.js';
+import { fetchParticipants, API_BASE } from './api.js';
 import { openParticipantDetail } from './participantDetail.js';
 
 // Элементы интерфейса
@@ -37,7 +37,22 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
         btn.className = 'list-btn';
         btn.type = 'button';
         btn.dataset.userId = user.user_id;
-        btn.innerHTML = `<span>${user.psn_id || '—'}</span><span class="right">›</span>`;
+        
+        // Определяем источник аватарки
+        const avatarSrc = user.avatar_url 
+            ? `${API_BASE}${user.avatar_url}` 
+            : './assets/default-avatar.svg';
+        
+        // Создаем структуру с аватаркой
+        btn.innerHTML = `
+            <div class="list-btn-avatar">
+                <img src="${avatarSrc}" alt="" />
+            </div>
+            <div class="list-btn-content">
+                <span class="list-btn-name">${user.psn_id || '—'}</span>
+                <span class="right">›</span>
+            </div>
+        `;
         
         // Добавляем обработчик клика
         btn.addEventListener('click', () => {

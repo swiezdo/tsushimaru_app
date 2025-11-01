@@ -305,13 +305,62 @@ body {
 /* ========== LIST ========== */
 .grid-list { display: grid; gap: var(--space-2); }
 .list-btn {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: var(--space-3) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md);
-  background: transparent; color: var(--tg-tx); cursor: pointer; min-height: var(--size-icon);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--tg-tx);
+  cursor: pointer;
+  min-height: 64px;
   font-size: var(--fs-16);
 }
-.list-btn:active { transform: translateY(1px); }
-.list-btn .right { opacity: .7; }
+
+.list-btn:active { 
+  transform: translateY(1px); 
+}
+
+.list-btn-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--elem-bg);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.list-btn-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.list-btn-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.list-btn-name {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-btn .right { 
+  opacity: 0.7;
+  margin-left: var(--space-2);
+}
 
 /* ========== FILE LINE ========== */
 .fileline-btn {
