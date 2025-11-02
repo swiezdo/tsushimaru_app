@@ -465,6 +465,17 @@ export async function fetchMastery() {
     }
 }
 
+// Получение уровней мастерства пользователя по user_id
+export async function fetchUserMastery(userId) {
+    try {
+        const data = await apiRequest(`/api/mastery.get?target_user_id=${userId}`);
+        return data;
+    } catch (error) {
+        console.error('Ошибка получения уровней мастерства пользователя:', error);
+        return { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
+    }
+}
+
 // Отправка заявки на повышение уровня мастерства
 export async function submitMasteryApplication(categoryKey, currentLevel, nextLevel, comment = '', photos = []) {
     try {

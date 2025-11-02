@@ -32,7 +32,7 @@ const MASTERY_LEVEL_RULES = {
 };
 
 // Загрузка конфига из JSON с retry-логикой
-async function loadMasteryConfig() {
+export async function loadMasteryConfig() {
     if (masteryConfig) return masteryConfig;
     
     const maxAttempts = 3;
@@ -80,7 +80,7 @@ async function fetchMasteryWithRetry() {
 }
 
 // Получение категории по ключу
-function getCategoryByKey(config, key) {
+export function getCategoryByKey(config, key) {
     if (!config || !config.categories) return null;
     return config.categories.find(cat => cat.key === key) || null;
 }
@@ -92,13 +92,13 @@ function getLevelByNumber(category, levelNum) {
 }
 
 // Расчёт прогресса в процентах
-function calculateProgress(currentLevel, maxLevels) {
+export function calculateProgress(currentLevel, maxLevels) {
     if (maxLevels === 0) return 0;
     return Math.round((currentLevel / maxLevels) * 100);
 }
 
 // Создание SVG кругового прогресса
-function createProgressCircle(category, currentLevel, progress) {
+export function createProgressCircle(category, currentLevel, progress) {
     const gradientId = `grad-${category.key}-${Math.random().toString(36).substr(2, 9)}`;
     
     // SVG контейнер
@@ -163,7 +163,7 @@ function createProgressCircle(category, currentLevel, progress) {
 }
 
 // Создание иконки максимального уровня
-function createMaxLevelIcon(categoryKey) {
+export function createMaxLevelIcon(categoryKey) {
     const icon = document.createElement('div');
     icon.className = 'mastery-icon';
     icon.style.backgroundImage = `url('./assets/mastery/${categoryKey}/icon.svg')`;
@@ -171,7 +171,7 @@ function createMaxLevelIcon(categoryKey) {
 }
 
 // Применение фоновых стилей к элементу
-function applyBackgroundStyles(element, backgroundImage) {
+export function applyBackgroundStyles(element, backgroundImage) {
     if (backgroundImage) {
         element.style.backgroundImage = backgroundImage;
         element.style.backgroundRepeat = 'no-repeat';
@@ -181,7 +181,7 @@ function applyBackgroundStyles(element, backgroundImage) {
 }
 
 // Определение стилей кнопки в зависимости от уровня
-function getButtonStyles(category, currentLevel) {
+export function getButtonStyles(category, currentLevel) {
     const maxLevels = category.maxLevels;
     const styles = {
         classes: ['badge-btn', `${category.key}-badge`],

@@ -1,8 +1,17 @@
 // participantDetail.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
-import { fetchUserProfile, fetchUserBuilds, API_BASE } from './api.js';
+import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE } from './api.js';
 import { prettyLines, formatDate } from './utils.js';
+import { 
+    loadMasteryConfig, 
+    getCategoryByKey, 
+    getButtonStyles, 
+    applyBackgroundStyles, 
+    createProgressCircle, 
+    createMaxLevelIcon, 
+    calculateProgress 
+} from './mastery.js';
 
 // Элементы интерфейса
 const participantRealNameEl = $('participant_real_name');
@@ -63,6 +72,104 @@ function renderParticipantBuilds(builds) {
         const buildElement = createBuildElement(build, true); // true = isPublic
         participantBuildsListEl.appendChild(buildElement);
     });
+}
+
+// Рендеринг мастерства участника
+async function renderParticipantMastery(userId) {
+    const container = document.getElementById('participantMasteryContainer');
+    const card = document.getElementById('participantMasteryCard');
+    
+    if (!container || !card) return;
+    
+    // Загружаем конфиг и уровни пользователя
+    const [config, levels] = await Promise.all([
+        loadMasteryConfig(),
+        fetchUserMastery(userId)
+    ]);
+    
+    if (!config) {
+        card.style.display = 'none';
+        return;
+    }
+    
+    // Проверяем, есть ли хотя бы один уровень > 0
+    const hasAnyProgress = Object.values(levels).some(level => level > 0);
+    if (!hasAnyProgress) {
+        card.style.display = 'none';
+        return;
+    }
+    
+    // Показываем карточку
+    card.style.display = 'block';
+    container.innerHTML = '';
+    
+    // Порядок категорий
+    const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun'];
+    
+    for (const key of categoryOrder) {
+        const currentLevel = levels[key] || 0;
+        
+        // Скрываем категории с нулевым уровнем
+        if (currentLevel === 0) continue;
+        
+        const category = getCategoryByKey(config, key);
+        if (!category) continue;
+        
+        // Создаём некликабельный элемент (div вместо button)
+        const badge = createParticipantBadge(category, currentLevel);
+        container.appendChild(badge);
+    }
+}
+
+// Создание некликабельного бейджа мастерства
+function createParticipantBadge(category, currentLevel) {
+    const maxLevels = category.maxLevels;
+    const progress = calculateProgress(currentLevel, maxLevels);
+    const styles = getButtonStyles(category, currentLevel);
+    const levelData = category.levels.find(l => l.level === currentLevel);
+    const isMaxLevel = currentLevel === maxLevels && styles.showIcon;
+    
+    // Создаём div вместо button
+    const badge = document.createElement('div');
+    badge.className = styles.classes.join(' ');
+    
+    // Применяем фоновое изображение
+    applyBackgroundStyles(badge, styles.backgroundImage);
+    
+    // Левая часть - тексты
+    const textContainer = document.createElement('div');
+    textContainer.className = 'mastery-text-container';
+    
+    const categoryName = document.createElement('div');
+    categoryName.className = 'mastery-category-name';
+    categoryName.textContent = category.name;
+    textContainer.appendChild(categoryName);
+    
+    if (currentLevel > 0 && levelData) {
+        const levelName = document.createElement('div');
+        levelName.className = 'mastery-level-name';
+        levelName.textContent = levelData.name;
+        textContainer.appendChild(levelName);
+    }
+    
+    badge.appendChild(textContainer);
+    
+    // Правая часть - круговой прогресс или иконка
+    const progressContainer = document.createElement('div');
+    progressContainer.className = 'mastery-progress-container';
+    
+    if (isMaxLevel) {
+        const icon = createMaxLevelIcon(category.key);
+        progressContainer.appendChild(icon);
+    } else {
+        const { container: svg, levelNumber } = createProgressCircle(category, currentLevel, progress);
+        progressContainer.appendChild(svg);
+        progressContainer.appendChild(levelNumber);
+    }
+    
+    badge.appendChild(progressContainer);
+    
+    return badge;
 }
 
 // Функция создания элемента билда (копия из builds.js)
@@ -159,6 +266,7 @@ export async function openParticipantDetail(userId) {
         renderParticipantProfile(profile);
         // Трофеи удалены
         renderParticipantBuilds(builds);
+        await renderParticipantMastery(userId);
         
         // Показываем экран
         showScreen('participantDetail');
