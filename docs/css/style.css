@@ -229,6 +229,11 @@ body {
 #masteryApplicationCard .actions-bar .btn {
   width: 100%;
 }
+/* Убираем боковые отступы у actions-bar в карточке заявки мастерства */
+#masteryApplicationCard .actions-bar {
+  margin-left: 0;
+  margin-right: 0;
+}
 
 /* ========== UPLOAD & SHOTS ========== */
 .shots-two {

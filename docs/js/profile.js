@@ -287,12 +287,27 @@ export function initProfile() {
       const saveResult = await apiSaveProfile(profileData);
       
       // Получаем user_id из ответа сервера (важно для первого сохранения профиля)
-      if (saveResult && saveResult.user_id && !currentUserId) {
-        currentUserId = saveResult.user_id;
-        console.log('User ID получен из ответа сервера:', currentUserId);
+      // Проверяем несколько возможных форматов ответа
+      if (!currentUserId && saveResult) {
+        currentUserId = saveResult.user_id || saveResult.userId || saveResult.id || null;
+        if (currentUserId) {
+          console.log('User ID получен из ответа сервера:', currentUserId);
+        }
       }
       
-      // Загружаем аватарку если выбрана
+      // Если user_id не получен из ответа, перезагружаем профиль для получения user_id
+      if (!currentUserId && selectedAvatarFile) {
+        try {
+          await fetchProfileFromServer();
+          if (currentUserId) {
+            console.log('User ID получен после перезагрузки профиля:', currentUserId);
+          }
+        } catch (fetchError) {
+          console.error('Ошибка перезагрузки профиля для получения user_id:', fetchError);
+        }
+      }
+      
+      // Загружаем аватарку если выбрана и user_id доступен
       if (selectedAvatarFile && currentUserId) {
         try {
           await uploadAvatar(currentUserId, selectedAvatarFile);

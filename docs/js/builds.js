@@ -241,7 +241,7 @@ function createBuildElement(build, isPublic = false) {
     // Для опубликованных билдов в "Мои билды" показываем дату создания слева и статистику справа
     const dateStr = build.created_at ? formatDate(new Date(build.created_at * 1000)) : '—';
     const dateText = document.createElement('span');
-    dateText.textContent = dateStr === '—' ? '—' : 'Создан: ' + dateStr;
+    dateText.textContent = dateStr;
     
     // Блок статистики справа
     const statsDiv = document.createElement('div');
