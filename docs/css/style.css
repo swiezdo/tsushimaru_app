@@ -916,6 +916,25 @@ html.tg .only-browser { display: none; }
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Полупрозрачный overlay для фоновых изображений в header card */
+.mastery-header-card[style*="background-image"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--overlay-medium);
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Контент должен быть поверх overlay */
+.mastery-header-card > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* ========== MASTERY SCREEN ========== */
