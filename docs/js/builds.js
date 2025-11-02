@@ -175,7 +175,46 @@ function createBuildElement(build, isPublic = false) {
   metaDiv.className = 'build-author';
   
   if (isPublic) {
-    metaDiv.textContent = 'Автор: ' + (build.author || '—');
+    // Для публичных билдов создаем flex контейнер с автором слева и статистикой справа
+    const authorText = document.createElement('span');
+    authorText.textContent = 'Автор: ' + (build.author || '—');
+    
+    // Блок статистики справа
+    const statsDiv = document.createElement('div');
+    statsDiv.className = 'build-stats';
+    
+    // Функция для создания элемента статистики
+    const createStatItem = (iconPath, count, alt) => {
+      const statItem = document.createElement('div');
+      statItem.className = 'build-stat-item';
+      
+      const icon = document.createElement('img');
+      icon.src = iconPath;
+      icon.alt = alt;
+      icon.className = 'build-stat-icon';
+      
+      const countSpan = document.createElement('span');
+      countSpan.className = 'build-stat-count';
+      countSpan.textContent = count || 0;
+      
+      statItem.appendChild(icon);
+      statItem.appendChild(countSpan);
+      
+      // Останавливаем всплытие события при клике на статистику
+      statItem.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+      
+      return statItem;
+    };
+    
+    // Добавляем три элемента статистики
+    statsDiv.appendChild(createStatItem('./assets/icons/comments.svg', build.comments_count || 0, 'Комментарии'));
+    statsDiv.appendChild(createStatItem('./assets/icons/like.svg', build.likes_count || 0, 'Лайки'));
+    statsDiv.appendChild(createStatItem('./assets/icons/dislike.svg', build.dislikes_count || 0, 'Дизлайки'));
+    
+    metaDiv.appendChild(authorText);
+    metaDiv.appendChild(statsDiv);
   } else {
     const dateStr = build.created_at ? formatDate(new Date(build.created_at * 1000)) : '—';
     metaDiv.textContent = dateStr === '—' ? '—' : 'Создан: ' + dateStr;
