@@ -106,6 +106,18 @@ function installBackButton() {
       sessionStorage.removeItem('previousScreen');
     }
     
+    // Проверяем и обновляем статистику билдов при возврате из buildPublicDetail на экран builds
+    if (currentScreen === 'buildPublicDetail' && nextScreen === 'builds') {
+      import('./builds.js').then(module => {
+        module.checkAndRefreshBuilds();
+        showScreen(nextScreen);
+      }).catch(error => {
+        console.error('Ошибка импорта builds.js:', error);
+        showScreen(nextScreen);
+      });
+      return;
+    }
+    
     showScreen(nextScreen);
   });
 }

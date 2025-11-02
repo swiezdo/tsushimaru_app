@@ -93,6 +93,7 @@ const filterModalOkBtn = $('filterModalOkBtn');
 
 let currentBuildId = null;
 let currentPublicBuildId = null; // ID открытого публичного билда для комментариев
+let buildStatsChanged = false; // Флаг изменений статистики (лайки/дизлайки/комментарии)
 let shot1Data = null;
 let shot2Data = null;
 
@@ -1102,6 +1103,9 @@ function openPublicBuildDetail(pubId) {
     // Сохраняем ID текущего публичного билда для комментариев
     currentPublicBuildId = pubId;
     
+    // Сбрасываем флаг изменений статистики при открытии нового билда
+    buildStatsChanged = false;
+    
     // Загружаем реакции для этого билда
     loadBuildReactions(pubId);
     
@@ -1823,6 +1827,9 @@ function initCommentForm() {
     try {
       await createComment(buildId, text);
       
+      // Устанавливаем флаг изменений статистики
+      buildStatsChanged = true;
+      
       // Очищаем поле ввода
       commentText.value = '';
       // Сбрасываем высоту textarea
@@ -1917,6 +1924,8 @@ function handleReactionClick(reactionType) {
   
   toggleReaction(buildId, reactionType).then(reactions => {
     updateReactionsUI(reactions);
+    // Устанавливаем флаг изменений статистики
+    buildStatsChanged = true;
     hapticOK();
   }).catch(err => {
     console.error('Ошибка переключения реакции:', err);
@@ -1941,6 +1950,17 @@ function handleReactionClick(reactionType) {
     if (likeBtn) likeBtn.disabled = false;
     if (dislikeBtn) dislikeBtn.disabled = false;
   });
+}
+
+// Функция проверки и обновления статистики билдов
+export function checkAndRefreshBuilds() {
+  if (buildStatsChanged) {
+    // Обновляем оба списка: "Все билды" и "Мои билды"
+    renderAllBuilds();
+    renderMyBuilds();
+    // Сбрасываем флаг после обновления
+    buildStatsChanged = false;
+  }
 }
 
 // Экспорт функций для использования в других модулях
