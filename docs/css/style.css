@@ -1105,16 +1105,6 @@ html.tg .only-browser { display: none; }
   cursor: not-allowed;
 }
 
-/* Иконка лайка - всегда зеленый */
-#likeBtn .reaction-icon {
-  color: #4caf50; /* Зеленый */
-}
-
-/* Иконка дизлайка - всегда красный */
-#dislikeBtn .reaction-icon {
-  color: #ff4444; /* Красный */
-}
-
 /* При активном состоянии - красим только контур (border), не фон */
 .reaction-chip.liked {
   background: var(--elem-bg); /* Оставляем стандартный фон */
