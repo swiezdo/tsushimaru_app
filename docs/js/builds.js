@@ -1508,10 +1508,10 @@ function renderPublicComments(comments) {
     avatarImg.src = avatarSrc;
     avatarImg.alt = comment.author || 'Автор';
     
-    // Текст с ником (кликабельный)
+    // Текст с ником (чип, как у автора билда)
     const authorName = document.createElement('button');
     authorName.type = 'button';
-    authorName.className = 'comment-author-name';
+    authorName.className = 'author-chip';
     authorName.textContent = comment.author || 'Неизвестный пользователь';
     
     // Обработчик клика для перехода к профилю
