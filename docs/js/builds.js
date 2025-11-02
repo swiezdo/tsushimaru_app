@@ -177,7 +177,7 @@ function createBuildElement(build, isPublic = false) {
   if (isPublic) {
     // Для публичных билдов создаем flex контейнер с автором слева и статистикой справа
     const authorText = document.createElement('span');
-    authorText.textContent = 'Автор: ' + (build.author || '—');
+    authorText.textContent = build.author || '—';
     
     // Блок статистики справа
     const statsDiv = document.createElement('div');
