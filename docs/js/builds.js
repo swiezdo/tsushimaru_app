@@ -1744,11 +1744,6 @@ function initCommentForm() {
       await loadPublicBuildComments(buildId);
       
       hapticOK();
-      tg?.showPopup?.({
-        title: 'Комментарий добавлен',
-        message: 'Ваш комментарий успешно опубликован',
-        buttons: [{ type: 'ok' }]
-      });
     } catch (error) {
       console.error('Ошибка отправки комментария:', error);
       hapticERR();

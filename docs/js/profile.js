@@ -7,7 +7,7 @@ import { renderChips, activeValues, setActive, shake, prettyLines, validatePSNId
 // ---------- Константы ----------
 const PLATFORM   = ['🎮 PlayStation','💻 ПК'];
 const MODES      = ['📖 Сюжет','🏹 Выживание','🗻 Испытания Иё','⚔️ Соперники','📜 Главы'];
-const GOALS      = ['🔎 Узнать что-то новое','👥 Поиск тиммейтов'];
+const GOALS      = ['🔎 Узнать что-то новое','👥 Поиск тиммейтов','🏆 Получение наград'];
 const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','🏅 Платина','👻 Кошмар','🔥 HellMode'];
 
 // ---------- LocalStorage ----------
@@ -284,7 +284,13 @@ export function initProfile() {
 
     try {
       // Отправляем данные на сервер
-      await apiSaveProfile(profileData);
+      const saveResult = await apiSaveProfile(profileData);
+      
+      // Получаем user_id из ответа сервера (важно для первого сохранения профиля)
+      if (saveResult && saveResult.user_id && !currentUserId) {
+        currentUserId = saveResult.user_id;
+        console.log('User ID получен из ответа сервера:', currentUserId);
+      }
       
       // Загружаем аватарку если выбрана
       if (selectedAvatarFile && currentUserId) {

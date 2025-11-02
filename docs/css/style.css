@@ -224,6 +224,11 @@ body {
   width: 100%;
   grid-column: 1 / -1;
 }
+/* Кнопка отправки заявки мастерства должна быть полной ширины */
+#masteryApplicationSubmitBtn,
+#masteryApplicationCard .actions-bar .btn {
+  width: 100%;
+}
 
 /* ========== UPLOAD & SHOTS ========== */
 .shots-two {
@@ -338,6 +343,16 @@ a svg,
 .shot-thumb img,
 .upload-box img {
   pointer-events: auto;
+}
+
+/* Разрешаем полное взаимодействие со скриншотами в детальном просмотре билда */
+.shots-grid .shot-thumb img {
+  pointer-events: auto;
+  -webkit-user-drag: auto;
+  user-select: auto;
+  -webkit-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
 }
 
 /* Логотип на главной странице */
@@ -461,6 +476,12 @@ a svg,
   flex-shrink: 0;
   object-fit: contain;
   filter: none;
+  /* Защита от контекстного меню и перетаскивания */
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .list-btn .right { 
