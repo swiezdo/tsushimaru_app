@@ -111,6 +111,7 @@ export async function saveProfile(formData) {
         }
 
         const url = `${API_BASE}/api/profile.save`;
+        console.log('📤 Отправка запроса на:', url);
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -119,14 +120,35 @@ export async function saveProfile(formData) {
             body: data,
         });
 
+        console.log('📥 Получен ответ:', response.status, response.statusText);
+
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            let errorText = '';
+            let errorData = {};
+            try {
+                errorText = await response.text();
+                console.error('❌ ОШИБКА СЕРВЕРА 500 - Полный текст ответа:', errorText);
+                console.error('❌ ОШИБКА СЕРВЕРА 500 - Длина ответа:', errorText.length);
+                try {
+                    errorData = JSON.parse(errorText);
+                    console.error('❌ ОШИБКА СЕРВЕРА 500 - Распарсенный JSON:', JSON.stringify(errorData, null, 2));
+                } catch (e) {
+                    console.error('❌ ОШИБКА СЕРВЕРА 500 - Ответ не является JSON');
+                    console.error('❌ ОШИБКА СЕРВЕРА 500 - Первые 500 символов:', errorText.substring(0, 500));
+                }
+            } catch (readErr) {
+                console.error('❌ ОШИБКА СЕРВЕРА 500 - Не удалось прочитать ответ:', readErr);
+            }
+            const error = new Error(errorData.detail || errorData.message || errorText || `HTTP ${response.status}`);
             error.status = response.status;
+            error.errorText = errorText;
+            error.errorData = errorData;
+            console.error('❌ ОШИБКА СЕРВЕРА 500 - Создан объект ошибки:', error);
             throw error;
         }
 
         const result = await response.json();
+        console.log('✅ Профиль сохранен успешно, ответ:', result);
         return result;
     } catch (error) {
         console.error('Ошибка сохранения профиля:', error);

@@ -652,7 +652,7 @@
       function loadMainBundle() {
         const s = document.createElement('script');
         s.type = 'module';
-        s.src = './js/main.js?v=30';
+        s.src = './js/main.js?v=' + Date.now();
         document.body.appendChild(s);
       }
 
