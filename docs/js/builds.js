@@ -2,7 +2,7 @@
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
 import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate } from './utils.js';
-import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, updateBuild, createComment, getBuildComments, API_BASE } from './api.js';
+import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, updateBuild, createComment, getBuildComments, toggleReaction, getReactions, API_BASE } from './api.js';
 
 const CLASS_VALUES = ['Самурай','Охотник','Убийца','Ронин'];
 const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма','Негативные эффекты'];
@@ -72,6 +72,12 @@ const pd_author         = $('pd_author');
 const pd_date           = $('pd_date');
 const publicDetailShots = $('publicDetailShots');
 const pd_build_id       = $('pd_build_id');
+
+// Реакции (лайки/дизлайки)
+const likeBtn           = $('likeBtn');
+const dislikeBtn        = $('dislikeBtn');
+const likesCount         = $('likesCount');
+const dislikesCount     = $('dislikesCount');
 
 // Списки «Все билды»
 const allBuildsList   = $('allBuildsList');
@@ -915,6 +921,9 @@ function openPublicBuildDetail(pubId) {
     // Сохраняем ID текущего публичного билда для комментариев
     currentPublicBuildId = pubId;
     
+    // Загружаем реакции для этого билда
+    loadBuildReactions(pubId);
+    
     // Загружаем комментарии для этого билда
     loadPublicBuildComments(pubId);
   }).catch(err => {
@@ -1451,6 +1460,21 @@ export function initBuilds() {
   
   // Инициализация формы комментариев
   initCommentForm();
+  
+  // Инициализация обработчиков реакций
+  if (likeBtn) {
+    likeBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      handleReactionClick('like');
+    });
+  }
+  
+  if (dislikeBtn) {
+    dislikeBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      handleReactionClick('dislike');
+    });
+  }
 }
 
 // ========== ФУНКЦИИ ДЛЯ РАБОТЫ С КОММЕНТАРИЯМИ ==========
@@ -1646,6 +1670,85 @@ function initCommentForm() {
   };
   
   commentForm.addEventListener('submit', commentForm._submitHandler);
+}
+
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С РЕАКЦИЯМИ (ЛАЙКИ/ДИЗЛАЙКИ) ==========
+
+function loadBuildReactions(buildId) {
+  if (!likeBtn || !dislikeBtn || !likesCount || !dislikesCount) return;
+  
+  getReactions(buildId).then(reactions => {
+    updateReactionsUI(reactions);
+  }).catch(err => {
+    console.error('Ошибка загрузки реакций:', err);
+    // Устанавливаем нулевые значения при ошибке
+    updateReactionsUI({
+      likes_count: 0,
+      dislikes_count: 0,
+      current_user_reaction: null
+    });
+  });
+}
+
+function updateReactionsUI(reactions) {
+  if (!likeBtn || !dislikeBtn || !likesCount || !dislikesCount) return;
+  
+  // Обновляем счетчики
+  likesCount.textContent = reactions.likes_count || 0;
+  dislikesCount.textContent = reactions.dislikes_count || 0;
+  
+  // Обновляем состояние кнопок (активный/неактивный)
+  // Удаляем все классы состояний
+  likeBtn.classList.remove('liked');
+  dislikeBtn.classList.remove('disliked');
+  
+  // Добавляем класс активного состояния, если пользователь поставил реакцию
+  if (reactions.current_user_reaction === 'like') {
+    likeBtn.classList.add('liked');
+  } else if (reactions.current_user_reaction === 'dislike') {
+    dislikeBtn.classList.add('disliked');
+  }
+}
+
+function handleReactionClick(reactionType) {
+  if (!currentPublicBuildId) {
+    tg?.showAlert?.('Не удалось определить билд для реакции');
+    hapticERR();
+    return;
+  }
+  
+  const buildId = currentPublicBuildId;
+  
+  // Отключаем кнопки на время запроса
+  if (likeBtn) likeBtn.disabled = true;
+  if (dislikeBtn) dislikeBtn.disabled = true;
+  
+  toggleReaction(buildId, reactionType).then(reactions => {
+    updateReactionsUI(reactions);
+    hapticOK();
+  }).catch(err => {
+    console.error('Ошибка переключения реакции:', err);
+    hapticERR();
+    
+    let errorMessage = 'Не удалось изменить реакцию.';
+    if (err.status === 401) {
+      errorMessage = 'Ошибка авторизации. Попробуйте перезапустить приложение.';
+    } else if (err.status >= 500) {
+      errorMessage = 'Ошибка сервера. Попробуйте позже.';
+    } else if (!navigator.onLine) {
+      errorMessage = 'Нет подключения к интернету.';
+    }
+    
+    tg?.showPopup?.({
+      title: 'Ошибка',
+      message: errorMessage,
+      buttons: [{ type: 'ok' }]
+    });
+  }).finally(() => {
+    // Восстанавливаем кнопки
+    if (likeBtn) likeBtn.disabled = false;
+    if (dislikeBtn) dislikeBtn.disabled = false;
+  });
 }
 
 // Экспорт функций для использования в других модулях

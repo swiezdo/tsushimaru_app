@@ -604,5 +604,62 @@ export async function getBuildComments(buildId) {
     }
 }
 
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С РЕАКЦИЯМИ (ЛАЙКИ/ДИЗЛАЙКИ) ==========
+
+// Переключение реакции (лайк/дизлайк)
+export async function toggleReaction(buildId, reactionType) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('build_id', buildId);
+        data.append('reaction_type', reactionType);
+
+        const url = `${API_BASE}/api/builds.toggleReaction`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        const result = await response.json();
+        return {
+            likes_count: result.likes_count || 0,
+            dislikes_count: result.dislikes_count || 0,
+            current_user_reaction: result.current_user_reaction || null
+        };
+    } catch (error) {
+        console.error('Ошибка переключения реакции:', error);
+        throw error;
+    }
+}
+
+// Получение статистики реакций для билда
+export async function getReactions(buildId) {
+    try {
+        const data = await apiRequest(`/api/builds.getReactions/${buildId}`);
+        return {
+            likes_count: data.likes_count || 0,
+            dislikes_count: data.dislikes_count || 0,
+            current_user_reaction: data.current_user_reaction || null
+        };
+    } catch (error) {
+        console.error('Ошибка получения реакций:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };

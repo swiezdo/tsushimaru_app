@@ -1068,6 +1068,67 @@ html.tg .only-browser { display: none; }
   transform: translateY(1px);
 }
 
+/* ========== РЕАКЦИИ (ЛАЙКИ/ДИЗЛАЙКИ) ========== */
+.reactions-field {
+  margin-top: var(--space-3);
+}
+
+.reactions-container {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.reaction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stroke-color);
+  background: var(--elem-bg);
+  color: var(--fg);
+  font-size: var(--fs-14);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.reaction-chip:active {
+  transform: scale(0.96);
+}
+
+.reaction-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reaction-chip.liked {
+  background: rgba(76, 175, 80, 0.2); /* Полупрозрачный зеленый */
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.reaction-chip.disliked {
+  background: rgba(255, 68, 68, 0.2); /* Полупрозрачный красный */
+  border-color: rgba(255, 68, 68, 0.4);
+}
+
+.reaction-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.reaction-count {
+  font-size: var(--fs-14);
+  font-weight: 500;
+  min-width: 1ch;
+  text-align: center;
+}
+
 /* ========== SAFE AREA ========== */
 #buildsScreen .card:last-of-type {
   margin-bottom: calc(var(--safe-bottom) + var(--space-3));
