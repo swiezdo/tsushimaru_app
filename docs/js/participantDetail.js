@@ -67,8 +67,15 @@ function renderParticipantBuilds(builds) {
     
     noParticipantBuildsHintEl?.classList.add('hidden');
     
+    // Сортируем билды по дате создания (сначала новые)
+    const sortedBuilds = builds.slice().sort((a, b) => {
+        const ca = Number(a?.created_at || 0);
+        const cb = Number(b?.created_at || 0);
+        return cb - ca; // По убыванию (новые сверху)
+    });
+    
     // Используем существующую функцию создания элемента билда из builds.js
-    builds.slice().reverse().forEach(build => {
+    sortedBuilds.forEach(build => {
         const buildElement = createBuildElement(build, true); // true = isPublic
         participantBuildsListEl.appendChild(buildElement);
     });

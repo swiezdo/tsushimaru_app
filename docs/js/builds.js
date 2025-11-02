@@ -100,7 +100,7 @@ let shot2Data = null;
 let selectedClasses = [];
 let selectedTags = [];
 let currentFilterType = null;
-let sortOrder = 'desc'; // 'desc' — сначала новые, 'asc' — сначала старые
+let sortType = 'newest'; // 'newest' - сначала новые, 'oldest' - сначала старые, 'most_likes' - больше лайков, 'most_dislikes' - больше дизлайков
 
 async function compressImageFile(file, { maxEdge = 1280, quality = 0.7 } = {}) {
   return new Promise((resolve, reject) => {
@@ -308,12 +308,41 @@ function renderBuildsList(container, items, emptyHint, isPublic = false) {
   
   // Используем DocumentFragment для оптимизации
   const fragment = document.createDocumentFragment();
-  // Сортировка: для «Все билды» по sortOrder, для «Мои билды» всегда новые сверху
-  const order = isPublic ? sortOrder : 'desc';
+  // Сортировка: для «Все билды» по sortType, для «Мои билды» всегда новые сверху
+  const currentSortType = isPublic ? sortType : 'newest';
   const sorted = items.slice().sort((a, b) => {
+    if (currentSortType === 'newest' || currentSortType === 'oldest') {
+      // Сортировка по дате создания
+      const ca = Number(a?.created_at || 0);
+      const cb = Number(b?.created_at || 0);
+      return currentSortType === 'newest' ? (cb - ca) : (ca - cb);
+    } else if (currentSortType === 'most_likes') {
+      // Сортировка по количеству лайков (по убыванию)
+      const likesA = Number(a?.likes_count || a?.likesCount || 0);
+      const likesB = Number(b?.likes_count || b?.likesCount || 0);
+      // Если лайки одинаковые, сортируем по дате (новые сверху)
+      if (likesA === likesB) {
+        const ca = Number(a?.created_at || 0);
+        const cb = Number(b?.created_at || 0);
+        return cb - ca;
+      }
+      return likesB - likesA;
+    } else if (currentSortType === 'most_dislikes') {
+      // Сортировка по количеству дизлайков (по убыванию)
+      const dislikesA = Number(a?.dislikes_count || a?.dislikesCount || 0);
+      const dislikesB = Number(b?.dislikes_count || b?.dislikesCount || 0);
+      // Если дизлайки одинаковые, сортируем по дате (новые сверху)
+      if (dislikesA === dislikesB) {
+        const ca = Number(a?.created_at || 0);
+        const cb = Number(b?.created_at || 0);
+        return cb - ca;
+      }
+      return dislikesB - dislikesA;
+    }
+    // По умолчанию - новые сверху
     const ca = Number(a?.created_at || 0);
     const cb = Number(b?.created_at || 0);
-    return order === 'desc' ? (cb - ca) : (ca - cb);
+    return cb - ca;
   });
   sorted.forEach(build => {
     fragment.appendChild(createBuildElement(build, isPublic));
@@ -470,18 +499,22 @@ function renderClassTabs() {
   const sortIcon = document.createElement('img');
   sortIcon.src = './assets/icons/sort.svg';
   sortIcon.alt = 'Сортировка';
-  sortTab.title = sortOrder === 'desc' ? 'Сначала новые' : 'Сначала старые';
-  // Подсветка активного состояния при альтернативном порядке (asc)
-  if (sortOrder === 'asc') {
+  // Устанавливаем заголовок в зависимости от текущего типа сортировки
+  const sortTitles = {
+    'newest': 'Сначала новые',
+    'oldest': 'Сначала старые',
+    'most_likes': 'Больше лайков',
+    'most_dislikes': 'Больше дизлайков'
+  };
+  sortTab.title = sortTitles[sortType] || 'Сортировка';
+  // Подсветка активного состояния если не выбрано "сначала новые" (по умолчанию)
+  if (sortType !== 'newest') {
     sortTab.classList.add('active');
   }
   sortTab.appendChild(sortIcon);
   sortTab.addEventListener('click', () => {
     hapticTapSmart();
-    sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
-    // Обновим заголовок и перерисуем список и вкладки
-    renderClassTabs();
-    applyFilters();
+    openSortModal();
   });
   classTabsContainer.appendChild(sortTab);
 }
@@ -563,6 +596,56 @@ function closeFilterModal() {
     filterModal.classList.add('hidden');
   }
   currentFilterType = null;
+}
+
+// Управление модальным окном сортировки
+function openSortModal() {
+  if (!filterModal || !filterModalTitle || !filterModalOptions) return;
+  
+  // Устанавливаем заголовок
+  filterModalTitle.textContent = 'Сортировка';
+  renderSortOptions();
+  
+  filterModal.classList.remove('hidden');
+}
+
+function renderSortOptions() {
+  if (!filterModalOptions) return;
+  
+  filterModalOptions.innerHTML = '';
+  
+  const sortOptions = [
+    { value: 'newest', label: 'Сначала новые' },
+    { value: 'oldest', label: 'Сначала старые' },
+    { value: 'most_likes', label: 'Больше лайков' },
+    { value: 'most_dislikes', label: 'Больше дизлайков' }
+  ];
+  
+  sortOptions.forEach(option => {
+    const label = document.createElement('label');
+    label.className = 'filter-option';
+    
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'sortType';
+    radio.value = option.value;
+    radio.checked = sortType === option.value;
+    
+    const span = document.createElement('span');
+    span.textContent = option.label;
+    
+    label.appendChild(radio);
+    label.appendChild(span);
+    
+    radio.addEventListener('change', (e) => {
+      hapticTapSmart();
+      if (e.target.checked) {
+        sortType = option.value;
+      }
+    });
+    
+    filterModalOptions.appendChild(label);
+  });
 }
 
 // Создание билда
@@ -1541,6 +1624,11 @@ export function initBuilds() {
     filterModalOkBtn.addEventListener('click', () => {
       hapticOK();
       closeFilterModal();
+      // Если это была модалка сортировки, обновляем список и вкладки
+      if (filterModalTitle?.textContent === 'Сортировка') {
+        renderClassTabs();
+        applyFilters();
+      }
     });
   }
   
