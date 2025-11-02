@@ -1489,13 +1489,28 @@ function renderPublicComments(comments) {
     
     const authorDiv = document.createElement('div');
     authorDiv.className = 'comment-author';
-    authorDiv.textContent = comment.author || 'Неизвестный пользователь';
+    
+    // Добавляем аватарку
+    const avatarImg = document.createElement('img');
+    avatarImg.className = 'comment-avatar';
+    const avatarSrc = comment.avatar_url 
+        ? `${API_BASE}${comment.avatar_url}` 
+        : './assets/default-avatar.svg';
+    avatarImg.src = avatarSrc;
+    avatarImg.alt = comment.author || 'Автор';
+    
+    // Текст с ником
+    const authorName = document.createElement('span');
+    authorName.textContent = comment.author || 'Неизвестный пользователь';
+    
+    authorDiv.appendChild(avatarImg);
+    authorDiv.appendChild(authorName);
     
     const dateDiv = document.createElement('div');
     dateDiv.className = 'comment-date';
     try {
       const d = new Date(comment.created_at * 1000);
-      dateDiv.textContent = isNaN(d.getTime()) ? '—' : d.toLocaleString('ru-RU');
+      dateDiv.textContent = isNaN(d.getTime()) ? '—' : d.toLocaleDateString('ru-RU');
     } catch {
       dateDiv.textContent = '—';
     }
