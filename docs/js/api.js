@@ -544,5 +544,65 @@ export async function uploadAvatar(userId, avatarFile) {
     }
 }
 
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С КОММЕНТАРИЯМИ ==========
+
+// Создание комментария
+export async function createComment(buildId, commentText) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('build_id', buildId);
+        data.append('comment_text', commentText);
+
+        const url = `${API_BASE}/api/comments.create`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка создания комментария:', error);
+        throw error;
+    }
+}
+
+// Получение комментариев для билда
+export async function getBuildComments(buildId) {
+    try {
+        const url = `${API_BASE}/api/comments.get?build_id=${buildId}`;
+        const response = await fetch(url, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        const data = await response.json();
+        return data.comments || [];
+    } catch (error) {
+        console.error('Ошибка получения комментариев:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };

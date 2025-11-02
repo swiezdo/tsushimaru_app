@@ -2,7 +2,7 @@
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
 import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate } from './utils.js';
-import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, updateBuild, API_BASE } from './api.js';
+import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, updateBuild, createComment, getBuildComments, API_BASE } from './api.js';
 
 const CLASS_VALUES = ['Самурай','Охотник','Убийца','Ронин'];
 const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма','Негативные эффекты'];
@@ -86,6 +86,7 @@ const filterModalOptions = $('filterModalOptions');
 const filterModalOkBtn = $('filterModalOkBtn');
 
 let currentBuildId = null;
+let currentPublicBuildId = null; // ID открытого публичного билда для комментариев
 let shot1Data = null;
 let shot2Data = null;
 
@@ -910,6 +911,12 @@ function openPublicBuildDetail(pubId) {
 
     showScreen('buildPublicDetail');
     setTopbar(true, formatTopbarTitle(p.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
+    
+    // Сохраняем ID текущего публичного билда для комментариев
+    currentPublicBuildId = pubId;
+    
+    // Загружаем комментарии для этого билда
+    loadPublicBuildComments(pubId);
   }).catch(err => {
     tg?.showAlert?.('Ошибка загрузки публичной публикации: ' + err);
     hapticERR();
@@ -1441,6 +1448,161 @@ export function initBuilds() {
 
   renderMyBuilds();
   renderAllBuilds();
+  
+  // Инициализация формы комментариев
+  initCommentForm();
+}
+
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С КОММЕНТАРИЯМИ ==========
+
+function loadPublicBuildComments(buildId) {
+  const commentsList = $('publicCommentsList');
+  if (!commentsList) return;
+  
+  getBuildComments(buildId).then(comments => {
+    renderPublicComments(comments);
+  }).catch(err => {
+    console.error('Ошибка загрузки комментариев:', err);
+    if (commentsList) {
+      commentsList.innerHTML = '<div class="hint muted">Ошибка загрузки комментариев</div>';
+    }
+  });
+}
+
+function renderPublicComments(comments) {
+  const commentsList = $('publicCommentsList');
+  if (!commentsList) return;
+  
+  commentsList.innerHTML = '';
+  
+  if (comments.length === 0) {
+    const emptyHint = document.createElement('div');
+    emptyHint.className = 'hint muted';
+    emptyHint.textContent = 'Пока нет комментариев. Будьте первым!';
+    commentsList.appendChild(emptyHint);
+    return;
+  }
+  
+  comments.forEach(comment => {
+    const commentItem = document.createElement('div');
+    commentItem.className = 'comment-item';
+    
+    const authorDiv = document.createElement('div');
+    authorDiv.className = 'comment-author';
+    authorDiv.textContent = comment.author || 'Неизвестный пользователь';
+    
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'comment-date';
+    try {
+      const d = new Date(comment.created_at * 1000);
+      dateDiv.textContent = isNaN(d.getTime()) ? '—' : d.toLocaleString('ru-RU');
+    } catch {
+      dateDiv.textContent = '—';
+    }
+    
+    const textDiv = document.createElement('div');
+    textDiv.className = 'comment-text';
+    textDiv.textContent = comment.comment_text || '';
+    
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'comment-header';
+    headerDiv.appendChild(authorDiv);
+    headerDiv.appendChild(dateDiv);
+    
+    commentItem.appendChild(headerDiv);
+    commentItem.appendChild(textDiv);
+    
+    commentsList.appendChild(commentItem);
+  });
+}
+
+// Инициализация обработчика формы комментария
+function initCommentForm() {
+  const commentForm = $('publicCommentForm');
+  const commentText = $('publicCommentText');
+  
+  if (!commentForm || !commentText) return;
+  
+  // Удаляем старый обработчик, если он есть
+  if (commentForm._submitHandler) {
+    commentForm.removeEventListener('submit', commentForm._submitHandler);
+  }
+  
+  // Создаем новый обработчик
+  commentForm._submitHandler = async (e) => {
+    e.preventDefault();
+    
+    const text = (commentText.value || '').trim();
+    
+    if (!text) {
+      shake(commentText);
+      hapticERR();
+      return;
+    }
+    
+    // Получаем build_id из публичного билда через открытый билд
+    // Используем pubId из openPublicBuildDetail, сохраняем его в переменную модуля
+    if (!currentPublicBuildId) {
+      tg?.showAlert?.('Не удалось определить билд для комментария');
+      hapticERR();
+      return;
+    }
+    
+    const buildId = currentPublicBuildId;
+    
+    // Отключаем форму на время отправки
+    const submitBtn = commentForm.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn?.textContent;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Отправка...';
+    }
+    
+    try {
+      await createComment(buildId, text);
+      
+      // Очищаем поле ввода
+      commentText.value = '';
+      
+      // Перезагружаем комментарии
+      await loadPublicBuildComments(buildId);
+      
+      hapticOK();
+      tg?.showPopup?.({
+        title: 'Комментарий добавлен',
+        message: 'Ваш комментарий успешно опубликован',
+        buttons: [{ type: 'ok' }]
+      });
+    } catch (error) {
+      console.error('Ошибка отправки комментария:', error);
+      hapticERR();
+      
+      let errorMessage = 'Не удалось отправить комментарий.';
+      if (error.status === 401) {
+        errorMessage = 'Ошибка авторизации. Попробуйте перезапустить приложение.';
+      } else if (error.status === 400) {
+        errorMessage = error.message || 'Проверьте правильность заполнения полей.';
+      } else if (error.status >= 500) {
+        errorMessage = 'Ошибка сервера. Попробуйте позже.';
+      } else if (!navigator.onLine) {
+        errorMessage = 'Нет подключения к интернету.';
+      }
+      
+      tg?.showPopup?.({
+        title: 'Ошибка',
+        message: errorMessage,
+        buttons: [{ type: 'ok' }]
+      });
+    } finally {
+      // Восстанавливаем кнопку
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    }
+  };
+  
+  commentForm.addEventListener('submit', commentForm._submitHandler);
 }
 
 // Экспорт функций для использования в других модулях

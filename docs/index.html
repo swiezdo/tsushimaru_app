@@ -8,7 +8,7 @@
     />
     <title></title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="./css/style.css?v=11" />
+    <link rel="stylesheet" href="./css/style.css?v=12" />
   </head>
 
   <body>
@@ -525,6 +525,17 @@
         <section class="card">
           <h3 class="card-title">Скриншоты</h3>
           <div id="publicDetailShots" class="shots-grid"></div>
+        </section>
+
+        <section class="card">
+          <h3 class="card-title">Комментарии</h3>
+          <div id="publicCommentsList" class="comments-list"></div>
+          <form id="publicCommentForm" class="form">
+            <div class="input">
+              <textarea id="publicCommentText" placeholder="Оставить комментарий..." maxlength="500" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn primary wide">Отправить</button>
+          </form>
         </section>
       </section>
 
