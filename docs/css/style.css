@@ -1105,14 +1105,25 @@ html.tg .only-browser { display: none; }
   cursor: not-allowed;
 }
 
+/* Иконка лайка - всегда зеленый */
+#likeBtn .reaction-icon {
+  color: #4caf50; /* Зеленый */
+}
+
+/* Иконка дизлайка - всегда красный */
+#dislikeBtn .reaction-icon {
+  color: #ff4444; /* Красный */
+}
+
+/* При активном состоянии - красим только контур (border), не фон */
 .reaction-chip.liked {
-  background: rgba(76, 175, 80, 0.2); /* Полупрозрачный зеленый */
-  border-color: rgba(76, 175, 80, 0.4);
+  background: var(--elem-bg); /* Оставляем стандартный фон */
+  border-color: #4caf50; /* Зеленый контур */
 }
 
 .reaction-chip.disliked {
-  background: rgba(255, 68, 68, 0.2); /* Полупрозрачный красный */
-  border-color: rgba(255, 68, 68, 0.4);
+  background: var(--elem-bg); /* Оставляем стандартный фон */
+  border-color: #ff4444; /* Красный контур */
 }
 
 .reaction-icon {
