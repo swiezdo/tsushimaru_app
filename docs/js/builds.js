@@ -1473,6 +1473,15 @@ function renderPublicComments(comments) {
   const commentsList = $('publicCommentsList');
   if (!commentsList) return;
   
+  // Находим заголовок карточки с комментариями
+  const commentsCard = commentsList.closest('.card');
+  const commentsTitle = commentsCard?.querySelector('.card-title');
+  
+  // Обновляем заголовок с количеством комментариев
+  if (commentsTitle) {
+    commentsTitle.textContent = `Комментарии (${comments.length})`;
+  }
+  
   commentsList.innerHTML = '';
   
   if (comments.length === 0) {
@@ -1499,9 +1508,28 @@ function renderPublicComments(comments) {
     avatarImg.src = avatarSrc;
     avatarImg.alt = comment.author || 'Автор';
     
-    // Текст с ником
-    const authorName = document.createElement('span');
+    // Текст с ником (кликабельный)
+    const authorName = document.createElement('button');
+    authorName.type = 'button';
+    authorName.className = 'comment-author-name';
     authorName.textContent = comment.author || 'Неизвестный пользователь';
+    
+    // Обработчик клика для перехода к профилю
+    if (comment.user_id) {
+      authorName.addEventListener('click', () => {
+        hapticTapSmart();
+        // Сохраняем информацию о том, откуда мы пришли
+        sessionStorage.setItem('previousScreen', `buildPublicDetail:${currentPublicBuildId}`);
+        
+        // Импортируем и вызываем функцию открытия профиля участника
+        import('./participantDetail.js').then(module => {
+          module.openParticipantDetail(comment.user_id);
+        }).catch(error => {
+          console.error('Ошибка импорта participantDetail.js:', error);
+          tg?.showAlert?.('Ошибка открытия профиля автора');
+        });
+      });
+    }
     
     authorDiv.appendChild(avatarImg);
     authorDiv.appendChild(authorName);
