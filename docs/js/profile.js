@@ -314,6 +314,16 @@ export function initProfile() {
       tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены на сервере.', buttons: [{ type: 'ok' }] });
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
+      // Обновляем список участников, если он открыт
+      // Используем динамический импорт чтобы избежать циклических зависимостей
+      import('./participants.js').then(module => {
+        module.refreshParticipantsList().catch(err => {
+          console.log('Ошибка обновления списка участников:', err);
+        });
+      }).catch(err => {
+        console.log('Не удалось обновить список участников:', err);
+      });
+      
     } catch (error) {
       console.error('Ошибка сохранения профиля:', error);
       

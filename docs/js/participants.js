@@ -38,9 +38,9 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
         btn.type = 'button';
         btn.dataset.userId = user.user_id;
         
-        // Определяем источник аватарки
+        // Определяем источник аватарки с timestamp для предотвращения кеширования
         const avatarSrc = user.avatar_url 
-            ? `${API_BASE}${user.avatar_url}` 
+            ? `${API_BASE}${user.avatar_url}?t=${Date.now()}` 
             : './assets/default-avatar.svg';
         
         // Создаем иконки максимальных уровней мастерства
@@ -112,4 +112,10 @@ export async function initParticipants() {
             filterParticipants(e.target.value);
         });
     }
+}
+
+// Функция для обновления списка участников (вызывается после сохранения профиля)
+export async function refreshParticipantsList() {
+    await loadParticipants();
+    renderParticipants();
 }

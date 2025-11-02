@@ -317,12 +317,34 @@ body {
   display: inline-block;
 }
 .brand { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
+/* Защита всех изображений и SVG от контекстного меню и перетаскивания */
+img, svg {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Разрешаем pointer-events для интерактивных элементов */
+button img,
+button svg,
+a img,
+a svg,
+.build-icon img,
+.build-stat-icon,
+.mastery-icon,
+.shot-thumb img,
+.upload-box img {
+  pointer-events: auto;
+}
+
+/* Логотип на главной странице */
 .logo { 
   width: var(--size-avatar); 
   height: var(--size-avatar); 
   object-fit: contain; 
-  pointer-events: none; 
-  -webkit-user-drag: none; 
 }
 .brand-title { font-size: var(--fs-22); font-weight: 700; letter-spacing: .3px; }
 

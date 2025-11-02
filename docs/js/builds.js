@@ -174,6 +174,34 @@ function createBuildElement(build, isPublic = false) {
   const metaDiv = document.createElement('div');
   metaDiv.className = 'build-author';
   
+  // Функция для создания элемента статистики
+  const createStatItem = (iconPath, count, alt) => {
+    const statItem = document.createElement('div');
+    statItem.className = 'build-stat-item';
+    
+    const icon = document.createElement('img');
+    icon.src = iconPath;
+    icon.alt = alt;
+    icon.className = 'build-stat-icon';
+    
+    const countSpan = document.createElement('span');
+    countSpan.className = 'build-stat-count';
+    countSpan.textContent = count || 0;
+    
+    statItem.appendChild(icon);
+    statItem.appendChild(countSpan);
+    
+    // Останавливаем всплытие события при клике на статистику
+    statItem.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    
+    return statItem;
+  };
+  
+  // Проверяем, опубликован ли билд (для показа статистики в "Мои билды")
+  const isPublished = build.is_public === 1;
+  
   if (isPublic) {
     // Для публичных билдов создаем flex контейнер с автором слева и статистикой справа
     const authorText = document.createElement('span');
@@ -183,39 +211,70 @@ function createBuildElement(build, isPublic = false) {
     const statsDiv = document.createElement('div');
     statsDiv.className = 'build-stats';
     
-    // Функция для создания элемента статистики
-    const createStatItem = (iconPath, count, alt) => {
-      const statItem = document.createElement('div');
-      statItem.className = 'build-stat-item';
-      
-      const icon = document.createElement('img');
-      icon.src = iconPath;
-      icon.alt = alt;
-      icon.className = 'build-stat-icon';
-      
-      const countSpan = document.createElement('span');
-      countSpan.className = 'build-stat-count';
-      countSpan.textContent = count || 0;
-      
-      statItem.appendChild(icon);
-      statItem.appendChild(countSpan);
-      
-      // Останавливаем всплытие события при клике на статистику
-      statItem.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
-      
-      return statItem;
-    };
-    
     // Добавляем три элемента статистики
-    statsDiv.appendChild(createStatItem('./assets/icons/comments.svg', build.comments_count || 0, 'Комментарии'));
-    statsDiv.appendChild(createStatItem('./assets/icons/like.svg', build.likes_count || 0, 'Лайки'));
-    statsDiv.appendChild(createStatItem('./assets/icons/dislike.svg', build.dislikes_count || 0, 'Дизлайки'));
+    // ВАЖНО: Если статистика показывает неправильные значения (лайки = комментарии),
+    // возможно сервер возвращает данные в другом формате или с другими именами полей
+    // Проверяем разные возможные варианты имен полей
+    const commentsCount = build.comments_count || build.commentsCount || 0;
+    let likesCount = build.likes_count || build.likesCount || 0;
+    let dislikesCount = build.dislikes_count || build.dislikesCount || 0;
+    
+    // Если статистика реакций находится в отдельном объекте
+    if (build.reactions) {
+      likesCount = build.reactions.likes_count || build.reactions.likesCount || likesCount;
+      dislikesCount = build.reactions.dislikes_count || build.reactions.dislikesCount || dislikesCount;
+    }
+    
+    // Временная отладка: если количество лайков совпадает с комментариями и больше 0,
+    // возможно проблема в данных сервера
+    if (commentsCount > 0 && likesCount === commentsCount && !build.reactions) {
+      console.warn('Возможная проблема: likes_count совпадает с comments_count для билда', build.build_id);
+    }
+    
+    statsDiv.appendChild(createStatItem('./assets/icons/comments.svg', commentsCount, 'Комментарии'));
+    statsDiv.appendChild(createStatItem('./assets/icons/like.svg', likesCount, 'Лайки'));
+    statsDiv.appendChild(createStatItem('./assets/icons/dislike.svg', dislikesCount, 'Дизлайки'));
     
     metaDiv.appendChild(authorText);
     metaDiv.appendChild(statsDiv);
+  } else if (isPublished) {
+    // Для опубликованных билдов в "Мои билды" показываем дату создания слева и статистику справа
+    const dateStr = build.created_at ? formatDate(new Date(build.created_at * 1000)) : '—';
+    const dateText = document.createElement('span');
+    dateText.textContent = dateStr === '—' ? '—' : 'Создан: ' + dateStr;
+    
+    // Блок статистики справа
+    const statsDiv = document.createElement('div');
+    statsDiv.className = 'build-stats';
+    
+    // Добавляем три элемента статистики
+    // ВАЖНО: Если статистика показывает неправильные значения (лайки = комментарии),
+    // возможно сервер возвращает данные в другом формате или с другими именами полей
+    // Проверяем разные возможные варианты имен полей
+    const commentsCount = build.comments_count || build.commentsCount || 0;
+    let likesCount = build.likes_count || build.likesCount || 0;
+    let dislikesCount = build.dislikes_count || build.dislikesCount || 0;
+    
+    // Если статистика реакций находится в отдельном объекте
+    if (build.reactions) {
+      likesCount = build.reactions.likes_count || build.reactions.likesCount || likesCount;
+      dislikesCount = build.reactions.dislikes_count || build.reactions.dislikesCount || dislikesCount;
+    }
+    
+    // Временная отладка: если количество лайков совпадает с комментариями и больше 0,
+    // возможно проблема в данных сервера
+    if (commentsCount > 0 && likesCount === commentsCount && !build.reactions) {
+      console.warn('Возможная проблема: likes_count совпадает с comments_count для билда', build.build_id);
+    }
+    
+    statsDiv.appendChild(createStatItem('./assets/icons/comments.svg', commentsCount, 'Комментарии'));
+    statsDiv.appendChild(createStatItem('./assets/icons/like.svg', likesCount, 'Лайки'));
+    statsDiv.appendChild(createStatItem('./assets/icons/dislike.svg', dislikesCount, 'Дизлайки'));
+    
+    metaDiv.appendChild(dateText);
+    metaDiv.appendChild(statsDiv);
   } else {
+    // Для неопубликованных билдов показываем только дату
     const dateStr = build.created_at ? formatDate(new Date(build.created_at * 1000)) : '—';
     metaDiv.textContent = dateStr === '—' ? '—' : 'Создан: ' + dateStr;
   }

@@ -43,10 +43,10 @@ function renderParticipantProfile(profile) {
     if (participantGoalsEl) participantGoalsEl.textContent = prettyLines(profile.goals || []);
     if (participantDifficultyEl) participantDifficultyEl.textContent = prettyLines(profile.difficulties || []);
     
-    // Обновляем аватарку
+    // Обновляем аватарку с timestamp для предотвращения кеширования
     if (participantAvatarEl) {
         const avatarSrc = profile.avatar_url 
-            ? `${API_BASE}${profile.avatar_url}` 
+            ? `${API_BASE}${profile.avatar_url}?t=${Date.now()}` 
             : './assets/default-avatar.svg';
         participantAvatarEl.src = avatarSrc;
     }
