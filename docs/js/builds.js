@@ -1590,6 +1590,15 @@ function initCommentForm() {
   
   if (!commentForm || !commentText) return;
   
+  // Автоматическое изменение высоты textarea при вводе
+  const autoResizeComment = () => {
+    commentText.style.height = 'auto';
+    commentText.style.height = Math.min(commentText.scrollHeight, 200) + 'px';
+  };
+  commentText.addEventListener('input', autoResizeComment);
+  // Устанавливаем начальную высоту
+  setTimeout(autoResizeComment, 0);
+  
   // Удаляем старый обработчик, если он есть
   if (commentForm._submitHandler) {
     commentForm.removeEventListener('submit', commentForm._submitHandler);
@@ -1630,6 +1639,8 @@ function initCommentForm() {
       
       // Очищаем поле ввода
       commentText.value = '';
+      // Сбрасываем высоту textarea
+      commentText.style.height = 'auto';
       
       // Перезагружаем комментарии
       await loadPublicBuildComments(buildId);
