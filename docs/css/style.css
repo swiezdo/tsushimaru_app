@@ -438,6 +438,7 @@ body {
   height: 20px;
   flex-shrink: 0;
   object-fit: contain;
+  filter: none;
 }
 
 .list-btn .right { 
