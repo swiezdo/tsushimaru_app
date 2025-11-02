@@ -1056,7 +1056,7 @@ html.tg .only-browser { display: none; }
   background: transparent;
   color: var(--tg-tx);
   cursor: pointer;
-  font-size: var(--fs-15);
+  font-size: var(--fs-14);
   min-height: 36px;
   transition: transform 0.1s ease;
   text-align: left;
