@@ -105,10 +105,8 @@ async function fetchProfileFromServer() {
       currentUserId = serverProfile.user_id;
       // Обновляем форму и отображение
       loadProfileToForm(serverProfile);
-      console.log('Профиль загружен с сервера');
     }
   } catch (error) {
-    console.log('Ошибка загрузки профиля с сервера:', error);
     
     // Показываем ошибку для всех случаев (online-only режим)
     if (error.status === 401) {
@@ -119,7 +117,6 @@ async function fetchProfileFromServer() {
       });
     } else if (error.status === 404) {
       // 404 - профиль не создан, это нормально для первого входа
-      console.log('Профиль не найден - первый вход пользователя');
     } else {
       // Любые другие ошибки (сеть, сервер) - показываем ошибку
       tg?.showPopup?.({ 
@@ -290,20 +287,14 @@ export function initProfile() {
       // Проверяем несколько возможных форматов ответа
       if (!currentUserId && saveResult) {
         currentUserId = saveResult.user_id || saveResult.userId || saveResult.id || null;
-        if (currentUserId) {
-          console.log('User ID получен из ответа сервера:', currentUserId);
-        }
       }
       
       // Если user_id не получен из ответа, перезагружаем профиль для получения user_id
       if (!currentUserId && selectedAvatarFile) {
         try {
           await fetchProfileFromServer();
-          if (currentUserId) {
-            console.log('User ID получен после перезагрузки профиля:', currentUserId);
-          }
         } catch (fetchError) {
-          console.error('Ошибка перезагрузки профиля для получения user_id:', fetchError);
+          // Игнорируем ошибку
         }
       }
       
@@ -319,10 +310,8 @@ export function initProfile() {
           // Перезагружаем профиль чтобы получить обновленную аватарку
           await fetchProfileFromServer();
           selectedAvatarFile = null; // Очищаем после успешной загрузки
-          console.log('Аватарка загружена');
         } catch (avatarError) {
-          console.error('Ошибка загрузки аватарки:', avatarError);
-          // Не прерываем успех сохранения профиля, просто логируем ошибку
+          // Не прерываем успех сохранения профиля, просто игнорируем ошибку
         }
       } else {
         // Обновляем отображение только если аватарка не загружалась
@@ -338,12 +327,8 @@ export function initProfile() {
       // Обновляем список участников, если он открыт
       // Используем динамический импорт чтобы избежать циклических зависимостей
       import('./participants.js').then(module => {
-        module.refreshParticipantsList().catch(err => {
-          console.log('Ошибка обновления списка участников:', err);
-        });
-      }).catch(err => {
-        console.log('Не удалось обновить список участников:', err);
-      });
+        module.refreshParticipantsList().catch(() => {});
+      }).catch(() => {});
       
     } catch (error) {
       console.error('Ошибка сохранения профиля:', error);

@@ -43,14 +43,11 @@ export async function loadMasteryConfig() {
             const response = await fetch('./mastery-config.json');
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             masteryConfig = await response.json();
-            console.log(`✅ Конфиг мастерства загружен с попытки ${attempt}`);
             return masteryConfig;
         } catch (error) {
             if (attempt === maxAttempts) {
-                console.error(`❌ Не удалось загрузить конфиг мастерства после ${maxAttempts} попыток:`, error);
                 return null;
             }
-            console.warn(`⚠️ Попытка ${attempt}/${maxAttempts} не удалась, повтор через ${retryDelay}мс`);
             await new Promise(resolve => setTimeout(resolve, retryDelay));
         }
     }
@@ -64,16 +61,11 @@ async function fetchMasteryWithRetry() {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
             const levels = await fetchMastery();
-            if (attempt > 1) {
-                console.log(`✅ Уровни мастерства получены с попытки ${attempt}`);
-            }
             return levels;
         } catch (error) {
             if (attempt === maxAttempts) {
-                console.error(`❌ Не удалось получить уровни мастерства после ${maxAttempts} попыток:`, error);
                 return { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
             }
-            console.warn(`⚠️ Попытка ${attempt}/${maxAttempts} не удалась, повтор через ${retryDelay}мс`);
             await new Promise(resolve => setTimeout(resolve, retryDelay));
         }
     }
@@ -259,10 +251,8 @@ async function preloadMasteryAssets(config, levels) {
     // Запускаем все предзагрузки параллельно
     try {
         await Promise.all(preloadPromises);
-        console.log('✅ Предзагрузка изображений завершена');
     } catch (error) {
         // Игнорируем ошибки - если изображение не найдено, это не критично
-        console.warn('⚠️ Некоторые изображения не удалось предзагрузить:', error);
     }
 }
 
@@ -332,11 +322,8 @@ function createBadgeButton(category, currentLevel) {
 export async function renderMasteryButtons() {
     // Если уже отрендерено - ничего не делаем
     if (masteryRendered) {
-        console.log('⚡ Мастерство уже отрендерено, пропускаем');
         return;
     }
-    
-    console.log('🎯 Первый рендеринг мастерства');
     
     // Пробуем найти контейнер разными способами
     let container = document.getElementById('masteryButtonsContainer');
@@ -345,30 +332,21 @@ export async function renderMasteryButtons() {
         container = document.querySelector('#masteryButtonsContainer');
     }
     if (!container) {
-        console.error('❌ Контейнер для кнопок мастерства не найден');
-        console.log('Поиск всех элементов с id:', document.querySelectorAll('[id*="mastery"]'));
         return;
     }
-    
-    console.log('✅ Контейнер найден:', container);
     
     // Очищаем контейнер только перед первым рендером
     container.innerHTML = '';
     
     // Загружаем данные (из кэша если уже загружены)
-    console.log('📋 Загрузка конфига мастерства...');
     const config = await loadMasteryConfig();
     if (!config) {
-        console.error('❌ Не удалось загрузить конфиг мастерства');
         container.innerHTML = '<div class="hint muted">Ошибка загрузки данных мастерства</div>';
         return;
     }
-    console.log('✅ Конфиг загружен, категорий:', config.categories?.length);
     
     // Загружаем уровни пользователя
-    console.log('📊 Загрузка уровней пользователя...');
     const levels = await fetchMasteryWithRetry();
-    console.log('✅ Уровни получены:', levels);
     
     // Порядок категорий для отображения
     const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun'];
@@ -378,12 +356,10 @@ export async function renderMasteryButtons() {
     for (const key of categoryOrder) {
         const category = getCategoryByKey(config, key);
         if (!category) {
-            console.warn(`⚠️ Категория ${key} не найдена в конфиге`);
             continue;
         }
         
         const currentLevel = levels[key] || 0;
-        console.log(`🔨 Создание кнопки для ${key}, уровень: ${currentLevel}`);
         const button = createBadgeButton(category, currentLevel);
         container.appendChild(button);
         buttonsCreated++;
@@ -391,13 +367,10 @@ export async function renderMasteryButtons() {
     
     // Помечаем как отрендеренное
     masteryRendered = true;
-    console.log(`✅ Рендеринг мастерства завершён (один раз за сессию). Создано кнопок: ${buttonsCreated}`);
 }
 
 // Открытие детального экрана мастерства
 export async function openMasteryDetail(categoryKey) {
-    console.log('🎯 Открытие детального экрана для категории:', categoryKey);
-    
     // Показываем экран сначала (чтобы топбар был виден)
     showScreen('rewardDetail');
     
@@ -856,12 +829,9 @@ async function submitMasteryApplicationForm(category, currentLevel, commentTexta
 
 // Предзагрузка данных без рендеринга (вызывается при старте приложения)
 async function preloadMasteryData() {
-    console.log('🎯 Предзагрузка данных мастерства...');
-    
     // Загружаем конфиг
     const config = await loadMasteryConfig();
     if (!config) {
-        console.error('❌ Не удалось загрузить конфиг мастерства');
         return;
     }
     
@@ -870,8 +840,6 @@ async function preloadMasteryData() {
     
     // Предзагружаем изображения
     await preloadMasteryAssets(config, levels);
-    
-    console.log('✅ Данные мастерства предзагружены');
 }
 
 // Инициализация модуля (вызывается при старте приложения)

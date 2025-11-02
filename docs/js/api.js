@@ -6,8 +6,6 @@ import { tg } from './telegram.js';
 // Конфигурация API endpoint
 const API_BASE = 'https://tsushimaru.com';
 
-console.log('API_BASE установлен:', API_BASE);
-
 // Получение initData из Telegram WebApp
 function getInitData() {
     if (!tg || !tg.initData) {
@@ -105,13 +103,7 @@ export async function saveProfile(formData) {
             data.append('difficulties', difficulty);
         });
 
-        console.log('📋 FormData содержимое:');
-        for (let [key, value] of data.entries()) {
-            console.log(`  ${key}: ${value}`);
-        }
-
         const url = `${API_BASE}/api/profile.save`;
-        console.log('📤 Отправка запроса на:', url);
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -120,35 +112,14 @@ export async function saveProfile(formData) {
             body: data,
         });
 
-        console.log('📥 Получен ответ:', response.status, response.statusText);
-
         if (!response.ok) {
-            let errorText = '';
-            let errorData = {};
-            try {
-                errorText = await response.text();
-                console.error('❌ ОШИБКА СЕРВЕРА 500 - Полный текст ответа:', errorText);
-                console.error('❌ ОШИБКА СЕРВЕРА 500 - Длина ответа:', errorText.length);
-                try {
-                    errorData = JSON.parse(errorText);
-                    console.error('❌ ОШИБКА СЕРВЕРА 500 - Распарсенный JSON:', JSON.stringify(errorData, null, 2));
-                } catch (e) {
-                    console.error('❌ ОШИБКА СЕРВЕРА 500 - Ответ не является JSON');
-                    console.error('❌ ОШИБКА СЕРВЕРА 500 - Первые 500 символов:', errorText.substring(0, 500));
-                }
-            } catch (readErr) {
-                console.error('❌ ОШИБКА СЕРВЕРА 500 - Не удалось прочитать ответ:', readErr);
-            }
-            const error = new Error(errorData.detail || errorData.message || errorText || `HTTP ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
             error.status = response.status;
-            error.errorText = errorText;
-            error.errorData = errorData;
-            console.error('❌ ОШИБКА СЕРВЕРА 500 - Создан объект ошибки:', error);
             throw error;
         }
 
         const result = await response.json();
-        console.log('✅ Профиль сохранен успешно, ответ:', result);
         return result;
     } catch (error) {
         console.error('Ошибка сохранения профиля:', error);
@@ -269,14 +240,10 @@ export async function updateBuild(buildId, buildData) {
         // Добавляем изображения только если они были изменены (являются Blob)
         if (buildData.photo_1) {
             data.append('photo_1', buildData.photo_1, 'photo_1.jpg');
-            console.log('📤 Отправка photo_1, размер:', buildData.photo_1.size, 'байт');
         }
         if (buildData.photo_2) {
             data.append('photo_2', buildData.photo_2, 'photo_2.jpg');
-            console.log('📤 Отправка photo_2, размер:', buildData.photo_2.size, 'байт');
         }
-        
-        console.log('📋 FormData поля:', Array.from(data.keys()));
 
         const url = `${API_BASE}/api/builds.update`;
         const response = await fetch(url, {
