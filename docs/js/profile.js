@@ -8,7 +8,7 @@ import { renderChips, activeValues, setActive, shake, prettyLines, validatePSNId
 const PLATFORM   = ['🎮 PlayStation','💻 ПК'];
 const MODES      = ['📖 Сюжет','🏹 Выживание','🗻 Испытания Иё','⚔️ Соперники','📜 Главы'];
 const GOALS      = ['🔎 Узнать что-то новое','👥 Поиск тиммейтов','🏆 Получение наград'];
-const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','🏅 Платина','👻 Кошмар','🔥 HellMode'];
+const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','💎 Платина','👻 Кошмар','🔥 HellMode'];
 
 // ---------- LocalStorage ----------
 // Удалено: больше не используем localStorage для профиля
