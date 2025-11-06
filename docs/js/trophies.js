@@ -11,9 +11,6 @@ let cachedActiveTrophies = [];
 // Флаг: отрендерено ли уже коллекция за эту сессию
 let trophiesRendered = false;
 
-// Флаг: выполняется ли сейчас рендеринг (защита от повторных вызовов)
-let isRendering = false;
-
 // Получение трофеев с кэшированием
 async function fetchTrophiesWithCache(forceRefresh = false) {
     if (cachedTrophies !== null && !forceRefresh) {
@@ -61,84 +58,73 @@ function createTrophyButton(trophyKey, isActive) {
 
 // Рендеринг коллекции трофеев
 export async function renderTrophiesCollection() {
-    // Защита от повторных вызовов
-    if (isRendering) {
+    // Пробуем найти контейнер
+    const container = document.getElementById('trophiesCollectionContainer');
+    if (!container) {
         return;
     }
     
-    isRendering = true;
+    // Находим родительский элемент карточки для удаления подсказок
+    const card = container.closest('.card');
     
-    try {
-        // Пробуем найти контейнер
-        const container = document.getElementById('trophiesCollectionContainer');
-        if (!container) {
-            return; // finally блок выполнится автоматически
+    // Удаляем все старые подсказки (они всегда должны быть вне grid)
+    if (card) {
+        const oldHint = card.querySelector('.trophies-hint');
+        if (oldHint) {
+            oldHint.remove();
         }
-        
-        // Находим родительский элемент карточки для удаления подсказок
-        const card = container.closest('.card');
-        
-        // Удаляем все старые подсказки (они всегда должны быть вне grid)
-        if (card) {
-            // Удаляем ВСЕ подсказки (на случай если их несколько)
-            const oldHints = card.querySelectorAll('.trophies-hint');
-            oldHints.forEach(hint => hint.remove());
-        }
-        
-        // Очищаем контейнер полностью (удаляем все дочерние элементы)
-        container.innerHTML = '';
-        
-        // Восстанавливаем grid отображение (на случай если оно было изменено)
-        container.style.display = 'grid';
+    }
     
-        // Загружаем трофеи (инвалидируем кэш если нужно обновить данные)
-        const data = await fetchTrophiesWithCache();
-        const trophies = data.trophies || [];
-        const activeTrophies = data.active_trophies || [];
-        
-        if (trophies.length === 0) {
-            // Если нет трофеев, показываем подсказку ВНЕ grid контейнера
-            if (card) {
-                const hint = document.createElement('div');
-                hint.className = 'hint muted trophies-hint';
-                hint.textContent = 'У вас пока нет трофеев.';
-                // Добавляем подсказку после контейнера с трофеями
-                container.parentNode.insertBefore(hint, container.nextSibling);
-            }
-            trophiesRendered = true;
-            return; // finally блок выполнится автоматически
-        }
-        
-        // Создаем кнопки для каждого трофея
-        trophies.forEach(trophyKey => {
-            const isActive = activeTrophies.includes(trophyKey);
-            const button = createTrophyButton(trophyKey, isActive);
-            
-            // Обработчик клика (используем замыкание для актуальных данных)
-            button.addEventListener('click', async () => {
-                // Обновляем данные из кэша перед обработкой клика
-                const currentData = await fetchTrophiesWithCache();
-                await handleTrophyClick(trophyKey, currentData.active_trophies || []);
-            });
-            
-            container.appendChild(button);
-        });
-        
-        // Добавляем подсказку о выборе до 8 значков (после grid контейнера, вне grid)
+    // Очищаем контейнер полностью (удаляем все дочерние элементы, включая подсказки)
+    container.innerHTML = '';
+    
+    // Восстанавливаем grid отображение (на случай если оно было изменено)
+    container.style.display = 'grid';
+    
+    // Загружаем трофеи (инвалидируем кэш если нужно обновить данные)
+    const data = await fetchTrophiesWithCache();
+    const trophies = data.trophies || [];
+    const activeTrophies = data.active_trophies || [];
+    
+    if (trophies.length === 0) {
+        // Если нет трофеев, показываем подсказку ВНЕ grid контейнера
         if (card) {
             const hint = document.createElement('div');
             hint.className = 'hint muted trophies-hint';
-            hint.style.marginTop = 'var(--space-3)';
-            hint.textContent = 'Вы можете выбрать до 8 значков для отображения под вашим ником на странице участников';
+            hint.textContent = 'У вас пока нет трофеев. Достигните максимального уровня в категории мастерства, чтобы получить трофей!';
             // Добавляем подсказку после контейнера с трофеями
             container.parentNode.insertBefore(hint, container.nextSibling);
         }
-        
         trophiesRendered = true;
-    } finally {
-        // Снимаем флаг выполнения
-        isRendering = false;
+        return;
     }
+    
+    // Создаем кнопки для каждого трофея
+    trophies.forEach(trophyKey => {
+        const isActive = activeTrophies.includes(trophyKey);
+        const button = createTrophyButton(trophyKey, isActive);
+        
+        // Обработчик клика (используем замыкание для актуальных данных)
+        button.addEventListener('click', async () => {
+            // Обновляем данные из кэша перед обработкой клика
+            const currentData = await fetchTrophiesWithCache();
+            await handleTrophyClick(trophyKey, currentData.active_trophies || []);
+        });
+        
+        container.appendChild(button);
+    });
+    
+    // Добавляем подсказку о выборе до 8 значков (после grid контейнера, вне grid)
+    if (card) {
+        const hint = document.createElement('div');
+        hint.className = 'hint muted trophies-hint';
+        hint.style.marginTop = 'var(--space-3)';
+        hint.textContent = 'Вы можете выбрать до 8 значков для отображения под вашим ником на странице участников';
+        // Добавляем подсказку после контейнера с трофеями
+        container.parentNode.insertBefore(hint, container.nextSibling);
+    }
+    
+    trophiesRendered = true;
 }
 
 // Обработка клика на трофей
