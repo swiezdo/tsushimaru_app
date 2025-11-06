@@ -64,8 +64,22 @@ export async function renderTrophiesCollection() {
         return;
     }
     
-    // Очищаем контейнер
+    // Находим родительский элемент карточки для удаления подсказок
+    const card = container.closest('.card');
+    
+    // Удаляем все старые подсказки (они всегда должны быть вне grid)
+    if (card) {
+        const oldHint = card.querySelector('.trophies-hint');
+        if (oldHint) {
+            oldHint.remove();
+        }
+    }
+    
+    // Очищаем контейнер полностью (удаляем все дочерние элементы, включая подсказки)
     container.innerHTML = '';
+    
+    // Восстанавливаем grid отображение (на случай если оно было изменено)
+    container.style.display = 'grid';
     
     // Загружаем трофеи (инвалидируем кэш если нужно обновить данные)
     const data = await fetchTrophiesWithCache();
@@ -73,20 +87,14 @@ export async function renderTrophiesCollection() {
     const activeTrophies = data.active_trophies || [];
     
     if (trophies.length === 0) {
-        // Если нет трофеев, показываем подсказку
-        // Удаляем старую подсказку если она есть
-        const card = container.closest('.card');
+        // Если нет трофеев, показываем подсказку ВНЕ grid контейнера
         if (card) {
-            const oldHint = card.querySelector('.trophies-hint');
-            if (oldHint) {
-                oldHint.remove();
-            }
+            const hint = document.createElement('div');
+            hint.className = 'hint muted trophies-hint';
+            hint.textContent = 'У вас пока нет трофеев. Достигните максимального уровня в категории мастерства, чтобы получить трофей!';
+            // Добавляем подсказку после контейнера с трофеями
+            container.parentNode.insertBefore(hint, container.nextSibling);
         }
-        
-        const hint = document.createElement('div');
-        hint.className = 'hint muted';
-        hint.textContent = 'У вас пока нет трофеев. Достигните максимального уровня в категории мастерства, чтобы получить трофей!';
-        container.appendChild(hint);
         trophiesRendered = true;
         return;
     }
@@ -106,17 +114,8 @@ export async function renderTrophiesCollection() {
         container.appendChild(button);
     });
     
-    // Добавляем подсказку о выборе до 8 значков (после grid контейнера)
-    // Находим родительский элемент карточки
-    const card = container.closest('.card');
+    // Добавляем подсказку о выборе до 8 значков (после grid контейнера, вне grid)
     if (card) {
-        // Удаляем старую подсказку если она есть
-        const oldHint = card.querySelector('.trophies-hint');
-        if (oldHint) {
-            oldHint.remove();
-        }
-        
-        // Создаем новую подсказку
         const hint = document.createElement('div');
         hint.className = 'hint muted trophies-hint';
         hint.style.marginTop = 'var(--space-3)';
