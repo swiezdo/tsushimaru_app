@@ -709,6 +709,60 @@ export async function fetchTrophies() {
     }
 }
 
+// Получение списка всех доступных трофеев из конфига
+export async function fetchTrophiesList() {
+    try {
+        const data = await apiRequest('/api/trophies.list');
+        return data.trophies || [];
+    } catch (error) {
+        console.error('Ошибка получения списка трофеев:', error);
+        throw error;
+    }
+}
+
+// Отправка заявки на получение трофея
+export async function submitTrophyApplication(trophyKey, comment = '', photos = []) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        data.append('trophy_key', trophyKey);
+        
+        if (comment) {
+            data.append('comment', comment);
+        }
+        
+        // Добавляем изображения
+        photos.forEach(photo => {
+            data.append('photos', photo);
+        });
+
+        const url = `${API_BASE}/api/trophy.submit`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка отправки заявки на получение трофея:', error);
+        throw error;
+    }
+}
+
 // Обновление активных трофеев
 export async function updateActiveTrophies(activeTrophiesList) {
     try {

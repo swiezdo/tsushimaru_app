@@ -9,6 +9,7 @@ import { initWhatsNew, renderWhatsNewCards } from './whatsNew.js';
 import { initFeedback } from './feedback.js';
 import { initMastery } from './mastery.js';
 import { initTrophies, renderTrophiesCollection } from './trophies.js';
+import { initTrophiesList } from './trophies_list.js';
 import { checkUserRegistration } from './api.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
@@ -211,6 +212,9 @@ async function startApp() {
   
   // Инициализация модуля трофеев
   initTrophies();
+  
+  // Инициализация модуля списка трофеев
+  initTrophiesList();
 
   showScreen('home');
 }

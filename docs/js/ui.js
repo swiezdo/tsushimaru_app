@@ -5,6 +5,7 @@ import { tg, scrollTopSmooth } from './telegram.js';
 import { loadProfileOnScreenOpen } from './profile.js';
 import { renderMasteryButtons } from './mastery.js';
 import { renderTrophiesCollection } from './trophies.js';
+import { renderTrophiesButtons } from './trophies_list.js';
 import { refreshParticipantsList } from './participants.js';
 
 // Ссылки на экраны
@@ -22,6 +23,7 @@ export const screens = {
   feedback:           document.getElementById('feedbackScreen'),
   reward:             document.getElementById('rewardScreen'),
   rewardDetail:       document.getElementById('rewardDetailScreen'),
+  trophyDetail:       document.getElementById('trophyDetailScreen'),
 };
 
 // Топбар
@@ -41,7 +43,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','reward','rewardDetail'];
+    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','reward','rewardDetail','trophyDetail'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -74,9 +76,14 @@ export function showScreen(name) {
     renderMasteryButtons();
     // Рендерим коллекцию трофеев при каждом открытии экрана
     renderTrophiesCollection();
+    // Рендерим список трофеев (рендер произойдет только один раз за сессию)
+    renderTrophiesButtons();
   }
   else if (name === 'rewardDetail')    {
     // Топбар устанавливается динамически в renderMasteryDetail()
+  }
+  else if (name === 'trophyDetail')    {
+    // Топбар устанавливается динамически в renderTrophyDetail()
     // Временный заголовок не нужен, т.к. он сразу обновляется
   }
 

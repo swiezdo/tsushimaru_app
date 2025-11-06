@@ -1052,6 +1052,129 @@ html.tg .only-browser { display: none; }
   pointer-events: none;
 }
 
+/* ========== TROPHIES LIST ========== */
+.trophy-list-item-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--tg-tx);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-height: calc(var(--size-touch) + var(--space-1));
+  transition: all 0.2s ease;
+}
+
+.trophy-list-item-btn:hover {
+  background: var(--hover-bg);
+}
+
+.trophy-list-item-btn:active {
+  transform: translateY(1px);
+}
+
+/* Зеленый контур для полученных трофеев */
+.trophy-list-item-btn.obtained {
+  border-color: rgba(76, 175, 80, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(76, 175, 80, 0.5),
+    0 0 8px rgba(76, 175, 80, 0.28);
+}
+
+.trophy-list-item-text {
+  font-size: var(--fs-16);
+  font-weight: 600;
+  line-height: var(--lh-normal);
+  word-break: break-word;
+  flex: 1;
+  text-align: left;
+}
+
+.trophy-list-item-icon {
+  flex-shrink: 0;
+  margin-left: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trophy-icon-small {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ========== TROPHY DETAIL SCREEN ========== */
+#trophyDetailContainer .card {
+  padding: var(--space-2) var(--space-4);
+}
+
+.trophy-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  position: relative;
+  overflow: hidden;
+}
+
+.trophy-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-3);
+}
+
+.trophy-detail-header {
+  gap: 0 !important;
+  margin-bottom: 0 !important;
+  font-size: var(--fs-16) !important;
+  font-weight: 600 !important;
+  line-height: var(--lh-normal) !important;
+  flex: 1;
+}
+
+.trophy-detail-icon-container {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trophy-icon-large {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.trophy-description {
+  font-size: var(--fs-15);
+  line-height: var(--lh-normal);
+  color: var(--tg-tx);
+  margin-top: var(--space-2);
+}
+
+.trophy-proof {
+  font-size: var(--fs-14);
+  color: var(--tg-hint);
+  line-height: var(--lh-normal);
+  white-space: pre-line;
+}
+
+.trophy-obtained-message {
+  font-size: var(--fs-16);
+  color: var(--tg-tx);
+  text-align: center;
+  padding: var(--space-3);
+}
+
 /* ========== MASTERY DETAIL SCREEN ========== */
 #masteryDetailContainer .card {
   padding: var(--space-2) var(--space-4);

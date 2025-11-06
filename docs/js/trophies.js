@@ -91,7 +91,7 @@ export async function renderTrophiesCollection() {
         if (card) {
             const hint = document.createElement('div');
             hint.className = 'hint muted trophies-hint';
-            hint.textContent = 'У вас пока нет трофеев. Достигните максимального уровня в категории мастерства, чтобы получить трофей!';
+            hint.textContent = 'У вас пока нет трофеев. Достигните максимального уровня в категории мастерства или подайте заявку на получение трофея, чтобы получить трофей!';
             // Добавляем подсказку после контейнера с трофеями
             container.parentNode.insertBefore(hint, container.nextSibling);
         }
