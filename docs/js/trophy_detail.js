@@ -5,7 +5,8 @@ import { fetchTrophiesList, submitTrophyApplication } from './api.js';
 import { fetchTrophies } from './api.js';
 import { showScreen, setTopbar } from './ui.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
-import { shake, focusAndScrollIntoView, createFileKey, isImageFile } from './builds.js';
+import { shake, focusAndScrollIntoView } from './builds.js';
+import { createFileKey, isImageFile } from './utils.js';
 
 // Константы для формы заявки
 const MAX_TROPHY_FILES = 9;
