@@ -69,10 +69,8 @@ export async function renderTrophiesCollection() {
     
     // Удаляем все старые подсказки (они всегда должны быть вне grid)
     if (card) {
-        const oldHint = card.querySelector('.trophies-hint');
-        if (oldHint) {
-            oldHint.remove();
-        }
+        const oldHints = card.querySelectorAll('.trophies-hint');
+        oldHints.forEach(hint => hint.remove());
     }
     
     // Очищаем контейнер полностью (удаляем все дочерние элементы, включая подсказки)

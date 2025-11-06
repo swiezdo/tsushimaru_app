@@ -235,6 +235,12 @@ body {
   margin-right: 0;
 }
 
+/* Убираем боковые отступы у actions-bar в карточке заявки трофея */
+#trophyApplicationCard .actions-bar {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 /* ========== UPLOAD & SHOTS ========== */
 .shots-two {
   display: grid;

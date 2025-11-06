@@ -30,20 +30,23 @@ function createTrophyListItemButton(trophy) {
     textContainer.textContent = trophyName;
     button.appendChild(textContainer);
     
-    // Правая часть - иконка (если трофей получен)
-    if (isObtained) {
-        const iconContainer = document.createElement('div');
-        iconContainer.className = 'trophy-list-item-icon';
-        
-        const icon = document.createElement('img');
-        icon.className = 'trophy-icon-small';
-        icon.src = `./assets/trophies/${trophyKey}.svg`;
-        icon.alt = trophyName;
-        icon.loading = 'lazy';
-        
-        iconContainer.appendChild(icon);
-        button.appendChild(iconContainer);
+    // Правая часть - иконка (всегда видна)
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'trophy-list-item-icon';
+    
+    const icon = document.createElement('img');
+    icon.className = 'trophy-icon-small';
+    icon.src = `./assets/trophies/${trophyKey}.svg`;
+    icon.alt = trophyName;
+    icon.loading = 'lazy';
+    
+    // Если трофей не получен, делаем иконку полупрозрачной
+    if (!isObtained) {
+        icon.style.opacity = '0.5';
     }
+    
+    iconContainer.appendChild(icon);
+    button.appendChild(iconContainer);
     
     // Обработчик клика
     button.addEventListener('click', () => {
