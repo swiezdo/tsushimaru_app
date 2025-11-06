@@ -164,18 +164,50 @@ export async function testConnection() {
     }
 }
 
+// Проверка участия в группе
+export async function checkGroupMembership() {
+    try {
+        const data = await apiRequest('/api/user.checkGroupMembership');
+        return data.is_member === true;
+    } catch (error) {
+        console.error('Ошибка проверки участия в группе:', error);
+        // При ошибке считаем что пользователь не в группе
+        return false;
+    }
+}
+
 // Проверка регистрации пользователя
 export async function checkUserRegistration() {
     try {
+        // Проверяем наличие профиля в БД
         await fetchProfile();
-        return true; // Пользователь зарегистрирован (статус 200)
+        const isRegistered = true;
+        
+        // Дополнительно проверяем участие в группе
+        const isInGroup = await checkGroupMembership();
+        
+        // Возвращаем объект с результатами обеих проверок
+        return {
+            isRegistered: isRegistered,
+            isInGroup: isInGroup
+        };
     } catch (error) {
         if (error.status === 404) {
-            return false; // Пользователь не зарегистрирован
+            // Пользователь не зарегистрирован
+            // Все равно проверяем участие в группе (может быть зарегистрирован, но не в группе)
+            const isInGroup = await checkGroupMembership();
+            return {
+                isRegistered: false,
+                isInGroup: isInGroup
+            };
         }
         // Для других ошибок (сеть, сервер) считаем что пользователь не зарегистрирован
         console.error('Ошибка проверки регистрации:', error);
-        return false;
+        const isInGroup = await checkGroupMembership();
+        return {
+            isRegistered: false,
+            isInGroup: isInGroup
+        };
     }
 }
 

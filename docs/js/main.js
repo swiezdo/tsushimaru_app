@@ -124,8 +124,13 @@ function installBackButton() {
 
 // ---------------- Проверка регистрации ----------------
 async function requireRegistration(callback) {
-  const isRegistered = await checkUserRegistration();
+  const result = await checkUserRegistration();
   
+  // Проверяем, что result - это объект (новый формат) или boolean (старый формат для обратной совместимости)
+  const isRegistered = typeof result === 'object' ? result.isRegistered : result;
+  const isInGroup = typeof result === 'object' ? result.isInGroup : true; // Для обратной совместимости считаем что в группе
+  
+  // Если пользователь не зарегистрирован
   if (!isRegistered) {
     // Показываем Telegram попап
     tg?.showPopup({
@@ -144,7 +149,27 @@ async function requireRegistration(callback) {
     return;
   }
   
-  // Если зарегистрирован - выполняем callback
+  // Если пользователь зарегистрирован, но не в группе
+  if (!isInGroup) {
+    // Показываем Telegram попап с предложением присоединиться к группе
+    tg?.showPopup({
+      title: "Требуется участие в группе",
+      message: "Эти функции доступны только участникам группы Tsushima.Ru. Пожалуйста, присоединитесь к группе.",
+      buttons: [
+        { id: "cancel", type: "default", text: "Ок" },
+        { id: "joinGroup", type: "destructive", text: "Открыть группу" }
+      ]
+    }, (buttonId) => {
+      if (buttonId === "joinGroup") {
+        // Открываем ссылку на группу
+        window.open("https://t.me/+ZFiVYVrz-PEzYjBi", "_blank");
+      }
+      // При нажатии "Ок" или закрытии попапа остаемся на главной
+    });
+    return;
+  }
+  
+  // Если зарегистрирован и в группе - выполняем callback
   callback();
 }
 
