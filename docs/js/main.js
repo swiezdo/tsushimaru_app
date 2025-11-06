@@ -8,7 +8,7 @@ import { initParticipantDetail } from './participantDetail.js';
 import { initWhatsNew, renderWhatsNewCards } from './whatsNew.js';
 import { initFeedback } from './feedback.js';
 import { initMastery } from './mastery.js';
-import { initTrophies, renderTrophiesCollection } from './trophies.js';
+import { initTrophies } from './trophies.js';
 import { checkUserRegistration } from './api.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
@@ -181,10 +181,7 @@ function bindHomeButtons() {
     ['participantsBtn', () => requireRegistration(() => showScreen('participants'))],
     ['buildsBtn',      () => requireRegistration(() => showScreen('builds'))],
     ['whatsNewBtn',    () => { showScreen('whatsNew'); renderWhatsNewCards(); }],
-    ['rewardBtn',      () => requireRegistration(() => { 
-      showScreen('reward'); 
-      renderTrophiesCollection(); 
-    })],
+    ['rewardBtn',      () => requireRegistration(() => showScreen('reward'))],
   ];
   for (const [id, handler] of map) {
     const el = $(id);
