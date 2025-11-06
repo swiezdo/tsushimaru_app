@@ -43,18 +43,16 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
             ? `${API_BASE}${user.avatar_url}?t=${Date.now()}` 
             : './assets/default-avatar.svg';
         
-        // Создаем иконки максимальных уровней мастерства
-        let masteryIconsHtml = '';
-        const maxMasteryLevels = user.max_mastery_levels || [];
-        if (maxMasteryLevels.length > 0) {
-            // Порядок категорий: solo, hellmode, raid, speedrun
-            const categoriesOrder = ['solo', 'hellmode', 'raid', 'speedrun'];
-            const icons = maxMasteryLevels
-                .filter(category => categoriesOrder.includes(category))
-                .sort((a, b) => categoriesOrder.indexOf(a) - categoriesOrder.indexOf(b))
-                .map(category => `<img src="./assets/mastery/${category}/icon.svg" alt="${category}" class="mastery-icon" />`)
+        // Создаем иконки активных трофеев
+        let trophyIconsHtml = '';
+        const activeTrophies = user.active_trophies || [];
+        if (activeTrophies.length > 0) {
+            // Сортируем трофеи по алфавиту (они уже должны быть отсортированы с сервера, но на всякий случай)
+            const sortedTrophies = [...activeTrophies].sort();
+            const icons = sortedTrophies
+                .map(trophyKey => `<img src="./assets/trophies/${trophyKey}.svg" alt="${trophyKey}" class="mastery-icon" />`)
                 .join('');
-            masteryIconsHtml = `<div class="mastery-icons">${icons}</div>`;
+            trophyIconsHtml = `<div class="mastery-icons">${icons}</div>`;
         }
         
         // Создаем структуру с аватаркой
@@ -65,7 +63,7 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
             <div class="list-btn-content">
                 <div class="list-btn-info">
                     <span class="list-btn-name">${user.psn_id || '—'}</span>
-                    ${masteryIconsHtml}
+                    ${trophyIconsHtml}
                 </div>
                 <span class="right">›</span>
             </div>

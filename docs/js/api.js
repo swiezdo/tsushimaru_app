@@ -693,5 +693,59 @@ export async function getReactions(buildId) {
     }
 }
 
+// ========== ФУНКЦИИ ДЛЯ РАБОТЫ С ТРОФЕЯМИ ==========
+
+// Получение трофеев пользователя
+export async function fetchTrophies() {
+    try {
+        const data = await apiRequest('/api/trophies.get');
+        return {
+            trophies: data.trophies || [],
+            active_trophies: data.active_trophies || []
+        };
+    } catch (error) {
+        console.error('Ошибка получения трофеев:', error);
+        throw error;
+    }
+}
+
+// Обновление активных трофеев
+export async function updateActiveTrophies(activeTrophiesList) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        
+        // Добавляем каждый трофей как отдельное поле
+        activeTrophiesList.forEach(trophy => {
+            data.append('active_trophies', trophy);
+        });
+
+        const url = `${API_BASE}/api/trophies.updateActive`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Telegram-Init-Data': initData,
+            },
+            body: data,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const error = new Error(errorData.detail || `HTTP ${response.status}`);
+            error.status = response.status;
+            throw error;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка обновления активных трофеев:', error);
+        throw error;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };
