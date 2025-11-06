@@ -4,6 +4,8 @@
 import { tg, scrollTopSmooth } from './telegram.js';
 import { loadProfileOnScreenOpen } from './profile.js';
 import { renderMasteryButtons } from './mastery.js';
+import { renderTrophiesCollection } from './trophies.js';
+import { refreshParticipantsList } from './participants.js';
 
 // Ссылки на экраны
 export const screens = {
@@ -51,7 +53,13 @@ export function showScreen(name) {
     loadProfileOnScreenOpen();
   }
   
-  else if (name === 'participants')    setTopbar(true, 'Участники');
+  else if (name === 'participants')    {
+    // Обновляем список участников при открытии экрана для актуальных данных
+    refreshParticipantsList().catch(err => {
+      console.error('Ошибка обновления списка участников:', err);
+    });
+    setTopbar(true, 'Участники');
+  }
   else if (name === 'participantDetail') setTopbar(true, 'Участник');
   else if (name === 'builds')          setTopbar(true, 'Билды');
   else if (name === 'buildCreate')     setTopbar(true, 'Создать билд');
@@ -64,6 +72,8 @@ export function showScreen(name) {
     setTopbar(true, 'Награды');
     // Рендерим кнопки мастерства (рендер произойдет только один раз за сессию)
     renderMasteryButtons();
+    // Рендерим коллекцию трофеев при каждом открытии экрана
+    renderTrophiesCollection();
   }
   else if (name === 'rewardDetail')    {
     // Топбар устанавливается динамически в renderMasteryDetail()

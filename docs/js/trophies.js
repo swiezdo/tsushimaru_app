@@ -97,6 +97,13 @@ export async function renderTrophiesCollection() {
         container.appendChild(button);
     });
     
+    // Добавляем подсказку о выборе до 8 значков
+    const hint = document.createElement('div');
+    hint.className = 'hint muted';
+    hint.style.marginTop = 'var(--space-3)';
+    hint.textContent = 'Вы можете выбрать до 8 значков для отображения под вашим ником на странице участников';
+    container.appendChild(hint);
+    
     trophiesRendered = true;
 }
 
