@@ -74,6 +74,15 @@ export async function renderTrophiesCollection() {
     
     if (trophies.length === 0) {
         // Если нет трофеев, показываем подсказку
+        // Удаляем старую подсказку если она есть
+        const card = container.closest('.card');
+        if (card) {
+            const oldHint = card.querySelector('.trophies-hint');
+            if (oldHint) {
+                oldHint.remove();
+            }
+        }
+        
         const hint = document.createElement('div');
         hint.className = 'hint muted';
         hint.textContent = 'У вас пока нет трофеев. Достигните максимального уровня в категории мастерства, чтобы получить трофей!';
@@ -97,12 +106,24 @@ export async function renderTrophiesCollection() {
         container.appendChild(button);
     });
     
-    // Добавляем подсказку о выборе до 8 значков
-    const hint = document.createElement('div');
-    hint.className = 'hint muted';
-    hint.style.marginTop = 'var(--space-3)';
-    hint.textContent = 'Вы можете выбрать до 8 значков для отображения под вашим ником на странице участников';
-    container.appendChild(hint);
+    // Добавляем подсказку о выборе до 8 значков (после grid контейнера)
+    // Находим родительский элемент карточки
+    const card = container.closest('.card');
+    if (card) {
+        // Удаляем старую подсказку если она есть
+        const oldHint = card.querySelector('.trophies-hint');
+        if (oldHint) {
+            oldHint.remove();
+        }
+        
+        // Создаем новую подсказку
+        const hint = document.createElement('div');
+        hint.className = 'hint muted trophies-hint';
+        hint.style.marginTop = 'var(--space-3)';
+        hint.textContent = 'Вы можете выбрать до 8 значков для отображения под вашим ником на странице участников';
+        // Добавляем подсказку после контейнера с трофеями
+        container.parentNode.insertBefore(hint, container.nextSibling);
+    }
     
     trophiesRendered = true;
 }
