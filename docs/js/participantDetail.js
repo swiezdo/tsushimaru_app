@@ -65,7 +65,11 @@ function renderParticipantTrophies(trophiesData) {
 
     participantTrophiesCard.style.display = 'none';
 
-    const trophies = (trophiesData?.trophies || []).slice().sort();
+    const masteryKeys = new Set(['solo', 'hellmode', 'raid', 'speedrun']);
+    const trophies = (trophiesData?.trophies || [])
+        .filter((trophyKey) => !masteryKeys.has(trophyKey))
+        .slice()
+        .sort();
 
     participantTrophiesCard.style.display = 'block';
 
@@ -81,17 +85,7 @@ function renderParticipantTrophies(trophiesData) {
         const titleText = trophyDef?.name || trophyKey;
 
         const item = document.createElement('div');
-        item.className = 'list-btn success is-static';
-
-        const avatar = document.createElement('div');
-        avatar.className = 'list-btn-avatar';
-
-        const icon = document.createElement('img');
-        icon.src = `./assets/trophies/${trophyKey}.svg`;
-        icon.alt = titleText;
-        icon.loading = 'lazy';
-
-        avatar.appendChild(icon);
+        item.className = 'list-btn is-static';
 
         const content = document.createElement('div');
         content.className = 'list-btn-content';
@@ -104,9 +98,20 @@ function renderParticipantTrophies(trophiesData) {
         nameEl.textContent = titleText;
 
         info.appendChild(nameEl);
-        content.appendChild(info);
 
-        item.appendChild(avatar);
+        const trailing = document.createElement('div');
+        trailing.className = 'list-btn-trailing';
+
+        const icon = document.createElement('img');
+        icon.className = 'list-btn-icon';
+        icon.src = `./assets/trophies/${trophyKey}.svg`;
+        icon.alt = titleText;
+        icon.loading = 'lazy';
+
+        trailing.appendChild(icon);
+
+        content.appendChild(info);
+        content.appendChild(trailing);
         item.appendChild(content);
 
         participantTrophiesContainer.appendChild(item);

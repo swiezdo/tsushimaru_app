@@ -14,18 +14,18 @@ function createTrophyRow(trophy) {
     const button = createButton('button', 'list-btn', '', { trophyKey: trophy.key });
 
     button.innerHTML = `
-        <div class="list-btn-avatar">
-            <img src="./assets/trophies/${trophy.key}.svg" alt="${trophy.name}" loading="lazy" />
-        </div>
         <div class="list-btn-content">
             <div class="list-btn-info">
                 <span class="list-btn-name">${trophy.name}</span>
             </div>
-            <span class="right">›</span>
+            <div class="list-btn-trailing">
+                <img class="list-btn-icon" src="./assets/trophies/${trophy.key}.svg" alt="${trophy.name}" loading="lazy" />
+                <span class="right">›</span>
+            </div>
         </div>
     `;
 
-    const icon = button.querySelector('img');
+    const icon = button.querySelector('.list-btn-icon');
     if (trophy.obtained) {
         button.classList.add('success');
     } else if (icon) {

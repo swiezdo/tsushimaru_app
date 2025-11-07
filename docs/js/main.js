@@ -59,6 +59,7 @@ function installBackButton() {
       'feedback': 'whatsNew',
       'reward': 'home',
       'rewardDetail': 'reward',
+      'trophyDetail': 'reward',
       'participantDetail': previousScreen ? (previousScreen.startsWith('buildPublicDetail:') ? 'buildPublicDetail' : 'participants') : 'participants'
     };
     

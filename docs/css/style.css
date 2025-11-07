@@ -431,10 +431,10 @@ a svg,
 }
 
 .list-btn.success {
-  border-color: rgba(76, 175, 80, 0.6);
+  border-color: rgba(46, 166, 255, 0.6);
   box-shadow:
-    0 0 0 1px rgba(76, 175, 80, 0.45),
-    0 0 6px rgba(76, 175, 80, 0.2);
+    0 0 0 1px rgba(46, 166, 255, 0.5),
+    0 0 6px rgba(46, 166, 255, 0.24);
 }
 
 .list-btn.is-static {
@@ -471,6 +471,18 @@ a svg,
   align-items: center;
   justify-content: space-between;
   min-width: 0;
+}
+
+.list-btn-trailing {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.list-btn-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .list-btn-info {
@@ -1023,7 +1035,7 @@ html.tg .only-browser { display: none; }
 /* ========== TILE GRID ========== */
 .tile-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: var(--space-2);
   width: 100%;
 }
