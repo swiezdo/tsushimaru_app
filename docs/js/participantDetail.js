@@ -1,7 +1,7 @@
 // participantDetail.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
-import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE, fetchUserTrophies } from './api.js';
+import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE, fetchUserTrophies, fetchTrophiesList } from './api.js';
 import { prettyLines, formatDate } from './utils.js';
 import { 
     loadMasteryConfig, 
@@ -30,8 +30,7 @@ const noParticipantBuildsHintEl = $('noParticipantBuildsHint');
 
 let currentParticipantId = null;
 let currentParticipantProfile = null;
-
-// Трофеи удалены
+let trophyDefinitionsByKey = new Map();
 
 // Рендеринг профиля участника
 function renderParticipantProfile(profile) {
@@ -78,17 +77,30 @@ function renderParticipantTrophies(trophiesData) {
     }
 
     trophies.forEach((trophyKey) => {
-        const tile = document.createElement('div');
-        tile.className = 'trophy-button trophy-button-readonly';
+        const trophyDef = trophyDefinitionsByKey.get(trophyKey);
+        const titleText = trophyDef?.name || trophyKey;
+
+        const item = document.createElement('div');
+        item.className = 'trophy-list-item-btn trophy-readonly obtained';
+
+        const textContainer = document.createElement('div');
+        textContainer.className = 'trophy-list-item-text';
+        textContainer.textContent = titleText;
+        item.appendChild(textContainer);
+
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'trophy-list-item-icon';
 
         const icon = document.createElement('img');
-        icon.className = 'trophy-icon';
+        icon.className = 'trophy-icon-small';
         icon.src = `./assets/trophies/${trophyKey}.svg`;
-        icon.alt = trophyKey;
+        icon.alt = titleText;
         icon.loading = 'lazy';
 
-        tile.appendChild(icon);
-        participantTrophiesContainer.appendChild(tile);
+        iconContainer.appendChild(icon);
+        item.appendChild(iconContainer);
+
+        participantTrophiesContainer.appendChild(item);
     });
 }
 
@@ -348,15 +360,27 @@ export async function openParticipantDetail(userId) {
             sessionStorage.setItem('previousScreen', 'participants');
         }
         
+        const trophyDefinitionsPromise = trophyDefinitionsByKey.size
+            ? Promise.resolve(null)
+            : fetchTrophiesList().catch(error => {
+                console.error('Ошибка загрузки списка трофеев:', error);
+                return [];
+            });
+
         // Загружаем данные участника параллельно
-        const [profile, builds, trophiesData] = await Promise.all([
+        const [profile, builds, trophiesData, trophiesDefinitions] = await Promise.all([
             fetchUserProfile(userId),
             fetchUserBuilds(userId),
             fetchUserTrophies(userId).catch(error => {
                 console.error('Ошибка загрузки трофеев участника:', error);
                 return { trophies: [], active_trophies: [] };
-            })
+            }),
+            trophyDefinitionsPromise
         ]);
+
+        if (Array.isArray(trophiesDefinitions) && trophiesDefinitions.length) {
+            trophyDefinitionsByKey = new Map(trophiesDefinitions.map(def => [def.key, def]));
+        }
         
         currentParticipantProfile = profile;
         

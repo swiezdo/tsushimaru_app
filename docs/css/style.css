@@ -1074,6 +1074,15 @@ html.tg .only-browser { display: none; }
   transform: translateY(1px);
 }
 
+.trophy-list-item-btn.trophy-readonly {
+  cursor: default;
+  pointer-events: none;
+}
+
+.trophy-list-item-btn.trophy-readonly:active {
+  transform: none;
+}
+
 /* Зеленый контур для полученных трофеев */
 .trophy-list-item-btn.obtained {
   border-color: rgba(76, 175, 80, 0.6);
