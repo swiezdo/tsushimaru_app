@@ -117,3 +117,9 @@ export async function refreshParticipantsList() {
     await loadParticipants();
     renderParticipants();
 }
+
+export function resetParticipantSearch() {
+    if (participantSearchEl) {
+        participantSearchEl.value = '';
+    }
+}

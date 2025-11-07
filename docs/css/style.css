@@ -1132,6 +1132,12 @@ html.tg .only-browser { display: none; }
   white-space: pre-line;
 }
 
+.trophy-proof.with-divider {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
 .trophy-obtained-message {
   font-size: var(--fs-16);
   color: var(--tg-tx);

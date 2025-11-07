@@ -6,7 +6,7 @@ import { loadProfileOnScreenOpen } from './profile.js';
 import { renderMasteryButtons } from './mastery.js';
 import { renderTrophiesCollection } from './trophies.js';
 import { renderTrophiesButtons } from './trophies_list.js';
-import { refreshParticipantsList } from './participants.js';
+import { refreshParticipantsList, resetParticipantSearch } from './participants.js';
 
 // Ссылки на экраны
 export const screens = {
@@ -56,6 +56,7 @@ export function showScreen(name) {
   }
   
   else if (name === 'participants')    {
+    resetParticipantSearch();
     // Обновляем список участников при открытии экрана для актуальных данных
     refreshParticipantsList().catch(err => {
       console.error('Ошибка обновления списка участников:', err);

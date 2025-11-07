@@ -23,6 +23,7 @@ const applicationState = {
 
 export async function openTrophyDetail(trophyKey) {
     showScreen('trophyDetail');
+    setTopbar(true, 'Просмотр трофея');
 
     try {
         const [trophies, userData] = await Promise.all([loadTrophiesList(), fetchTrophies()]);
@@ -60,33 +61,45 @@ function renderTrophyDetail(trophy, isObtained) {
     resetApplicationState();
     clearChildren(detailContainer);
 
-    setTopbar(true, trophy.name);
-
-    detailContainer.appendChild(buildDescriptionCard(trophy, isObtained));
-
-    if (!isObtained) {
+    if (isObtained) {
+        detailContainer.appendChild(buildObtainedNoticeCard());
+        detailContainer.appendChild(buildInfoCard(trophy, { includeProof: false }));
+    } else {
+        detailContainer.appendChild(buildInfoCard(trophy, { includeProof: Boolean(trophy.proof) }));
         detailContainer.appendChild(buildApplicationCard(trophy));
     }
 }
 
-function buildDescriptionCard(trophy, isObtained) {
+function buildObtainedNoticeCard() {
     const card = document.createElement('section');
-    card.className = `card ${isObtained ? 'max-level' : 'next-level'}`;
+    card.className = 'card max-level';
 
     const title = document.createElement('h3');
     title.className = 'card-title';
-    title.textContent = isObtained ? '🎉 Вы получили этот трофей!' : trophy.name;
+    title.textContent = '🎉 Вы получили этот трофей!';
+    card.appendChild(title);
+
+    return card;
+}
+
+function buildInfoCard(trophy, { includeProof }) {
+    const card = document.createElement('section');
+    card.className = 'card next-level';
+
+    const title = document.createElement('h3');
+    title.className = 'card-title';
+    title.textContent = trophy.name;
+    card.appendChild(title);
 
     const description = document.createElement('div');
     description.className = 'trophy-description';
+    description.style.whiteSpace = 'pre-line';
     description.textContent = trophy.description;
-
-    card.appendChild(title);
     card.appendChild(description);
 
-    if (!isObtained && trophy.proof) {
+    if (includeProof && trophy.proof) {
         const proof = document.createElement('div');
-        proof.className = 'trophy-proof';
+        proof.className = 'trophy-proof with-divider';
         proof.textContent = `📸 ${trophy.proof}`;
         card.appendChild(proof);
     }
