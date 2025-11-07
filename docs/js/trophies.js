@@ -10,6 +10,7 @@ let cachedActiveTrophies = [];
 
 // Флаг: отрендерено ли уже коллекция за эту сессию
 let trophiesRendered = false;
+let activeRenderToken = null;
 
 // Получение трофеев с кэшированием
 async function fetchTrophiesWithCache(forceRefresh = false) {
@@ -57,7 +58,11 @@ function createTrophyButton(trophyKey, isActive) {
 }
 
 // Рендеринг коллекции трофеев
-export async function renderTrophiesCollection() {
+export async function renderTrophiesCollection(forceRefresh = false) {
+    if (trophiesRendered && !forceRefresh) {
+        return;
+    }
+    
     // Пробуем найти контейнер
     const container = document.getElementById('trophiesCollectionContainer');
     if (!container) {
@@ -66,6 +71,9 @@ export async function renderTrophiesCollection() {
     
     // Находим родительский элемент карточки для удаления подсказок
     const card = container.closest('.card');
+    
+    const renderToken = Symbol('trophies-render');
+    activeRenderToken = renderToken;
     
     // Удаляем все старые подсказки (они всегда должны быть вне grid)
     if (card) {
@@ -80,9 +88,13 @@ export async function renderTrophiesCollection() {
     container.style.display = 'grid';
     
     // Загружаем трофеи (инвалидируем кэш если нужно обновить данные)
-    const data = await fetchTrophiesWithCache();
+    const data = await fetchTrophiesWithCache(forceRefresh);
     const trophies = data.trophies || [];
     const activeTrophies = data.active_trophies || [];
+    
+    if (activeRenderToken !== renderToken) {
+        return;
+    }
     
     if (trophies.length === 0) {
         // Если нет трофеев, показываем подсказку ВНЕ grid контейнера

@@ -709,6 +709,20 @@ export async function fetchTrophies() {
     }
 }
 
+// Получение трофеев указанного пользователя
+export async function fetchUserTrophies(targetUserId) {
+    try {
+        const data = await apiRequest(`/api/trophies.get?target_user_id=${targetUserId}`);
+        return {
+            trophies: data.trophies || [],
+            active_trophies: data.active_trophies || []
+        };
+    } catch (error) {
+        console.error('Ошибка получения трофеев пользователя:', error);
+        throw error;
+    }
+}
+
 // Получение списка всех доступных трофеев из конфига
 export async function fetchTrophiesList() {
     try {

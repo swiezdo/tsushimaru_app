@@ -82,7 +82,6 @@ function applyTheme() {
     document.documentElement.style.setProperty('--card-bg', 'rgba(0, 0, 0, 0.06)');
     document.documentElement.style.setProperty('--stroke-color', 'rgba(0, 0, 0, 0.15)');
     document.documentElement.style.setProperty('--elem-bg', 'rgba(0, 0, 0, 0.08)');
-    document.documentElement.style.setProperty('--hover-bg', 'rgba(0, 0, 0, 0.12)');
     document.documentElement.style.setProperty('--lightbox-bg', 'rgba(0, 0, 0, 0.75)');
     document.documentElement.style.setProperty('--modal-bg', bgColor);
     // Темно-серый фон для квадратиков с иконками на светлой теме
@@ -92,7 +91,6 @@ function applyTheme() {
     document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.04)');
     document.documentElement.style.setProperty('--stroke-color', 'rgba(255, 255, 255, 0.08)');
     document.documentElement.style.setProperty('--elem-bg', 'rgba(255, 255, 255, 0.06)');
-    document.documentElement.style.setProperty('--hover-bg', 'rgba(255, 255, 255, 0.04)');
     document.documentElement.style.setProperty('--lightbox-bg', 'rgba(0, 0, 0, 0.85)');
     document.documentElement.style.setProperty('--modal-bg', bgColor);
     // Светлый фон для квадратиков с иконками на темной теме

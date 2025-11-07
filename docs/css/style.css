@@ -16,7 +16,6 @@
   --card-bg: rgba(255, 255, 255, 0.04);
   --stroke-color: rgba(255, 255, 255, 0.08);
   --elem-bg: rgba(255, 255, 255, 0.06);
-  --hover-bg: rgba(255, 255, 255, 0.04);
   --modal-bg: var(--bg);
   --icon-bg: rgba(255, 255, 255, 0.06);
   --color-border: var(--stroke-color);
@@ -79,7 +78,6 @@
   
   /* Miscellaneous */
   --opacity-secondary: 0.7;
-  --opacity-hover: 0.95;
   --transition-fast: 0.1s ease;
   --transition-base: 0.2s ease;
 }
@@ -782,14 +780,6 @@ html.tg .only-browser { display: none; }
   filter: brightness(0) saturate(100%) invert(8%) sepia(19%) saturate(3011%) hue-rotate(179deg) brightness(95%) contrast(99%);
 }
 
-.class-tab:hover:not(.active) {
-  background: var(--hover-bg);
-}
-
-.class-tab:hover:not(.active) img {
-  opacity: 1;
-}
-
 /* ========== MASTERY BADGES ========== */
 .badge-btn {
   display: flex;
@@ -1037,12 +1027,17 @@ html.tg .only-browser { display: none; }
   overflow: hidden;
 }
 
-.trophy-button:hover {
-  background: var(--hover-bg);
-}
-
 .trophy-button:active {
   transform: scale(0.95);
+}
+
+.trophy-button.trophy-button-readonly {
+  cursor: default;
+  pointer-events: none;
+}
+
+.trophy-button.trophy-button-readonly:active {
+  transform: none;
 }
 
 .trophy-button.active {
@@ -1073,10 +1068,6 @@ html.tg .only-browser { display: none; }
   overflow: hidden;
   min-height: calc(var(--size-touch) + var(--space-1));
   transition: all 0.2s ease;
-}
-
-.trophy-list-item-btn:hover {
-  background: var(--hover-bg);
 }
 
 .trophy-list-item-btn:active {
@@ -1254,11 +1245,6 @@ html.tg .only-browser { display: none; }
   transition: all var(--transition-base);
 }
 
-.reset-filters-btn:hover {
-  background: rgba(255, 68, 68, 0.25);
-  border-color: rgba(255, 68, 68, 0.7);
-}
-
 .reset-filters-btn.hidden {
   display: none;
 }
@@ -1311,10 +1297,6 @@ html.tg .only-browser { display: none; }
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background-color 0.2s ease;
-}
-
-.filter-option:hover {
-  background: var(--hover-bg);
 }
 
 .filter-option input[type="checkbox"] {
@@ -1537,10 +1519,8 @@ html.tg .only-browser { display: none; }
   transition: opacity var(--transition-base);
 }
 
-.build-edit-btn:hover,
 .build-edit-btn:active {
   opacity: 1;
-  background: var(--hover-bg);
 }
 
 .build-edit-btn img,
@@ -1567,11 +1547,6 @@ html.tg .only-browser { display: none; }
   overflow: hidden;
   z-index: 10;
   transition: all 0.2s ease;
-}
-
-.avatar-upload-btn:hover {
-  border-color: var(--accent);
-  background: var(--hover-bg);
 }
 
 .avatar-preview {

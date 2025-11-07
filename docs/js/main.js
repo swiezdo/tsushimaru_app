@@ -8,7 +8,7 @@ import { initParticipantDetail } from './participantDetail.js';
 import { initWhatsNew, renderWhatsNewCards } from './whatsNew.js';
 import { initFeedback } from './feedback.js';
 import { initMastery } from './mastery.js';
-import { initTrophies, renderTrophiesCollection } from './trophies.js';
+import { initTrophies } from './trophies.js';
 import { initTrophiesList } from './trophies_list.js';
 import { checkUserRegistration } from './api.js';
 
@@ -184,7 +184,6 @@ function bindHomeButtons() {
     ['whatsNewBtn',    () => { showScreen('whatsNew'); renderWhatsNewCards(); }],
     ['rewardBtn',      () => requireRegistration(() => { 
       showScreen('reward'); 
-      renderTrophiesCollection(); 
     })],
   ];
   for (const [id, handler] of map) {

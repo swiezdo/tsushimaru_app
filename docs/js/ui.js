@@ -75,7 +75,7 @@ export function showScreen(name) {
     // Рендерим кнопки мастерства (рендер произойдет только один раз за сессию)
     renderMasteryButtons();
     // Рендерим коллекцию трофеев при каждом открытии экрана
-    renderTrophiesCollection();
+    renderTrophiesCollection(true);
     // Рендерим список трофеев (рендер произойдет только один раз за сессию)
     renderTrophiesButtons();
   }

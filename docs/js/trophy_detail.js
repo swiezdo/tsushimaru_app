@@ -76,21 +76,21 @@ function renderTrophyDetail(trophy, isObtained) {
     description.textContent = trophy.description;
     descriptionCard.appendChild(description);
     
-    // Разделитель
-    const divider = document.createElement('div');
-    divider.style.marginTop = 'var(--space-3)';
-    divider.style.paddingTop = 'var(--space-3)';
-    divider.style.borderTop = '1px solid var(--color-border)';
-    descriptionCard.appendChild(divider);
-    
-    // Доказательство (серым текстом поменьше)
-    const proof = document.createElement('div');
-    proof.className = 'trophy-proof';
-    proof.style.fontSize = 'var(--fs-14)';
-    proof.style.color = 'var(--tg-hint)';
-    proof.style.marginTop = 'var(--space-2)';
-    proof.textContent = `📸 ${trophy.proof}`;
-    descriptionCard.appendChild(proof);
+    if (!isObtained) {
+        const divider = document.createElement('div');
+        divider.style.marginTop = 'var(--space-3)';
+        divider.style.paddingTop = 'var(--space-3)';
+        divider.style.borderTop = '1px solid var(--color-border)';
+        descriptionCard.appendChild(divider);
+
+        const proof = document.createElement('div');
+        proof.className = 'trophy-proof';
+        proof.style.fontSize = 'var(--fs-14)';
+        proof.style.color = 'var(--tg-hint)';
+        proof.style.marginTop = 'var(--space-2)';
+        proof.textContent = `📸 ${trophy.proof}`;
+        descriptionCard.appendChild(proof);
+    }
     
     container.appendChild(descriptionCard);
     
