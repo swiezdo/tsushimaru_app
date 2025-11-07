@@ -81,24 +81,33 @@ function renderParticipantTrophies(trophiesData) {
         const titleText = trophyDef?.name || trophyKey;
 
         const item = document.createElement('div');
-        item.className = 'trophy-list-item-btn trophy-readonly obtained';
+        item.className = 'list-btn success is-static';
 
-        const textContainer = document.createElement('div');
-        textContainer.className = 'trophy-list-item-text';
-        textContainer.textContent = titleText;
-        item.appendChild(textContainer);
-
-        const iconContainer = document.createElement('div');
-        iconContainer.className = 'trophy-list-item-icon';
+        const avatar = document.createElement('div');
+        avatar.className = 'list-btn-avatar';
 
         const icon = document.createElement('img');
-        icon.className = 'trophy-icon-small';
         icon.src = `./assets/trophies/${trophyKey}.svg`;
         icon.alt = titleText;
         icon.loading = 'lazy';
 
-        iconContainer.appendChild(icon);
-        item.appendChild(iconContainer);
+        avatar.appendChild(icon);
+
+        const content = document.createElement('div');
+        content.className = 'list-btn-content';
+
+        const info = document.createElement('div');
+        info.className = 'list-btn-info';
+
+        const nameEl = document.createElement('span');
+        nameEl.className = 'list-btn-name';
+        nameEl.textContent = titleText;
+
+        info.appendChild(nameEl);
+        content.appendChild(info);
+
+        item.appendChild(avatar);
+        item.appendChild(content);
 
         participantTrophiesContainer.appendChild(item);
     });

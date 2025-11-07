@@ -69,6 +69,81 @@ export function createButton(type, className, textContent, dataset = {}) {
   return btn;
 }
 
+export function appendChildren(parent, ...children) {
+  if (!parent) return parent;
+  children.forEach((child) => {
+    if (!child) return;
+    parent.appendChild(child);
+  });
+  return parent;
+}
+
+export function clearChildren(node) {
+  if (!node) return;
+  while (node.firstChild) {
+    node.removeChild(node.firstChild);
+  }
+}
+
+export function removeElements(root, selector) {
+  if (!root || !selector) return;
+  root.querySelectorAll(selector).forEach((el) => el.remove());
+}
+
+export function createImage(src, className, alt = '', attributes = {}) {
+  const img = document.createElement('img');
+  if (className) img.className = className;
+  if (typeof alt === 'string') img.alt = alt;
+  if (src) img.src = src;
+  Object.assign(img, attributes);
+  return img;
+}
+
+export function insertHintAfter(anchor, text, extraClass = '') {
+  if (!anchor || !anchor.parentNode) return null;
+  const className = ['hint', extraClass].filter(Boolean).join(' ');
+  const hint = createElement('div', className, text);
+  anchor.insertAdjacentElement('afterend', hint);
+  return hint;
+}
+
+export function renderFilesPreview(files, previewEl, { limit = 4, onRemove } = {}) {
+  if (!previewEl) return () => {};
+
+  const objectURLs = [];
+  previewEl.innerHTML = '';
+
+  const shown = files.slice(0, limit);
+  shown.forEach((file, idx) => {
+    const tile = createElement('div', 'preview-item removable');
+    tile.title = 'Нажмите, чтобы удалить';
+
+    if (isImageFile(file)) {
+      const objectURL = URL.createObjectURL(file);
+      objectURLs.push(objectURL);
+      const img = createImage(objectURL, '', file.name || '');
+      tile.appendChild(img);
+    } else {
+      tile.textContent = '📄';
+    }
+
+    tile.addEventListener('click', () => {
+      onRemove?.(idx);
+    });
+
+    previewEl.appendChild(tile);
+  });
+
+  if (files.length > limit) {
+    const more = createElement('div', 'preview-more', `+${files.length - limit}`);
+    previewEl.appendChild(more);
+  }
+
+  return () => {
+    objectURLs.forEach((url) => URL.revokeObjectURL(url));
+  };
+}
+
 // ---------- Работа с файлами ----------
 export function createFileKey(file) {
   return `${file.name}::${file.size}::${file.lastModified}`;

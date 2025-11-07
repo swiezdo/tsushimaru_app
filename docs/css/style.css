@@ -430,6 +430,22 @@ a svg,
   transform: translateY(1px); 
 }
 
+.list-btn.success {
+  border-color: rgba(76, 175, 80, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(76, 175, 80, 0.45),
+    0 0 6px rgba(76, 175, 80, 0.2);
+}
+
+.list-btn.is-static {
+  cursor: default;
+  pointer-events: none;
+}
+
+.list-btn.is-static:active {
+  transform: none;
+}
+
 .list-btn-avatar {
   width: 40px;
   height: 40px;
@@ -657,6 +673,7 @@ a svg,
   line-height: 1;
 }
 .muted { color: var(--tg-hint); font-size: var(--fs-14); }
+.is-dimmed { opacity: 0.5; }
 
 /* ========== SHOTS GRID ========== */
 .shots-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
@@ -1003,119 +1020,48 @@ html.tg .only-browser { display: none; }
   gap: var(--space-2);
 }
 
-/* ========== TROPHIES COLLECTION ========== */
-.trophies-collection-container {
+/* ========== TILE GRID ========== */
+.tile-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
   gap: var(--space-2);
   width: 100%;
 }
 
-.trophy-button {
+.tile-btn {
   aspect-ratio: 1;
   width: 100%;
   padding: 0;
   background: var(--elem-bg);
-  border: 2px solid transparent;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
-.trophy-button:active {
+.tile-btn:active {
   transform: scale(0.95);
 }
 
-.trophy-button.trophy-button-readonly {
-  cursor: default;
-  pointer-events: none;
-}
-
-.trophy-button.trophy-button-readonly:active {
-  transform: none;
-}
-
-.trophy-button.active {
+.tile-btn.is-active {
   border-color: var(--accent);
-  background: rgba(46, 166, 255, 0.1); /* accent color with opacity */
-  box-shadow: 0 0 0 2px rgba(46, 166, 255, 0.2); /* accent color with opacity */
+  background: rgba(46, 166, 255, 0.12);
+  box-shadow: 0 0 0 2px rgba(46, 166, 255, 0.24);
 }
 
-.trophy-icon {
+.tile-icon {
   width: 60%;
   height: 60%;
   object-fit: contain;
   pointer-events: none;
 }
 
-/* ========== TROPHIES LIST ========== */
-.trophy-list-item-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--tg-tx);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  min-height: calc(var(--size-touch) + var(--space-1));
-  transition: all 0.2s ease;
-}
-
-.trophy-list-item-btn:active {
-  transform: translateY(1px);
-}
-
-.trophy-list-item-btn.trophy-readonly {
-  cursor: default;
-  pointer-events: none;
-}
-
-.trophy-list-item-btn.trophy-readonly:active {
-  transform: none;
-}
-
-/* Зеленый контур для полученных трофеев */
-.trophy-list-item-btn.obtained {
-  border-color: rgba(76, 175, 80, 0.6);
-  box-shadow:
-    0 0 0 1px rgba(76, 175, 80, 0.5),
-    0 0 8px rgba(76, 175, 80, 0.28);
-}
-
-.trophy-list-item-text {
-  font-size: var(--fs-16);
-  font-weight: 600;
-  line-height: var(--lh-normal);
-  word-break: break-word;
-  flex: 1;
-  text-align: left;
-}
-
-.trophy-list-item-icon {
-  flex-shrink: 0;
-  margin-left: var(--space-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.trophy-icon-small {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-/* ========== TROPHY DETAIL SCREEN ========== */
+/* ========== TROPHY DETAIL ========== */
 #trophyDetailContainer .card {
   padding: var(--space-2) var(--space-4);
 }

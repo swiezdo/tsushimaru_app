@@ -3,24 +3,27 @@
 
 import { fetchTrophies, updateActiveTrophies } from './api.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
+import { clearChildren, createButton, createImage, insertHintAfter, removeElements } from './utils.js';
 
-// Кэш трофеев
+const MAX_ACTIVE_TROPHIES = 8;
+const HINT_ROLE = 'trophy-hint';
+
+const collectionEl = $('trophiesCollectionContainer');
+const collectionCard = collectionEl?.closest('.card');
+
 let cachedTrophies = null;
 let cachedActiveTrophies = [];
-
-// Флаг: отрендерено ли уже коллекция за эту сессию
 let trophiesRendered = false;
-let activeRenderToken = null;
+let renderVersion = 0;
 
-// Получение трофеев с кэшированием
 async function fetchTrophiesWithCache(forceRefresh = false) {
-    if (cachedTrophies !== null && !forceRefresh) {
+    if (!forceRefresh && cachedTrophies !== null) {
         return {
             trophies: cachedTrophies,
-            active_trophies: cachedActiveTrophies
+            active_trophies: cachedActiveTrophies,
         };
     }
-    
+
     try {
         const data = await fetchTrophies();
         cachedTrophies = data.trophies || [];
@@ -28,186 +31,126 @@ async function fetchTrophiesWithCache(forceRefresh = false) {
         return data;
     } catch (error) {
         console.error('Ошибка загрузки трофеев:', error);
-        return {
-            trophies: [],
-            active_trophies: []
-        };
+        cachedTrophies = [];
+        cachedActiveTrophies = [];
+        return { trophies: [], active_trophies: [] };
     }
 }
 
-// Создание кнопки трофея
-function createTrophyButton(trophyKey, isActive) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'trophy-button';
-    button.dataset.trophyKey = trophyKey;
-    
-    if (isActive) {
-        button.classList.add('active');
+function ensureCollectionLayout() {
+    if (!collectionEl) return;
+    collectionEl.classList.add('tile-grid');
+}
+
+function attachHint(text) {
+    if (!collectionEl || !collectionCard) return;
+    removeElements(collectionCard, `[data-role="${HINT_ROLE}"]`);
+    const hint = insertHintAfter(collectionEl, text, 'muted');
+    if (hint) {
+        hint.dataset.role = HINT_ROLE;
+        hint.style.marginTop = 'var(--space-3)';
     }
-    
-    const icon = document.createElement('img');
-    icon.className = 'trophy-icon';
-    icon.src = `./assets/trophies/${trophyKey}.svg`;
-    icon.alt = trophyKey;
-    icon.loading = 'lazy';
-    
+}
+
+function createTrophyButton(trophyKey) {
+    const button = createButton('button', 'tile-btn', '', { trophyKey });
+    const icon = createImage(`./assets/trophies/${trophyKey}.svg`, 'tile-icon', trophyKey, { loading: 'lazy' });
     button.appendChild(icon);
-    
+    button.addEventListener('click', () => handleTrophyClick(trophyKey));
     return button;
 }
 
-// Рендеринг коллекции трофеев
-export async function renderTrophiesCollection(forceRefresh = false) {
-    if (trophiesRendered && !forceRefresh) {
-        return;
-    }
-    
-    // Пробуем найти контейнер
-    const container = document.getElementById('trophiesCollectionContainer');
-    if (!container) {
-        return;
-    }
-    
-    // Находим родительский элемент карточки для удаления подсказок
-    const card = container.closest('.card');
-    
-    const renderToken = Symbol('trophies-render');
-    activeRenderToken = renderToken;
-    
-    // Удаляем все старые подсказки (они всегда должны быть вне grid)
-    if (card) {
-        const oldHints = card.querySelectorAll('.trophies-hint');
-        oldHints.forEach(hint => hint.remove());
-    }
-    
-    // Очищаем контейнер полностью (удаляем все дочерние элементы, включая подсказки)
-    container.innerHTML = '';
-    
-    // Восстанавливаем grid отображение (на случай если оно было изменено)
-    container.style.display = 'grid';
-    
-    // Загружаем трофеи (инвалидируем кэш если нужно обновить данные)
-    const data = await fetchTrophiesWithCache(forceRefresh);
-    const trophies = data.trophies || [];
-    const activeTrophies = data.active_trophies || [];
-    
-    if (activeRenderToken !== renderToken) {
-        return;
-    }
-    
-    if (trophies.length === 0) {
-        // Если нет трофеев, показываем подсказку ВНЕ grid контейнера
-        if (card) {
-            const hint = document.createElement('div');
-            hint.className = 'hint muted trophies-hint';
-            hint.textContent = 'У вас пока нет трофеев. Достигните максимального уровня в категории мастерства или подайте заявку на получение трофея, чтобы получить трофей!';
-            // Добавляем подсказку после контейнера с трофеями
-            container.parentNode.insertBefore(hint, container.nextSibling);
-        }
-        trophiesRendered = true;
-        return;
-    }
-    
-    // Создаем кнопки для каждого трофея
-    trophies.forEach(trophyKey => {
-        const isActive = activeTrophies.includes(trophyKey);
-        const button = createTrophyButton(trophyKey, isActive);
-        
-        // Обработчик клика (используем замыкание для актуальных данных)
-        button.addEventListener('click', async () => {
-            // Обновляем данные из кэша перед обработкой клика
-            const currentData = await fetchTrophiesWithCache();
-            await handleTrophyClick(trophyKey, currentData.active_trophies || []);
-        });
-        
-        container.appendChild(button);
+function syncActiveState(activeKeys) {
+    if (!collectionEl) return;
+    const activeSet = new Set(activeKeys);
+    collectionEl.querySelectorAll('.tile-btn').forEach((btn) => {
+        const key = btn.dataset.trophyKey;
+        btn.classList.toggle('is-active', activeSet.has(key));
     });
-    
-    // Добавляем подсказку о выборе до 8 значков (после grid контейнера, вне grid)
-    if (card) {
-        const hint = document.createElement('div');
-        hint.className = 'hint muted trophies-hint';
-        hint.style.marginTop = 'var(--space-3)';
-        hint.textContent = 'Вы можете выбрать до 8 значков для отображения под вашим ником на странице участников';
-        // Добавляем подсказку после контейнера с трофеями
-        container.parentNode.insertBefore(hint, container.nextSibling);
-    }
-    
-    trophiesRendered = true;
 }
 
-// Обработка клика на трофей
-async function handleTrophyClick(trophyKey, currentActive) {
+async function handleTrophyClick(trophyKey) {
     hapticTapSmart();
-    
-    const isCurrentlyActive = currentActive.includes(trophyKey);
-    let newActiveTrophies;
-    
-    if (isCurrentlyActive) {
-        // Трофей уже выбран - снимаем выделение
-        newActiveTrophies = currentActive.filter(t => t !== trophyKey);
+
+    const current = cachedActiveTrophies.slice();
+    const isActive = current.includes(trophyKey);
+    let next = current;
+
+    if (isActive) {
+        next = current.filter((key) => key !== trophyKey);
     } else {
-        // Трофей не выбран
-        if (currentActive.length >= 8) {
-            // Уже выбрано 8 трофеев - ничего не делаем (не показываем сообщение, просто игнорируем)
+        if (current.length >= MAX_ACTIVE_TROPHIES) {
             return;
         }
-        // Добавляем в активные
-        newActiveTrophies = [...currentActive, trophyKey].sort(); // Сортируем по алфавиту
+        next = [...current, trophyKey].sort();
     }
-    
-    // Обновляем UI сразу (оптимистичное обновление)
-    updateTrophiesUI(newActiveTrophies);
-    
-    // Отправляем запрос на сервер
+
+    syncActiveState(next);
+
     try {
-        await updateActiveTrophies(newActiveTrophies);
+        await updateActiveTrophies(next);
+        cachedActiveTrophies = next;
         hapticOK();
-        // Обновляем кэш после успешного обновления
-        cachedActiveTrophies = newActiveTrophies;
     } catch (error) {
         console.error('Ошибка обновления активных трофеев:', error);
         hapticERR();
-        
-        // Откатываем изменения в UI
-        updateTrophiesUI(currentActive);
-        cachedActiveTrophies = currentActive;
-        
+        cachedActiveTrophies = current;
+        syncActiveState(current);
         tg?.showPopup?.({
             title: 'Ошибка',
             message: 'Не удалось обновить активные трофеи. Попробуйте позже.',
-            buttons: [{ type: 'ok' }]
+            buttons: [{ type: 'ok' }],
         });
     }
 }
 
-// Обновление UI трофеев
-function updateTrophiesUI(activeTrophies) {
-    const container = document.getElementById('trophiesCollectionContainer');
-    if (!container) return;
-    
-    const buttons = container.querySelectorAll('.trophy-button');
-    buttons.forEach(button => {
-        const trophyKey = button.dataset.trophyKey;
-        if (activeTrophies.includes(trophyKey)) {
-            button.classList.add('active');
-        } else {
-            button.classList.remove('active');
-        }
+export async function renderTrophiesCollection(forceRefresh = false) {
+    if (!collectionEl) return;
+
+    ensureCollectionLayout();
+
+    if (trophiesRendered && !forceRefresh) {
+        syncActiveState(cachedActiveTrophies);
+        return;
+    }
+
+    const currentVersion = ++renderVersion;
+
+    removeElements(collectionCard, `[data-role="${HINT_ROLE}"]`);
+    clearChildren(collectionEl);
+
+    const data = await fetchTrophiesWithCache(forceRefresh);
+    if (currentVersion !== renderVersion) return;
+
+    const trophies = data.trophies || [];
+    cachedActiveTrophies = data.active_trophies || [];
+
+    if (trophies.length === 0) {
+        attachHint('У вас пока нет трофеев. Достигните максимального уровня или подайте заявку, чтобы получить первый трофей.');
+        trophiesRendered = true;
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    const activeSet = new Set(cachedActiveTrophies);
+
+    trophies.forEach((key) => {
+        const button = createTrophyButton(key);
+        button.classList.toggle('is-active', activeSet.has(key));
+        fragment.appendChild(button);
     });
+
+    collectionEl.appendChild(fragment);
+    attachHint('Вы можете выбрать до 8 значков для отображения под вашим ником на странице участников');
+    trophiesRendered = true;
 }
 
-// Очистка кэша (для обновления после получения нового трофея)
 export function invalidateTrophiesCache() {
     cachedTrophies = null;
     cachedActiveTrophies = [];
     trophiesRendered = false;
 }
 
-// Инициализация модуля
 export function initTrophies() {
-    // Модуль готов к использованию
-    console.log('Trophies модуль инициализирован');
+    ensureCollectionLayout();
 }
-
