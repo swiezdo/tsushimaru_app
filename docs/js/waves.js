@@ -43,13 +43,6 @@ function formatTopbarTitle(data) {
   return `${absoluteWeek}-ая неделя (${week})`;
 }
 
-function setLoading(message = 'Загрузка...') {
-  if (!elements.emptyState || !elements.table) return;
-  elements.emptyState.textContent = message;
-  elements.emptyState.classList.remove('hidden');
-  elements.table.classList.add('hidden');
-}
-
 function showEmpty(message) {
   if (!elements.emptyState || !elements.table) return;
   elements.emptyState.textContent = message;
@@ -117,15 +110,23 @@ export async function openWavesScreen() {
 
   if (wavesCache) {
     renderWaves(wavesCache);
+    if (elements.emptyState) elements.emptyState.classList.add('hidden');
+    elements.table.classList.remove('hidden');
     return;
   }
 
-  setLoading('Загрузка волн...');
+  if (elements.emptyState) {
+    elements.emptyState.classList.remove('hidden');
+    elements.emptyState.textContent = 'Загрузка...';
+  }
+  elements.table.classList.add('hidden');
 
   try {
     const data = await getWavesData();
     wavesCache = data;
     renderWaves(data);
+    if (elements.emptyState) elements.emptyState.classList.add('hidden');
+    elements.table.classList.remove('hidden');
   } catch (error) {
     console.error('Не удалось загрузить данные волн:', error);
     showEmpty('Не удалось загрузить волны. Попробуйте позже.');
