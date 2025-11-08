@@ -84,8 +84,13 @@ function renderTableRows(waves) {
   waves.forEach((spawnRow, index) => {
     const tr = document.createElement('tr');
 
+    const waveNumber = index + 1;
+    if (waveNumber % 3 === 0) {
+      tr.classList.add('waves-strong');
+    }
+
     const numCell = document.createElement('td');
-    numCell.textContent = `${index + 1}.`;
+    numCell.textContent = `${waveNumber}.`;
     numCell.classList.add('waves-number');
     tr.appendChild(numCell);
 
