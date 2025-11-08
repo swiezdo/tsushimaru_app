@@ -403,7 +403,8 @@ a svg,
 }
 .waves-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: center;
 }
 .waves-table th,
@@ -443,6 +444,9 @@ a svg,
   margin: var(--space-4);
   margin-bottom: var(--card-spacing, var(--space-4));
   text-align: center;
+}
+.waves-empty.hidden {
+  display: none;
 }
 
 /* ========== FOOTER ACTIONS ========== */
