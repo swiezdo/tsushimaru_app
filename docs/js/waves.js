@@ -11,6 +11,7 @@ const elements = {
   table: null,
   tbody: null,
   emptyState: null,
+  emptyStateText: null,
 };
 
 let wavesCache = null;
@@ -24,6 +25,7 @@ function ensureElements() {
   elements.mod2 = document.getElementById('wavesMod2');
   elements.table = document.getElementById('wavesTable');
   elements.emptyState = document.getElementById('wavesEmptyState');
+  elements.emptyStateText = document.getElementById('wavesEmptyStateText');
 
   if (elements.table) {
     elements.tbody = elements.table.querySelector('tbody');
@@ -45,14 +47,16 @@ function formatTopbarTitle(data) {
 
 function setLoading(message = 'Загрузка...') {
   if (!elements.emptyState || !elements.table) return;
-  elements.emptyState.textContent = message;
+  if (elements.emptyStateText) elements.emptyStateText.textContent = message;
+  else elements.emptyState.textContent = message;
   elements.emptyState.classList.remove('hidden');
   elements.table.classList.add('hidden');
 }
 
 function showEmpty(message) {
   if (!elements.emptyState || !elements.table) return;
-  elements.emptyState.textContent = message;
+  if (elements.emptyStateText) elements.emptyStateText.textContent = message;
+  else elements.emptyState.textContent = message;
   elements.emptyState.classList.remove('hidden');
   elements.table.classList.add('hidden');
 }

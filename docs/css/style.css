@@ -373,14 +373,14 @@ a svg,
 .brand-title { font-size: var(--fs-22); font-weight: 700; letter-spacing: .3px; }
 
 /* ========== WAVES ========== */
-.waves-card {
+.waves-meta-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
 }
-.waves-header {
+.waves-meta-card .waves-header {
   display: flex;
   flex-direction: column;
+  gap: var(--space-1);
 }
 .waves-title {
   font-size: var(--fs-18);
@@ -390,11 +390,9 @@ a svg,
   font-size: var(--fs-15);
   color: var(--muted);
 }
-.waves-table-wrapper {
+.waves-table.card {
+  padding: 0;
   overflow: hidden;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--elem-bg);
 }
 .waves-table {
   width: 100%;
@@ -429,6 +427,12 @@ a svg,
 }
 .waves-table tr.waves-strong {
   background: rgba(255, 82, 82, 0.12);
+}
+.waves-empty.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-4);
 }
 
 /* ========== FOOTER ACTIONS ========== */

@@ -48,19 +48,19 @@
 
       <!-- ====== ВОЛНЫ ====== -->
       <section id="wavesScreen" class="hidden">
-        <section class="card waves-card">
+        <section class="card waves-meta-card">
           <div class="waves-header">
             <div id="wavesMap" class="waves-title">—</div>
             <div id="wavesMod1" class="waves-subtitle muted">—</div>
             <div id="wavesMod2" class="waves-subtitle muted">—</div>
           </div>
-          <div class="waves-table-wrapper">
-            <table id="wavesTable" class="waves-table">
-              <tbody></tbody>
-            </table>
-            <div id="wavesEmptyState" class="hint muted hidden">Данные о волнах недоступны.</div>
-          </div>
         </section>
+        <table id="wavesTable" class="card waves-table">
+          <tbody></tbody>
+        </table>
+        <div id="wavesEmptyState" class="card waves-empty hidden">
+          <div id="wavesEmptyStateText" class="hint muted">Данные о волнах недоступны.</div>
+        </div>
       </section>
 
       <!-- ====== ПРОФИЛЬ ====== -->
