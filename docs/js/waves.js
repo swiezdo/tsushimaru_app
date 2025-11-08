@@ -44,16 +44,22 @@ function formatTopbarTitle(data) {
 }
 
 function showEmpty(message) {
-  if (!elements.emptyState || !elements.table) return;
-  elements.emptyState.textContent = message;
-  elements.emptyState.classList.remove('hidden');
-  elements.table.classList.add('hidden');
+  if (elements.table) {
+    elements.table.classList.add('hidden');
+  }
+  if (elements.emptyState) {
+    elements.emptyState.textContent = message;
+    elements.emptyState.classList.remove('hidden');
+  }
 }
 
 function showTable() {
-  if (!elements.emptyState || !elements.table) return;
-  elements.emptyState.classList.add('hidden');
-  elements.table.classList.remove('hidden');
+  if (elements.table) {
+    elements.table.classList.remove('hidden');
+  }
+  if (elements.emptyState) {
+    elements.emptyState.classList.add('hidden');
+  }
 }
 
 function renderHeader(data) {
@@ -110,23 +116,20 @@ export async function openWavesScreen() {
 
   if (wavesCache) {
     renderWaves(wavesCache);
-    if (elements.emptyState) elements.emptyState.classList.add('hidden');
-    elements.table.classList.remove('hidden');
     return;
   }
 
-  if (elements.emptyState) {
-    elements.emptyState.classList.remove('hidden');
-    elements.emptyState.textContent = 'Загрузка...';
+  if (elements.table) {
+    elements.table.classList.add('hidden');
   }
-  elements.table.classList.add('hidden');
+  if (elements.emptyState) {
+    elements.emptyState.classList.add('hidden');
+  }
 
   try {
     const data = await getWavesData();
     wavesCache = data;
     renderWaves(data);
-    if (elements.emptyState) elements.emptyState.classList.add('hidden');
-    elements.table.classList.remove('hidden');
   } catch (error) {
     console.error('Не удалось загрузить данные волн:', error);
     showEmpty('Не удалось загрузить волны. Попробуйте позже.');

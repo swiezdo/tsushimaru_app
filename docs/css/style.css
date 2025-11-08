@@ -396,6 +396,9 @@ a svg,
   margin-bottom: var(--card-spacing, var(--space-4));
   width: calc(100% - (var(--space-4) * 2));
   box-sizing: border-box;
+  background: var(--card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 .waves-table {
