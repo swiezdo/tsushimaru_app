@@ -40,7 +40,7 @@ function formatTopbarTitle(data) {
     return 'Волны';
   }
 
-  return `${absoluteWeek}-ая неделя ("${week}")`;
+  return `${absoluteWeek}-ая неделя (${week})`;
 }
 
 function setLoading(message = 'Загрузка...') {

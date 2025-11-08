@@ -376,12 +376,11 @@ a svg,
 .waves-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 .waves-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
 }
 .waves-title {
   font-size: var(--fs-18);
@@ -419,7 +418,11 @@ a svg,
   border-bottom: none;
 }
 .waves-number {
-  width: 1%;
+  width: 3ch;
+  min-width: 3ch;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+  text-align: right;
   white-space: nowrap;
   font-weight: 600;
   color: var(--accent);
