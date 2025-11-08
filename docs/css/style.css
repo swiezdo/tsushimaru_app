@@ -399,11 +399,11 @@ a svg,
 .waves-table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
+  text-align: center;
 }
 .waves-table th,
 .waves-table td {
-  padding: var(--space-3);
+  padding: var(--space-1);
   font-size: var(--fs-14);
   border-bottom: 1px solid var(--color-border);
 }
