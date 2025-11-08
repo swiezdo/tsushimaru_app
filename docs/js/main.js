@@ -11,6 +11,7 @@ import { initMastery } from './mastery.js';
 import { initTrophies } from './trophies.js';
 import { initTrophiesList } from './trophies_list.js';
 import { checkUserRegistration } from './api.js';
+import { initWaves, openWavesScreen } from './waves.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
 (function installHapticGuardOnce(){
@@ -53,6 +54,7 @@ function installBackButton() {
       'buildDetail': 'builds', 
       'buildPublicDetail': previousScreen ? (previousScreen.startsWith('participantDetail:') ? 'participantDetail' : 'builds') : 'builds',
       'profile': 'home',
+      'waves': 'home',
       'participants': 'home',
       'builds': 'home',
       'whatsNew': 'home',
@@ -180,6 +182,7 @@ async function requireRegistration(callback) {
 function bindHomeButtons() {
   const map = [
     ['openProfileBtn', () => showScreen('profile')],
+    ['wavesBtn', () => requireRegistration(() => { showScreen('waves'); openWavesScreen(); })],
     ['participantsBtn', () => requireRegistration(() => showScreen('participants'))],
     ['buildsBtn',      () => requireRegistration(() => showScreen('builds'))],
     ['whatsNewBtn',    () => { showScreen('whatsNew'); renderWhatsNewCards(); }],
@@ -215,6 +218,9 @@ async function startApp() {
   
   // Инициализация модуля списка трофеев
   initTrophiesList();
+
+  // Инициализация модуля волн
+  initWaves();
 
   showScreen('home');
 }

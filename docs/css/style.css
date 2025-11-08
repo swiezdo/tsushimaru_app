@@ -372,6 +372,59 @@ a svg,
 }
 .brand-title { font-size: var(--fs-22); font-weight: 700; letter-spacing: .3px; }
 
+/* ========== WAVES ========== */
+.waves-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.waves-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.waves-title {
+  font-size: var(--fs-18);
+  font-weight: 600;
+}
+.waves-subtitle {
+  font-size: var(--fs-15);
+  color: var(--muted);
+}
+.waves-table-wrapper {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--elem-bg);
+}
+.waves-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.waves-table th,
+.waves-table td {
+  padding: var(--space-3);
+  font-size: var(--fs-14);
+  border-bottom: 1px solid var(--color-border);
+}
+.waves-table th {
+  font-weight: 600;
+  color: var(--tg-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: var(--fs-12);
+}
+.waves-table tr:last-child td {
+  border-bottom: none;
+}
+.waves-number {
+  width: 1%;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--accent);
+}
+
 /* ========== FOOTER ACTIONS ========== */
 .footer-actions { margin: var(--space-2) 0 calc(var(--space-8) + var(--safe-bottom)); }
 #backToListBtn, #homeBtn, #buildsHomeBtn, #backToBuildsBtn { margin-bottom: calc(var(--space-8) + var(--safe-bottom)); }

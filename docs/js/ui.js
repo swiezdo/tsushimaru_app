@@ -12,6 +12,7 @@ import { refreshParticipantsList, resetParticipantSearch } from './participants.
 export const screens = {
   home:               document.getElementById('homeScreen'),
   profile:            document.getElementById('profileScreen'),
+  waves:              document.getElementById('wavesScreen'),
   participants:       document.getElementById('participantsScreen'),
   participantDetail:  document.getElementById('participantDetailScreen'),
   builds:             document.getElementById('buildsScreen'),
@@ -43,7 +44,7 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','reward','rewardDetail','trophyDetail'];
+    const withBack = ['profile','waves','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','reward','rewardDetail','trophyDetail'];
     if (withBack.includes(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
@@ -63,6 +64,7 @@ export function showScreen(name) {
     });
     setTopbar(true, 'Участники');
   }
+  else if (name === 'waves')           setTopbar(true, 'Волны');
   else if (name === 'participantDetail') setTopbar(true, 'Участник');
   else if (name === 'builds')          setTopbar(true, 'Билды');
   else if (name === 'buildCreate')     setTopbar(true, 'Создать билд');

@@ -38,9 +38,35 @@
 
             <button id="openProfileBtn" class="btn">👤 Мой профиль</button>
             <button id="rewardBtn" class="btn">🏆 Награды</button>
+            <button id="wavesBtn" class="btn">🌊 Волны</button>
             <button id="participantsBtn" class="btn">👥 Участники</button>
             <button id="buildsBtn" class="btn ghost">🛠️ Билды</button>
             <button id="whatsNewBtn" class="btn">📰 Что нового?</button>
+          </div>
+        </section>
+      </section>
+
+      <!-- ====== ВОЛНЫ ====== -->
+      <section id="wavesScreen" class="hidden">
+        <section class="card waves-card">
+          <div class="waves-header">
+            <div id="wavesMap" class="waves-title">—</div>
+            <div id="wavesMod1" class="waves-subtitle muted">—</div>
+            <div id="wavesMod2" class="waves-subtitle muted">—</div>
+          </div>
+          <div class="waves-table-wrapper">
+            <table id="wavesTable" class="waves-table">
+              <thead>
+                <tr>
+                  <th>Волна</th>
+                  <th>Спавн 1</th>
+                  <th>Спавн 2</th>
+                  <th>Спавн 3</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div id="wavesEmptyState" class="hint muted hidden">Данные о волнах недоступны.</div>
           </div>
         </section>
       </section>
