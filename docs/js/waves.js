@@ -17,6 +17,10 @@ let wavesCache = null;
 let initialized = false;
 
 const MAX_WAVES = 15;
+const ICON_TYPES = {
+  OBJECTIVE: 'objective',
+  MOD: 'mod',
+};
 const OBJECTIVE_WAVE_NUMBERS = [2, 4, 7, 10, 13];
 const MOD_WAVE_NUMBERS = [3, 6, 9, 12, 15];
 
@@ -27,7 +31,16 @@ function getObjectiveIcon(objectives, waveNumber) {
   if (index === -1) return null;
 
   const key = `objective${index + 1}_icon`;
-  return objectives[key] ? `./assets/icons/objectives/${objectives[key]}` : null;
+  const filename = objectives[key];
+  if (!filename) return null;
+
+  const descriptionKey = `objective${index + 1}`;
+  return {
+    path: `./assets/icons/objectives/${filename}`,
+    type: ICON_TYPES.OBJECTIVE,
+    description: objectives[descriptionKey] || 'Бонусная задача',
+    label: 'Б',
+  };
 }
 
 function getModIcon(mods, waveNumber) {
@@ -37,7 +50,16 @@ function getModIcon(mods, waveNumber) {
   if (index === -1) return null;
 
   const key = `mod${index + 1}_icon`;
-  return mods[key] ? `./assets/icons/mods/${mods[key]}` : null;
+  const filename = mods[key];
+  if (!filename) return null;
+
+  const descriptionKey = `mod${index + 1}`;
+  return {
+    path: `./assets/icons/mods/${filename}`,
+    type: ICON_TYPES.MOD,
+    description: mods[descriptionKey] || 'Модификатор мира',
+    label: 'М',
+  };
 }
 
 function getWaveIcon(metadata, waveNumber) {
@@ -53,19 +75,35 @@ function createIconCell(metadata, waveNumber) {
   const iconCell = document.createElement('td');
   iconCell.classList.add('waves-icon');
 
-  const iconPath = getWaveIcon(metadata, waveNumber);
-  if (!iconPath) {
+  const iconData = getWaveIcon(metadata, waveNumber);
+  if (!iconData) {
     return iconCell;
   }
 
+  const badge = document.createElement('div');
+  badge.classList.add('waves-icon-badge');
+  if (iconData.type === ICON_TYPES.OBJECTIVE) {
+    badge.classList.add('waves-icon-badge--objective');
+  } else if (iconData.type === ICON_TYPES.MOD) {
+    badge.classList.add('waves-icon-badge--mod');
+  }
+  badge.title = iconData.description;
+  badge.setAttribute('aria-label', iconData.description);
+
   const icon = document.createElement('img');
-  icon.src = iconPath;
-  icon.alt = '';
+  icon.src = iconData.path;
+  icon.alt = iconData.description;
   icon.decoding = 'async';
   icon.loading = 'lazy';
   icon.classList.add('waves-icon-img');
 
-  iconCell.appendChild(icon);
+  const tag = document.createElement('span');
+  tag.classList.add('waves-icon-tag');
+  tag.textContent = iconData.label;
+
+  badge.appendChild(icon);
+  badge.appendChild(tag);
+  iconCell.appendChild(badge);
   return iconCell;
 }
 

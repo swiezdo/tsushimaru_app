@@ -423,16 +423,60 @@ a svg,
   font-size: var(--fs-12);
 }
 .waves-icon {
-  width: 40px;
-  min-width: 40px;
+  width: 48px;
+  min-width: 48px;
   text-align: center;
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
 }
 .waves-icon-img {
   display: block;
-  width: 24px;
-  height: 24px;
-  margin: 0 auto;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
+  filter: invert(1) brightness(1.2);
+}
+.waves-icon-badge {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.waves-icon-badge--objective {
+  background: rgba(46, 166, 255, 0.18);
+  border-color: rgba(46, 166, 255, 0.6);
+  box-shadow: 0 0 12px rgba(46, 166, 255, 0.35);
+}
+.waves-icon-badge--mod {
+  background: rgba(212, 175, 55, 0.18);
+  border-color: rgba(212, 175, 55, 0.65);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.32);
+}
+.waves-icon-tag {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.waves-icon-badge--objective .waves-icon-tag {
+  background: #2ea6ff;
+  color: #00131f;
+}
+.waves-icon-badge--mod .waves-icon-tag {
+  background: #d4af37;
+  color: #1c1200;
 }
 .waves-table tr:last-child td {
   border-bottom: none;
