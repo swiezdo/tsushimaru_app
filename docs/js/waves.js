@@ -301,7 +301,9 @@ function buildModItems(mods) {
   if (!mods) return [];
   const items = [];
 
-  MOD_WAVE_NUMBERS.forEach((_, idx) => {
+  const waveLabel = (number) => `${number}-я`;
+
+  MOD_WAVE_NUMBERS.forEach((waveNumber, idx) => {
     const index = idx + 1;
     const iconKey = `mod${index}_icon`;
     const labelKey = `mod${index}`;
@@ -310,10 +312,12 @@ function buildModItems(mods) {
     if (!filename) return;
 
     const description = mods[labelKey] || 'Модификатор мира';
+    const waveText = `${waveLabel(waveNumber)} волна`;
+    const fullDescription = `${description} — ${waveText}`;
 
     items.push({
       path: `./assets/icons/mods/${filename}`,
-      description,
+      description: fullDescription,
     });
   });
 
