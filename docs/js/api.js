@@ -560,7 +560,7 @@ export async function fetchMastery() {
     } catch (error) {
         console.error('Ошибка получения уровней мастерства:', error);
         // При ошибке возвращаем нулевые уровни
-        return { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
+        return { solo: 0, hellmode: 0, raid: 0, speedrun: 0, glitch: 0 };
     }
 }
 
@@ -571,7 +571,7 @@ export async function fetchUserMastery(userId) {
         return data;
     } catch (error) {
         console.error('Ошибка получения уровней мастерства пользователя:', error);
-        return { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
+        return { solo: 0, hellmode: 0, raid: 0, speedrun: 0, glitch: 0 };
     }
 }
 

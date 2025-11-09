@@ -127,6 +127,7 @@ const API_BASE_URL = 'https://tsushimaru.com';
 - Содержит структуру категорий и уровней мастерства
 - Загружается через API: `/assets/mastery-config.json`
 - Используется для отображения форм заявок на мастерство
+- Текущие категории: `solo`, `hellmode`, `raid`, `speedrun`, `glitch` (иконки лежат в `docs/assets/mastery/<key>/`)
 
 ### whats-new.json
 

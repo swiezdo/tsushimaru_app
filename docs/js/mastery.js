@@ -28,6 +28,9 @@ const MASTERY_LEVEL_RULES = {
         { level: 3, bg: 'background2.jpg' },
         { level: 4, bg: 'background.gif' },
         { level: 5, icon: true }
+    ],
+    11: [
+        { level: 11, icon: true }
     ]
 };
 
@@ -64,7 +67,7 @@ async function fetchMasteryWithRetry() {
             return levels;
         } catch (error) {
             if (attempt === maxAttempts) {
-                return { solo: 0, hellmode: 0, raid: 0, speedrun: 0 };
+                return { solo: 0, hellmode: 0, raid: 0, speedrun: 0, glitch: 0 };
             }
             await new Promise(resolve => setTimeout(resolve, retryDelay));
         }
@@ -349,7 +352,7 @@ export async function renderMasteryButtons() {
     const levels = await fetchMasteryWithRetry();
     
     // Порядок категорий для отображения
-    const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun'];
+    const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun', 'glitch'];
     
     // Создаём кнопки для каждой категории
     let buttonsCreated = 0;

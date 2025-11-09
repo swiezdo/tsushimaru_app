@@ -65,7 +65,7 @@ function renderParticipantTrophies(trophiesData) {
 
     participantTrophiesCard.style.display = 'none';
 
-    const masteryKeys = new Set(['solo', 'hellmode', 'raid', 'speedrun']);
+    const masteryKeys = new Set(['solo', 'hellmode', 'raid', 'speedrun', 'glitch']);
     const trophies = (trophiesData?.trophies || [])
         .filter((trophyKey) => !masteryKeys.has(trophyKey))
         .slice()
@@ -175,7 +175,7 @@ async function renderParticipantMastery(userId) {
     container.innerHTML = '';
     
     // Порядок категорий
-    const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun'];
+    const categoryOrder = ['solo', 'hellmode', 'raid', 'speedrun', 'glitch'];
     
     for (const key of categoryOrder) {
         const currentLevel = levels[key] || 0;
