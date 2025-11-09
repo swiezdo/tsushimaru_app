@@ -704,7 +704,7 @@ function renderMasteryApplicationPreview() {
 
     masteryApplicationPreviewCleanup();
     masteryApplicationPreviewCleanup = renderFilesPreview(masteryApplicationSelected, previewEl, {
-        limit: 5,
+        limit: 4,
         onRemove: (idx) => {
             masteryApplicationSelected.splice(idx, 1);
             hapticTapSmart();

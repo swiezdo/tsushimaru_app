@@ -107,7 +107,7 @@ export function insertHintAfter(anchor, text, extraClass = '') {
   return hint;
 }
 
-export function renderFilesPreview(files, previewEl, { limit = 5, onRemove } = {}) {
+export function renderFilesPreview(files, previewEl, { limit = 4, onRemove } = {}) {
   if (!previewEl) return () => {};
 
   const objectURLs = [];

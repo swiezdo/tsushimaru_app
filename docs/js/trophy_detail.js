@@ -236,7 +236,7 @@ function handleFilesSelected(files) {
 function refreshPreview() {
     applicationState.cleanupPreview();
     applicationState.cleanupPreview = renderFilesPreview(applicationState.files, applicationState.previewEl, {
-        limit: 5,
+        limit: 4,
         onRemove: (idx) => {
             applicationState.files.splice(idx, 1);
             hapticTapSmart();
