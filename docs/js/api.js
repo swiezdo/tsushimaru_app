@@ -153,17 +153,6 @@ export async function getApiStats() {
     }
 }
 
-// Получение данных волн
-export async function getWavesData() {
-    try {
-        const data = await apiRequest('/api/waves.get');
-        return data;
-    } catch (error) {
-        console.error('Ошибка получения волн:', error);
-        throw error;
-    }
-}
-
 // Утилита для проверки подключения к API
 export async function testConnection() {
     try {
