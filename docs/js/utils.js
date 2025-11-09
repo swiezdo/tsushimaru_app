@@ -107,7 +107,7 @@ export function insertHintAfter(anchor, text, extraClass = '') {
   return hint;
 }
 
-export function renderFilesPreview(files, previewEl, { limit = 4, onRemove } = {}) {
+export function renderFilesPreview(files, previewEl, { limit = 5, onRemove } = {}) {
   if (!previewEl) return () => {};
 
   const objectURLs = [];
@@ -185,149 +185,27 @@ export function isVideoFile(file) {
   return file.type.startsWith('video/');
 }
 
-export function createProgressController(rootEl) {
-  if (!rootEl) return null;
+export function startButtonDotsAnimation(button, baseText = 'Отправка', interval = 400) {
+  if (!button) return null;
 
-  let steps = [];
-  let hideTimeout = null;
+  const suffixes = ['', ' .', ' ..', ' ...'];
+  let index = 0;
 
-  const updateStatusClass = (step, status) => {
-    if (!step) return;
-    if (step.status === status) return;
+  button.textContent = `${baseText}${suffixes[index]}`;
 
-    step.status = status;
-    step.el.classList.remove('is-active', 'is-done', 'is-error');
-
-    if (status === 'active') {
-      step.el.classList.add('is-active');
-    } else if (status === 'done') {
-      step.el.classList.add('is-done');
-    } else if (status === 'error') {
-      step.el.classList.add('is-error');
-    }
-  };
-
-  const clearHideTimeout = () => {
-    if (hideTimeout) {
-      clearTimeout(hideTimeout);
-      hideTimeout = null;
-    }
-  };
+  const timer = setInterval(() => {
+    index = (index + 1) % suffixes.length;
+    button.textContent = `${baseText}${suffixes[index]}`;
+  }, Math.max(200, interval));
 
   return {
-    start(batchCount) {
-      clearHideTimeout();
-      rootEl.classList.remove('hidden');
-      rootEl.innerHTML = '';
-      steps = [];
-
-      const normalizedBatches = Math.max(1, batchCount);
-      const labels = ['Подготовка'];
-
-      for (let i = 1; i <= normalizedBatches; i += 1) {
-        labels.push(
-          normalizedBatches === 1
-            ? 'Отправка медиаданных'
-            : `Отправка части ${i}/${normalizedBatches}`,
-        );
+    stop(finalText) {
+      clearInterval(timer);
+      if (button) {
+        button.textContent = finalText ?? baseText;
       }
-
-      labels.push('Завершение');
-
-      labels.forEach((label, idx) => {
-        const stepEl = document.createElement('div');
-        stepEl.className = 'progress-step';
-
-        const labelEl = document.createElement('span');
-        labelEl.className = 'progress-step__label';
-        labelEl.textContent = label;
-
-        stepEl.appendChild(labelEl);
-        rootEl.appendChild(stepEl);
-
-        const step = {
-          el: stepEl,
-          labelEl,
-          status: idx === 0 ? 'active' : 'pending',
-        };
-
-        steps.push(step);
-        updateStatusClass(step, step.status);
-      });
-    },
-
-    setStatus(index, status) {
-      updateStatusClass(steps[index], status);
-    },
-
-    setLabel(index, label) {
-      if (!steps[index] || !label) return;
-      steps[index].labelEl.textContent = label;
-    },
-
-    getStatus(index) {
-      return steps[index]?.status ?? null;
-    },
-
-    getStepCount() {
-      return steps.length;
-    },
-
-    hide(delay = 1200) {
-      clearHideTimeout();
-      hideTimeout = setTimeout(() => {
-        rootEl.classList.add('hidden');
-        rootEl.innerHTML = '';
-        steps = [];
-        hideTimeout = null;
-      }, Math.max(0, delay));
-    },
-
-    reset() {
-      clearHideTimeout();
-      rootEl.classList.add('hidden');
-      rootEl.innerHTML = '';
-      steps = [];
     },
   };
-}
-
-export function updateUploadProgress(progress, fraction, batchCount) {
-  if (!progress || typeof fraction !== 'number') return;
-
-  const totalSteps = progress.getStepCount();
-  if (!totalSteps) return;
-
-  const normalizedBatches = Math.max(1, batchCount);
-  const firstBatchIndex = 1;
-  const lastIndex = totalSteps - 1;
-  const stepWidth = 1 / normalizedBatches;
-
-  for (let idx = 0; idx < normalizedBatches; idx += 1) {
-    const threshold = stepWidth * (idx + 1);
-    const stepIndex = firstBatchIndex + idx;
-
-    if (fraction >= threshold) {
-      if (progress.getStatus(stepIndex) !== 'done') {
-        progress.setStatus(stepIndex, 'done');
-
-        const nextStep = stepIndex + 1;
-        if (nextStep < lastIndex && progress.getStatus(nextStep) === 'pending') {
-          progress.setStatus(nextStep, 'active');
-        } else if (nextStep === lastIndex && progress.getStatus(lastIndex) === 'pending') {
-          progress.setStatus(lastIndex, 'active');
-        }
-      }
-    } else if (fraction >= threshold - stepWidth / 2) {
-      if (progress.getStatus(stepIndex) === 'pending') {
-        progress.setStatus(stepIndex, 'active');
-      }
-    }
-  }
-
-  if (fraction >= 0.98 && progress.getStatus(lastIndex) === 'pending') {
-    progress.setStatus(lastIndex, 'active');
-  }
 }
 
 // ---------- Валидация ----------

@@ -4,15 +4,7 @@
 import { fetchMastery, submitMasteryApplication } from './api.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
-import {
-    shake,
-    createFileKey,
-    isImageFile,
-    isVideoFile,
-    renderFilesPreview,
-    createProgressController,
-    updateUploadProgress,
-} from './utils.js';
+import { shake, createFileKey, isImageFile, isVideoFile, renderFilesPreview, startButtonDotsAnimation } from './utils.js';
 
 // Кэш конфига
 let masteryConfig = null;
@@ -551,10 +543,8 @@ function renderMasteryDetail(category, currentLevel) {
 
 // Константы для формы заявки
 const MAX_MASTERY_FILES = 18;
-const MAX_MASTERY_BATCH = 9;
 let masteryApplicationSelected = [];
 let masteryApplicationPreviewCleanup = () => {};
-let masteryApplicationProgressController = null;
 
 // Рендеринг карточки заявки на повышение уровня
 function renderMasteryApplicationCard(container, category, currentLevel) {
@@ -562,7 +552,6 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     masteryApplicationSelected = [];
     masteryApplicationPreviewCleanup();
     masteryApplicationPreviewCleanup = () => {};
-    masteryApplicationProgressController = null;
     
     // Создаём карточку
     const applicationCard = document.createElement('section');
@@ -638,11 +627,6 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     
     applicationCard.appendChild(form);
 
-    const progressContainer = document.createElement('div');
-    progressContainer.id = 'masteryApplicationProgress';
-    progressContainer.className = 'progress-tracker hidden';
-    applicationCard.appendChild(progressContainer);
-    
     // Кнопка отправки
     const actionsBar = document.createElement('div');
     actionsBar.className = 'actions-bar';
@@ -657,8 +641,6 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     applicationCard.appendChild(actionsBar);
     
     container.appendChild(applicationCard);
-
-    masteryApplicationProgressController = createProgressController(progressContainer);
     
     // Обработчики событий
     addFilesBtn.addEventListener('click', () => {
@@ -668,8 +650,6 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     });
     
     filesInput.addEventListener('change', () => {
-        masteryApplicationProgressController?.reset();
-
         const files = Array.from(filesInput.files || []);
         if (!files.length) {
             shake(previewContainer || addFilesBtn);
@@ -724,7 +704,7 @@ function renderMasteryApplicationPreview() {
 
     masteryApplicationPreviewCleanup();
     masteryApplicationPreviewCleanup = renderFilesPreview(masteryApplicationSelected, previewEl, {
-        limit: 6,
+        limit: 5,
         onRemove: (idx) => {
             masteryApplicationSelected.splice(idx, 1);
             hapticTapSmart();
@@ -743,13 +723,10 @@ async function submitMasteryApplicationForm(category, currentLevel, commentTexta
     const filesCount = masteryApplicationSelected.length;
     const nextLevel = currentLevel + 1;
     const comment = (commentTextarea?.value || '').trim();
-    const progress = masteryApplicationProgressController;
-    const batchCount = Math.max(1, Math.ceil(filesCount / MAX_MASTERY_BATCH));
 
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.classList.add('is-loading');
-        submitBtn.textContent = 'Подготовка...';
     }
     
     // Валидация: минимум 1 файл обязателен
@@ -774,35 +751,15 @@ async function submitMasteryApplicationForm(category, currentLevel, commentTexta
         return;
     }
     
-    progress?.reset();
-    progress?.start(batchCount);
-    
+    let dotsAnimation = null;
+
     try {
         hapticOK();
-        if (progress) {
-            progress.setStatus(0, 'done');
-            if (progress.getStepCount() > 2) {
-                progress.setStatus(1, 'active');
-            } else {
-                progress.setStatus(progress.getStepCount() - 1, 'active');
-            }
-        }
-
         if (submitBtn) {
-            submitBtn.textContent = 'Отправка...';
+            dotsAnimation = startButtonDotsAnimation(submitBtn, 'Отправка');
         }
         
-        await submitMasteryApplication(category.key, currentLevel, nextLevel, comment, masteryApplicationSelected, {
-            onUploadProgress: (fraction) => {
-                updateUploadProgress(progress, fraction, batchCount);
-            },
-        });
-        
-        if (progress) {
-            const lastIndex = progress.getStepCount() - 1;
-            progress.setStatus(lastIndex, 'done');
-            progress.hide();
-        }
+        await submitMasteryApplication(category.key, currentLevel, nextLevel, comment, masteryApplicationSelected);
         
         tg?.showPopup?.({ 
             title: 'Заявка отправлена', 
@@ -825,24 +782,17 @@ async function submitMasteryApplicationForm(category, currentLevel, commentTexta
     } catch (error) {
         console.error('Ошибка отправки заявки:', error);
         hapticERR();
-        if (progress) {
-            const lastIndex = progress.getStepCount() - 1;
-            if (lastIndex >= 0) {
-                progress.setStatus(lastIndex, 'error');
-                progress.setLabel(lastIndex, 'Ошибка отправки');
-            }
-        }
         tg?.showPopup?.({ 
             title: 'Ошибка', 
             message: error.message || 'Произошла ошибка при отправке заявки.', 
             buttons: [{ type: 'ok' }] 
         });
     } finally {
+        dotsAnimation?.stop(originalText);
         // Восстанавливаем кнопку
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.classList.remove('is-loading');
-            submitBtn.textContent = originalText;
         }
         submittingApplication = false;
     }

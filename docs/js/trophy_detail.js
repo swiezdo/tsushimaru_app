@@ -11,12 +11,10 @@ import {
     isVideoFile,
     clearChildren,
     renderFilesPreview,
-    createProgressController,
-    updateUploadProgress,
+    startButtonDotsAnimation,
 } from './utils.js';
 
 const MAX_TROPHY_FILES = 18;
-const MAX_FILES_PER_BATCH = 9;
 
 function isSupportedMediaFile(file) {
     return isImageFile(file) || isVideoFile(file);
@@ -31,8 +29,6 @@ const applicationState = {
     cleanupPreview: () => {},
     commentEl: null,
     previewEl: null,
-    progressEl: null,
-    progressController: null,
     filesInput: null,
     submitBtn: null,
 };
@@ -142,7 +138,6 @@ function buildApplicationCard(trophy) {
                 <div id="trophyApplicationPreview" class="thumbs-row"></div>
             </div>
         </form>
-        <div id="trophyApplicationProgress" class="progress-tracker hidden"></div>
         <div class="actions-bar">
             <button type="button" class="btn primary wide" id="trophyApplicationSubmitBtn">Отправить</button>
         </div>
@@ -158,14 +153,11 @@ function setupApplicationForm(card, trophy) {
     const addBtn = card.querySelector('#trophyApplicationAddBtn');
     const previewEl = card.querySelector('#trophyApplicationPreview');
     const submitBtn = card.querySelector('#trophyApplicationSubmitBtn');
-    const progressEl = card.querySelector('#trophyApplicationProgress');
 
     applicationState.commentEl = commentEl;
     applicationState.filesInput = filesInput;
     applicationState.previewEl = previewEl;
     applicationState.submitBtn = submitBtn;
-    applicationState.progressEl = progressEl;
-    applicationState.progressController = progressEl ? createProgressController(progressEl) : null;
 
     if (commentEl) {
         const autoResize = () => {
@@ -185,7 +177,6 @@ function setupApplicationForm(card, trophy) {
     });
 
     filesInput?.addEventListener('change', () => {
-        applicationState.progressController?.reset();
         handleFilesSelected(Array.from(filesInput.files || []));
     });
 
@@ -245,7 +236,7 @@ function handleFilesSelected(files) {
 function refreshPreview() {
     applicationState.cleanupPreview();
     applicationState.cleanupPreview = renderFilesPreview(applicationState.files, applicationState.previewEl, {
-        limit: 6,
+        limit: 5,
         onRemove: (idx) => {
             applicationState.files.splice(idx, 1);
             hapticTapSmart();
@@ -271,42 +262,17 @@ async function submitTrophyApplicationForm(trophy) {
     }
 
     const originalText = submitBtn.textContent;
-    const progress = applicationState.progressController;
-    const totalFiles = applicationState.files.length;
-    const batchCount = Math.max(1, Math.ceil(totalFiles / MAX_FILES_PER_BATCH));
-
     submitBtn.disabled = true;
     submitBtn.classList.add('is-loading');
-    submitBtn.textContent = 'Подготовка...';
 
-    progress?.reset();
-    progress?.start(batchCount);
+    let dotsAnimation = null;
 
     try {
         const comment = (applicationState.commentEl?.value || '').trim();
 
-        if (progress) {
-            progress.setStatus(0, 'done');
-            if (progress.getStepCount() > 2) {
-                progress.setStatus(1, 'active');
-            } else {
-                progress.setStatus(progress.getStepCount() - 1, 'active');
-            }
-        }
+        dotsAnimation = startButtonDotsAnimation(submitBtn, 'Отправка');
 
-        submitBtn.textContent = 'Отправка...';
-
-        await submitTrophyApplication(trophy.key, comment, applicationState.files, {
-            onUploadProgress: (fraction) => {
-                updateUploadProgress(progress, fraction, batchCount);
-            },
-        });
-
-        if (progress) {
-            const lastIndex = progress.getStepCount() - 1;
-            progress.setStatus(lastIndex, 'done');
-            progress.hide();
-        }
+        await submitTrophyApplication(trophy.key, comment, applicationState.files);
 
         applicationState.files = [];
         applicationState.cleanupPreview();
@@ -334,23 +300,15 @@ async function submitTrophyApplicationForm(trophy) {
         console.error('Ошибка отправки заявки:', error);
         hapticERR();
 
-        if (progress) {
-            const lastIndex = progress.getStepCount() - 1;
-            if (lastIndex >= 0) {
-                progress.setStatus(lastIndex, 'error');
-                progress.setLabel(lastIndex, 'Ошибка отправки');
-            }
-        }
-
         tg?.showPopup?.({
             title: 'Ошибка',
             message: error.message || 'Не удалось отправить заявку. Попробуйте позже.',
             buttons: [{ type: 'ok' }],
         });
     } finally {
+        dotsAnimation?.stop(originalText);
         submitBtn.disabled = false;
         submitBtn.classList.remove('is-loading');
-        submitBtn.textContent = originalText;
     }
 }
 
@@ -360,9 +318,6 @@ function resetApplicationState() {
     applicationState.files = [];
     applicationState.commentEl = null;
     applicationState.previewEl = null;
-    applicationState.progressController?.reset();
-    applicationState.progressEl = null;
-    applicationState.progressController = null;
     applicationState.filesInput = null;
     applicationState.submitBtn = null;
 }
