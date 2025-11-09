@@ -209,7 +209,7 @@ function renderHeader(data) {
     if (slug) {
       elements.mapCard.style.setProperty(
         '--waves-map-bg',
-        `url('./assets/maps/${slug}.png')`,
+        `url('../assets/maps/${slug}.png')`,
       );
       elements.mapCard.classList.add('waves-meta-card--with-bg');
     } else {
