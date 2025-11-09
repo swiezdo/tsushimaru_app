@@ -92,6 +92,39 @@ export function calculateProgress(currentLevel, maxLevels) {
     return Math.round((currentLevel / maxLevels) * 100);
 }
 
+function appendTextWithLinks(element, text) {
+    element.textContent = '';
+    if (!text) {
+        return;
+    }
+
+    const lines = String(text).split('\n');
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+        const line = lines[lineIndex];
+        const parts = line.split(/(https?:\/\/[^\s]+)/gi);
+
+        for (const part of parts) {
+            if (!part) continue;
+
+            if (/^https?:\/\/[^\s]+$/i.test(part)) {
+                const anchor = document.createElement('a');
+                anchor.href = part;
+                anchor.target = '_blank';
+                anchor.rel = 'noopener noreferrer';
+                anchor.textContent = 'здесь';
+                anchor.title = part;
+                element.appendChild(anchor);
+            } else {
+                element.appendChild(document.createTextNode(part));
+            }
+        }
+
+        if (lineIndex < lines.length - 1) {
+            element.appendChild(document.createElement('br'));
+        }
+    }
+}
+
 // Создание SVG кругового прогресса
 export function createProgressCircle(category, currentLevel, progress) {
     const gradientId = `grad-${category.key}-${Math.random().toString(36).substr(2, 9)}`;
@@ -477,7 +510,7 @@ function renderMasteryDetail(category, currentLevel) {
             const currentDesc = document.createElement('div');
             currentDesc.className = 'mastery-description';
             currentDesc.style.whiteSpace = 'pre-line';
-            currentDesc.textContent = currentLevelData.description;
+            appendTextWithLinks(currentDesc, currentLevelData.description);
             currentCard.appendChild(currentDesc);
             
             container.appendChild(currentCard);
@@ -501,7 +534,7 @@ function renderMasteryDetail(category, currentLevel) {
             const nextDesc = document.createElement('div');
             nextDesc.className = 'mastery-description';
             nextDesc.style.whiteSpace = 'pre-line';
-            nextDesc.textContent = nextLevelData.description;
+            appendTextWithLinks(nextDesc, nextLevelData.description);
             nextCard.appendChild(nextDesc);
             
             const nextProof = document.createElement('div');
@@ -511,7 +544,7 @@ function renderMasteryDetail(category, currentLevel) {
             nextProof.style.borderTop = '1px solid var(--color-border)';
             nextProof.style.fontSize = 'var(--fs-14)';
             nextProof.style.color = 'var(--tg-hint)';
-            nextProof.textContent = `📸 ${nextLevelData.proof}`;
+            appendTextWithLinks(nextProof, `📸 ${nextLevelData.proof}`);
             nextCard.appendChild(nextProof);
             
             container.appendChild(nextCard);
@@ -531,7 +564,7 @@ function renderMasteryDetail(category, currentLevel) {
             const maxDesc = document.createElement('div');
             maxDesc.className = 'mastery-description';
             maxDesc.style.whiteSpace = 'pre-line';
-            maxDesc.textContent = maxLevelData.description;
+            appendTextWithLinks(maxDesc, maxLevelData.description);
             maxCard.appendChild(maxDesc);
         }
         
