@@ -423,30 +423,30 @@ a svg,
   font-size: var(--fs-12);
 }
 .waves-icon {
-  width: 48px;
-  min-width: 48px;
+  width: 42px;
+  min-width: 42px;
   text-align: center;
   padding-top: var(--space-1);
   padding-bottom: var(--space-1);
 }
 .waves-icon-img {
   display: block;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
-  filter: invert(1) brightness(1.2);
+  filter: invert(1) brightness(1.35);
 }
 .waves-icon-badge {
   position: relative;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   margin: 0 auto;
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 .waves-icon-badge--objective {
   background: rgba(46, 166, 255, 0.18);
@@ -460,12 +460,12 @@ a svg,
 }
 .waves-icon-tag {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  font-size: var(--fs-12);
+  top: -5px;
+  right: -8px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1;
-  padding: 2px 4px;
+  padding: 2px 5px;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.05em;

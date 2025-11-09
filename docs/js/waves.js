@@ -35,11 +35,20 @@ function getObjectiveIcon(objectives, waveNumber) {
   if (!filename) return null;
 
   const descriptionKey = `objective${index + 1}`;
+  const numberKey = `objective${index + 1}_num`;
+  const count = objectives[numberKey];
+  const label =
+    typeof count === 'number' || typeof count === 'string'
+      ? String(count)
+      : null;
+  const description = objectives[descriptionKey] || 'Бонусная задача';
+  const tooltip = label ? `${description} — ${label}` : description;
+
   return {
     path: `./assets/icons/objectives/${filename}`,
     type: ICON_TYPES.OBJECTIVE,
-    description: objectives[descriptionKey] || 'Бонусная задача',
-    label: 'Б',
+    description: tooltip,
+    label,
   };
 }
 
@@ -58,7 +67,7 @@ function getModIcon(mods, waveNumber) {
     path: `./assets/icons/mods/${filename}`,
     type: ICON_TYPES.MOD,
     description: mods[descriptionKey] || 'Модификатор мира',
-    label: 'М',
+    label: null,
   };
 }
 
@@ -97,12 +106,14 @@ function createIconCell(metadata, waveNumber) {
   icon.loading = 'lazy';
   icon.classList.add('waves-icon-img');
 
-  const tag = document.createElement('span');
-  tag.classList.add('waves-icon-tag');
-  tag.textContent = iconData.label;
+  if (iconData.label) {
+    const tag = document.createElement('span');
+    tag.classList.add('waves-icon-tag');
+    tag.textContent = iconData.label;
+    badge.appendChild(tag);
+  }
 
   badge.appendChild(icon);
-  badge.appendChild(tag);
   iconCell.appendChild(badge);
   return iconCell;
 }
