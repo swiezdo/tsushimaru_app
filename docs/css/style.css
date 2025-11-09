@@ -408,9 +408,12 @@ a svg,
 }
 .waves-table th,
 .waves-table td {
-  padding: 5px;
+  padding: var(--space-1) var(--space-2);
   font-size: var(--fs-14);
   border-bottom: 1px solid var(--color-border);
+}
+.waves-table tr {
+  height: 38px;
 }
 .waves-table td {
   vertical-align: middle;
@@ -425,9 +428,9 @@ a svg,
 .waves-icon {
   width: 42px;
   min-width: 42px;
-  text-align: center;
-  padding-top: var(--space-1);
-  padding-bottom: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .waves-icon-img {
   display: block;
