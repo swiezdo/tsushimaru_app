@@ -11,6 +11,7 @@ const elements = {
   table: null,
   tbody: null,
   emptyState: null,
+  modIcons: null,
   mapCard: null,
   metaCard: null,
   objectivesList: null,
@@ -152,6 +153,7 @@ function ensureElements() {
   elements.mod2 = document.getElementById('wavesMod2');
   elements.table = document.getElementById('wavesTable');
   elements.emptyState = document.getElementById('wavesEmptyState');
+  elements.modIcons = document.getElementById('wavesModIcons');
   elements.mapCard = document.querySelector('.waves-meta-card');
   elements.metaCard = document.getElementById('wavesMetaCard');
   elements.objectivesList = document.getElementById('wavesObjectivesList');
@@ -186,6 +188,10 @@ function showEmpty(message) {
   if (elements.metaCard) {
     elements.metaCard.classList.add('hidden');
   }
+  if (elements.modIcons) {
+    elements.modIcons.innerHTML = '';
+    elements.modIcons.classList.add('hidden');
+  }
 }
 
 function showTable() {
@@ -217,6 +223,7 @@ function renderHeader(data) {
       elements.mapCard.classList.remove('waves-meta-card--with-bg');
     }
   }
+  renderModIcons(data);
 
   const title = formatTopbarTitle(data);
   setTopbar(true, title);
@@ -351,6 +358,47 @@ function renderWaves(data) {
 
   renderMetaList(elements.objectivesList, objectivesItems);
   renderMetaList(elements.modsList, modItems);
+}
+
+function renderModIcons(data) {
+  if (!elements.modIcons) return;
+  elements.modIcons.innerHTML = '';
+
+  const items = [];
+  if (data?.mod1_icon) {
+    items.push({
+      path: `./assets/icons/mod1/${data.mod1_icon}`,
+      title: data?.mod1 || '',
+    });
+  }
+  if (data?.mod2_icon) {
+    items.push({
+      path: `./assets/icons/mod2/${data.mod2_icon}`,
+      title: data?.mod2 || '',
+    });
+  }
+
+  if (!items.length) {
+    elements.modIcons.classList.add('hidden');
+    return;
+  }
+
+  elements.modIcons.classList.remove('hidden');
+
+  items.forEach((item) => {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('waves-mod-icon');
+
+    const img = document.createElement('img');
+    img.src = item.path;
+    img.alt = item.title;
+    img.title = item.title;
+    img.decoding = 'async';
+    img.loading = 'lazy';
+
+    wrapper.appendChild(img);
+    elements.modIcons.appendChild(wrapper);
+  });
 }
 
 export async function openWavesScreen() {
