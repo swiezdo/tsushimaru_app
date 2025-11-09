@@ -133,7 +133,7 @@
     {
       "key": "glitch",
       "name": "Глитч",
-      "maxLevels": 1,
+      "maxLevels": 11,
       "levels": [
         {
           "level": 1,
