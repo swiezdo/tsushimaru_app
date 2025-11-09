@@ -11,6 +11,7 @@ const elements = {
   table: null,
   tbody: null,
   emptyState: null,
+  mapCard: null,
   metaCard: null,
   objectivesList: null,
   modsList: null,
@@ -151,6 +152,7 @@ function ensureElements() {
   elements.mod2 = document.getElementById('wavesMod2');
   elements.table = document.getElementById('wavesTable');
   elements.emptyState = document.getElementById('wavesEmptyState');
+  elements.mapCard = document.querySelector('.waves-meta-card');
   elements.metaCard = document.getElementById('wavesMetaCard');
   elements.objectivesList = document.getElementById('wavesObjectivesList');
   elements.modsList = document.getElementById('wavesModsList');
@@ -202,6 +204,19 @@ function renderHeader(data) {
   if (elements.map) elements.map.textContent = data?.map || '—';
   if (elements.mod1) elements.mod1.textContent = data?.mod1 || '—';
   if (elements.mod2) elements.mod2.textContent = data?.mod2 || '—';
+  if (elements.mapCard) {
+    const slug = data?.slug;
+    if (slug) {
+      elements.mapCard.style.setProperty(
+        '--waves-map-bg',
+        `url('./assets/maps/${slug}.png')`,
+      );
+      elements.mapCard.classList.add('waves-meta-card--with-bg');
+    } else {
+      elements.mapCard.style.removeProperty('--waves-map-bg');
+      elements.mapCard.classList.remove('waves-meta-card--with-bg');
+    }
+  }
 
   const title = formatTopbarTitle(data);
   setTopbar(true, title);

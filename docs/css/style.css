@@ -376,10 +376,15 @@ a svg,
 .waves-meta-card {
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  color: var(--fg);
 }
 .waves-meta-card .waves-header {
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 .waves-title {
   font-size: var(--fs-18);
@@ -388,6 +393,38 @@ a svg,
 .waves-subtitle {
   font-size: var(--fs-15);
   color: var(--muted);
+}
+.waves-meta-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--waves-map-bg, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  z-index: 0;
+}
+.waves-meta-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 22, 33, 0.75), rgba(14, 22, 33, 0.85));
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  z-index: 0;
+}
+.waves-meta-card--with-bg::after,
+.waves-meta-card--with-bg::before {
+  opacity: 1;
+}
+.waves-meta-card--with-bg .waves-subtitle {
+  color: rgba(255, 255, 255, 0.85);
+}
+.waves-meta-card--with-bg .waves-title,
+.waves-meta-card--with-bg .waves-header {
+  text-shadow: var(--shadow-text);
 }
 .waves-table.card {
   padding: 0;
