@@ -4,9 +4,23 @@
 import { fetchTrophiesList, fetchTrophies, submitTrophyApplication } from './api.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
-import { shake, createFileKey, isImageFile, clearChildren, renderFilesPreview } from './utils.js';
+import {
+    shake,
+    createFileKey,
+    isImageFile,
+    isVideoFile,
+    clearChildren,
+    renderFilesPreview,
+    createProgressController,
+    updateUploadProgress,
+} from './utils.js';
 
-const MAX_TROPHY_FILES = 9;
+const MAX_TROPHY_FILES = 18;
+const MAX_FILES_PER_BATCH = 9;
+
+function isSupportedMediaFile(file) {
+    return isImageFile(file) || isVideoFile(file);
+}
 
 const detailContainer = $('trophyDetailContainer');
 
@@ -17,6 +31,8 @@ const applicationState = {
     cleanupPreview: () => {},
     commentEl: null,
     previewEl: null,
+    progressEl: null,
+    progressController: null,
     filesInput: null,
     submitBtn: null,
 };
@@ -121,11 +137,12 @@ function buildApplicationCard(trophy) {
             </div>
             <div class="input">
                 <label for="trophyApplicationFiles">Прикрепите файлы</label>
-                <input id="trophyApplicationFiles" type="file" multiple accept="image/*" hidden />
+                <input id="trophyApplicationFiles" type="file" multiple accept="image/*,video/*" hidden />
                 <button type="button" class="fileline-btn" id="trophyApplicationAddBtn" aria-label="Прикрепить файлы">＋ Прикрепить</button>
                 <div id="trophyApplicationPreview" class="thumbs-row"></div>
             </div>
         </form>
+        <div id="trophyApplicationProgress" class="progress-tracker hidden"></div>
         <div class="actions-bar">
             <button type="button" class="btn primary wide" id="trophyApplicationSubmitBtn">Отправить</button>
         </div>
@@ -141,11 +158,14 @@ function setupApplicationForm(card, trophy) {
     const addBtn = card.querySelector('#trophyApplicationAddBtn');
     const previewEl = card.querySelector('#trophyApplicationPreview');
     const submitBtn = card.querySelector('#trophyApplicationSubmitBtn');
+    const progressEl = card.querySelector('#trophyApplicationProgress');
 
     applicationState.commentEl = commentEl;
     applicationState.filesInput = filesInput;
     applicationState.previewEl = previewEl;
     applicationState.submitBtn = submitBtn;
+    applicationState.progressEl = progressEl;
+    applicationState.progressController = progressEl ? createProgressController(progressEl) : null;
 
     if (commentEl) {
         const autoResize = () => {
@@ -165,6 +185,7 @@ function setupApplicationForm(card, trophy) {
     });
 
     filesInput?.addEventListener('change', () => {
+        applicationState.progressController?.reset();
         handleFilesSelected(Array.from(filesInput.files || []));
     });
 
@@ -182,11 +203,11 @@ function handleFilesSelected(files) {
         return;
     }
 
-    const images = files.filter((file) => isImageFile(file));
-    if (images.length !== files.length) {
+    const supported = files.filter((file) => isSupportedMediaFile(file));
+    if (supported.length !== files.length) {
         tg?.showPopup?.({
             title: 'Неподдерживаемый формат',
-            message: 'Разрешены только изображения.',
+            message: 'Можно прикреплять изображения и видео (например, MP4, MOV).',
             buttons: [{ type: 'ok' }],
         });
     }
@@ -196,7 +217,7 @@ function handleFilesSelected(files) {
     const uniqueNewFiles = [];
     let skippedByLimit = 0;
 
-    images.forEach((file) => {
+    supported.forEach((file) => {
         const key = createFileKey(file);
         if (knownKeys.has(key)) return;
         if (uniqueNewFiles.length >= freeSlots) {
@@ -210,7 +231,7 @@ function handleFilesSelected(files) {
     if (skippedByLimit > 0) {
         tg?.showPopup?.({
             title: 'Лимит файлов',
-            message: `Можно прикрепить не более ${MAX_TROPHY_FILES} изображений.`,
+            message: `Можно прикрепить не более ${MAX_TROPHY_FILES} файлов.`,
             buttons: [{ type: 'ok' }],
         });
     }
@@ -224,6 +245,7 @@ function handleFilesSelected(files) {
 function refreshPreview() {
     applicationState.cleanupPreview();
     applicationState.cleanupPreview = renderFilesPreview(applicationState.files, applicationState.previewEl, {
+        limit: 6,
         onRemove: (idx) => {
             applicationState.files.splice(idx, 1);
             hapticTapSmart();
@@ -233,29 +255,72 @@ function refreshPreview() {
 }
 
 async function submitTrophyApplicationForm(trophy) {
-    if (!applicationState.submitBtn) return;
+    const submitBtn = applicationState.submitBtn;
+    if (!submitBtn) return;
 
     if (applicationState.files.length === 0) {
-        shake(applicationState.submitBtn);
-        focusAndScrollIntoView(applicationState.submitBtn);
+        shake(submitBtn);
+        focusAndScrollIntoView(submitBtn);
         tg?.showPopup?.({
             title: 'Ошибка',
-            message: 'Необходимо прикрепить хотя бы одно изображение.',
+            message: 'Необходимо прикрепить хотя бы один файл (изображение или видео).',
             buttons: [{ type: 'ok' }],
         });
         hapticERR();
         return;
     }
 
-    const submitBtn = applicationState.submitBtn;
     const originalText = submitBtn.textContent;
+    const progress = applicationState.progressController;
+    const totalFiles = applicationState.files.length;
+    const batchCount = Math.max(1, Math.ceil(totalFiles / MAX_FILES_PER_BATCH));
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Отправка...';
+    submitBtn.classList.add('is-loading');
+    submitBtn.textContent = 'Подготовка...';
+
+    progress?.reset();
+    progress?.start(batchCount);
 
     try {
         const comment = (applicationState.commentEl?.value || '').trim();
-        await submitTrophyApplication(trophy.key, comment, applicationState.files);
+
+        if (progress) {
+            progress.setStatus(0, 'done');
+            if (progress.getStepCount() > 2) {
+                progress.setStatus(1, 'active');
+            } else {
+                progress.setStatus(progress.getStepCount() - 1, 'active');
+            }
+        }
+
+        submitBtn.textContent = 'Отправка...';
+
+        await submitTrophyApplication(trophy.key, comment, applicationState.files, {
+            onUploadProgress: (fraction) => {
+                updateUploadProgress(progress, fraction, batchCount);
+            },
+        });
+
+        if (progress) {
+            const lastIndex = progress.getStepCount() - 1;
+            progress.setStatus(lastIndex, 'done');
+            progress.hide();
+        }
+
+        applicationState.files = [];
+        applicationState.cleanupPreview();
+        applicationState.cleanupPreview = () => {};
+        if (applicationState.filesInput) {
+            applicationState.filesInput.value = '';
+        }
+        if (applicationState.commentEl) {
+            applicationState.commentEl.value = '';
+            applicationState.commentEl.style.height = 'auto';
+        }
+        if (applicationState.previewEl) {
+            applicationState.previewEl.innerHTML = '';
+        }
 
         hapticOK();
         tg?.showPopup?.({
@@ -268,6 +333,15 @@ async function submitTrophyApplicationForm(trophy) {
     } catch (error) {
         console.error('Ошибка отправки заявки:', error);
         hapticERR();
+
+        if (progress) {
+            const lastIndex = progress.getStepCount() - 1;
+            if (lastIndex >= 0) {
+                progress.setStatus(lastIndex, 'error');
+                progress.setLabel(lastIndex, 'Ошибка отправки');
+            }
+        }
+
         tg?.showPopup?.({
             title: 'Ошибка',
             message: error.message || 'Не удалось отправить заявку. Попробуйте позже.',
@@ -275,6 +349,7 @@ async function submitTrophyApplicationForm(trophy) {
         });
     } finally {
         submitBtn.disabled = false;
+        submitBtn.classList.remove('is-loading');
         submitBtn.textContent = originalText;
     }
 }
@@ -285,6 +360,9 @@ function resetApplicationState() {
     applicationState.files = [];
     applicationState.commentEl = null;
     applicationState.previewEl = null;
+    applicationState.progressController?.reset();
+    applicationState.progressEl = null;
+    applicationState.progressController = null;
     applicationState.filesInput = null;
     applicationState.submitBtn = null;
 }

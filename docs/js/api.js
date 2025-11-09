@@ -56,6 +56,73 @@ async function apiRequest(endpoint, options = {}) {
     }
 }
 
+function safeParseJSON(text) {
+    if (typeof text !== 'string' || !text.length) return null;
+    try {
+        return JSON.parse(text);
+    } catch {
+        return null;
+    }
+}
+
+function postFormDataWithProgress(url, formData, initData, options = {}) {
+    const { onUploadProgress } = options || {};
+
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.responseType = 'json';
+
+        if (initData) {
+            xhr.setRequestHeader('X-Telegram-Init-Data', initData);
+        }
+
+        if (typeof onUploadProgress === 'function') {
+            xhr.upload.addEventListener('progress', (event) => {
+                if (!event.lengthComputable) return;
+                const fraction = event.total > 0 ? event.loaded / event.total : 0;
+                try {
+                    onUploadProgress(Math.min(1, Math.max(0, fraction)));
+                } catch (progressError) {
+                    console.error('Ошибка обработчика прогресса загрузки:', progressError);
+                }
+            });
+        }
+
+        xhr.onerror = () => {
+            reject(new Error('Не удалось отправить запрос. Проверьте соединение.'));
+        };
+
+        xhr.onabort = () => {
+            reject(new Error('Отправка была прервана.'));
+        };
+
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState !== XMLHttpRequest.DONE) return;
+
+            const status = xhr.status;
+            const body = xhr.response ?? safeParseJSON(xhr.responseText);
+
+            if (status >= 200 && status < 300) {
+                if (typeof onUploadProgress === 'function') {
+                    try {
+                        onUploadProgress(1);
+                    } catch (progressError) {
+                        console.error('Ошибка обработчика прогресса загрузки:', progressError);
+                    }
+                }
+                resolve(body ?? {});
+            } else {
+                const error = new Error(body?.detail || `HTTP ${status}`);
+                error.status = status;
+                reject(error);
+            }
+        };
+
+        xhr.send(formData);
+    });
+}
+
 // Получение профиля пользователя
 export async function fetchProfile() {
     try {
@@ -509,7 +576,14 @@ export async function fetchUserMastery(userId) {
 }
 
 // Отправка заявки на повышение уровня мастерства
-export async function submitMasteryApplication(categoryKey, currentLevel, nextLevel, comment = '', photos = []) {
+export async function submitMasteryApplication(
+    categoryKey,
+    currentLevel,
+    nextLevel,
+    comment = '',
+    media = [],
+    options = {},
+) {
     try {
         const initData = getInitData();
         if (!initData) {
@@ -525,28 +599,16 @@ export async function submitMasteryApplication(categoryKey, currentLevel, nextLe
             data.append('comment', comment);
         }
         
-        // Добавляем изображения
-        photos.forEach(photo => {
-            data.append('photos', photo);
+        const files = Array.isArray(media) ? media : Array.from(media || []);
+
+        files.forEach((file) => {
+            if (file) {
+                data.append('photos', file);
+            }
         });
 
         const url = `${API_BASE}/api/mastery.submitApplication`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
-            body: data,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
+        return await postFormDataWithProgress(url, data, initData, options);
     } catch (error) {
         console.error('Ошибка отправки заявки на повышение уровня:', error);
         throw error;
@@ -746,7 +808,7 @@ export async function fetchTrophiesList() {
 }
 
 // Отправка заявки на получение трофея
-export async function submitTrophyApplication(trophyKey, comment = '', photos = []) {
+export async function submitTrophyApplication(trophyKey, comment = '', media = [], options = {}) {
     try {
         const initData = getInitData();
         if (!initData) {
@@ -760,28 +822,16 @@ export async function submitTrophyApplication(trophyKey, comment = '', photos = 
             data.append('comment', comment);
         }
         
-        // Добавляем изображения
-        photos.forEach(photo => {
-            data.append('photos', photo);
+        const files = Array.isArray(media) ? media : Array.from(media || []);
+
+        files.forEach((file) => {
+            if (file) {
+                data.append('photos', file);
+            }
         });
 
         const url = `${API_BASE}/api/trophy.submit`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
-            body: data,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
+        return await postFormDataWithProgress(url, data, initData, options);
     } catch (error) {
         console.error('Ошибка отправки заявки на получение трофея:', error);
         throw error;

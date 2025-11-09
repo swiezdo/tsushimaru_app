@@ -4,7 +4,15 @@
 import { fetchMastery, submitMasteryApplication } from './api.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
-import { shake, createFileKey, isImageFile } from './utils.js';
+import {
+    shake,
+    createFileKey,
+    isImageFile,
+    isVideoFile,
+    renderFilesPreview,
+    createProgressController,
+    updateUploadProgress,
+} from './utils.js';
 
 // Кэш конфига
 let masteryConfig = null;
@@ -542,16 +550,19 @@ function renderMasteryDetail(category, currentLevel) {
 }
 
 // Константы для формы заявки
-const MAX_MASTERY_FILES = 9;
+const MAX_MASTERY_FILES = 18;
+const MAX_MASTERY_BATCH = 9;
 let masteryApplicationSelected = [];
-let masteryApplicationObjectURLs = new Set();
+let masteryApplicationPreviewCleanup = () => {};
+let masteryApplicationProgressController = null;
 
 // Рендеринг карточки заявки на повышение уровня
 function renderMasteryApplicationCard(container, category, currentLevel) {
     // Очищаем предыдущие данные
     masteryApplicationSelected = [];
-    masteryApplicationObjectURLs.forEach(url => URL.revokeObjectURL(url));
-    masteryApplicationObjectURLs.clear();
+    masteryApplicationPreviewCleanup();
+    masteryApplicationPreviewCleanup = () => {};
+    masteryApplicationProgressController = null;
     
     // Создаём карточку
     const applicationCard = document.createElement('section');
@@ -607,7 +618,7 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     filesInput.id = 'masteryApplicationFiles';
     filesInput.type = 'file';
     filesInput.multiple = true;
-    filesInput.accept = 'image/*';
+    filesInput.accept = 'image/*,video/*';
     filesInput.style.display = 'none';
     
     const addFilesBtn = document.createElement('button');
@@ -626,6 +637,11 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     form.appendChild(filesContainer);
     
     applicationCard.appendChild(form);
+
+    const progressContainer = document.createElement('div');
+    progressContainer.id = 'masteryApplicationProgress';
+    progressContainer.className = 'progress-tracker hidden';
+    applicationCard.appendChild(progressContainer);
     
     // Кнопка отправки
     const actionsBar = document.createElement('div');
@@ -641,6 +657,8 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     applicationCard.appendChild(actionsBar);
     
     container.appendChild(applicationCard);
+
+    masteryApplicationProgressController = createProgressController(progressContainer);
     
     // Обработчики событий
     addFilesBtn.addEventListener('click', () => {
@@ -650,6 +668,8 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     });
     
     filesInput.addEventListener('change', () => {
+        masteryApplicationProgressController?.reset();
+
         const files = Array.from(filesInput.files || []);
         if (!files.length) {
             shake(previewContainer || addFilesBtn);
@@ -657,13 +677,12 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
             return;
         }
         
-        // Фильтруем только изображения
-        const imageFiles = files.filter(file => isImageFile(file));
+        const supportedFiles = files.filter((file) => isImageFile(file) || isVideoFile(file));
         
-        if (imageFiles.length !== files.length) {
+        if (supportedFiles.length !== files.length) {
             tg?.showPopup?.({
                 title: 'Неподдерживаемый формат',
-                message: 'Разрешены только изображения.',
+                message: 'Можно прикреплять изображения и видео (например, MP4, MOV).',
                 buttons: [{ type: 'ok' }]
             });
         }
@@ -671,18 +690,18 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
         const keyOf = (f) => createFileKey(f);
         const existing = new Set(masteryApplicationSelected.map(keyOf));
         const freeSlots = Math.max(0, MAX_MASTERY_FILES - masteryApplicationSelected.length);
-        const incoming = imageFiles.filter(f => !existing.has(keyOf));
+        const incoming = supportedFiles.filter((file) => !existing.has(keyOf(file)));
         
         if (incoming.length > freeSlots) {
             incoming.length = freeSlots;
             tg?.showPopup?.({
                 title: 'Лимит файлов',
-                message: `Можно прикрепить не более ${MAX_MASTERY_FILES} изображений.`,
+                message: `Можно прикрепить не более ${MAX_MASTERY_FILES} файлов.`,
                 buttons: [{ type: 'ok' }]
             });
         }
         
-        incoming.forEach(f => masteryApplicationSelected.push(f));
+        incoming.forEach((file) => masteryApplicationSelected.push(file));
         renderMasteryApplicationPreview();
     });
     
@@ -702,45 +721,16 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
 function renderMasteryApplicationPreview() {
     const previewEl = $('masteryApplicationPreview');
     if (!previewEl) return;
-    
-    // Очищаем старые objectURL
-    masteryApplicationObjectURLs.forEach(url => URL.revokeObjectURL(url));
-    masteryApplicationObjectURLs.clear();
-    
-    previewEl.innerHTML = '';
-    const limit = 4;
-    const toShow = masteryApplicationSelected.slice(0, limit);
-    
-    toShow.forEach((file, idx) => {
-        const tile = document.createElement('div');
-        tile.className = 'preview-item removable';
-        tile.title = 'Нажмите, чтобы удалить';
-        
-        if (isImageFile(file)) {
-            const img = document.createElement('img');
-            const objectURL = URL.createObjectURL(file);
-            masteryApplicationObjectURLs.add(objectURL);
-            img.src = objectURL;
-            tile.appendChild(img);
-        } else {
-            tile.textContent = '📄';
-        }
-        
-        tile.addEventListener('click', () => {
+
+    masteryApplicationPreviewCleanup();
+    masteryApplicationPreviewCleanup = renderFilesPreview(masteryApplicationSelected, previewEl, {
+        limit: 6,
+        onRemove: (idx) => {
             masteryApplicationSelected.splice(idx, 1);
             hapticTapSmart();
             renderMasteryApplicationPreview();
-        });
-        
-        previewEl.appendChild(tile);
+        },
     });
-    
-    if (masteryApplicationSelected.length > limit) {
-        const more = document.createElement('div');
-        more.className = 'preview-more';
-        more.textContent = `+${masteryApplicationSelected.length - limit}`;
-        previewEl.appendChild(more);
-    }
 }
 
 // Отправка формы заявки
@@ -750,17 +740,17 @@ async function submitMasteryApplicationForm(category, currentLevel, commentTexta
     submittingApplication = true;
     
     const originalText = submitBtn?.textContent || 'Отправить';
-    
-    // Блокируем кнопку и меняем текст
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.classList.add('success');
-        submitBtn.textContent = 'Подождите...';
-    }
-    
-    const comment = (commentTextarea?.value || '').trim();
     const filesCount = masteryApplicationSelected.length;
     const nextLevel = currentLevel + 1;
+    const comment = (commentTextarea?.value || '').trim();
+    const progress = masteryApplicationProgressController;
+    const batchCount = Math.max(1, Math.ceil(filesCount / MAX_MASTERY_BATCH));
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('is-loading');
+        submitBtn.textContent = 'Подготовка...';
+    }
     
     // Валидация: минимум 1 файл обязателен
     if (filesCount === 0) {
@@ -770,24 +760,49 @@ async function submitMasteryApplicationForm(category, currentLevel, commentTexta
         hapticERR();
         tg?.showPopup?.({ 
             title: 'Ошибка', 
-            message: 'Необходимо прикрепить хотя бы одно изображение.', 
+            message: 'Необходимо прикрепить хотя бы один файл (изображение или видео).', 
             buttons: [{ type: 'ok' }] 
         });
         
         // Восстанавливаем кнопку
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.classList.remove('success');
+            submitBtn.classList.remove('is-loading');
             submitBtn.textContent = originalText;
         }
         submittingApplication = false;
         return;
     }
     
+    progress?.reset();
+    progress?.start(batchCount);
+    
     try {
         hapticOK();
+        if (progress) {
+            progress.setStatus(0, 'done');
+            if (progress.getStepCount() > 2) {
+                progress.setStatus(1, 'active');
+            } else {
+                progress.setStatus(progress.getStepCount() - 1, 'active');
+            }
+        }
+
+        if (submitBtn) {
+            submitBtn.textContent = 'Отправка...';
+        }
         
-        await submitMasteryApplication(category.key, currentLevel, nextLevel, comment, masteryApplicationSelected);
+        await submitMasteryApplication(category.key, currentLevel, nextLevel, comment, masteryApplicationSelected, {
+            onUploadProgress: (fraction) => {
+                updateUploadProgress(progress, fraction, batchCount);
+            },
+        });
+        
+        if (progress) {
+            const lastIndex = progress.getStepCount() - 1;
+            progress.setStatus(lastIndex, 'done');
+            progress.hide();
+        }
         
         tg?.showPopup?.({ 
             title: 'Заявка отправлена', 
@@ -797,20 +812,26 @@ async function submitMasteryApplicationForm(category, currentLevel, commentTexta
         
         // Очищаем форму
         masteryApplicationSelected = [];
-        masteryApplicationObjectURLs.forEach(url => URL.revokeObjectURL(url));
-        masteryApplicationObjectURLs.clear();
+        masteryApplicationPreviewCleanup();
+        masteryApplicationPreviewCleanup = () => {};
         if (commentTextarea) {
             commentTextarea.value = '';
             commentTextarea.style.height = 'auto';
         }
-        const previewEl = $('masteryApplicationPreview');
-        if (previewEl) previewEl.innerHTML = '';
         const filesInput = $('masteryApplicationFiles');
         if (filesInput) filesInput.value = '';
+        renderMasteryApplicationPreview();
         
     } catch (error) {
         console.error('Ошибка отправки заявки:', error);
         hapticERR();
+        if (progress) {
+            const lastIndex = progress.getStepCount() - 1;
+            if (lastIndex >= 0) {
+                progress.setStatus(lastIndex, 'error');
+                progress.setLabel(lastIndex, 'Ошибка отправки');
+            }
+        }
         tg?.showPopup?.({ 
             title: 'Ошибка', 
             message: error.message || 'Произошла ошибка при отправке заявки.', 
@@ -820,7 +841,7 @@ async function submitMasteryApplicationForm(category, currentLevel, commentTexta
         // Восстанавливаем кнопку
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.classList.remove('success');
+            submitBtn.classList.remove('is-loading');
             submitBtn.textContent = originalText;
         }
         submittingApplication = false;
