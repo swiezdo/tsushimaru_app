@@ -438,6 +438,8 @@ a svg,
   height: 18px;
   object-fit: contain;
   filter: invert(1) brightness(1.35);
+  position: relative;
+  z-index: 1;
 }
 .waves-icon-badge {
   position: relative;
@@ -465,13 +467,14 @@ a svg,
   position: absolute;
   top: -5px;
   right: -8px;
-  font-size: 11px;
+  font-size: 8px;
   font-weight: 700;
   line-height: 1;
   padding: 2px 5px;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  z-index: 2;
 }
 .waves-icon-badge--objective .waves-icon-tag {
   background: #2ea6ff;
