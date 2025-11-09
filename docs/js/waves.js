@@ -16,6 +16,81 @@ const elements = {
 let wavesCache = null;
 let initialized = false;
 
+const MAX_WAVES = 15;
+const OBJECTIVE_WAVE_NUMBERS = [2, 4, 7, 10, 13];
+const MOD_WAVE_NUMBERS = [3, 6, 9, 12, 15];
+
+function getObjectiveIcon(objectives, waveNumber) {
+  if (!objectives) return null;
+
+  const index = OBJECTIVE_WAVE_NUMBERS.indexOf(waveNumber);
+  if (index === -1) return null;
+
+  const key = `objective${index + 1}_icon`;
+  return objectives[key] ? `./assets/icons/objectives/${objectives[key]}` : null;
+}
+
+function getModIcon(mods, waveNumber) {
+  if (!mods) return null;
+
+  const index = MOD_WAVE_NUMBERS.indexOf(waveNumber);
+  if (index === -1) return null;
+
+  const key = `mod${index + 1}_icon`;
+  return mods[key] ? `./assets/icons/mods/${mods[key]}` : null;
+}
+
+function getWaveIcon(metadata, waveNumber) {
+  if (!metadata) return null;
+
+  return (
+    getObjectiveIcon(metadata.objectives, waveNumber)
+    || getModIcon(metadata.mods, waveNumber)
+  );
+}
+
+function createIconCell(metadata, waveNumber) {
+  const iconCell = document.createElement('td');
+  iconCell.classList.add('waves-icon');
+
+  const iconPath = getWaveIcon(metadata, waveNumber);
+  if (!iconPath) {
+    return iconCell;
+  }
+
+  const icon = document.createElement('img');
+  icon.src = iconPath;
+  icon.alt = '';
+  icon.decoding = 'async';
+  icon.loading = 'lazy';
+  icon.classList.add('waves-icon-img');
+
+  iconCell.appendChild(icon);
+  return iconCell;
+}
+
+function createNumberCell(waveNumber) {
+  const numCell = document.createElement('td');
+  numCell.textContent = `${waveNumber}.`;
+  numCell.classList.add('waves-number');
+  return numCell;
+}
+
+function createSpawnsCell(spawnRow) {
+  const spawnCell = document.createElement('td');
+  spawnCell.classList.add('waves-spawns');
+
+  if (!Array.isArray(spawnRow) || spawnRow.length === 0) {
+    spawnCell.textContent = '—';
+    return spawnCell;
+  }
+
+  const filtered = spawnRow.filter((value) => typeof value === 'string' && value.trim().length > 0);
+  spawnCell.textContent = filtered.length > 0 ? filtered.join(', ') : '—';
+
+  return spawnCell;
+}
+
 function ensureElements() {
   if (initialized) return;
 
@@ -71,7 +146,7 @@ function renderHeader(data) {
   setTopbar(true, title);
 }
 
-function renderTableRows(waves) {
+function renderTableRows(waves, metadata) {
   if (!elements.tbody) return;
   elements.tbody.innerHTML = '';
 
@@ -80,7 +155,7 @@ function renderTableRows(waves) {
     return;
   }
 
-  waves.forEach((spawnRow, index) => {
+  for (let index = 0; index < MAX_WAVES; index += 1) {
     const tr = document.createElement('tr');
 
     const waveNumber = index + 1;
@@ -88,27 +163,24 @@ function renderTableRows(waves) {
       tr.classList.add('waves-strong');
     }
 
-    const numCell = document.createElement('td');
-    numCell.textContent = `${waveNumber}.`;
-    numCell.classList.add('waves-number');
-    tr.appendChild(numCell);
+    const spawnRow = Array.isArray(waves) ? waves[index] : null;
 
-    for (let i = 0; i < 3; i += 1) {
-      const cell = document.createElement('td');
-      const value = Array.isArray(spawnRow) ? spawnRow[i] : undefined;
-      cell.textContent = value || '—';
-      tr.appendChild(cell);
-    }
+    tr.appendChild(createIconCell(metadata, waveNumber));
+    tr.appendChild(createNumberCell(waveNumber));
+    tr.appendChild(createSpawnsCell(spawnRow));
 
     elements.tbody.appendChild(tr);
-  });
+  }
 
   showTable();
 }
 
 function renderWaves(data) {
   renderHeader(data);
-  renderTableRows(data?.waves);
+  renderTableRows(data?.waves, {
+    objectives: data?.objectives,
+    mods: data?.mods,
+  });
 }
 
 export async function openWavesScreen() {

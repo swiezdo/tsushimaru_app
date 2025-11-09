@@ -380,7 +380,6 @@ a svg,
 .waves-meta-card .waves-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
 }
 .waves-title {
   font-size: var(--fs-18);
@@ -413,12 +412,27 @@ a svg,
   font-size: var(--fs-14);
   border-bottom: 1px solid var(--color-border);
 }
+.waves-table td {
+  vertical-align: middle;
+}
 .waves-table th {
   font-weight: 600;
   color: var(--tg-hint);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: var(--fs-12);
+}
+.waves-icon {
+  width: 40px;
+  min-width: 40px;
+  text-align: center;
+}
+.waves-icon-img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto;
+  object-fit: contain;
 }
 .waves-table tr:last-child td {
   border-bottom: none;
@@ -432,6 +446,9 @@ a svg,
   white-space: nowrap;
   font-weight: 600;
   color: var(--accent);
+}
+.waves-spawns {
+  text-align: left;
 }
 .waves-table tr.waves-strong {
   background: rgba(255, 82, 82, 0.12);
