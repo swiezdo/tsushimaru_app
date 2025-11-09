@@ -11,6 +11,9 @@ const elements = {
   table: null,
   tbody: null,
   emptyState: null,
+  metaCard: null,
+  objectivesList: null,
+  modsList: null,
 };
 
 let wavesCache = null;
@@ -148,6 +151,9 @@ function ensureElements() {
   elements.mod2 = document.getElementById('wavesMod2');
   elements.table = document.getElementById('wavesTable');
   elements.emptyState = document.getElementById('wavesEmptyState');
+  elements.metaCard = document.getElementById('wavesMetaCard');
+  elements.objectivesList = document.getElementById('wavesObjectivesList');
+  elements.modsList = document.getElementById('wavesModsList');
 
   if (elements.table) {
     elements.tbody = elements.table.querySelector('tbody');
@@ -175,6 +181,9 @@ function showEmpty(message) {
     elements.emptyState.textContent = message;
     elements.emptyState.classList.remove('hidden');
   }
+  if (elements.metaCard) {
+    elements.metaCard.classList.add('hidden');
+  }
 }
 
 function showTable() {
@@ -183,6 +192,9 @@ function showTable() {
   }
   if (elements.emptyState) {
     elements.emptyState.classList.add('hidden');
+  }
+  if (elements.metaCard) {
+    elements.metaCard.classList.remove('hidden');
   }
 }
 
@@ -224,12 +236,102 @@ function renderTableRows(waves, metadata) {
   showTable();
 }
 
+function renderMetaList(container, items) {
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!Array.isArray(items) || items.length === 0) {
+    container.classList.add('waves-meta-list--empty');
+    return;
+  }
+
+  container.classList.remove('waves-meta-list--empty');
+
+  items.forEach((item) => {
+    const row = document.createElement('div');
+    row.classList.add('waves-meta-item');
+
+    const icon = document.createElement('img');
+    icon.src = item.path;
+    icon.alt = item.description;
+    icon.decoding = 'async';
+    icon.loading = 'lazy';
+    icon.classList.add('waves-meta-icon');
+
+    const text = document.createElement('div');
+    text.classList.add('waves-meta-text');
+    text.textContent = item.description;
+
+    row.appendChild(icon);
+    row.appendChild(text);
+    container.appendChild(row);
+  });
+}
+
+function buildObjectiveItems(objectives) {
+  if (!objectives) return [];
+  const items = [];
+
+  OBJECTIVE_WAVE_NUMBERS.forEach((_, idx) => {
+    const index = idx + 1;
+    const iconKey = `objective${index}_icon`;
+    const labelKey = `objective${index}`;
+    const numberKey = `objective${index}_num`;
+
+    const filename = objectives[iconKey];
+    if (!filename) return;
+
+    const description = objectives[labelKey] || 'Бонусная задача';
+    const count = objectives[numberKey];
+    const fullDescription =
+      typeof count === 'number' || typeof count === 'string'
+        ? `${description} — ${count}`
+        : description;
+
+    items.push({
+      path: `./assets/icons/objectives/${filename}`,
+      description: fullDescription,
+    });
+  });
+
+  return items;
+}
+
+function buildModItems(mods) {
+  if (!mods) return [];
+  const items = [];
+
+  MOD_WAVE_NUMBERS.forEach((_, idx) => {
+    const index = idx + 1;
+    const iconKey = `mod${index}_icon`;
+    const labelKey = `mod${index}`;
+
+    const filename = mods[iconKey];
+    if (!filename) return;
+
+    const description = mods[labelKey] || 'Модификатор мира';
+
+    items.push({
+      path: `./assets/icons/mods/${filename}`,
+      description,
+    });
+  });
+
+  return items;
+}
+
 function renderWaves(data) {
   renderHeader(data);
   renderTableRows(data?.waves, {
     objectives: data?.objectives,
     mods: data?.mods,
   });
+
+  const objectivesItems = buildObjectiveItems(data?.objectives);
+  const modItems = buildModItems(data?.mods);
+
+  renderMetaList(elements.objectivesList, objectivesItems);
+  renderMetaList(elements.modsList, modItems);
 }
 
 export async function openWavesScreen() {
