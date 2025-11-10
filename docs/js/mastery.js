@@ -113,6 +113,9 @@ function appendTextWithLinks(element, text) {
                 anchor.rel = 'noopener noreferrer';
                 anchor.textContent = 'здесь';
                 anchor.title = part;
+                anchor.style.color = 'inherit';
+                anchor.style.textDecoration = 'underline';
+                anchor.style.fontWeight = 'inherit';
                 element.appendChild(anchor);
             } else {
                 element.appendChild(document.createTextNode(part));
