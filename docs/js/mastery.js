@@ -15,23 +15,34 @@ let masteryRendered = false;
 // Lookup table для правил фонов по уровню
 const MASTERY_LEVEL_RULES = {
     3: [
-        { level: 2, bg: 'background.jpg' },
+        { level: 1, bg: 'background.jpg' },
+        { level: 2, bg: 'background2.jpg' },
         { level: 3, bg: 'background.gif', icon: true }
     ],
     4: [
+        { level: 1, bg: 'background.jpg' },
         { level: 2, bg: 'background.jpg' },
         { level: 3, bg: 'background.gif' },
         { level: 4, icon: true }
     ],
     5: [
+        { level: 1, bg: 'background.jpg' },
         { level: 2, bg: 'background.jpg' },
         { level: 3, bg: 'background2.jpg' },
         { level: 4, bg: 'background.gif' },
         { level: 5, icon: true }
     ],
-    11: [
+    10: [
         { level: 1, bg: 'background.jpg' },
-        { level: 11, icon: true }
+        { level: 2, bg: 'background2.jpg' },
+        { level: 3, bg: 'background3.jpg' },
+        { level: 4, bg: 'background4.jpg' },
+        { level: 5, bg: 'background5.jpg' },
+        { level: 6, bg: 'background6.jpg' },
+        { level: 7, bg: 'background7.jpg' },
+        { level: 8, bg: 'background8.jpg' },
+        { level: 9, bg: 'background9.jpg' },
+        { level: 10, bg: 'background.gif', icon: true }
     ]
 };
 
