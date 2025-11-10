@@ -30,6 +30,7 @@ const MASTERY_LEVEL_RULES = {
         { level: 5, icon: true }
     ],
     11: [
+        { level: 1, bg: 'background.jpg' },
         { level: 11, icon: true }
     ]
 };
