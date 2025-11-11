@@ -177,6 +177,7 @@ export function createProgressCircle(category, currentLevel, progress) {
     bgCircle.setAttribute('fill', 'none');
     bgCircle.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
     bgCircle.setAttribute('stroke-width', '5');
+    bgCircle.setAttribute('data-role', 'progress-bg');
     
     // Прогресс круг
     const circumference = 2 * Math.PI * 45;
@@ -193,6 +194,7 @@ export function createProgressCircle(category, currentLevel, progress) {
     progressCircle.setAttribute('stroke-dasharray', `${circumference} ${circumference}`);
     progressCircle.setAttribute('stroke-dashoffset', offset);
     progressCircle.setAttribute('transform', 'rotate(-90 50 50)');
+    progressCircle.setAttribute('data-role', 'progress-fill');
     
     svg.appendChild(defs);
     svg.appendChild(bgCircle);
