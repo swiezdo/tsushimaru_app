@@ -324,6 +324,9 @@ function createBadgeButton(category, currentLevel) {
     
     // Применяем фоновое изображение
     applyBackgroundStyles(button, styles.backgroundImage);
+    if (styles.backgroundImage) {
+        button.classList.add('badge-btn--with-bg');
+    }
     
     // Левая часть - тексты
     const textContainer = document.createElement('div');
@@ -476,6 +479,9 @@ function renderMasteryDetail(category, currentLevel) {
     
     // Применяем фоновое изображение
     applyBackgroundStyles(headerCard, styles.backgroundImage);
+    if (styles.backgroundImage) {
+        headerCard.classList.add('mastery-header-card--with-bg');
+    }
     
     // Определяем название для заголовка карточки
     let headerTitleText;
