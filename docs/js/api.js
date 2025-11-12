@@ -15,45 +15,59 @@ function getInitData() {
     return tg.initData;
 }
 
-// Базовый fetch с обработкой ошибок
-async function apiRequest(endpoint, options = {}) {
+function ensureInitData() {
     const initData = getInitData();
     if (!initData) {
         throw new Error('Не удалось получить данные авторизации Telegram');
     }
+    return initData;
+}
 
-    const url = `${API_BASE}${endpoint}`;
-    const defaultOptions = {
-        headers: {
-            'X-Telegram-Init-Data': initData,
-            'Content-Type': 'application/json',
-        },
-    };
+function isFormData(value) {
+    return typeof FormData !== 'undefined' && value instanceof FormData;
+}
 
-    const mergedOptions = {
-        ...defaultOptions,
-        ...options,
-        headers: {
-            ...defaultOptions.headers,
-            ...options.headers,
-        },
-    };
+async function requestJson(endpoint, { method = 'GET', headers = {}, body, includeAuth = false } = {}) {
+    const finalHeaders = { ...headers };
+    let payload = body;
 
-    try {
-        const response = await fetch(url, mergedOptions);
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
+    if (includeAuth) {
+        finalHeaders['X-Telegram-Init-Data'] = ensureInitData();
+    }
+
+    if (payload && !isFormData(payload) && payload !== undefined) {
+        if (!finalHeaders['Content-Type']) {
+            finalHeaders['Content-Type'] = 'application/json';
         }
+        payload = JSON.stringify(payload);
+    }
 
-        return await response.json();
-    } catch (error) {
-        console.error('API Request failed:', error);
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+        method,
+        headers: finalHeaders,
+        body: payload,
+    });
+
+    let data = null;
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+        data = await response.json().catch(() => null);
+    }
+
+    if (!response.ok) {
+        const error = new Error(
+            data?.detail || data?.message || `HTTP ${response.status}`,
+        );
+        error.status = response.status;
         throw error;
     }
+
+    return data;
+}
+
+// Базовый fetch с обработкой ошибок
+async function apiRequest(endpoint, options = {}) {
+    return requestJson(endpoint, { ...options, includeAuth: true });
 }
 
 function safeParseJSON(text) {
@@ -170,24 +184,12 @@ export async function saveProfile(formData) {
             data.append('difficulties', difficulty);
         });
 
-        const url = `${API_BASE}/api/profile.save`;
-        const response = await fetch(url, {
+        const result = await requestJson('/api/profile.save', {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
+            includeAuth: true,
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        const result = await response.json();
-        return result;
+        return result ?? {};
     } catch (error) {
         console.error('Ошибка сохранения профиля:', error);
         throw error;
@@ -197,12 +199,8 @@ export async function saveProfile(formData) {
 // Проверка работоспособности API
 export async function checkApiHealth() {
     try {
-        const response = await fetch(`${API_BASE}/health`);
-        if (!response.ok) {
-            throw new Error(`API недоступен: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
+        const data = await requestJson('/health');
+        return data ?? {};
     } catch (error) {
         console.error('Ошибка проверки API:', error);
         throw error;
@@ -309,23 +307,11 @@ export async function createBuild(buildData) {
         if (buildData.photo_1) data.append('photo_1', buildData.photo_1);
         if (buildData.photo_2) data.append('photo_2', buildData.photo_2);
 
-        const url = `${API_BASE}/api/builds.create`;
-        const response = await fetch(url, {
+        return await requestJson('/api/builds.create', {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
+            includeAuth: true,
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Ошибка создания билда:', error);
         throw error;
@@ -355,23 +341,11 @@ export async function updateBuild(buildId, buildData) {
             data.append('photo_2', buildData.photo_2, 'photo_2.jpg');
         }
 
-        const url = `${API_BASE}/api/builds.update`;
-        const response = await fetch(url, {
+        return await requestJson('/api/builds.update', {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
+            includeAuth: true,
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Ошибка обновления билда:', error);
         throw error;
@@ -392,14 +366,7 @@ export async function getMyBuilds() {
 // Получение публичных билдов
 export async function getPublicBuilds() {
     try {
-        const response = await fetch(`${API_BASE}/api/builds.getPublic`);
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-        const data = await response.json();
+        const data = await requestJson('/api/builds.getPublic');
         return data.builds || [];
     } catch (error) {
         console.error('Ошибка получения публичных билдов:', error);
@@ -419,23 +386,11 @@ export async function toggleBuildPublish(buildId, isPublic) {
         data.append('build_id', buildId);
         data.append('is_public', isPublic ? 1 : 0);
 
-        const url = `${API_BASE}/api/builds.togglePublish`;
-        const response = await fetch(url, {
+        return await requestJson('/api/builds.togglePublish', {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
+            includeAuth: true,
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Ошибка переключения публичности билда:', error);
         throw error;
@@ -452,22 +407,10 @@ export async function deleteBuild(buildId) {
 
         // Преобразуем buildId в число для корректной работы на бэкенде
         const buildIdNum = parseInt(buildId, 10);
-        const url = `${API_BASE}/api/builds.delete?build_id=${buildIdNum}`;
-        const response = await fetch(url, {
+        return await requestJson(`/api/builds.delete?build_id=${buildIdNum}`, {
             method: 'DELETE',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
+            includeAuth: true,
         });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
     } catch (error) {
         console.error('Ошибка удаления билда:', error);
         throw error;
@@ -493,23 +436,11 @@ export async function submitFeedback(description, photos = []) {
             data.append('photos', photo);
         });
 
-        const url = `${API_BASE}/api/feedback.submit`;
-        const response = await fetch(url, {
+        return (await requestJson('/api/feedback.submit', {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
+            includeAuth: true,
+        })) ?? {};
     } catch (error) {
         console.error('Ошибка отправки отзыва:', error);
         throw error;
@@ -626,23 +557,11 @@ export async function uploadAvatar(userId, avatarFile) {
         const data = new FormData();
         data.append('avatar', avatarFile);
         
-        const url = `${API_BASE}/api/users/avatars/${userId}/upload`;
-        const response = await fetch(url, {
+        return (await requestJson(`/api/users/avatars/${userId}/upload`, {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-        
-        return await response.json();
+            includeAuth: true,
+        })) ?? {};
     } catch (error) {
         console.error('Ошибка загрузки аватарки:', error);
         throw error;
@@ -663,23 +582,11 @@ export async function createComment(buildId, commentText) {
         data.append('build_id', buildId);
         data.append('comment_text', commentText);
 
-        const url = `${API_BASE}/api/comments.create`;
-        const response = await fetch(url, {
+        return (await requestJson('/api/comments.create', {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
+            includeAuth: true,
+        })) ?? {};
     } catch (error) {
         console.error('Ошибка создания комментария:', error);
         throw error;
@@ -689,19 +596,7 @@ export async function createComment(buildId, commentText) {
 // Получение комментариев для билда
 export async function getBuildComments(buildId) {
     try {
-        const url = `${API_BASE}/api/comments.get?build_id=${buildId}`;
-        const response = await fetch(url, {
-            method: 'GET',
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        const data = await response.json();
+        const data = await requestJson(`/api/comments.get?build_id=${buildId}`);
         return data.comments || [];
     } catch (error) {
         console.error('Ошибка получения комментариев:', error);
@@ -723,23 +618,11 @@ export async function toggleReaction(buildId, reactionType) {
         data.append('build_id', buildId);
         data.append('reaction_type', reactionType);
 
-        const url = `${API_BASE}/api/builds.toggleReaction`;
-        const response = await fetch(url, {
+        const result = (await requestJson('/api/builds.toggleReaction', {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        const result = await response.json();
+            includeAuth: true,
+        })) ?? {};
         return {
             likes_count: result.likes_count || 0,
             dislikes_count: result.dislikes_count || 0,
@@ -853,23 +736,11 @@ export async function updateActiveTrophies(activeTrophiesList) {
             data.append('active_trophies', trophy);
         });
 
-        const url = `${API_BASE}/api/trophies.updateActive`;
-        const response = await fetch(url, {
+        return (await requestJson('/api/trophies.updateActive', {
             method: 'POST',
-            headers: {
-                'X-Telegram-Init-Data': initData,
-            },
             body: data,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const error = new Error(errorData.detail || `HTTP ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-
-        return await response.json();
+            includeAuth: true,
+        })) ?? {};
     } catch (error) {
         console.error('Ошибка обновления активных трофеев:', error);
         throw error;

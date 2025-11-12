@@ -76,7 +76,7 @@
             <img id="avatarPreview" class="avatar-preview hidden" src="" alt="Аватар" />
             <span id="avatarPlaceholder" class="avatar-placeholder">+</span>
           </button>
-          <input id="avatarFileInput" type="file" accept="image/*" style="display: none" />
+          <input id="avatarFileInput" type="file" accept="image/*" class="hidden-input" />
           <div class="profile-grid">
             <div class="field">
               <label>Имя</label>
@@ -185,7 +185,7 @@
         <section class="card">
           <h3 class="card-title">Список участников</h3>
           <div id="participantsList" class="grid-list"></div>
-          <div id="noParticipantsHint" class="hint muted hidden" style="margin-top: 8px">
+          <div id="noParticipantsHint" class="hint muted hidden mt-sm">
             Участники не найдены.
           </div>
         </section>
@@ -232,16 +232,16 @@
         </section>
 
         <!-- Карточка мастерства участника -->
-        <section class="card" id="participantMasteryCard" style="display: none;">
+        <section class="card hidden" id="participantMasteryCard">
           <h2 class="card-title">Мастерство</h2>
           <div id="participantMasteryContainer" class="list-buttons"></div>
         </section>
 
         <!-- Карточка трофеев участника -->
-        <section class="card" id="participantTrophiesCard" style="display: none;">
+        <section class="card hidden" id="participantTrophiesCard">
           <h2 class="card-title">Трофеи участника</h2>
           <div id="participantTrophiesContainer" class="list-buttons"></div>
-          <div id="noParticipantTrophiesHint" class="hint muted hidden" style="margin-top: 8px">
+          <div id="noParticipantTrophiesHint" class="hint muted hidden mt-sm">
             У участника пока нет трофеев.
           </div>
         </section>
@@ -249,7 +249,7 @@
         <section class="card">
           <h2 class="card-title">Билды участника</h2>
           <div id="participantBuildsList" class="grid-list"></div>
-          <div id="noParticipantBuildsHint" class="hint muted hidden" style="margin-top: 8px">
+          <div id="noParticipantBuildsHint" class="hint muted hidden mt-sm">
             У участника пока нет публичных билдов.
           </div>
         </section>
@@ -264,7 +264,7 @@
         <section class="card">
           <h3 class="card-title">Мои билды</h3>
           <div id="myBuildsList" class="grid-list"></div>
-          <div id="noBuildsHint" class="hint muted hidden" style="margin-top: 8px">
+          <div id="noBuildsHint" class="hint muted hidden mt-sm">
             Создайте свой первый билд.
           </div>
         </section>
@@ -277,10 +277,10 @@
           <div class="class-tabs-container" id="classTabsContainer"></div>
           
           <div id="allBuildsList" class="grid-list"></div>
-          <div id="noAllBuildsHint" class="hint muted hidden" style="margin-top: 8px">
+          <div id="noAllBuildsHint" class="hint muted hidden mt-sm">
             Публикаций пока нет.
           </div>
-          <div id="noFilteredBuildsHint" class="hint muted hidden" style="margin-top: 8px">
+          <div id="noFilteredBuildsHint" class="hint muted hidden mt-sm">
             Билды не найдены.
           </div>
         </section>
@@ -329,14 +329,14 @@
                 data-idx="1"
                 type="file"
                 accept="image/*"
-                style="display: none"
+                class="hidden-input"
               />
               <input
                 id="build_shot2"
                 data-idx="2"
                 type="file"
                 accept="image/*"
-                style="display: none"
+                class="hidden-input"
               />
 
               <div class="shots-two" id="shotsTwo">
@@ -415,14 +415,14 @@
                 data-idx="1"
                 type="file"
                 accept="image/*"
-                style="display: none"
+                class="hidden-input"
               />
               <input
                 id="buildEdit_shot2"
                 data-idx="2"
                 type="file"
                 accept="image/*"
-                style="display: none"
+                class="hidden-input"
               />
 
               <div class="shots-two" id="shotsEditTwo">
@@ -471,7 +471,7 @@
         </div>
 
         <section class="card">
-          <button type="button" class="build-edit-btn" id="vd_build_share_btn" aria-label="Поделиться билдом" data-build-id="" style="left: 12px; right: auto;">
+          <button type="button" class="build-edit-btn build-edit-btn--left" id="vd_build_share_btn" aria-label="Поделиться билдом" data-build-id="">
             <img src="./assets/icons/share.svg" alt="Поделиться" />
           </button>
           <button type="button" class="build-edit-btn" id="buildEditBtn" aria-label="Редактировать билд">
@@ -516,7 +516,7 @@
       <!-- ====== ДЕТАЛИ ПУБЛИЧНОГО БИЛДА (без кнопок действий) ====== -->
       <section id="buildPublicDetailScreen" class="hidden">
         <section class="card">
-          <button type="button" class="build-edit-btn" id="pd_build_share_btn" aria-label="Поделиться билдом" data-build-id="" style="left: 12px; right: auto;">
+          <button type="button" class="build-edit-btn build-edit-btn--left" id="pd_build_share_btn" aria-label="Поделиться билдом" data-build-id="">
             <img src="./assets/icons/share.svg" alt="Поделиться" />
           </button>
           <div class="profile-grid">
@@ -602,7 +602,7 @@
 
             <div class="input">
               <label for="feedbackFiles">Прикрепите файлы (необязательно)</label>
-              <input id="feedbackFiles" type="file" multiple accept="image/*" style="display:none" />
+              <input id="feedbackFiles" type="file" multiple accept="image/*" class="hidden-input" />
               <button type="button" id="feedbackAddBtn" class="fileline-btn" aria-label="Прикрепить файлы">＋ Прикрепить</button>
               <div id="feedbackPreview" class="thumbs-row"></div>
             </div>

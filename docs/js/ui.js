@@ -27,6 +27,54 @@ export const screens = {
   trophyDetail:       document.getElementById('trophyDetailScreen'),
 };
 
+const SCREEN_TITLES = {
+  home: 'Tsushima.Ru',
+  profile: 'Профиль',
+  waves: 'Волны',
+  participants: 'Участники',
+  participantDetail: 'Участник',
+  builds: 'Билды',
+  buildCreate: 'Создать билд',
+  buildEdit: 'Редактирование',
+  buildDetail: 'Билд',
+  buildPublicDetail: 'Билд',
+  whatsNew: 'Что нового?',
+  feedback: 'Отправить отзыв',
+  reward: 'Награды',
+};
+
+const SCREENS_WITH_BACK = new Set([
+  'profile',
+  'waves',
+  'participants',
+  'participantDetail',
+  'builds',
+  'buildCreate',
+  'buildEdit',
+  'buildDetail',
+  'buildPublicDetail',
+  'whatsNew',
+  'feedback',
+  'reward',
+  'rewardDetail',
+  'trophyDetail',
+]);
+
+const SCREEN_HOOKS = {
+  profile: () => loadProfileOnScreenOpen(),
+  participants: () => {
+    resetParticipantSearch();
+    refreshParticipantsList().catch((err) => {
+      console.error('Ошибка обновления списка участников:', err);
+    });
+  },
+  reward: () => {
+    renderMasteryButtons();
+    renderTrophiesCollection(true);
+    renderTrophiesButtons();
+  },
+};
+
 // Топбар
 export function setTopbar(visible, title) {
   const tb = document.querySelector('.topbar');
@@ -44,50 +92,18 @@ export function showScreen(name) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    const withBack = ['profile','waves','participants','participantDetail','builds','buildCreate','buildEdit','buildDetail','buildPublicDetail','whatsNew','feedback','reward','rewardDetail','trophyDetail'];
-    if (withBack.includes(name)) tg.BackButton.show();
+    if (SCREENS_WITH_BACK.has(name)) tg.BackButton.show();
     else tg.BackButton.hide();
   }
 
-  if (name === 'home')                 setTopbar(true, 'Tsushima.Ru');
-  else if (name === 'profile')         {
-    setTopbar(true, 'Профиль');
-    // Загружаем профиль с сервера при открытии экрана профиля
-    loadProfileOnScreenOpen();
+  const title = SCREEN_TITLES[name];
+  if (title) {
+    setTopbar(true, title);
   }
-  
-  else if (name === 'participants')    {
-    resetParticipantSearch();
-    // Обновляем список участников при открытии экрана для актуальных данных
-    refreshParticipantsList().catch(err => {
-      console.error('Ошибка обновления списка участников:', err);
-    });
-    setTopbar(true, 'Участники');
-  }
-  else if (name === 'waves')           setTopbar(true, 'Волны');
-  else if (name === 'participantDetail') setTopbar(true, 'Участник');
-  else if (name === 'builds')          setTopbar(true, 'Билды');
-  else if (name === 'buildCreate')     setTopbar(true, 'Создать билд');
-  else if (name === 'buildEdit')       setTopbar(true, 'Редактирование');
-  else if (name === 'buildDetail')     setTopbar(true, 'Билд');
-  else if (name === 'buildPublicDetail') setTopbar(true, 'Билд');
-  else if (name === 'whatsNew')        setTopbar(true, 'Что нового?');
-  else if (name === 'feedback')        setTopbar(true, 'Отправить отзыв');
-  else if (name === 'reward')          {
-    setTopbar(true, 'Награды');
-    // Рендерим кнопки мастерства (рендер произойдет только один раз за сессию)
-    renderMasteryButtons();
-    // Рендерим коллекцию трофеев при каждом открытии экрана
-    renderTrophiesCollection(true);
-    // Рендерим список трофеев (рендер произойдет только один раз за сессию)
-    renderTrophiesButtons();
-  }
-  else if (name === 'rewardDetail')    {
-    // Топбар устанавливается динамически в renderMasteryDetail()
-  }
-  else if (name === 'trophyDetail')    {
-    // Топбар устанавливается динамически в renderTrophyDetail()
-    // Временный заголовок не нужен, т.к. он сразу обновляется
+
+  const hook = SCREEN_HOOKS[name];
+  if (typeof hook === 'function') {
+    hook();
   }
 
   scrollTopSmooth();

@@ -33,9 +33,100 @@ import { initWaves, openWavesScreen } from './waves.js';
   };
 })();
 
+const BACK_ROUTES = {
+  buildCreate: 'builds',
+  buildEdit: 'buildDetail',
+  buildDetail: 'builds',
+  buildPublicDetail: 'builds',
+  profile: 'home',
+  waves: 'home',
+  participants: 'home',
+  builds: 'home',
+  whatsNew: 'home',
+  feedback: 'whatsNew',
+  reward: 'home',
+  rewardDetail: 'reward',
+  trophyDetail: 'reward',
+};
+
+function parseSpecialScreen(previousValue, prefix) {
+  if (!previousValue || !previousValue.startsWith(prefix)) return null;
+  const [, id] = previousValue.split(':');
+  return id || null;
+}
+
+async function importBuildsModule() {
+  return import('./builds.js');
+}
+
+async function importParticipantDetailModule() {
+  return import('./participantDetail.js');
+}
+
+async function handleSpecialBackNavigation({ currentScreen, nextScreen, previousScreen }) {
+  // Возврат в карточку участника после выбора другого участника
+  if (nextScreen === 'participantDetail') {
+    const participantId = parseSpecialScreen(previousScreen, 'participantDetail:');
+    if (participantId) {
+      try {
+        const module = await importParticipantDetailModule();
+        await module.openParticipantDetail(participantId);
+      } catch (error) {
+        console.error('Ошибка импорта participantDetail.js:', error);
+        showScreen('participants');
+      }
+      return true;
+    }
+  }
+
+  // Возврат к публичному билду из списка участников
+  if (nextScreen === 'buildPublicDetail') {
+    const buildId = parseSpecialScreen(previousScreen, 'buildPublicDetail:');
+    if (buildId) {
+      try {
+        const module = await importBuildsModule();
+        await module.openPublicBuildDetail(buildId);
+      } catch (error) {
+        console.error('Ошибка импорта builds.js:', error);
+        showScreen('builds');
+      }
+      return true;
+    }
+  }
+
+  // Переход назад из профиля участника к билду, откуда пришли
+  if (currentScreen === 'participantDetail') {
+    const buildId = parseSpecialScreen(previousScreen, 'buildPublicDetail:');
+    if (buildId) {
+      try {
+        const module = await importBuildsModule();
+        await module.openPublicBuildDetail(buildId);
+      } catch (error) {
+        console.error('Ошибка импорта builds.js:', error);
+        showScreen('builds');
+      }
+      return true;
+    }
+  }
+
+  // При возврате на экран билдов нужно обновить статистику
+  if (currentScreen === 'buildPublicDetail' && nextScreen === 'builds') {
+    try {
+      const module = await importBuildsModule();
+      await module.checkAndRefreshBuilds();
+    } catch (error) {
+      console.error('Ошибка импорта builds.js:', error);
+    }
+    showScreen(nextScreen);
+    return true;
+  }
+
+  return false;
+}
+
 // ---------------- BackButton навигация + Tap ----------------
 function installBackButton() {
-  tg?.onEvent?.('backButtonClicked', () => {
+  tg?.onEvent?.('backButtonClicked', async () => {
     hapticTapSmart(); // Tap на Back
     
     // Определяем текущий экран и следующий экран
@@ -47,83 +138,28 @@ function installBackButton() {
     // Проверяем sessionStorage для специальных случаев навигации
     const previousScreen = sessionStorage.getItem('previousScreen');
     
-    // Маппинг экранов для навигации назад
-    const backNavigation = {
-      'buildCreate': 'builds',
-      'buildEdit': 'buildDetail',
-      'buildDetail': 'builds', 
-      'buildPublicDetail': previousScreen ? (previousScreen.startsWith('participantDetail:') ? 'participantDetail' : 'builds') : 'builds',
-      'profile': 'home',
-      'waves': 'home',
-      'participants': 'home',
-      'builds': 'home',
-      'whatsNew': 'home',
-      'feedback': 'whatsNew',
-      'reward': 'home',
-      'rewardDetail': 'reward',
-      'trophyDetail': 'reward',
-      'participantDetail': previousScreen ? (previousScreen.startsWith('buildPublicDetail:') ? 'buildPublicDetail' : 'participants') : 'participants'
-    };
-    
-    let nextScreen = backNavigation[currentScreen] || 'home';
-    
-    // Обработка специального случая возврата к профилю участника
-    if (nextScreen === 'participantDetail' && previousScreen && previousScreen.startsWith('participantDetail:')) {
-      const userId = previousScreen.split(':')[1];
-      // Импортируем функцию открытия профиля участника
-      import('./participantDetail.js').then(module => {
-        module.openParticipantDetail(userId);
-      }).catch(error => {
-        console.error('Ошибка импорта participantDetail.js:', error);
-        showScreen('participants');
-      });
-      return;
+    let nextScreen = BACK_ROUTES[currentScreen] || 'home';
+
+    // Уточняем маршрут с учётом предыдущего экрана (например, возврат к участнику)
+    if (nextScreen === 'buildPublicDetail' && previousScreen?.startsWith('participantDetail:')) {
+      nextScreen = 'participantDetail';
+    } else if (currentScreen === 'participantDetail' && previousScreen?.startsWith('buildPublicDetail:')) {
+      nextScreen = 'buildPublicDetail';
     }
-    
-    // Обработка возврата из профиля участника к деталям билда
-    if (nextScreen === 'buildPublicDetail' && previousScreen && previousScreen.startsWith('buildPublicDetail:')) {
-      const buildId = previousScreen.split(':')[1];
-      // Импортируем функцию открытия деталей публичного билда
-      import('./builds.js').then(module => {
-        module.openPublicBuildDetail(buildId);
-      }).catch(error => {
-        console.error('Ошибка импорта builds.js:', error);
-        showScreen('builds');
-      });
-      return;
-    }
-    
-    // Обработка возврата из профиля участника к деталям билда (когда пришли из buildPublicDetail)
-    if (currentScreen === 'participantDetail' && previousScreen && previousScreen.startsWith('buildPublicDetail:')) {
-      const buildId = previousScreen.split(':')[1];
-      // Импортируем функцию открытия деталей публичного билда
-      import('./builds.js').then(module => {
-        module.openPublicBuildDetail(buildId);
-      }).catch(error => {
-        console.error('Ошибка импорта builds.js:', error);
-        showScreen('builds');
-      });
-      return;
-    }
-    
-    // Очищаем sessionStorage после использования
+
+    const handled = await handleSpecialBackNavigation({
+      currentScreen,
+      nextScreen,
+      previousScreen,
+    });
+
     if (previousScreen) {
       sessionStorage.removeItem('previousScreen');
     }
-    
-    // Проверяем и обновляем статистику билдов при возврате из buildPublicDetail на экран builds
-    if (currentScreen === 'buildPublicDetail' && nextScreen === 'builds') {
-      import('./builds.js').then(module => {
-        module.checkAndRefreshBuilds();
-        showScreen(nextScreen);
-      }).catch(error => {
-        console.error('Ошибка импорта builds.js:', error);
-        showScreen(nextScreen);
-      });
-      return;
+
+    if (!handled) {
+      showScreen(nextScreen);
     }
-    
-    showScreen(nextScreen);
   });
 }
 

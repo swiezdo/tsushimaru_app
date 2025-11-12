@@ -36,6 +36,10 @@ tsushimaru_app/
     └── whats-new.json      # Что нового (загружается через API)
 ```
 
+- `js/api.js` содержит helper `requestJson()` — новые запросы следует строить на нём вместо прямого `fetch`.
+- Навигация и BackButton централизованы в `main.js`/`ui.js`; избегайте дублирования переходов внутри экранов.
+- Для отказа от inline-стилей используйте утилитарные классы `hidden-input`, `mt-sm`, `build-edit-btn--left` из `css/style.css`.
+
 ### GitHub Pages
 
 - **Деплой**: автоматический из папки `docs/`
