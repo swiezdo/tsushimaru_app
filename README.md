@@ -42,7 +42,7 @@ tsushimaru_app/
 
 - **Технологии**: HTML, CSS, JavaScript, Telegram WebApp SDK
 - **Деплой**: GitHub Pages (автоматически из папки `/docs`)
-- **URL**: https://swiezdo.github.io/tsushimaru_app/
+- **URL**: https://tsushimaru.com/
 - **Статические файлы**: все ресурсы в `docs/`
 
 ## Оптимизации и соглашения

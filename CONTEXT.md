@@ -43,7 +43,7 @@ tsushimaru_app/
 ### GitHub Pages
 
 - **Деплой**: автоматический из папки `docs/`
-- **URL**: `https://swiezdo.github.io/tsushimaru_app/`
+- **URL**: `https://tsushimaru.com/`
 - **Настройка**: Settings → Pages → Source: `/docs`
 - **Обновление**: просто commit и push - GitHub Pages обновится автоматически
 
