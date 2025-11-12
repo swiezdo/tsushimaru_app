@@ -56,7 +56,7 @@ tsushimaru_app/
 
 - **Расположение**: `/root/miniapp_api` (отдельный проект)
 - **Технологии**: Python, FastAPI, SQLite
-- **API URL**: https://tsushimaru.com
+- **API URL**: https://api.tsushimaru.com
 - **Взаимодействие**: только через REST API
 
 ## Быстрый старт
@@ -122,7 +122,7 @@ headers: {
 
 В файле `docs/js/api.js` настройте `API_BASE_URL`:
 ```javascript
-const API_BASE_URL = 'https://tsushimaru.com';
+const API_BASE_URL = 'https://api.tsushimaru.com';
 // или для разработки: 'http://localhost:8000'
 ```
 
@@ -186,7 +186,7 @@ npx serve
 ### miniapp_api
 
 - Взаимодействие только через REST API
-- API endpoint: `https://tsushimaru.com`
+- API endpoint: `https://api.tsushimaru.com`
 - Валидация через Telegram initData
 
 ### gyozenbot

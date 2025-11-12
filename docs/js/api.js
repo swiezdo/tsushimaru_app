@@ -4,7 +4,7 @@
 import { tg } from './telegram.js';
 
 // Конфигурация API endpoint
-const API_BASE = 'https://tsushimaru.com';
+const API_BASE = 'https://api.tsushimaru.com';
 
 // Получение initData из Telegram WebApp
 function getInitData() {

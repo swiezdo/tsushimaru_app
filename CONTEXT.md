@@ -52,7 +52,7 @@ tsushimaru_app/
 - **Backend НЕ в этом репозитории!**
 - Backend находится в `/root/miniapp_api` (отдельный проект)
 - Взаимодействие только через REST API
-- API endpoint: `https://tsushimaru.com` (или `API_BASE_URL` из конфига)
+- API endpoint: `https://api.tsushimaru.com` (или `API_BASE_URL` из конфига)
 
 ### Telegram WebApp SDK
 
@@ -140,7 +140,7 @@ tg.expand();
 ### miniapp_api
 
 - **REST API**: все взаимодействие через HTTP запросы
-- **API endpoint**: `https://tsushimaru.com` (настраивается в `api.js`)
+- **API endpoint**: `https://api.tsushimaru.com` (настраивается в `api.js`)
 - **Авторизация**: через `X-Telegram-Init-Data` заголовок
 - **CORS**: настроен на стороне API для GitHub Pages домена
 
@@ -227,7 +227,7 @@ const response = await fetch(`${API_BASE_URL}/api/endpoint`, {
 
 ## Важные замечания
 
-1. **API endpoint**: настраивается в `api.js`, по умолчанию `https://tsushimaru.com`
+1. **API endpoint**: настраивается в `api.js`, по умолчанию `https://api.tsushimaru.com`
 2. **Авторизация**: всегда требуется `X-Telegram-Init-Data` заголовок
 3. **Обработка ошибок**: все ошибки API должны обрабатываться и показываться пользователю
 4. **Телефонная тема**: учитывать темную/светлую тему через Telegram WebApp SDK
