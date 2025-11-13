@@ -74,6 +74,9 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
             hapticTapSmart();
             const userId = btn.dataset.userId;
             if (userId) {
+                // Устанавливаем previousScreen перед открытием профиля участника
+                // Это гарантирует, что при возврате назад мы вернемся на страницу участников
+                sessionStorage.setItem('previousScreen', 'participants');
                 openParticipantDetail(parseInt(userId));
             }
         });

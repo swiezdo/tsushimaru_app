@@ -116,7 +116,6 @@ export function renderFilesPreview(files, previewEl, { limit = 4, onRemove } = {
   const shown = files.slice(0, limit);
   shown.forEach((file, idx) => {
     const tile = createElement('div', 'preview-item removable');
-    tile.title = 'Нажмите, чтобы удалить';
 
     if (isImageFile(file)) {
       const objectURL = URL.createObjectURL(file);

@@ -138,13 +138,29 @@ function installBackButton() {
     // Проверяем sessionStorage для специальных случаев навигации
     const previousScreen = sessionStorage.getItem('previousScreen');
     
-    let nextScreen = BACK_ROUTES[currentScreen] || 'home';
-
-    // Уточняем маршрут с учётом предыдущего экрана (например, возврат к участнику)
-    if (nextScreen === 'buildPublicDetail' && previousScreen?.startsWith('participantDetail:')) {
-      nextScreen = 'participantDetail';
-    } else if (currentScreen === 'participantDetail' && previousScreen?.startsWith('buildPublicDetail:')) {
-      nextScreen = 'buildPublicDetail';
+    // Обрабатываем специальные случаи ПЕРЕД использованием BACK_ROUTES
+    let nextScreen;
+    
+    if (currentScreen === 'participantDetail') {
+      // Возврат из профиля участника
+      if (previousScreen === 'participants') {
+        // Пришли из списка участников - возвращаемся туда
+        nextScreen = 'participants';
+      } else if (previousScreen?.startsWith('buildPublicDetail:')) {
+        // Пришли из билда - обрабатывается в handleSpecialBackNavigation
+        nextScreen = 'buildPublicDetail';
+      } else {
+        // По умолчанию возвращаемся на страницу участников
+        nextScreen = 'participants';
+      }
+    } else {
+      // Для остальных экранов используем BACK_ROUTES
+      nextScreen = BACK_ROUTES[currentScreen] || 'home';
+      
+      // Специальный случай: возврат из билда к участнику
+      if (nextScreen === 'buildPublicDetail' && previousScreen?.startsWith('participantDetail:')) {
+        nextScreen = 'participantDetail';
+      }
     }
 
     const handled = await handleSpecialBackNavigation({
@@ -153,12 +169,18 @@ function installBackButton() {
       previousScreen,
     });
 
-    if (previousScreen) {
-      sessionStorage.removeItem('previousScreen');
-    }
-
     if (!handled) {
       showScreen(nextScreen);
+      // Удаляем previousScreen только после успешного перехода
+      if (previousScreen) {
+        sessionStorage.removeItem('previousScreen');
+      }
+    } else {
+      // Если handled = true, previousScreen уже обработан в handleSpecialBackNavigation
+      // Но нужно его удалить, если переход выполнен
+      if (previousScreen && (previousScreen === 'participants' || previousScreen.startsWith('buildPublicDetail:'))) {
+        sessionStorage.removeItem('previousScreen');
+      }
     }
   });
 }

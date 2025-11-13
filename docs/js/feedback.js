@@ -1,7 +1,7 @@
 // feedback.js
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView } from './ui.js';
-import { shake, createFileKey, isImageFile } from './utils.js';
+import { shake, createFileKey, isImageFile, isVideoFile, renderFilesPreview } from './utils.js';
 import { submitFeedback } from './api.js';
 
 // Элементы интерфейса
@@ -14,12 +14,12 @@ const feedbackAddBtn = $('feedbackAddBtn');
 const MAX_FEEDBACK_FILES = 10;
 
 let feedbackSelected = [];
-let objectURLs = new Set();
+let feedbackPreviewCleanup = () => {};
 
 function resetFeedbackForm() {
   // Очищаем objectURL при сбросе формы
-  objectURLs.forEach(url => URL.revokeObjectURL(url));
-  objectURLs.clear();
+  feedbackPreviewCleanup();
+  feedbackPreviewCleanup = () => {};
   
   if (previewEl) { previewEl.innerHTML = ''; previewEl.classList.remove('shake','error'); }
   if (feedbackFilesEl) feedbackFilesEl.value = '';
@@ -35,46 +35,18 @@ function renderFeedbackPreview() {
   if (!previewEl) return;
   
   // Очищаем старые objectURL
-  objectURLs.forEach(url => URL.revokeObjectURL(url));
-  objectURLs.clear();
+  feedbackPreviewCleanup();
+  feedbackPreviewCleanup = () => {};
   
-  previewEl.innerHTML = '';
-  const limit = 4;
-  const toShow = feedbackSelected.slice(0, limit);
-
-  toShow.forEach((file, idx) => {
-    const tile = document.createElement('div');
-    tile.className = 'preview-item removable';
-    tile.title = 'Нажмите, чтобы удалить';
-
-    if (isImageFile(file)) {
-      const img = document.createElement('img');
-      const objectURL = URL.createObjectURL(file);
-      objectURLs.add(objectURL);
-      img.src = objectURL;
-      img.onload = () => {
-        // URL будет отозван при следующем вызове renderFeedbackPreview
-      };
-      tile.appendChild(img);
-    } else {
-      tile.textContent = '📄';
-    }
-
-    tile.addEventListener('click', () => {
+  // Используем универсальную функцию renderFilesPreview
+  feedbackPreviewCleanup = renderFilesPreview(feedbackSelected, previewEl, {
+    limit: 4,
+    onRemove: (idx) => {
       feedbackSelected.splice(idx, 1);
       hapticTapSmart();
       renderFeedbackPreview();
-    });
-
-    previewEl.appendChild(tile);
+    }
   });
-
-  if (feedbackSelected.length > limit) {
-    const more = document.createElement('div');
-    more.className = 'preview-more';
-    more.textContent = `+${feedbackSelected.length - limit}`;
-    previewEl.appendChild(more);
-  }
 }
 
 let submitting = false;
@@ -163,13 +135,13 @@ export function initFeedback() {
         return; 
       }
 
-      // Фильтруем только изображения
-      const imageFiles = files.filter(file => isImageFile(file));
+      // Фильтруем изображения и видео
+      const mediaFiles = files.filter(file => isImageFile(file) || isVideoFile(file));
       
-      if (imageFiles.length !== files.length) {
+      if (mediaFiles.length !== files.length) {
         tg?.showPopup?.({
           title: 'Неподдерживаемый формат',
-          message: 'Разрешены только изображения.',
+          message: 'Разрешены только изображения и видео (MP4, MOV).',
           buttons: [{ type: 'ok' }]
         });
       }
@@ -177,13 +149,13 @@ export function initFeedback() {
       const keyOf = (f) => createFileKey(f);
       const existing = new Set(feedbackSelected.map(keyOf));
       const freeSlots = Math.max(0, MAX_FEEDBACK_FILES - feedbackSelected.length);
-      const incoming = imageFiles.filter(f => !existing.has(keyOf));
+      const incoming = mediaFiles.filter(f => !existing.has(keyOf));
 
       if (incoming.length > freeSlots) {
         incoming.length = freeSlots;
         tg?.showPopup?.({
           title: 'Лимит файлов',
-          message: `Можно прикрепить не более ${MAX_FEEDBACK_FILES} изображений.`,
+          message: `Можно прикрепить не более ${MAX_FEEDBACK_FILES} файлов.`,
           buttons: [{ type: 'ok' }]
         });
       }
