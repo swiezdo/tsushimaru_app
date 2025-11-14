@@ -206,6 +206,9 @@ function createParticipantBadge(category, currentLevel) {
     
     // Применяем фоновое изображение
     applyBackgroundStyles(badge, styles.backgroundImage);
+    if (styles.backgroundImage) {
+        badge.classList.add('badge-btn--with-bg');
+    }
     
     // Левая часть - тексты
     const textContainer = document.createElement('div');

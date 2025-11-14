@@ -158,8 +158,8 @@ function installBackButton() {
       nextScreen = BACK_ROUTES[currentScreen] || 'home';
       
       // Специальный случай: возврат из билда к участнику
-      if (nextScreen === 'buildPublicDetail' && previousScreen?.startsWith('participantDetail:')) {
-        nextScreen = 'participantDetail';
+    if (nextScreen === 'buildPublicDetail' && previousScreen?.startsWith('participantDetail:')) {
+      nextScreen = 'participantDetail';
       }
     }
 
