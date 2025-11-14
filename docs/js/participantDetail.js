@@ -200,8 +200,10 @@ function createParticipantBadge(category, currentLevel) {
     const levelData = category.levels.find(l => l.level === currentLevel);
     const isMaxLevel = currentLevel === maxLevels && styles.showIcon;
     
-    // Создаём div вместо button
-    const badge = document.createElement('div');
+    // Создаём некликабельную кнопку
+    const badge = document.createElement('button');
+    badge.type = 'button';
+    badge.disabled = true;
     badge.className = styles.classes.join(' ');
     
     // Применяем фоновое изображение

@@ -1116,13 +1116,8 @@ html.tg .only-browser { display: none; }
   z-index: 2;
 }
 .badge-btn:active { transform: translateY(1px); }
-
-/* Некликабельная версия badge для просмотра чужих профилей */
-#participantMasteryContainer .badge-btn {
+.badge-btn:disabled {
   cursor: default;
-}
-
-#participantMasteryContainer .badge-btn:active {
   transform: none;
 }
 
@@ -1259,7 +1254,6 @@ html.tg .only-browser { display: none; }
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-1);
   flex: 1;
   z-index: 2;
   position: relative;
@@ -1476,11 +1470,6 @@ html.tg .only-browser { display: none; }
 /* ========== MASTERY DETAIL SCREEN ========== */
 #masteryDetailContainer .card {
   padding: var(--space-2) var(--space-4);
-}
-
-/* Убираем свечение иконок мастерства в профиле участника */
-#participantMasteryContainer .mastery-icon {
-  filter: none;
 }
 
 #masteryDetailContainer .reward-detail-header {
