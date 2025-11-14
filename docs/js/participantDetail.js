@@ -5,12 +5,8 @@ import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE, fetchUse
 import { prettyLines, formatDate } from './utils.js';
 import { 
     loadMasteryConfig, 
-    getCategoryByKey, 
-    getButtonStyles, 
-    applyBackgroundStyles, 
-    createProgressCircle, 
-    createMaxLevelIcon, 
-    calculateProgress 
+    getCategoryByKey,
+    createBadgeButton
 } from './mastery.js';
 
 // Элементы интерфейса
@@ -192,60 +188,9 @@ async function renderParticipantMastery(userId) {
     }
 }
 
-// Создание некликабельного бейджа мастерства
+// Создание некликабельного бейджа мастерства (использует общую функцию)
 function createParticipantBadge(category, currentLevel) {
-    const maxLevels = category.maxLevels;
-    const progress = calculateProgress(currentLevel, maxLevels);
-    const styles = getButtonStyles(category, currentLevel);
-    const levelData = category.levels.find(l => l.level === currentLevel);
-    const isMaxLevel = currentLevel === maxLevels && styles.showIcon;
-    
-    // Создаём некликабельную кнопку
-    const badge = document.createElement('button');
-    badge.type = 'button';
-    badge.disabled = true;
-    badge.className = styles.classes.join(' ');
-    
-    // Применяем фоновое изображение
-    applyBackgroundStyles(badge, styles.backgroundImage);
-    if (styles.backgroundImage) {
-        badge.classList.add('badge-btn--with-bg');
-    }
-    
-    // Левая часть - тексты
-    const textContainer = document.createElement('div');
-    textContainer.className = 'mastery-text-container';
-    
-    const categoryName = document.createElement('div');
-    categoryName.className = 'mastery-category-name';
-    categoryName.textContent = category.name;
-    textContainer.appendChild(categoryName);
-    
-    if (currentLevel > 0 && levelData) {
-        const levelName = document.createElement('div');
-        levelName.className = 'mastery-level-name';
-        levelName.textContent = levelData.name;
-        textContainer.appendChild(levelName);
-    }
-    
-    badge.appendChild(textContainer);
-    
-    // Правая часть - круговой прогресс или иконка
-    const progressContainer = document.createElement('div');
-    progressContainer.className = 'mastery-progress-container';
-    
-    if (isMaxLevel) {
-        const icon = createMaxLevelIcon(category.key);
-        progressContainer.appendChild(icon);
-    } else {
-        const { container: svg, levelNumber } = createProgressCircle(category, currentLevel, progress);
-        progressContainer.appendChild(svg);
-        progressContainer.appendChild(levelNumber);
-    }
-    
-    badge.appendChild(progressContainer);
-    
-    return badge;
+    return createBadgeButton(category, currentLevel, false);
 }
 
 // Функция создания элемента билда (копия из builds.js)

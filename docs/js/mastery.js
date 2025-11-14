@@ -309,8 +309,9 @@ async function preloadMasteryAssets(config, levels) {
     }
 }
 
-// Создание HTML кнопки
-function createBadgeButton(category, currentLevel) {
+// Создание HTML кнопки мастерства
+// clickable: если false, кнопка будет disabled и без обработчика клика
+export function createBadgeButton(category, currentLevel, clickable = true) {
     const maxLevels = category.maxLevels;
     const progress = calculateProgress(currentLevel, maxLevels);
     const styles = getButtonStyles(category, currentLevel);
@@ -320,6 +321,9 @@ function createBadgeButton(category, currentLevel) {
     // Создаём элемент кнопки
     const button = document.createElement('button');
     button.type = 'button';
+    if (!clickable) {
+        button.disabled = true;
+    }
     button.className = styles.classes.join(' ');
     
     // Применяем фоновое изображение
@@ -365,11 +369,13 @@ function createBadgeButton(category, currentLevel) {
     
     button.appendChild(progressContainer);
     
-    // Обработчик клика
-    button.addEventListener('click', () => {
-        hapticTapSmart();
-        openMasteryDetail(category.key);
-    });
+    // Обработчик клика (только для кликабельной кнопки)
+    if (clickable) {
+        button.addEventListener('click', () => {
+            hapticTapSmart();
+            openMasteryDetail(category.key);
+        });
+    }
     
     return button;
 }
