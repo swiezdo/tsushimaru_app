@@ -91,6 +91,24 @@ export function setTopbar(visible, title) {
   }
 }
 
+// Обновление активного состояния bottom navigation
+export function updateBottomNav(activeScreen) {
+  const bottomNav = document.getElementById('bottomNav');
+  if (!bottomNav) return;
+  
+  // Удаляем класс active со всех кнопок
+  const buttons = bottomNav.querySelectorAll('.bottom-nav-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+  
+  // Добавляем класс active к соответствующей кнопке
+  if (activeScreen) {
+    const activeBtn = bottomNav.querySelector(`[data-screen="${activeScreen}"]`);
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+    }
+  }
+}
+
 // Показ экрана
 export function showScreen(name) {
   Object.values(screens).forEach((el) => el && el.classList.add('hidden'));
@@ -112,6 +130,9 @@ export function showScreen(name) {
     hook();
   }
 
+  // Обновляем активное состояние bottom navigation
+  updateBottomNav(name);
+
   scrollTopSmooth();
 }
 export function applySafeInsets() {
@@ -125,7 +146,8 @@ export function applySafeInsets() {
   root.style.paddingTop = `calc(env(safe-area-inset-top, 0px) + 64px)`;
   root.style.paddingLeft = `env(safe-area-inset-left, 0px)`;
   root.style.paddingRight = `env(safe-area-inset-right, 0px)`;
-  root.style.paddingBottom = `calc(env(safe-area-inset-bottom, 0px) + 16px)`;
+  // Учитываем высоту bottom navigation bar (60px) + safe area + базовый отступ
+  root.style.paddingBottom = `calc(env(safe-area-inset-bottom, 0px) + 16px + 60px)`;
   
   // Добавляем отступы между карточками через CSS переменную
   root.style.setProperty('--card-spacing', `${cardSpacing}px`);
@@ -183,9 +205,6 @@ export function focusAndScrollIntoView(el) {
 
 // ===== Закрытие клавиатуры на iOS при тапе вне поля ввода =====
 (function installIOSKeyboardClose() {
-  // Импортируем утилиты из telegram.js
-  const tg = window.Telegram?.WebApp;
-  
   // Правильная проверка iOS устройства
   const isIOS = (tg && tg.platform === 'ios') || 
                 /iPad|iPhone|iPod/.test(navigator.userAgent) ||

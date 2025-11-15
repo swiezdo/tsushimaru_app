@@ -12,6 +12,7 @@ import { initTrophies } from './trophies.js';
 import { initTrophiesList } from './trophies_list.js';
 import { checkUserRegistration } from './api.js';
 import { initWaves, openWavesScreen } from './waves.js';
+import { initStaticImage, playAnimationOnce } from './utils.js';
 
 // ---------------- Анти-«пролистывание» для тактильной отдачи (глобально один раз) ----------------
 (function installHapticGuardOnce(){
@@ -257,10 +258,69 @@ function bindHomeButtons() {
   }
 }
 
+// ---------------- Bottom Navigation ----------------
+function bindBottomNav() {
+  const bottomNav = document.getElementById('bottomNav');
+  if (!bottomNav) return;
+
+  // Инициализация: создаем статичные изображения для всех элементов с data-static="true"
+  const staticImages = bottomNav.querySelectorAll('img[data-static="true"]');
+  staticImages.forEach(img => {
+    // initStaticImage теперь асинхронная, но мы не ждем её завершения
+    initStaticImage(img).catch(err => {
+      console.warn('Ошибка при инициализации статичного изображения:', err);
+    });
+  });
+
+  // Обработчики для кнопок с data-screen
+  const screenButtons = bottomNav.querySelectorAll('[data-screen]');
+  screenButtons.forEach(btn => {
+    const screenName = btn.dataset.screen;
+    btn.addEventListener('click', () => {
+      hapticTapSmart();
+      
+      // Запускаем анимацию для всех кнопок с анимированными иконками
+      const animatedImg = btn.querySelector('img[data-static="true"]');
+      if (animatedImg) {
+        playAnimationOnce(animatedImg);
+      }
+      
+      // Обработка разных экранов с requireRegistration
+      if (screenName === 'reward') {
+        requireRegistration(() => { 
+          showScreen('reward'); 
+        });
+      } else if (screenName === 'participants') {
+        requireRegistration(() => showScreen('participants'));
+      } else if (screenName === 'waves') {
+        requireRegistration(() => { 
+          showScreen('waves'); 
+          openWavesScreen(); 
+        });
+      } else if (screenName === 'builds') {
+        requireRegistration(() => showScreen('builds'));
+      } else {
+        // Домой и Профиль - без requireRegistration
+        showScreen(screenName);
+      }
+    });
+  });
+
+  // Обработчик для кнопки группы (Telegram)
+  const groupBtn = document.getElementById('bottomNavGroupBtn');
+  if (groupBtn) {
+    groupBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      window.open("https://t.me/+ZFiVYVrz-PEzYjBi", "_blank");
+    });
+  }
+}
+
 // ---------------- Старт ----------------
 async function startApp() {
   applySafeInsets();
   bindHomeButtons();
+  bindBottomNav();
   installBackButton();
 
   initProfile();

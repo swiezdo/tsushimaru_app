@@ -11,6 +11,235 @@ export function shake(el) {
   el.classList.add('shake');
 }
 
+/**
+ * Определяет длительность анимации WebP
+ * @param {string} src - Путь к WebP файлу
+ * @returns {Promise<number|null>} Длительность в миллисекундах или null
+ */
+export async function getWebPAnimationDuration(src) {
+  try {
+    // Пробуем использовать ImageDecoder API (современные браузеры)
+    if ('ImageDecoder' in window) {
+      try {
+        const response = await fetch(src);
+        const blob = await response.blob();
+        const decoder = new ImageDecoder({ data: blob, type: 'image/webp' });
+        
+        // Ждем готовности декодера
+        await decoder.tracks.ready;
+        
+        const track = decoder.tracks.selectedTrack;
+        if (track && track.frameCount > 1) {
+          let totalDuration = 0;
+          
+          // Проходим по всем кадрам и суммируем их длительности
+          for (let i = 0; i < track.frameCount; i++) {
+            const result = await decoder.decode({ frameIndex: i });
+            // duration может быть в миллисекундах или микросекундах, проверяем
+            const frameDuration = result.image.duration || 0;
+            // Если duration очень большое (> 10000), значит это микросекунды
+            totalDuration += frameDuration > 10000 ? frameDuration / 1000 : frameDuration;
+          }
+          
+          if (totalDuration > 0) {
+            return Math.round(totalDuration);
+          }
+        }
+      } catch (e) {
+        console.warn('ImageDecoder API не сработал, используем парсинг:', e);
+      }
+    }
+    
+    // Альтернативный метод: парсинг WebP формата
+    const response = await fetch(src);
+    const arrayBuffer = await response.arrayBuffer();
+    const view = new DataView(arrayBuffer);
+    
+    // Проверяем RIFF header
+    if (view.getUint32(0, true) !== 0x46464952) { // "RIFF"
+      return null;
+    }
+    
+    // Проверяем WEBP signature
+    if (String.fromCharCode(
+      view.getUint8(8),
+      view.getUint8(9),
+      view.getUint8(10),
+      view.getUint8(11)
+    ) !== 'WEBP') {
+      return null;
+    }
+    
+    let offset = 12;
+    let totalDuration = 0;
+    let hasAnim = false;
+    let frameCount = 0;
+    
+    // Парсим chunks
+    while (offset < arrayBuffer.byteLength - 8) {
+      if (offset + 8 > arrayBuffer.byteLength) break;
+      
+      const chunkType = String.fromCharCode(
+        view.getUint8(offset),
+        view.getUint8(offset + 1),
+        view.getUint8(offset + 2),
+        view.getUint8(offset + 3)
+      );
+      
+      const chunkSize = view.getUint32(offset + 4, true);
+      
+      if (chunkType === 'VP8X') {
+        // VP8X chunk содержит флаги (offset + 12)
+        if (offset + 12 < arrayBuffer.byteLength) {
+          const flags = view.getUint8(offset + 12);
+          hasAnim = (flags & 0x02) !== 0; // Animation flag (bit 1)
+          if (!hasAnim) return null;
+        }
+      }
+      
+      if (chunkType === 'ANMF') {
+        // ANMF chunk - кадр анимации
+        // Структура: 4 байта типа, 4 байта размера, затем:
+        // - 4 байта X координаты
+        // - 4 байта Y координаты  
+        // - 2 байта ширины
+        // - 2 байта высоты
+        // - 2 байта задержки (в миллисекундах, little-endian)
+        // - 1 байт флагов
+        // - данные кадра
+        
+        if (offset + 24 < arrayBuffer.byteLength) {
+          // Задержка находится в байтах 20-21 (после координат и размеров)
+          const delayMs = view.getUint16(offset + 20, true); // little-endian, в миллисекундах
+          totalDuration += delayMs;
+          frameCount++;
+        }
+      }
+      
+      // Переходим к следующему chunk
+      offset += 8; // заголовок chunk
+      if (chunkSize % 2 === 1) {
+        offset += chunkSize + 1; // размер + выравнивание
+      } else {
+        offset += chunkSize;
+      }
+      
+      if (offset >= arrayBuffer.byteLength) break;
+    }
+    
+    if (hasAnim && totalDuration > 0 && frameCount > 0) {
+      return totalDuration;
+    }
+    
+    return null;
+  } catch (e) {
+    console.warn('Не удалось определить длительность анимации:', e);
+    return null;
+  }
+}
+
+/**
+ * Инициализирует статичное изображение из первого кадра анимированного WebP
+ * @param {HTMLImageElement} img - Элемент изображения с data-static="true"
+ */
+export async function initStaticImage(img) {
+  if (!img || img.dataset.static !== 'true') return;
+  
+  // Сохраняем оригинальный путь к анимированному изображению
+  const baseSrc = img.src.split('?')[0];
+  img.dataset.animatedSrc = baseSrc;
+  
+  // Автоматически определяем длительность, если не указана
+  if (!img.dataset.animationDuration) {
+    const duration = await getWebPAnimationDuration(baseSrc);
+    if (duration && duration > 0) {
+      img.dataset.animationDuration = Math.round(duration).toString();
+      console.log(`✅ Автоматически определена длительность для ${baseSrc.split('/').pop()}: ${Math.round(duration)}ms`);
+    } else {
+      // Если не удалось определить, используем значение по умолчанию
+      img.dataset.animationDuration = '2000';
+      console.warn(`⚠️ Не удалось определить длительность для ${baseSrc.split('/').pop()}, используется значение по умолчанию: 2000ms. Укажите data-animation-duration вручную.`);
+    }
+  } else {
+    console.log(`ℹ️ Используется указанная длительность для ${baseSrc.split('/').pop()}: ${img.dataset.animationDuration}ms`);
+  }
+  
+  // Временно скрываем изображение, чтобы анимация не воспроизводилась визуально
+  const originalDisplay = img.style.display;
+  img.style.display = 'none';
+  
+  // Создаем скрытое изображение для извлечения первого кадра
+  const hiddenImg = new Image();
+  hiddenImg.onload = function() {
+    try {
+      // Создаем canvas для извлечения первого кадра
+      const canvas = document.createElement('canvas');
+      canvas.width = hiddenImg.width;
+      canvas.height = hiddenImg.height;
+      const ctx = canvas.getContext('2d');
+      // Рисуем первый кадр анимации
+      ctx.drawImage(hiddenImg, 0, 0);
+      // Конвертируем первый кадр в data URL (используем PNG для гарантии статичности)
+      const staticSrc = canvas.toDataURL('image/png');
+      // Сохраняем статичное изображение и используем его
+      img.dataset.staticSrc = staticSrc;
+      img.src = staticSrc;
+      img.style.display = originalDisplay;
+    } catch (e) {
+      // Если не удалось создать статичное изображение (CORS или другая ошибка)
+      console.warn('Не удалось создать статичное изображение:', e);
+      img.style.display = originalDisplay;
+    }
+  };
+  hiddenImg.onerror = function() {
+    console.warn('Не удалось загрузить изображение для создания статичного');
+    img.style.display = originalDisplay;
+  };
+  hiddenImg.src = baseSrc;
+}
+
+/**
+ * Запускает анимацию изображения на один цикл
+ * @param {HTMLImageElement} img - Элемент изображения с data-static="true"
+ */
+export function playAnimationOnce(img) {
+  if (!img || img.dataset.static !== 'true') {
+    // Если уже анимируется, останавливаем предыдущую и запускаем новую
+    if (img && img.dataset.animationTimer) {
+      clearTimeout(parseInt(img.dataset.animationTimer));
+    }
+  }
+  
+  // Получаем длительность анимации из атрибута или используем значение по умолчанию
+  const animationDuration = parseInt(img.dataset.animationDuration) || 2000;
+  
+  // Переключаемся на анимированную версию
+  const animatedSrc = img.dataset.animatedSrc || img.src.split('?')[0];
+  img.src = animatedSrc + '?t=' + Date.now();
+  img.dataset.static = 'false';
+  
+  // Останавливаем предыдущий таймер, если он был
+  if (img.dataset.animationTimer) {
+    clearTimeout(parseInt(img.dataset.animationTimer));
+  }
+  
+  // Устанавливаем таймер для остановки анимации после одного цикла
+  const timerId = setTimeout(() => {
+    // Возвращаем статичное изображение (первый кадр)
+    if (img.dataset.staticSrc) {
+      img.src = img.dataset.staticSrc;
+    } else {
+      // Если статичное изображение не было создано, перезагружаем оригинал
+      const baseSrc = img.dataset.animatedSrc || img.src.split('?')[0];
+      img.src = baseSrc;
+    }
+    img.dataset.static = 'true';
+    img.dataset.animationTimer = '';
+  }, animationDuration);
+  
+  img.dataset.animationTimer = timerId.toString();
+}
+
 // ---------- Работа с чипами ----------
 export function renderChips(container, values, { single = false, onChange } = {}) {
   if (!container) return;
