@@ -10,6 +10,65 @@
     <link rel="icon" href="data:," />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="./css/style.css" />
+    <style>
+      .password-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .password-overlay.hidden {
+        display: none;
+      }
+
+      .password-modal {
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+      }
+
+      .password-modal h2 {
+        margin: 0 0 var(--space-2) 0;
+        font-size: var(--fs-20);
+        color: var(--fg);
+      }
+
+      .password-modal p {
+        margin: 0 0 var(--space-4) 0;
+        color: var(--muted);
+      }
+
+      .password-modal #passwordInput {
+        width: 100%;
+        margin-bottom: var(--space-2);
+        padding: var(--space-3);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+        background: var(--elem-bg);
+        color: var(--fg);
+        font-size: var(--fs-16);
+        box-sizing: border-box;
+      }
+
+      .password-error {
+        color: var(--color-error);
+        font-size: var(--fs-14);
+        margin-bottom: var(--space-2);
+        min-height: 20px;
+      }
+
+      .password-error.hidden {
+        display: none;
+      }
+    </style>
   </head>
 
   <body>
@@ -668,6 +727,54 @@
         <button type="button" class="btn primary wide" id="filterModalOkBtn">ОК</button>
       </div>
     </div>
+
+    <!-- ====== ШТОРКА С ПАРОЛЕМ ====== -->
+    <div id="passwordOverlay" class="password-overlay">
+      <div class="password-modal">
+        <h2>Доступ ограничен</h2>
+        <p>Введите пароль для доступа к приложению</p>
+        <form id="passwordForm">
+          <input type="password" id="passwordInput" placeholder="Пароль" autofocus>
+          <div id="passwordError" class="password-error hidden"></div>
+          <button type="submit" class="btn primary wide">Войти</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        const PASSWORD = 'FmN#uy$BTp';
+        const overlay = document.getElementById('passwordOverlay');
+        const form = document.getElementById('passwordForm');
+        const input = document.getElementById('passwordInput');
+        const error = document.getElementById('passwordError');
+        
+        // Проверка авторизации при загрузке
+        if (sessionStorage.getItem('app_authorized') !== 'true') {
+          overlay.classList.remove('hidden');
+        } else {
+          overlay.classList.add('hidden');
+        }
+        
+        // Обработчик формы
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const enteredPassword = input.value;
+          
+          if (enteredPassword === PASSWORD) {
+            sessionStorage.setItem('app_authorized', 'true');
+            overlay.classList.add('hidden');
+            error.classList.add('hidden');
+            input.value = '';
+          } else {
+            error.textContent = 'Неверный пароль';
+            error.classList.remove('hidden');
+            input.value = '';
+            input.focus();
+          }
+        });
+      })();
+    </script>
 
     <script type="module" src="./js/main.js"></script>
   </body>
