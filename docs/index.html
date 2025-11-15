@@ -169,8 +169,23 @@
           </div>
         </section>
 
+        <div class="actions-bar">
+          <button type="button" id="profileEditBtn" class="btn primary wide">
+            Редактировать
+          </button>
+        </div>
+
         <section class="card">
-          <h2 class="card-title">Обновить профиль</h2>
+          <h2 class="card-title">Моя коллекция</h2>
+          <div id="trophiesCollectionContainer" class="trophies-collection-container">
+            <!-- Кнопки трофеев будут добавлены динамически через trophies.js -->
+          </div>
+        </section>
+      </section>
+
+      <!-- ====== РЕДАКТИРОВАТЬ ПРОФИЛЬ ====== -->
+      <section id="profileEditScreen" class="hidden">
+        <section class="card">
           <form id="profileForm" class="form" autocomplete="on">
             <div class="input">
               <label for="real_name">Имя</label>
@@ -675,13 +690,6 @@
 
       <!-- ====== НАГРАДЫ ====== -->
       <section id="rewardScreen" class="hidden">
-        <section class="card">
-          <h2 class="card-title">Моя коллекция</h2>
-          <div id="trophiesCollectionContainer" class="trophies-collection-container">
-            <!-- Кнопки трофеев будут добавлены динамически через trophies.js -->
-          </div>
-        </section>
-        
         <section class="card">
           <h2 class="card-title">Мастерство</h2>
           <div id="masteryButtonsContainer" class="grid-list">

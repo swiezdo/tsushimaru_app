@@ -39,6 +39,7 @@ const BACK_ROUTES = {
   buildDetail: 'builds',
   buildPublicDetail: 'builds',
   profile: 'home',
+  profileEdit: 'profile',
   waves: 'home',
   participants: 'home',
   builds: 'home',
@@ -247,6 +248,7 @@ function bindHomeButtons() {
     ['rewardBtn',      () => requireRegistration(() => { 
       showScreen('reward'); 
     })],
+    ['profileEditBtn', () => showScreen('profileEdit')],
   ];
   for (const [id, handler] of map) {
     const el = $(id);

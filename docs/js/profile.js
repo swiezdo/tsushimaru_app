@@ -1,6 +1,6 @@
 // profile.js
 import { tg, $, hapticTapSmart, hapticERR, hapticOK, hideKeyboard } from './telegram.js';
-import { focusAndScrollIntoView } from './ui.js';
+import { focusAndScrollIntoView, showScreen } from './ui.js';
 import { fetchProfile, saveProfile as apiSaveProfile, uploadAvatar, API_BASE } from './api.js';
 import { renderChips, activeValues, setActive, shake, prettyLines, validatePSNId, safeLocalStorageGet, safeLocalStorageSet } from './utils.js';
 
@@ -321,7 +321,10 @@ export function initProfile() {
       }
 
       hapticOK();
-      tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены на сервере.', buttons: [{ type: 'ok' }] });
+      tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены на сервере.', buttons: [{ type: 'ok' }] }, () => {
+        // Возвращаемся на страницу профиля после закрытия попапа
+        showScreen('profile');
+      });
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
       // Обновляем список участников, если он открыт

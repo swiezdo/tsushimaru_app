@@ -12,6 +12,7 @@ import { refreshParticipantsList, resetParticipantSearch } from './participants.
 export const screens = {
   home:               document.getElementById('homeScreen'),
   profile:            document.getElementById('profileScreen'),
+  profileEdit:        document.getElementById('profileEditScreen'),
   waves:              document.getElementById('wavesScreen'),
   participants:       document.getElementById('participantsScreen'),
   participantDetail:  document.getElementById('participantDetailScreen'),
@@ -30,6 +31,7 @@ export const screens = {
 const SCREEN_TITLES = {
   home: 'Tsushima.Ru',
   profile: 'Профиль',
+  profileEdit: 'Редактировать профиль',
   waves: 'Волны',
   participants: 'Участники',
   participantDetail: 'Участник',
@@ -45,6 +47,7 @@ const SCREEN_TITLES = {
 
 const SCREENS_WITH_BACK = new Set([
   'profile',
+  'profileEdit',
   'waves',
   'participants',
   'participantDetail',
@@ -61,7 +64,11 @@ const SCREENS_WITH_BACK = new Set([
 ]);
 
 const SCREEN_HOOKS = {
-  profile: () => loadProfileOnScreenOpen(),
+  profile: () => {
+    loadProfileOnScreenOpen();
+    renderTrophiesCollection(true);
+  },
+  profileEdit: () => loadProfileOnScreenOpen(),
   participants: () => {
     resetParticipantSearch();
     refreshParticipantsList().catch((err) => {
@@ -70,7 +77,6 @@ const SCREEN_HOOKS = {
   },
   reward: () => {
     renderMasteryButtons();
-    renderTrophiesCollection(true);
     renderTrophiesButtons();
   },
 };
