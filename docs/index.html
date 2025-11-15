@@ -131,11 +131,10 @@
       <section id="profileScreen" class="hidden">
         <section class="card">
           <h2 class="card-title">Ваш профиль</h2>
-          <button type="button" class="avatar-upload-btn" id="avatarUploadBtn" aria-label="Загрузить аватарку">
+          <div class="avatar-display" id="avatarDisplay">
             <img id="avatarPreview" class="avatar-preview hidden" src="" alt="Аватар" />
             <span id="avatarPlaceholder" class="avatar-placeholder">+</span>
-          </button>
-          <input id="avatarFileInput" type="file" accept="image/*" class="hidden-input" />
+          </div>
           <div class="profile-grid">
             <div class="field">
               <label>Имя</label>
@@ -186,7 +185,12 @@
       <!-- ====== РЕДАКТИРОВАТЬ ПРОФИЛЬ ====== -->
       <section id="profileEditScreen" class="hidden">
         <section class="card">
-          <form id="profileForm" class="form" autocomplete="on">
+          <button type="button" class="avatar-upload-btn" id="avatarEditUploadBtn" aria-label="Загрузить аватарку" style="left: 50%; right: auto; transform: translateX(-50%);">
+            <img id="avatarEditPreview" class="avatar-preview hidden" src="" alt="Аватар" />
+            <span id="avatarEditPlaceholder" class="avatar-placeholder">+</span>
+          </button>
+          <input id="avatarEditFileInput" type="file" accept="image/*" class="hidden-input" />
+          <form id="profileForm" class="form" autocomplete="on" style="margin-top: 65px;">
             <div class="input">
               <label for="real_name">Имя</label>
               <input

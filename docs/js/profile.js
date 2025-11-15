@@ -27,14 +27,20 @@ const profileSaveBtn  = $('profileSaveBtn');
 const nameErrorEl     = $('nameError');
 const psnErrorEl      = $('psnError');
 
-// ---------- Аватарка ----------
-const avatarUploadBtn = $('avatarUploadBtn');
-const avatarFileInput = $('avatarFileInput');
+// ---------- Аватарка (страница "Профиль" - неактивная) ----------
+const avatarDisplay = $('avatarDisplay');
 const avatarPreview = $('avatarPreview');
 const avatarPlaceholder = $('avatarPlaceholder');
+
+// ---------- Аватарка (страница "Редактировать профиль" - активная) ----------
+const avatarEditUploadBtn = $('avatarEditUploadBtn');
+const avatarEditFileInput = $('avatarEditFileInput');
+const avatarEditPreview = $('avatarEditPreview');
+const avatarEditPlaceholder = $('avatarEditPlaceholder');
+
 let selectedAvatarFile = null; // Временное хранилище выбранного файла
 let currentUserId = null; // ID текущего пользователя
-let currentAvatarObjectUrl = null; // URL для локального превью
+let currentAvatarEditObjectUrl = null; // URL для локального превью на странице редактирования
 
 // Кеш для элементов чипов
 let chipsCache = null;
@@ -82,17 +88,45 @@ function loadProfileToForm(profile) {
   if (v_psn_id) v_psn_id.textContent = profile.psn_id || '—';
   refreshProfileView();
   
-  // Обновляем аватарку
+  // Обновляем аватарку на странице "Профиль" (неактивная)
   if (profile.avatar_url) {
-    // Добавляем параметр времени чтобы браузер перезагрузил изображение
-    avatarPreview.src = API_BASE + profile.avatar_url + '?t=' + Date.now();
-    avatarPreview.classList.remove('hidden');
-    avatarPlaceholder.classList.add('hidden');
-    avatarUploadBtn.classList.add('has-avatar');
+    const avatarUrl = API_BASE + profile.avatar_url + '?t=' + Date.now();
+    // Обновляем аватарку на странице "Профиль"
+    if (avatarPreview) {
+      avatarPreview.src = avatarUrl;
+      avatarPreview.classList.remove('hidden');
+    }
+    if (avatarPlaceholder) {
+      avatarPlaceholder.classList.add('hidden');
+    }
+    // Обновляем аватарку на странице "Редактировать профиль" (активная)
+    if (avatarEditPreview) {
+      avatarEditPreview.src = avatarUrl;
+      avatarEditPreview.classList.remove('hidden');
+    }
+    if (avatarEditPlaceholder) {
+      avatarEditPlaceholder.classList.add('hidden');
+    }
+    if (avatarEditUploadBtn) {
+      avatarEditUploadBtn.classList.add('has-avatar');
+    }
   } else {
-    avatarPreview.classList.add('hidden');
-    avatarPlaceholder.classList.remove('hidden');
-    avatarUploadBtn.classList.remove('has-avatar');
+    // Нет аватарки - показываем placeholder
+    if (avatarPreview) {
+      avatarPreview.classList.add('hidden');
+    }
+    if (avatarPlaceholder) {
+      avatarPlaceholder.classList.remove('hidden');
+    }
+    if (avatarEditPreview) {
+      avatarEditPreview.classList.add('hidden');
+    }
+    if (avatarEditPlaceholder) {
+      avatarEditPlaceholder.classList.remove('hidden');
+    }
+    if (avatarEditUploadBtn) {
+      avatarEditUploadBtn.classList.remove('has-avatar');
+    }
   }
 }
 
@@ -141,13 +175,13 @@ export function initProfile() {
   // Профиль не загружается при инициализации
   // Загрузка происходит только при открытии экрана профиля
 
-  // Обработчики аватарки
-  if (avatarUploadBtn && avatarFileInput) {
-    avatarUploadBtn.addEventListener('click', () => {
-      avatarFileInput.click();
+  // Обработчики аватарки на странице "Редактировать профиль" (активная)
+  if (avatarEditUploadBtn && avatarEditFileInput) {
+    avatarEditUploadBtn.addEventListener('click', () => {
+      avatarEditFileInput.click();
     });
     
-    avatarFileInput.addEventListener('change', (e) => {
+    avatarEditFileInput.addEventListener('change', (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
       
@@ -176,16 +210,16 @@ export function initProfile() {
       }
       
       // Освобождаем предыдущий objectUrl если он был
-      if (currentAvatarObjectUrl) {
-        URL.revokeObjectURL(currentAvatarObjectUrl);
+      if (currentAvatarEditObjectUrl) {
+        URL.revokeObjectURL(currentAvatarEditObjectUrl);
       }
       
-      // Создаем превью
-      currentAvatarObjectUrl = URL.createObjectURL(file);
-      avatarPreview.src = currentAvatarObjectUrl;
-      avatarPreview.classList.remove('hidden');
-      avatarPlaceholder.classList.add('hidden');
-      avatarUploadBtn.classList.add('has-avatar');
+      // Создаем превью на странице редактирования
+      currentAvatarEditObjectUrl = URL.createObjectURL(file);
+      avatarEditPreview.src = currentAvatarEditObjectUrl;
+      avatarEditPreview.classList.remove('hidden');
+      avatarEditPlaceholder.classList.add('hidden');
+      avatarEditUploadBtn.classList.add('has-avatar');
       
       // Сохраняем файл для загрузки
       selectedAvatarFile = file;
@@ -303,9 +337,9 @@ export function initProfile() {
         try {
           await uploadAvatar(currentUserId, selectedAvatarFile);
           // Освобождаем objectUrl локального превью
-          if (currentAvatarObjectUrl) {
-            URL.revokeObjectURL(currentAvatarObjectUrl);
-            currentAvatarObjectUrl = null;
+          if (currentAvatarEditObjectUrl) {
+            URL.revokeObjectURL(currentAvatarEditObjectUrl);
+            currentAvatarEditObjectUrl = null;
           }
           // Перезагружаем профиль чтобы получить обновленную аватарку
           await fetchProfileFromServer();
@@ -366,6 +400,11 @@ export function initProfile() {
 // Функция для загрузки профиля при открытии экрана
 export async function loadProfileOnScreenOpen() {
   selectedAvatarFile = null; // Сбрасываем выбранный файл при загрузке профиля
+  // Освобождаем objectUrl локального превью если был
+  if (currentAvatarEditObjectUrl) {
+    URL.revokeObjectURL(currentAvatarEditObjectUrl);
+    currentAvatarEditObjectUrl = null;
+  }
   await fetchProfileFromServer();
 }
 
