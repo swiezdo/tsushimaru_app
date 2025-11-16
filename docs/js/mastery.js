@@ -496,7 +496,7 @@ function renderMasteryDetail(category, currentLevel) {
     const infoText = document.createElement('div');
     infoText.className = 'mastery-detail-main-text';
     if (currentLevel < maxLevels) {
-        infoText.textContent = `Чтобы получить иконку "Мастерства" ${category.name}, получите ${maxLevels}-й уровень!`;
+        infoText.textContent = `Чтобы получить значок мастерства "${category.name}", получите ${maxLevels}-й уровень!`;
     } else {
         infoText.textContent = 'Вы достигли максимального уровня';
     }
