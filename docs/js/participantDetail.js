@@ -196,10 +196,10 @@ function createParticipantBadge(category, currentLevel) {
 // Функция создания элемента билда (копия из builds.js)
 function createBuildElement(build, isPublic = false) {
     const CLASS_ICON = {
-        'Самурай': './assets/icons/samurai.svg',
-        'Охотник': './assets/icons/hunter.svg',
-        'Убийца': './assets/icons/assassin.svg',
-        'Ронин': './assets/icons/ronin.svg'
+        'Самурай': './assets/icons/classes/samurai.svg',
+        'Охотник': './assets/icons/classes/hunter.svg',
+        'Убийца': './assets/icons/classes/assassin.svg',
+        'Ронин': './assets/icons/classes/ronin.svg'
     };
     
     const row = document.createElement('button');
@@ -268,9 +268,9 @@ function createBuildElement(build, isPublic = false) {
             dislikesCount = build.reactions.dislikes_count || build.reactions.dislikesCount || dislikesCount;
         }
         
-        statsDiv.appendChild(createStatItem('./assets/icons/comments.svg', commentsCount, 'Комментарии'));
-        statsDiv.appendChild(createStatItem('./assets/icons/like.svg', likesCount, 'Лайки'));
-        statsDiv.appendChild(createStatItem('./assets/icons/dislike.svg', dislikesCount, 'Дизлайки'));
+        statsDiv.appendChild(createStatItem('./assets/icons/system/comments.svg', commentsCount, 'Комментарии'));
+        statsDiv.appendChild(createStatItem('./assets/icons/system/like.svg', likesCount, 'Лайки'));
+        statsDiv.appendChild(createStatItem('./assets/icons/system/dislike.svg', dislikesCount, 'Дизлайки'));
         
         metaDiv.appendChild(authorText);
         metaDiv.appendChild(statsDiv);

@@ -55,7 +55,7 @@ export async function loadMasteryConfig() {
     
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-            const response = await fetch('./mastery-config.json');
+            const response = await fetch('./assets/data/mastery-config.json');
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             masteryConfig = await response.json();
             return masteryConfig;

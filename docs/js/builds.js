@@ -8,10 +8,10 @@ const CLASS_VALUES = ['Самурай','Охотник','Убийца','Рони
 const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма','Негативные эффекты'];
 
 const CLASS_ICON = {
-  'Самурай':'./assets/icons/samurai.svg',
-  'Охотник':'./assets/icons/hunter.svg',
-  'Убийца':'./assets/icons/assassin.svg',
-  'Ронин':'./assets/icons/ronin.svg'
+  'Самурай':'./assets/icons/classes/samurai.svg',
+  'Охотник':'./assets/icons/classes/hunter.svg',
+  'Убийца':'./assets/icons/classes/assassin.svg',
+  'Ронин':'./assets/icons/classes/ronin.svg'
 };
 
 // Элементы
@@ -232,9 +232,9 @@ function createBuildElement(build, isPublic = false) {
       console.warn('Возможная проблема: likes_count совпадает с comments_count для билда', build.build_id);
     }
     
-    statsDiv.appendChild(createStatItem('./assets/icons/comments.svg', commentsCount, 'Комментарии'));
-    statsDiv.appendChild(createStatItem('./assets/icons/like.svg', likesCount, 'Лайки'));
-    statsDiv.appendChild(createStatItem('./assets/icons/dislike.svg', dislikesCount, 'Дизлайки'));
+    statsDiv.appendChild(createStatItem('./assets/icons/system/comments.svg', commentsCount, 'Комментарии'));
+    statsDiv.appendChild(createStatItem('./assets/icons/system/like.svg', likesCount, 'Лайки'));
+    statsDiv.appendChild(createStatItem('./assets/icons/system/dislike.svg', dislikesCount, 'Дизлайки'));
     
     metaDiv.appendChild(authorText);
     metaDiv.appendChild(statsDiv);
@@ -268,9 +268,9 @@ function createBuildElement(build, isPublic = false) {
       console.warn('Возможная проблема: likes_count совпадает с comments_count для билда', build.build_id);
     }
     
-    statsDiv.appendChild(createStatItem('./assets/icons/comments.svg', commentsCount, 'Комментарии'));
-    statsDiv.appendChild(createStatItem('./assets/icons/like.svg', likesCount, 'Лайки'));
-    statsDiv.appendChild(createStatItem('./assets/icons/dislike.svg', dislikesCount, 'Дизлайки'));
+    statsDiv.appendChild(createStatItem('./assets/icons/system/comments.svg', commentsCount, 'Комментарии'));
+    statsDiv.appendChild(createStatItem('./assets/icons/system/like.svg', likesCount, 'Лайки'));
+    statsDiv.appendChild(createStatItem('./assets/icons/system/dislike.svg', dislikesCount, 'Дизлайки'));
     
     metaDiv.appendChild(dateText);
     metaDiv.appendChild(statsDiv);
@@ -482,7 +482,7 @@ function renderClassTabs() {
   }
   
   const tagsIcon = document.createElement('img');
-  tagsIcon.src = './assets/icons/tag.svg';
+  tagsIcon.src = './assets/icons/system/tag.svg';
   tagsIcon.alt = 'Теги';
   tagsTab.appendChild(tagsIcon);
   
@@ -498,7 +498,7 @@ function renderClassTabs() {
   sortTab.type = 'button';
   sortTab.className = 'class-tab sort-tab';
   const sortIcon = document.createElement('img');
-  sortIcon.src = './assets/icons/sort.svg';
+  sortIcon.src = './assets/icons/system/sort.svg';
   sortIcon.alt = 'Сортировка';
   // Устанавливаем заголовок в зависимости от текущего типа сортировки
   const sortTitles = {
