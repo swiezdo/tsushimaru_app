@@ -2,6 +2,7 @@
   {
     "week": 1,
     "story": "Разлученные сердца",
+    "story_mods": ["beast-demons", "demon-hounds", "beast-demons"],
     "story_img": "severed-hearts.jpg",
     "story_slug": "severed-hearts",
     "story_mod": "Общие раны",
@@ -24,6 +25,7 @@
   {
     "week": 2,
     "story": "Повесть об Утицунэ",
+    "story_mods": ["archer-demons", "floating-shrine", "warlord-demons"],
     "story_img": "the-tale-of-uchitsune.jpg",
     "story_slug": "the-tale-of-uchitsune",
     "story_mod": "Ядовитые облака",
@@ -46,6 +48,7 @@
   {
     "week": 3,
     "story": "Караван воров",
+    "story_mods": ["beast-demons", "beast-demons", "warlord-demons"],
     "story_img": "caravan-of-thieves.jpg",
     "story_slug": "caravan-of-thieves",
     "story_mod": "Горящие клинки",
@@ -68,6 +71,7 @@
   {
     "week": 4,
     "story": "Превратности войны",
+    "story_mods": ["guardian-demons", "bears", "fire-spirits"],
     "story_img": "tides-of-battle.jpg",
     "story_slug": "tides-of-battle",
     "story_mod": "Затупленные катаны",
@@ -90,6 +94,7 @@
   {
     "week": 5,
     "story": "Завеса между мирами",
+    "story_mods": ["floating-shrine", "beast-demons", "floating-shrine"],
     "story_img": "the-veil-between-realms.jpg",
     "story_slug": "the-veil-between-realms",
     "story_mod": "Смертельная схватка",
@@ -112,6 +117,7 @@
   {
     "week": 6,
     "story": "Демоны-вороны Оцуны",
+    "story_mods": ["demon-hounds", "beast-demons", "archer-demons"],
     "story_img": "the-crow-demons-of-otsuna.jpg",
     "story_slug": "the-crow-demons-of-otsuna",
     "story_mod": "Усиленные враги",
@@ -136,6 +142,7 @@
   {
     "week": 7,
     "story": "Злосчастные мертвецы",
+    "story_mods": ["demon-horde", "death-maidens", "demon-horde"],
     "story_img": "the-stranded-dead.jpg",
     "story_slug": "the-stranded-dead",
     "story_mod": "Ограниченное исцеление",
@@ -160,6 +167,7 @@
   {
     "week": 8,
     "story": "Проклятие ведьмы",
+    "story_mods": ["demon-hounds", "bears", "demon-horde"],
     "story_img": "the-curse-of-the-onibaba.jpg",
     "story_slug": "the-curse-of-the-onibaba",
     "story_mod": "Лесной пожар",
@@ -184,6 +192,7 @@
   {
     "week": 9,
     "story": "Разлученные сердца",
+    "story_mods": ["tengu", "death-maidens", "warlord-demons"],
     "story_img": "severed-hearts.jpg",
     "story_slug": "severed-hearts",
     "story_mod": "Ядовитые облака",
@@ -208,6 +217,7 @@
   {
     "week": 10,
     "story": "Повесть об Утицунэ",
+    "story_mods": ["demon-hounds", "beast-demons", "demon-hounds"],
     "story_img": "the-tale-of-uchitsune.jpg",
     "story_slug": "the-tale-of-uchitsune",
     "story_mod": "Затупленные катаны",
@@ -232,6 +242,7 @@
   {
     "week": 11,
     "story": "Караван воров",
+    "story_mods": ["bears", "death-maidens", "floating-shrine"],
     "story_img": "caravan-of-thieves.jpg",
     "story_slug": "caravan-of-thieves",
     "story_mod": "Лесной пожар",
@@ -256,6 +267,7 @@
   {
     "week": 12,
     "story": "Превратности войны",
+    "story_mods": ["spirit-bow", "spirit-bow", "death-maidens"],
     "story_img": "tides-of-battle.jpg",
     "story_slug": "tides-of-battle",
     "story_mod": "Горящие клинки",
@@ -280,6 +292,7 @@
   {
     "week": 13,
     "story": "Завеса между мирами",
+    "story_mods": ["guardian-demons", "bound-enemies", "fire-spirits"],
     "story_img": "the-veil-between-realms.jpg",
     "story_slug": "the-veil-between-realms",
     "story_mod": "Усиленные враги",
@@ -304,6 +317,7 @@
   {
     "week": 14,
     "story": "Демоны-вороны Оцуны",
+    "story_mods": ["bound-enemies", "guardian-demons", "fire-spirits"],
     "story_img": "the-crow-demons-of-otsuna.jpg",
     "story_slug": "the-crow-demons-of-otsuna",
     "story_mod": "Общие раны",
@@ -328,6 +342,7 @@
   {
     "week": 15,
     "story": "Злосчастные мертвецы",
+    "story_mods": ["bears", "spirit-bow", "bound-enemies"],
     "story_img": "the-stranded-dead.jpg",
     "story_slug": "the-stranded-dead",
     "story_mod": "Ядовитые облака",
@@ -352,6 +367,7 @@
   {
     "week": 16,
     "story": "Проклятие ведьмы",
+    "story_mods": ["fire-spirits", "spirit-enemies", "fire-spirits"],
     "story_img": "the-curse-of-the-onibaba.jpg",
     "story_slug": "the-curse-of-the-onibaba",
     "story_mod": "Ограниченное исцеление",
