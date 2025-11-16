@@ -862,6 +862,8 @@ function updatePublishButton(myId) {
       publishBuildBtn.textContent = 'Опубликовать';
       publishBuildBtn.classList.add('primary');
       publishBuildBtn.classList.remove('danger');
+      publishBuildBtn.classList.remove('btn--red');
+      publishBuildBtn.setAttribute('data-bg-image', 'blue');
       return;
     }
     
@@ -870,15 +872,21 @@ function updatePublishButton(myId) {
       publishBuildBtn.textContent = 'Скрыть';
       publishBuildBtn.classList.remove('primary');
       publishBuildBtn.classList.add('danger');
+      publishBuildBtn.classList.add('btn--red');
+      publishBuildBtn.setAttribute('data-bg-image', 'red');
     } else {
       publishBuildBtn.textContent = 'Опубликовать';
       publishBuildBtn.classList.add('primary');
       publishBuildBtn.classList.remove('danger');
+      publishBuildBtn.classList.remove('btn--red');
+      publishBuildBtn.setAttribute('data-bg-image', 'blue');
     }
   }).catch(err => {
     publishBuildBtn.textContent = 'Опубликовать';
     publishBuildBtn.classList.add('primary');
     publishBuildBtn.classList.remove('danger');
+    publishBuildBtn.classList.remove('btn--red');
+    publishBuildBtn.setAttribute('data-bg-image', 'blue');
   });
 }
 
@@ -1309,6 +1317,14 @@ async function deleteBuildById(id) {
 export function initBuilds() {
   renderChips(classChipsEl, CLASS_VALUES, { single: true });
   renderChips(tagsChipsEl,  TAG_VALUES);
+  
+  // Инициализация атрибутов data-bg-image для кнопок
+  if (publishBuildBtn) {
+    publishBuildBtn.setAttribute('data-bg-image', 'blue');
+  }
+  if (deleteBuildBtn) {
+    deleteBuildBtn.setAttribute('data-bg-image', 'red');
+  }
 
   // Авто-рост описания
   if (buildDescEl) {

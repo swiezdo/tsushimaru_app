@@ -699,6 +699,7 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
     submitBtn.className = 'btn primary wide';
     submitBtn.id = 'masteryApplicationSubmitBtn';
     submitBtn.textContent = 'Отправить';
+    submitBtn.setAttribute('data-bg-image', 'green');
     
     actionsBar.appendChild(submitBtn);
     applicationCard.appendChild(actionsBar);

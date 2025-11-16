@@ -316,6 +316,239 @@ body {
 }
 .btn.primary { background: var(--accent); border-color: transparent; color: var(--color-accent-contrast); font-weight: 700; }
 .btn.danger { background: var(--color-error); border-color: transparent; color: var(--color-accent-contrast); font-weight: 700; }
+
+/* ========== КНОПКИ С ФОНОВЫМИ ИЗОБРАЖЕНИЯМИ ========== */
+/* Базовые стили для кнопок с фоновыми изображениями */
+.btn--with-bg-image {
+  background: none !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  font-weight: 700;
+}
+
+.btn--with-bg-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Синие кнопки (blue.png) - по ID */
+#sendFeedbackBtn,
+#profileEditBtn,
+#createBuildBtn {
+  background: none !important;
+  background-image: url('../assets/system/blue.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+#sendFeedbackBtn::before,
+#profileEditBtn::before,
+#createBuildBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Кнопка publishBuildBtn - синяя по умолчанию, красная когда показывает "Скрыть" */
+#publishBuildBtn:not(.btn--red):not(.danger) {
+  background: none !important;
+  background-image: url('../assets/system/blue.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+#publishBuildBtn:not(.btn--red):not(.danger)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Зеленые кнопки (green.png) - по ID */
+#feedbackSubmitBtn,
+#profileSaveBtn,
+#buildSubmitBtn,
+#buildEditSubmitBtn {
+  background: none !important;
+  background-image: url('../assets/system/green.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+#feedbackSubmitBtn::before,
+#profileSaveBtn::before,
+#buildSubmitBtn::before,
+#buildEditSubmitBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Красные кнопки (red.png) - по ID */
+#deleteBuildBtn {
+  background: none !important;
+  background-image: url('../assets/system/red.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+#deleteBuildBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Кнопка publishBuildBtn - красная когда показывает "Скрыть" */
+#publishBuildBtn.btn--red,
+#publishBuildBtn.danger {
+  background: none !important;
+  background-image: url('../assets/system/red.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+#publishBuildBtn.btn--red::before,
+#publishBuildBtn.danger::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Динамически создаваемые кнопки через data-bg-image атрибут */
+button.btn.primary[type="submit"],
+button.btn.primary[data-bg-image="green"],
+button.btn[data-bg-image="green"],
+#masteryApplicationSubmitBtn {
+  background: none !important;
+  background-image: url('../assets/system/green.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+button.btn.primary[type="submit"]::before,
+button.btn.primary[data-bg-image="green"]::before,
+button.btn[data-bg-image="green"]::before,
+#masteryApplicationSubmitBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+button.btn[data-bg-image="blue"] {
+  background: none !important;
+  background-image: url('../assets/system/blue.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+button.btn[data-bg-image="blue"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
+button.btn[data-bg-image="red"] {
+  background: none !important;
+  background-image: url('../assets/system/red.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+button.btn[data-bg-image="red"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
 .btn.ghost { opacity: var(--opacity-hover); }
 .btn.wide { width: 100%; }
 .btn:active { transform: translateY(1px); }

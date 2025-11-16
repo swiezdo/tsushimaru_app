@@ -309,12 +309,70 @@ function bindBottomNav() {
   }
 }
 
+// ---------------- Применение стилей к кнопкам с фоновыми изображениями ----------------
+function applyButtonBackgroundStyles() {
+  // Функция для применения стилей к кнопкам по тексту
+  const applyStylesToButton = (btn) => {
+    if (!btn || !btn.classList.contains('btn')) return;
+    
+    const text = btn.textContent.trim();
+    if (text === 'Отправить' || text === 'Сохранить' || text === 'Создать') {
+      btn.setAttribute('data-bg-image', 'green');
+    } else if (text === 'Редактировать' || text === 'Создать билд' || text === 'Опубликовать') {
+      btn.setAttribute('data-bg-image', 'blue');
+    } else if (text === 'Скрыть' || text === 'Удалить') {
+      btn.setAttribute('data-bg-image', 'red');
+    }
+  };
+  
+  // Применяем стили к существующим кнопкам
+  const buttons = Array.from(document.querySelectorAll('button.btn'));
+  buttons.forEach(applyStylesToButton);
+  
+  // Наблюдатель за изменениями DOM для динамически создаваемых кнопок и изменений текста
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      // Обработка новых кнопок
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          if (node.tagName === 'BUTTON') {
+            applyStylesToButton(node);
+          }
+          // Также проверяем вложенные кнопки
+          const nestedButtons = node.querySelectorAll?.('button.btn');
+          if (nestedButtons) {
+            nestedButtons.forEach(applyStylesToButton);
+          }
+        }
+      });
+      
+      // Обработка изменений текста в существующих кнопках
+      if (mutation.type === 'characterData' || mutation.type === 'childList') {
+        const target = mutation.target;
+        if (target.tagName === 'BUTTON' || target.closest?.('button.btn')) {
+          const btn = target.tagName === 'BUTTON' ? target : target.closest('button.btn');
+          if (btn) {
+            applyStylesToButton(btn);
+          }
+        }
+      }
+    });
+  });
+  
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+}
+
 // ---------------- Старт ----------------
 async function startApp() {
   applySafeInsets();
   bindHomeButtons();
   bindBottomNav();
   installBackButton();
+  applyButtonBackgroundStyles();
 
   initProfile();
   await initParticipants();
