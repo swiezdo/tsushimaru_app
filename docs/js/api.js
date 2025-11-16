@@ -747,5 +747,17 @@ export async function updateActiveTrophies(activeTrophiesList) {
     }
 }
 
+// Получение текущей недели ротации
+export async function getCurrentRotationWeek() {
+    try {
+        const data = await requestJson('/api/rotation/current');
+        return data.week || 14; // Возвращаем 14 по умолчанию если не удалось получить
+    } catch (error) {
+        console.error('Ошибка получения текущей недели:', error);
+        // При ошибке возвращаем неделю 14 по умолчанию
+        return 14;
+    }
+}
+
 // Экспорт константы для использования в других модулях
 export { API_BASE };

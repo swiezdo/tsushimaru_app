@@ -7,6 +7,7 @@ import { renderMasteryButtons } from './mastery.js';
 import { renderTrophiesCollection } from './trophies.js';
 import { renderTrophiesButtons } from './trophies_list.js';
 import { refreshParticipantsList, resetParticipantSearch } from './participants.js';
+import { initHome } from './home.js';
 
 // Ссылки на экраны
 export const screens = {
@@ -64,6 +65,7 @@ const SCREENS_WITH_BACK = new Set([
 ]);
 
 const SCREEN_HOOKS = {
+  home: () => initHome(),
   profile: () => {
     loadProfileOnScreenOpen();
     renderTrophiesCollection(true);

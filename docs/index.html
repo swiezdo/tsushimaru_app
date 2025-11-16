@@ -84,23 +84,57 @@
           <div class="brand">
             <img class="logo" src="./assets/logo/logo.png" alt="Tsushima.Ru" />
           </div>
+          
+          <h2 class="card-title" id="rotationWeekTitle">Неделя #14</h2>
+          
           <div class="grid-list">
-            <a
-              id="telegramGroupBtn"
-              class="btn primary"
-              href="https://t.me/+ZFiVYVrz-PEzYjBi"
-              target="_blank"
-              rel="noopener"
-            >
-              🏯 Группа Tsushima.Ru
-            </a>
-
-            <button id="openProfileBtn" class="btn">👤 Мой профиль</button>
-            <button id="rewardBtn" class="btn">🏆 Награды</button>
-            <button id="wavesBtn" class="btn">🌊 Волны</button>
-            <button id="participantsBtn" class="btn">👥 Участники</button>
-            <button id="buildsBtn" class="btn ghost">🛠️ Билды</button>
-            <button id="whatsNewBtn" class="btn">📰 Что нового?</button>
+            <!-- Сюжет -->
+            <button type="button" id="rotationStoryBtn" class="badge-btn">
+              <div class="rotation-mode-text">
+                <div class="rotation-mode-name">Сюжет</div>
+                <div class="rotation-mode-map">—</div>
+              </div>
+              <div class="rotation-mod-icons">
+                <div class="waves-mod-icon">
+                  <img src="" alt="" id="rotationStoryModIcon" />
+                </div>
+              </div>
+            </button>
+            
+            <!-- Выживание "Кошмар" -->
+            <button type="button" id="rotationSurvivalBtn" class="badge-btn">
+              <div class="rotation-mode-text">
+                <div class="rotation-mode-name">Выживание "Кошмар"</div>
+                <div class="rotation-mode-map">—</div>
+              </div>
+              <div class="rotation-mod-icons">
+                <div class="waves-mod-icon">
+                  <img src="" alt="" id="rotationSurvivalMod1Icon" />
+                </div>
+                <div class="waves-mod-icon">
+                  <img src="" alt="" id="rotationSurvivalMod2Icon" />
+                </div>
+              </div>
+            </button>
+            
+            <!-- Соперники -->
+            <button type="button" id="rotationRivalsBtn" class="badge-btn" disabled>
+              <div class="rotation-mode-text">
+                <div class="rotation-mode-name">Соперники</div>
+                <div class="rotation-mode-map">—</div>
+              </div>
+              <div class="rotation-mod-icons" id="rotationRivalsModIcons">
+                <!-- Иконка будет добавлена динамически только если есть rivals_mod_icon -->
+              </div>
+            </button>
+            
+            <!-- Испытания Иё -->
+            <button type="button" id="rotationTrialsBtn" class="badge-btn" disabled>
+              <div class="rotation-mode-text">
+                <div class="rotation-mode-name">Испытания Иё</div>
+                <div class="rotation-mode-map">—</div>
+              </div>
+            </button>
           </div>
         </section>
       </section>

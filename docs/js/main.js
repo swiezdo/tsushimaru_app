@@ -238,23 +238,16 @@ async function requireRegistration(callback) {
   callback();
 }
 
-// ---------------- Главная: Tap на все кнопки ----------------
+// ---------------- Главная: обработчики удалены (теперь в home.js) ----------------
 function bindHomeButtons() {
-  const map = [
-    ['openProfileBtn', () => showScreen('profile')],
-    ['wavesBtn', () => requireRegistration(() => { showScreen('waves'); openWavesScreen(); })],
-    ['participantsBtn', () => requireRegistration(() => showScreen('participants'))],
-    ['buildsBtn',      () => requireRegistration(() => showScreen('builds'))],
-    ['whatsNewBtn',    () => { showScreen('whatsNew'); renderWhatsNewCards(); }],
-    ['rewardBtn',      () => requireRegistration(() => { 
-      showScreen('reward'); 
-    })],
-    ['profileEditBtn', () => showScreen('profileEdit')],
-  ];
-  for (const [id, handler] of map) {
-    const el = $(id);
-    if (!el) continue;
-    el.addEventListener('click', () => { hapticTapSmart(); handler(); });
+  // Обработчики кнопок главной страницы перенесены в home.js
+  // Оставляем только обработчик кнопки редактирования профиля
+  const profileEditBtn = $('profileEditBtn');
+  if (profileEditBtn) {
+    profileEditBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      showScreen('profileEdit');
+    });
   }
 }
 

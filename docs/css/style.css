@@ -404,6 +404,35 @@ a svg,
   height: 100%;
   object-fit: contain;
 }
+
+/* ========== ROTATION MODE BUTTONS ========== */
+.rotation-mode-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.rotation-mode-name {
+  font-size: var(--fs-14);
+  color: var(--tg-hint);
+  font-weight: 500;
+}
+
+.rotation-mode-map {
+  font-size: var(--fs-16);
+  font-weight: 600;
+  line-height: var(--lh-normal);
+  word-break: break-word;
+}
+
+.rotation-mod-icons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .waves-meta-card .waves-header {
   display: flex;
   flex-direction: column;
