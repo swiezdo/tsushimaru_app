@@ -13,7 +13,7 @@ let rotationCountdownTimerId = null;
 // ===== Загрузка данных «Что нового?» =====
 async function loadWhatsNew() {
   try {
-    const res = await fetch('./assets/data/whats-new.json');
+    const res = await fetch(`./assets/data/whats-new.json?v=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`whats-new.json status ${res.status}`);
     return await res.json();
   } catch (e) {

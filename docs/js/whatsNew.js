@@ -16,7 +16,7 @@ const CHANGE_ICONS = {
 // Загрузка данных из JSON файла
 async function loadWhatsNewData() {
   try {
-    const response = await fetch('./assets/data/whats-new.json');
+    const response = await fetch(`./assets/data/whats-new.json?v=${Date.now()}`, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
