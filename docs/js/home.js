@@ -61,7 +61,7 @@ export async function loadCurrentWeek() {
  * @param {number} week - Номер недели (1-16)
  * @returns {Object|null} Данные недели или null
  */
-function getWeekData(week) {
+export function getWeekData(week) {
   if (!rotationData || !Array.isArray(rotationData)) {
     return null;
   }
@@ -88,9 +88,18 @@ export function renderHomeContent(weekData) {
   const storyBtn = document.getElementById('rotationStoryBtn');
   const storyMap = storyBtn?.querySelector('.rotation-mode-map');
   const storyModIcon = document.getElementById('rotationStoryModIcon');
+  let storyHint = storyBtn?.querySelector('.rotation-mode-hint');
   
   if (storyMap) {
     storyMap.textContent = weekData.story || '—';
+  }
+  if (storyBtn) {
+    if (!storyHint) {
+      storyHint = document.createElement('div');
+      storyHint.className = 'rotation-mode-hint';
+      storyBtn.querySelector('.rotation-mode-text')?.appendChild(storyHint);
+    }
+    storyHint.textContent = 'Нажмите, чтобы открыть';
   }
   
   if (storyModIcon && weekData.story_mod_icon) {
@@ -103,9 +112,18 @@ export function renderHomeContent(weekData) {
   const survivalMap = survivalBtn?.querySelector('.rotation-mode-map');
   const survivalMod1Icon = document.getElementById('rotationSurvivalMod1Icon');
   const survivalMod2Icon = document.getElementById('rotationSurvivalMod2Icon');
+  let survivalHint = survivalBtn?.querySelector('.rotation-mode-hint');
   
   if (survivalMap) {
     survivalMap.textContent = weekData.survival || '—';
+  }
+  if (survivalBtn) {
+    if (!survivalHint) {
+      survivalHint = document.createElement('div');
+      survivalHint.className = 'rotation-mode-hint';
+      survivalBtn.querySelector('.rotation-mode-text')?.appendChild(survivalHint);
+    }
+    survivalHint.textContent = 'Нажмите, чтобы открыть';
   }
   
   if (survivalMod1Icon && weekData.survival_mod1_icon) {
@@ -122,9 +140,24 @@ export function renderHomeContent(weekData) {
   const rivalsBtn = document.getElementById('rotationRivalsBtn');
   const rivalsMap = rivalsBtn?.querySelector('.rotation-mode-map');
   const rivalsModIcons = document.getElementById('rotationRivalsModIcons');
+  let rivalsModLabel = rivalsBtn?.querySelector('.rotation-mode-mod');
   
   if (rivalsMap) {
     rivalsMap.textContent = weekData.rivals || '—';
+  }
+
+  // Подпись модификатора соперников (только если есть rivals_mod)
+  if (rivalsBtn) {
+    if (weekData.rivals_mod) {
+      if (!rivalsModLabel) {
+        rivalsModLabel = document.createElement('div');
+        rivalsModLabel.className = 'rotation-mode-mod';
+        rivalsBtn.querySelector('.rotation-mode-text')?.appendChild(rivalsModLabel);
+      }
+      rivalsModLabel.textContent = weekData.rivals_mod;
+    } else if (rivalsModLabel) {
+      rivalsModLabel.remove();
+    }
   }
   
   // Очищаем контейнер иконок модификаторов для соперников
@@ -146,9 +179,20 @@ export function renderHomeContent(weekData) {
   // Испытания Иё
   const trialsBtn = document.getElementById('rotationTrialsBtn');
   const trialsMap = trialsBtn?.querySelector('.rotation-mode-map');
+  let trialsModLabel = trialsBtn?.querySelector('.rotation-mode-mod');
   
   if (trialsMap) {
     trialsMap.textContent = weekData.trials || '—';
+  }
+
+  // Подпись модификатора для испытаний Иё (всегда один и тот же)
+  if (trialsBtn) {
+    if (!trialsModLabel) {
+      trialsModLabel = document.createElement('div');
+      trialsModLabel.className = 'rotation-mode-mod';
+      trialsBtn.querySelector('.rotation-mode-text')?.appendChild(trialsModLabel);
+    }
+    trialsModLabel.textContent = 'Свирепые враги';
   }
 
   // Иконка модификатора для испытаний Иё
@@ -446,13 +490,7 @@ function setupRotationButtons() {
   if (storyBtn) {
     storyBtn.addEventListener('click', () => {
       hapticTapSmart();
-      tg?.showPopup({
-        title: "Скоро",
-        message: "Страница сюжета находится в разработке",
-        buttons: [
-          { id: "ok", type: "default", text: "Ок" }
-        ]
-      });
+      showScreen('story');
     });
   }
 

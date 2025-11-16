@@ -287,7 +287,7 @@
   L 63.1939 60.2821"
 />
 </g>
-<path fill="#090909" d="
+<path fill="none" d="
   M 125.00 0.00
   L 125.00 125.00
   L 0.00 125.00
@@ -427,7 +427,7 @@
   Q 20.76 19.82 25.19 22.51
   Z"
 />
-<path fill="#090909" d="
+<path fill="none" d="
   M 98.92 96.41
   L 90.99 88.95
   A 1.97 1.97 0.0 0 0 88.22 89.02
@@ -627,10 +627,10 @@
   A 0.70 0.70 0.0 0 1 13.48 30.35
   Z"
 />
-<circle fill="#090909" cx="65.95" cy="34.23" r="0.90"/>
+<circle fill="none" cx="65.95" cy="34.23" r="0.90"/>
 <ellipse fill="#606160" cx="0.00" cy="0.00" transform="translate(57.99,34.26) rotate(-110.0)" rx="0.89" ry="0.64"/>
-<ellipse fill="#090909" cx="0.00" cy="0.00" transform="translate(59.59,38.99) rotate(-95.7)" rx="0.96" ry="0.75"/>
-<path fill="#090909" d="
+<ellipse fill="none" cx="0.00" cy="0.00" transform="translate(59.59,38.99) rotate(-95.7)" rx="0.96" ry="0.75"/>
+<path fill="none" d="
   M 64.70 38.35
   Q 65.17 38.49 65.20 38.97
   Q 65.22 39.48 64.79 39.60
@@ -638,7 +638,7 @@
   A 0.83 0.74 -6.4 0 1 64.70 38.35
   Z"
 />
-<path fill="#090909" d="
+<path fill="none" d="
   M 62.01 44.79
   Q 66.92 44.79 71.64 47.49
   A 2.33 2.31 -40.2 0 0 73.62 47.64
@@ -698,13 +698,13 @@
   L 63.1939 60.2821
   Z"
 />
-<circle fill="#090909" cx="40.85" cy="60.27" r="1.00"/>
-<ellipse fill="#090909" cx="0.00" cy="0.00" transform="translate(83.34,60.32) rotate(-99.5)" rx="1.11" ry="0.96"/>
-<rect fill="#090909" x="-2.55" y="-2.55" transform="translate(61.91,62.64) rotate(-43.2)" width="5.10" height="5.10" rx="1.71"/>
-<ellipse fill="#090909" cx="0.00" cy="0.00" transform="translate(40.90,65.05) rotate(-103.6)" rx="0.96" ry="0.77"/>
-<circle fill="#090909" cx="83.37" cy="65.05" r="0.87"/>
-<circle fill="#090909" cx="59.55" cy="86.38" r="0.91"/>
-<ellipse fill="#090909" cx="0.00" cy="0.00" transform="translate(64.35,86.44) rotate(-6.2)" rx="0.86" ry="0.68"/>
+<circle fill="none" cx="40.85" cy="60.27" r="1.00"/>
+<ellipse fill="none" cx="0.00" cy="0.00" transform="translate(83.34,60.32) rotate(-99.5)" rx="1.11" ry="0.96"/>
+<rect fill="none" x="-2.55" y="-2.55" transform="translate(61.91,62.64) rotate(-43.2)" width="5.10" height="5.10" rx="1.71"/>
+<ellipse fill="none" cx="0.00" cy="0.00" transform="translate(40.90,65.05) rotate(-103.6)" rx="0.96" ry="0.77"/>
+<circle fill="none" cx="83.37" cy="65.05" r="0.87"/>
+<circle fill="none" cx="59.55" cy="86.38" r="0.91"/>
+<ellipse fill="none" cx="0.00" cy="0.00" transform="translate(64.35,86.44) rotate(-6.2)" rx="0.86" ry="0.68"/>
 <path fill="#fbfbfb" d="
   M 98.92 96.41
   Q 101.55 98.03 102.24 99.77
@@ -723,6 +723,6 @@
   L 98.92 96.41
   Z"
 />
-<circle fill="#090909" cx="65.97" cy="91.17" r="1.09"/>
-<circle fill="#090909" cx="57.91" cy="91.24" r="0.89"/>
+<circle fill="none" cx="65.97" cy="91.17" r="1.09"/>
+<circle fill="none" cx="57.91" cy="91.24" r="0.89"/>
 </svg>

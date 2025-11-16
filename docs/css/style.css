@@ -470,6 +470,19 @@ a svg,
   word-break: break-word;
 }
 
+.rotation-mode-mod {
+  font-size: var(--fs-14);
+  font-weight: 600;
+  line-height: var(--lh-normal);
+  word-break: break-word;
+  margin-top: 2px;
+}
+
+.rotation-mode-hint {
+  font-size: var(--fs-14);
+  margin-top: 2px;
+}
+
 .rotation-mod-icons {
   display: flex;
   gap: 4px;
@@ -522,6 +535,102 @@ a svg,
 .waves-meta-card--with-bg .waves-title,
 .waves-meta-card--with-bg .waves-header {
   text-shadow: var(--shadow-text);
+}
+
+/* ========== STORY SCREEN ========== */
+.story-hero-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 120px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.story-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.story-hero-title {
+  margin: 0;
+  text-shadow: var(--shadow-text);
+}
+
+.story-hero-mod-main {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 2;
+}
+
+.story-hero-mod-chapters {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  z-index: 2;
+}
+
+/* Увеличенные иконки модификаторов глав в карточке сюжета */
+.story-hero-mod-chapters .waves-mod-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.story-mod-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.story-mod-row img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* Дополнительный отступ после строки «Модификатор недели» перед блоком глав */
+.story-mod-row + .muted {
+  margin-top: var(--space-3);
+}
+
+.story-scroll-title {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+}
+
+.story-scroll-images {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.story-scroll-images img {
+  width: 50%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+  pointer-events: auto;
+  -webkit-user-drag: auto;
+  user-select: auto;
+  -webkit-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+}
+
+.story-scroll-description {
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal);
+  color: var(--tg-tx);
+}
+
+@media (max-width: 640px) {
+  .story-scroll-images {
+    flex-direction: row;
+  }
 }
 .card.waves-table {
   padding: 0;

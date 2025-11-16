@@ -1216,7 +1216,7 @@ function handleTouchEnd(event) {
   lastTouchDistance = 0;
 }
 
-function openLightbox(src) {
+export function openLightbox(src) {
   if (!lightbox || !lightboxImg) return;
   
   lightboxImg.src = src;

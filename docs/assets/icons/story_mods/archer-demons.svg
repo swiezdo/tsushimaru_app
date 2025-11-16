@@ -434,7 +434,7 @@
   A 0.74 0.61 -87.8 0 0 70.4484 68.9905"
 />
 </g>
-<path fill="#050505" d="
+<path fill="none" d="
   M 125.00 0.00
   L 125.00 125.00
   L 0.00 125.00
@@ -1094,8 +1094,8 @@
   Q 28.46 71.62 33.57 68.65
   Z"
 />
-<ellipse fill="#050505" cx="0.00" cy="0.00" transform="translate(54.25,69.68) rotate(-110.5)" rx="1.00" ry="0.76"/>
-<ellipse fill="#050505" cx="0.00" cy="0.00" transform="translate(70.42,69.73) rotate(-87.8)" rx="0.74" ry="0.61"/>
+<ellipse fill="none" cx="0.00" cy="0.00" transform="translate(54.25,69.68) rotate(-110.5)" rx="1.00" ry="0.76"/>
+<ellipse fill="none" cx="0.00" cy="0.00" transform="translate(70.42,69.73) rotate(-87.8)" rx="0.74" ry="0.61"/>
 <path fill="#484948" d="
   M 93.67 75.18
   Q 91.59 72.59 91.14 69.01

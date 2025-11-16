@@ -7,12 +7,14 @@ import { renderMasteryButtons } from './mastery.js';
 import { renderTrophiesCollection } from './trophies.js';
 import { renderTrophiesButtons } from './trophies_list.js';
 import { renderWhatsNewCards } from './whatsNew.js';
+import { openStoryScreen } from './story.js';
 import { refreshParticipantsList, resetParticipantSearch } from './participants.js';
 import { initHome } from './home.js';
 
 // Ссылки на экраны
 export const screens = {
   home:               document.getElementById('homeScreen'),
+  story:              document.getElementById('storyScreen'),
   profile:            document.getElementById('profileScreen'),
   profileEdit:        document.getElementById('profileEditScreen'),
   waves:              document.getElementById('wavesScreen'),
@@ -32,6 +34,7 @@ export const screens = {
 
 const SCREEN_TITLES = {
   home: 'Tsushima.Ru',
+  story: 'Сюжет',
   profile: 'Профиль',
   profileEdit: 'Редактировать профиль',
   waves: 'Волны',
@@ -48,6 +51,7 @@ const SCREEN_TITLES = {
 };
 
 const SCREENS_WITH_BACK = new Set([
+  'story',
   'profile',
   'profileEdit',
   'waves',
@@ -67,6 +71,7 @@ const SCREENS_WITH_BACK = new Set([
 
 const SCREEN_HOOKS = {
   home: () => initHome(),
+  story: () => openStoryScreen(),
   profile: () => {
     loadProfileOnScreenOpen();
     renderTrophiesCollection(true);
