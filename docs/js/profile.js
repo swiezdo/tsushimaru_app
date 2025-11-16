@@ -192,6 +192,7 @@ export function initProfile() {
   // Обработчики аватарки на странице "Редактировать профиль" (активная)
   if (avatarEditUploadBtn && avatarEditFileInput) {
     avatarEditUploadBtn.addEventListener('click', () => {
+      hapticTapSmart();
       avatarEditFileInput.click();
     });
     
@@ -377,7 +378,7 @@ export function initProfile() {
         currentAvatarEditObjectUrl = null;
       }
       
-      tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены на сервере.', buttons: [{ type: 'ok' }] }, () => {
+      tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные профиля успешно сохранены.', buttons: [{ type: 'ok' }] }, () => {
         // Возвращаемся на страницу профиля после закрытия попапа
         showScreen('profile');
       });

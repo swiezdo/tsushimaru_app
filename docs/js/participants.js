@@ -160,6 +160,9 @@ export async function initParticipants() {
         participantSearchEl.addEventListener('input', (e) => {
             filterParticipants(e.target.value);
         });
+        participantSearchEl.addEventListener('focus', () => {
+            hapticTapSmart();
+        }, { passive: true });
     }
 }
 

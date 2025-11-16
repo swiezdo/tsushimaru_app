@@ -4,6 +4,7 @@
 import { loadRotationData, loadCurrentWeek, getWeekData } from './home.js';
 import { setTopbar } from './ui.js';
 import { openLightbox } from './builds.js';
+import { hapticTapSmart } from './telegram.js';
 
 // Версия для SVG модификаторов сюжета (борьба с кэшем)
 const STORY_MOD_ICON_VERSION = 'v1';
@@ -223,8 +224,14 @@ function renderScrollsCard(root, weekData, scrollBlock) {
     imagesRow.appendChild(img2);
 
     // Открытие в лайтбоксе с масштабированием
-    img1.addEventListener('click', () => openLightbox(img1.src));
-    img2.addEventListener('click', () => openLightbox(img2.src));
+    img1.addEventListener('click', () => {
+      hapticTapSmart();
+      openLightbox(img1.src);
+    });
+    img2.addEventListener('click', () => {
+      hapticTapSmart();
+      openLightbox(img2.src);
+    });
     card.appendChild(imagesRow);
 
     const desc = document.createElement('p');

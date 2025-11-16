@@ -81,7 +81,7 @@ export function renderHomeContent(weekData) {
   // Обновляем заголовок недели
   const weekTitle = document.getElementById('rotationWeekTitle');
   if (weekTitle) {
-    weekTitle.textContent = `Неделя #${weekData.week}`;
+    weekTitle.textContent = `Неделя №${weekData.week}`;
   }
 
   // Сюжет
@@ -262,7 +262,10 @@ function renderWhatsNewPreviewCard(latest) {
   moreBtn.className = 'author-chip';
   moreBtn.type = 'button';
   moreBtn.textContent = 'Подробнее';
-  moreBtn.addEventListener('click', () => showScreen('whatsNew'));
+  moreBtn.addEventListener('click', () => {
+    hapticTapSmart();
+    showScreen('whatsNew');
+  });
   header.appendChild(title);
   header.appendChild(moreBtn);
   // Подзаголовки: title, version, date

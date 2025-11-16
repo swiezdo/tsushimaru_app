@@ -384,6 +384,7 @@ export function renderFilesPreview(files, previewEl, { limit = 4, onRemove } = {
     }
 
     tile.addEventListener('click', () => {
+      hapticTapSmart();
       onRemove?.(idx);
     });
 

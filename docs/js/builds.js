@@ -992,6 +992,7 @@ function openBuildDetail(id) {
       
       // Создаем новый обработчик клика для поделиться
       vd_build_share_btn._shareClickHandler = () => {
+        hapticTapSmart();
         shareBuildCommand(buildId);
       };
       
@@ -1011,7 +1012,10 @@ function openBuildDetail(id) {
       const img = document.createElement('img');
       img.src = urlWithCacheBust;
       wrap.appendChild(img);
-      wrap.addEventListener('click', () => openLightbox(fullUrl));
+      wrap.addEventListener('click', () => {
+        hapticTapSmart();
+        openLightbox(fullUrl);
+      });
       buildDetailShots.appendChild(wrap);
     });
 
@@ -1077,6 +1081,7 @@ function openPublicBuildDetail(pubId) {
       
       // Создаем новый обработчик клика для поделиться
       pd_build_share_btn._shareClickHandler = () => {
+        hapticTapSmart();
         shareBuildCommand(buildId);
       };
       
@@ -1101,7 +1106,10 @@ function openPublicBuildDetail(pubId) {
       const img = document.createElement('img');
       img.src = urlWithCacheBust;
       wrap.appendChild(img);
-      wrap.addEventListener('click', () => openLightbox(fullUrl));
+      wrap.addEventListener('click', () => {
+        hapticTapSmart();
+        openLightbox(fullUrl);
+      });
       publicDetailShots.appendChild(wrap);
     });
 
@@ -1258,6 +1266,7 @@ function closeLightbox() {
 // Закрытие лайтбокса при клике на фон
 lightbox?.addEventListener('click', (e) => {
   if (e.target === lightbox) {
+    hapticTapSmart();
     closeLightbox();
   }
 });
@@ -1656,6 +1665,7 @@ export function initBuilds() {
   if (filterModal) {
     filterModal.addEventListener('click', (e) => {
       if (e.target === filterModal) {
+        hapticTapSmart();
         closeFilterModal();
       }
     });
@@ -1802,6 +1812,7 @@ function initCommentForm() {
     commentText.style.height = Math.min(commentText.scrollHeight, 200) + 'px';
   };
   commentText.addEventListener('input', autoResizeComment);
+  commentText.addEventListener('focus', () => { hapticTapSmart(); }, { passive: true });
   // Устанавливаем начальную высоту
   setTimeout(autoResizeComment, 0);
   
