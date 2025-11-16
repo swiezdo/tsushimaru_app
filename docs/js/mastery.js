@@ -516,6 +516,14 @@ function renderMasteryDetail(category, currentLevel) {
         const levelData = getLevelByNumber(category, levelNum);
         if (!levelData) continue;
         
+        // Если это следующий уровень (еще не получен), добавляем заголовок перед карточкой
+        if (levelNum === currentLevel + 1 && currentLevel > 0 && currentLevel < maxLevels) {
+            const nextTitle = document.createElement('h3');
+            nextTitle.className = 'mastery-next-level-title';
+            nextTitle.textContent = 'Следующий уровень:';
+            container.appendChild(nextTitle);
+        }
+        
         const styles = getButtonStyles(category, levelNum);
         
         const levelCard = document.createElement('section');
@@ -570,7 +578,7 @@ function renderMasteryDetail(category, currentLevel) {
             const nextCard = document.createElement('section');
             nextCard.className = 'card next-level';
             
-            // Описание условий следующего уровня (без заголовка)
+            // Описание условий следующего уровня
             const nextDesc = document.createElement('div');
             nextDesc.className = 'mastery-description';
             nextDesc.style.whiteSpace = 'pre-line';

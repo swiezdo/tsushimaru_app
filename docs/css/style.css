@@ -1725,12 +1725,30 @@ html.tg .only-browser { display: none; }
   width: 128px;
   height: 128px;
   object-fit: contain;
+  animation: mastery-icon-glow 2s ease-in-out infinite;
+}
+
+/* Анимация свечения для иконки мастерства */
+@keyframes mastery-icon-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.3)) drop-shadow(0 0 12px rgba(212, 175, 55, 0.15));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5)) drop-shadow(0 0 20px rgba(212, 175, 55, 0.25));
+  }
 }
 
 /* Текст в карточке про иконку/максимальный уровень */
 .mastery-detail-main-text {
   text-align: left;
   line-height: 1.5;
+}
+
+/* Заголовок "Следующий уровень:" перед карточкой */
+.mastery-next-level-title {
+  font-size: var(--fs-16);
+  font-weight: 600;
+  margin: var(--space-4) var(--space-4) var(--space-2) var(--space-4);
 }
 
 /* Текст с прогрессом "Завершено X из Y" (по размеру как топбар) */
