@@ -20,6 +20,51 @@ async function loadParticipants() {
     }
 }
 
+// Компаратор приоритезированной сортировки участников
+function compareParticipants(a, b) {
+    // Вспомогательные признаки с учетом возможных полей бэкенда
+    const hasAnyTrophyA = Boolean(a?.has_any_trophy) || (Array.isArray(a?.trophies) && a.trophies.length > 0) || (Array.isArray(a?.active_trophies) && a.active_trophies.length > 0);
+    const hasAnyTrophyB = Boolean(b?.has_any_trophy) || (Array.isArray(b?.trophies) && b.trophies.length > 0) || (Array.isArray(b?.active_trophies) && b.active_trophies.length > 0);
+    
+    // ВЫСШИЙ ПРИОРИТЕТ: количество активных значков (по убыванию)
+    const activeCountA = typeof a?.active_trophies_count === 'number'
+        ? a.active_trophies_count
+        : (Array.isArray(a?.active_trophies) ? a.active_trophies.length : 0);
+    const activeCountB = typeof b?.active_trophies_count === 'number'
+        ? b.active_trophies_count
+        : (Array.isArray(b?.active_trophies) ? b.active_trophies.length : 0);
+    if (activeCountA !== activeCountB) {
+        return activeCountB - activeCountA; // больше значков — выше
+    }
+    
+    const hasMasteryA = Boolean(a?.has_mastery_progress);
+    const hasMasteryB = Boolean(b?.has_mastery_progress);
+    
+    // П1: Значки/трофеи/мастерство (любые трофеи или любой прогресс мастерства)
+    const p1A = hasAnyTrophyA || hasMasteryA;
+    const p1B = hasAnyTrophyB || hasMasteryB;
+    if (p1A !== p1B) return p1A ? -1 : 1;
+    
+    // П2: Наличие аватарки
+    const p2A = Boolean(a?.avatar_url);
+    const p2B = Boolean(b?.avatar_url);
+    if (p2A !== p2B) return p2A ? -1 : 1;
+    
+    // П3 в исходном требовании (хотя перекрыт П1): хотя бы первый уровень мастерства
+    // Оставляем на случай, если бэкенд решит разделить признаки
+    if (hasMasteryA !== hasMasteryB) return hasMasteryA ? -1 : 1;
+    
+    // П4: Есть хотя бы один билд (публичный)
+    const hasBuildsA = Boolean(a?.has_public_builds) || (typeof a?.builds_count === 'number' && a.builds_count > 0);
+    const hasBuildsB = Boolean(b?.has_public_builds) || (typeof b?.builds_count === 'number' && b.builds_count > 0);
+    if (hasBuildsA !== hasBuildsB) return hasBuildsA ? -1 : 1;
+    
+    // Внутри групп — по имени (psn_id) A→Я
+    const nameA = (a?.psn_id || '').toLowerCase();
+    const nameB = (b?.psn_id || '').toLowerCase();
+    return nameA.localeCompare(nameB);
+}
+
 function renderParticipants(participants = ALL_PARTICIPANTS) {
     if (!participantsListEl) return;
     
@@ -32,7 +77,10 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
     
     noParticipantsHintEl?.classList.add('hidden');
     
-    participants.forEach(user => {
+    // Применяем приоритезированную сортировку
+    const sorted = participants.slice().sort(compareParticipants);
+    
+    sorted.forEach(user => {
         const btn = document.createElement('button');
         btn.className = 'list-btn';
         btn.type = 'button';
