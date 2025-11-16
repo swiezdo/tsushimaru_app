@@ -42,6 +42,9 @@ let selectedAvatarFile = null; // Временное хранилище выбр
 let currentUserId = null; // ID текущего пользователя
 let currentAvatarEditObjectUrl = null; // URL для локального превью на странице редактирования
 
+// Исходное состояние профиля для отслеживания изменений
+let originalProfileState = null;
+
 // Кеш для элементов чипов
 let chipsCache = null;
 
@@ -82,6 +85,17 @@ function loadProfileToForm(profile) {
   if (profile.modes) setActive(cache.modes, profile.modes);
   if (profile.goals) setActive(cache.goals, profile.goals);
   if (profile.difficulties) setActive(cache.difficulty, profile.difficulties);
+  
+  // Сохраняем исходное состояние для отслеживания изменений
+  originalProfileState = {
+    real_name: profile.real_name || '',
+    psn_id: profile.psn_id || '',
+    platforms: [...(profile.platforms || [])],
+    modes: [...(profile.modes || [])],
+    goals: [...(profile.goals || [])],
+    difficulties: [...(profile.difficulties || [])],
+    avatar_url: profile.avatar_url || null
+  };
   
   // Обновляем отображение в карточке "Ваш профиль"
   if (v_real_name) v_real_name.textContent = profile.real_name || '—';
@@ -355,6 +369,14 @@ export function initProfile() {
       }
 
       hapticOK();
+      // Сбрасываем исходное состояние после успешного сохранения
+      originalProfileState = null;
+      selectedAvatarFile = null;
+      if (currentAvatarEditObjectUrl) {
+        URL.revokeObjectURL(currentAvatarEditObjectUrl);
+        currentAvatarEditObjectUrl = null;
+      }
+      
       tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные сохранены на сервере.', buttons: [{ type: 'ok' }] }, () => {
         // Возвращаемся на страницу профиля после закрытия попапа
         showScreen('profile');
@@ -397,6 +419,47 @@ export function initProfile() {
   profileSaveBtn?.addEventListener('click', () => profileForm.requestSubmit());
 }
 
+// Проверка наличия несохраненных изменений
+export function hasUnsavedChanges() {
+  if (!originalProfileState || !profileForm) return false;
+  
+  const cache = getChipsCache();
+  const currentState = {
+    real_name: (profileForm.real_name?.value || '').trim(),
+    psn_id: (profileForm.psn_id?.value || '').trim(),
+    platforms: activeValues(cache.platform).sort(),
+    modes: activeValues(cache.modes).sort(),
+    goals: activeValues(cache.goals).sort(),
+    difficulties: activeValues(cache.difficulty).sort(),
+    hasNewAvatar: selectedAvatarFile !== null
+  };
+  
+  const originalState = {
+    real_name: originalProfileState.real_name || '',
+    psn_id: originalProfileState.psn_id || '',
+    platforms: (originalProfileState.platforms || []).sort(),
+    modes: (originalProfileState.modes || []).sort(),
+    goals: (originalProfileState.goals || []).sort(),
+    difficulties: (originalProfileState.difficulties || []).sort(),
+    hasNewAvatar: false
+  };
+  
+  // Проверяем изменения в текстовых полях
+  if (currentState.real_name !== originalState.real_name) return true;
+  if (currentState.psn_id !== originalState.psn_id) return true;
+  
+  // Проверяем изменения в чипах
+  if (JSON.stringify(currentState.platforms) !== JSON.stringify(originalState.platforms)) return true;
+  if (JSON.stringify(currentState.modes) !== JSON.stringify(originalState.modes)) return true;
+  if (JSON.stringify(currentState.goals) !== JSON.stringify(originalState.goals)) return true;
+  if (JSON.stringify(currentState.difficulties) !== JSON.stringify(originalState.difficulties)) return true;
+  
+  // Проверяем изменения в аватарке
+  if (currentState.hasNewAvatar !== originalState.hasNewAvatar) return true;
+  
+  return false;
+}
+
 // Функция для загрузки профиля при открытии экрана
 export async function loadProfileOnScreenOpen() {
   selectedAvatarFile = null; // Сбрасываем выбранный файл при загрузке профиля
@@ -405,6 +468,7 @@ export async function loadProfileOnScreenOpen() {
     URL.revokeObjectURL(currentAvatarEditObjectUrl);
     currentAvatarEditObjectUrl = null;
   }
+  originalProfileState = null; // Сбрасываем исходное состояние
   await fetchProfileFromServer();
 }
 

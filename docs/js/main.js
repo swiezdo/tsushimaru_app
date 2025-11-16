@@ -165,6 +165,38 @@ function installBackButton() {
       }
     }
 
+    // Специальная проверка для страницы редактирования профиля
+    if (currentScreen === 'profileEdit') {
+      // Динамически импортируем модуль профиля для проверки изменений
+      try {
+        const profileModule = await import('./profile.js');
+        if (profileModule.hasUnsavedChanges && profileModule.hasUnsavedChanges()) {
+          // Показываем попап с предупреждением
+          tg?.showPopup?.({
+            title: 'Несохраненные изменения',
+            message: 'У вас есть несохраненные изменения. Вы уверены, что хотите выйти?',
+            buttons: [
+              { id: 'cancel', type: 'default', text: 'Отменить' },
+              { id: 'discard', type: 'destructive', text: 'Выйти без сохранения' }
+            ]
+          }, (buttonId) => {
+            if (buttonId === 'discard') {
+              // Выходим без сохранения
+              showScreen(nextScreen);
+              if (previousScreen) {
+                sessionStorage.removeItem('previousScreen');
+              }
+            }
+            // Если buttonId === 'cancel', ничего не делаем - остаемся на странице
+          });
+          return; // Прерываем выполнение, ждем ответа пользователя
+        }
+      } catch (error) {
+        console.error('Ошибка проверки несохраненных изменений:', error);
+        // При ошибке просто продолжаем навигацию
+      }
+    }
+
     const handled = await handleSpecialBackNavigation({
       currentScreen,
       nextScreen,
