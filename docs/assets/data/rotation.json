@@ -4,7 +4,7 @@
     "story": "Разлученные сердца",
     "story_mods": {
       "chapter1": { "slug": "beast-demons", "title": "Зверодемоны" },
-      "chapter2": { "slug": "demon-hounds", "title": "Псы демоны" },
+      "chapter2": { "slug": "demon-hounds", "title": "Псы-демоны" },
       "chapter3": { "slug": "beast-demons", "title": "Зверодемоны" }
     },
     "story_img": "severed-hearts.jpg",
@@ -30,9 +30,9 @@
     "week": 2,
     "story": "Повесть об Утицунэ",
     "story_mods": {
-      "chapter1": { "slug": "archer-demons", "title": "Демоны лучники" },
-      "chapter2": { "slug": "floating-shrine", "title": "Плавучие святилища" },
-      "chapter3": { "slug": "warlord-demons", "title": "Демоны военачальники" }
+      "chapter1": { "slug": "archer-demons", "title": "Демоны-лучники" },
+      "chapter2": { "slug": "floating-shrine", "title": "Плавучее святилище богов" },
+      "chapter3": { "slug": "warlord-demons", "title": "Демоны-военачальники" }
     },
     "story_img": "the-tale-of-uchitsune.jpg",
     "story_slug": "the-tale-of-uchitsune",
@@ -59,7 +59,7 @@
     "story_mods": {
       "chapter1": { "slug": "beast-demons", "title": "Зверодемоны" },
       "chapter2": { "slug": "beast-demons", "title": "Зверодемоны" },
-      "chapter3": { "slug": "warlord-demons", "title": "Демоны военачальники" }
+      "chapter3": { "slug": "warlord-demons", "title": "Демоны-военачальники" }
     },
     "story_img": "caravan-of-thieves.jpg",
     "story_slug": "caravan-of-thieves",
@@ -84,7 +84,7 @@
     "week": 4,
     "story": "Превратности войны",
     "story_mods": {
-      "chapter1": { "slug": "guardian-demons", "title": "Демоны защитники" },
+      "chapter1": { "slug": "guardian-demons", "title": "Демоны-защитники" },
       "chapter2": { "slug": "bears", "title": "Медведи" },
       "chapter3": { "slug": "fire-spirits", "title": "Духи огня" }
     },
@@ -111,9 +111,9 @@
     "week": 5,
     "story": "Завеса между мирами",
     "story_mods": {
-      "chapter1": { "slug": "floating-shrine", "title": "Плавучие святилища" },
+      "chapter1": { "slug": "floating-shrine", "title": "Плавучее святилище богов" },
       "chapter2": { "slug": "beast-demons", "title": "Зверодемоны" },
-      "chapter3": { "slug": "floating-shrine", "title": "Плавучие святилища" }
+      "chapter3": { "slug": "floating-shrine", "title": "Плавучее святилище богов" }
     },
     "story_img": "the-veil-between-realms.jpg",
     "story_slug": "the-veil-between-realms",
@@ -138,9 +138,9 @@
     "week": 6,
     "story": "Демоны-вороны Оцуны",
     "story_mods": {
-      "chapter1": { "slug": "demon-hounds", "title": "Псы демоны" },
+      "chapter1": { "slug": "demon-hounds", "title": "Псы-демоны" },
       "chapter2": { "slug": "beast-demons", "title": "Зверодемоны" },
-      "chapter3": { "slug": "archer-demons", "title": "Демоны лучники" }
+      "chapter3": { "slug": "archer-demons", "title": "Демоны-лучники" }
     },
     "story_img": "the-crow-demons-of-otsuna.jpg",
     "story_slug": "the-crow-demons-of-otsuna",
@@ -167,9 +167,9 @@
     "week": 7,
     "story": "Злосчастные мертвецы",
     "story_mods": {
-      "chapter1": { "slug": "demon-horde", "title": "Орда демонов" },
+      "chapter1": { "slug": "demon-horde", "title": "Полчище демонов" },
       "chapter2": { "slug": "death-maidens", "title": "Приспешницы смерти" },
-      "chapter3": { "slug": "demon-horde", "title": "Орда демонов" }
+      "chapter3": { "slug": "demon-horde", "title": "Полчище демонов" }
     },
     "story_img": "the-stranded-dead.jpg",
     "story_slug": "the-stranded-dead",
@@ -196,9 +196,9 @@
     "week": 8,
     "story": "Проклятие ведьмы",
     "story_mods": {
-      "chapter1": { "slug": "demon-hounds", "title": "Псы демоны" },
+      "chapter1": { "slug": "demon-hounds", "title": "Псы-демоны" },
       "chapter2": { "slug": "bears", "title": "Медведи" },
-      "chapter3": { "slug": "demon-horde", "title": "Орда демонов" }
+      "chapter3": { "slug": "demon-horde", "title": "Полчище демонов" }
     },
     "story_img": "the-curse-of-the-onibaba.jpg",
     "story_slug": "the-curse-of-the-onibaba",
@@ -227,7 +227,7 @@
     "story_mods": {
       "chapter1": { "slug": "tengu", "title": "Тэнгу" },
       "chapter2": { "slug": "death-maidens", "title": "Приспешницы смерти" },
-      "chapter3": { "slug": "warlord-demons", "title": "Демоны военачальники" }
+      "chapter3": { "slug": "warlord-demons", "title": "Демоны-военачальники" }
     },
     "story_img": "severed-hearts.jpg",
     "story_slug": "severed-hearts",
@@ -254,9 +254,9 @@
     "week": 10,
     "story": "Повесть об Утицунэ",
     "story_mods": {
-      "chapter1": { "slug": "demon-hounds", "title": "Псы демоны" },
+      "chapter1": { "slug": "demon-hounds", "title": "Псы-демоны" },
       "chapter2": { "slug": "beast-demons", "title": "Зверодемоны" },
-      "chapter3": { "slug": "demon-hounds", "title": "Псы демоны" }
+      "chapter3": { "slug": "demon-hounds", "title": "Псы-демоны" }
     },
     "story_img": "the-tale-of-uchitsune.jpg",
     "story_slug": "the-tale-of-uchitsune",
@@ -285,7 +285,7 @@
     "story_mods": {
       "chapter1": { "slug": "bears", "title": "Медведи" },
       "chapter2": { "slug": "death-maidens", "title": "Приспешницы смерти" },
-      "chapter3": { "slug": "floating-shrine", "title": "Плавучие святилища" }
+      "chapter3": { "slug": "floating-shrine", "title": "Плавучее святилище богов" }
     },
     "story_img": "caravan-of-thieves.jpg",
     "story_slug": "caravan-of-thieves",
@@ -341,7 +341,7 @@
     "week": 13,
     "story": "Завеса между мирами",
     "story_mods": {
-      "chapter1": { "slug": "guardian-demons", "title": "Демоны защитники" },
+      "chapter1": { "slug": "guardian-demons", "title": "Демоны-защитники" },
       "chapter2": { "slug": "bound-enemies", "title": "Связанные враги" },
       "chapter3": { "slug": "fire-spirits", "title": "Огненные духи" }
     },
@@ -371,7 +371,7 @@
     "story": "Демоны-вороны Оцуны",
     "story_mods": {
       "chapter1": { "slug": "bound-enemies", "title": "Связанные враги" },
-      "chapter2": { "slug": "guardian-demons", "title": "Демоны защитники" },
+      "chapter2": { "slug": "guardian-demons", "title": "Демоны-защитники" },
       "chapter3": { "slug": "fire-spirits", "title": "Духи огня" }
     },
     "story_img": "the-crow-demons-of-otsuna.jpg",
@@ -429,7 +429,7 @@
     "story": "Проклятие ведьмы",
     "story_mods": {
       "chapter1": { "slug": "fire-spirits", "title": "Духи огня" },
-      "chapter2": { "slug": "spirit-enemies", "title": "Вражеские духи" },
+      "chapter2": { "slug": "spirit-enemies", "title": "Враги духи" },
       "chapter3": { "slug": "fire-spirits", "title": "Духи огня" }
     },
     "story_img": "the-curse-of-the-onibaba.jpg",
