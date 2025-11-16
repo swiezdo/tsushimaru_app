@@ -2445,18 +2445,40 @@ html.tg .only-browser { display: none; }
   cursor: pointer;
   min-height: 44px;
   transition: opacity var(--transition-base);
+  position: relative;
+}
+
+/* Индикатор активной вкладки (синяя полоска сверху) */
+.bottom-nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 4px 4px;
+  transition: width 0.3s ease;
+  z-index: 1;
+}
+
+.bottom-nav-btn.active::before {
+  width: 60%;
 }
 
 .bottom-nav-icon {
   width: 30px;
   height: 30px;
-  transition: opacity var(--transition-base);
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+              opacity var(--transition-base);
   object-fit: contain;
 }
 
 .bottom-nav-btn.active .bottom-nav-icon {
   opacity: 1;
-  filter: grayscale(0%);
+  filter: drop-shadow(0 0 8px rgba(46, 166, 255, 0.5)) grayscale(0%);
+  transform: scale(1.15);
 }
 
 .bottom-nav-btn:not(.active) .bottom-nav-icon {
@@ -2471,4 +2493,8 @@ html.tg .only-browser { display: none; }
 
 .bottom-nav-btn:active {
   opacity: 0.7;
+}
+
+.bottom-nav-btn:active .bottom-nav-icon {
+  transform: scale(0.9);
 }
