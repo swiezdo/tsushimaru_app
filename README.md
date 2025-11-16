@@ -16,8 +16,16 @@ Telegram Mini App для игры Ghost of Tsushima: Legends - создание 
 
 ```
 tsushimaru_app/
-└── docs/                    # Frontend (GitHub Pages)
+└── docs/                    # Frontend (статический контент)
     ├── assets/             # Статические ресурсы (логотипы, иконки)
+    │   ├── icons/
+    │   │   ├── classes/    # Иконки классов (samurai.svg|png, hunter.*, assassin.*, ronin.*)
+    │   │   ├── modes/      # Иконки режимов (story.svg, survival.svg, rivals.svg, trials.svg)
+    │   │   ├── navigation/ # Навигационные иконки WebP (home.webp, users.webp, ...)
+    │   │   └── system/     # Системные иконки UI (like.svg, share.svg, ...)
+    │   ├── maps/
+    │   │   └── survival/   # Карты выживания (the-shores-of-vengeance.jpg, ...)
+    │   └── data/           # Данные JSON (rotation.json, whats-new.json, trophies.json, mastery-config.json)
     ├── css/                # Стили
     ├── js/                 # JavaScript модули
     │   ├── main.js         # Главный файл, инициализация
@@ -31,9 +39,7 @@ tsushimaru_app/
     │   ├── whatsNew.js     # Что нового
     │   ├── ui.js            # UI утилиты
     │   └── utils.js        # Общие утилиты
-    ├── index.html          # Главная страница
-    ├── mastery-config.json  # Конфигурация мастерства
-    └── whats-new.json      # Что нового
+    └── index.html          # Главная страница
 ```
 
 ## Компоненты
@@ -41,7 +47,7 @@ tsushimaru_app/
 ### Frontend (`/docs`)
 
 - **Технологии**: HTML, CSS, JavaScript, Telegram WebApp SDK
-- **Деплой**: GitHub Pages (автоматически из папки `/docs`)
+- **Деплой**: любой статический хостинг (из папки `/docs`)
 - **URL**: https://tsushimaru.com/
 - **Статические файлы**: все ресурсы в `docs/`
 
@@ -77,7 +83,7 @@ cd tsushimaru_app
    - Используйте ngrok или подобный инструмент для создания публичного URL
    - Настройте бота на использование этого URL
 
-### Деплой на GitHub Pages
+### Деплой
 
 1. Убедитесь, что все файлы в папке `docs/`
 2. Сделайте commit и push:
@@ -87,15 +93,7 @@ git commit -m "Update frontend"
 git push origin main
 ```
 
-3. GitHub Pages автоматически обновится (обычно в течение минуты)
-
-### Настройка GitHub Pages
-
-1. Перейдите в Settings → Pages репозитория
-2. Выберите "Deploy from a branch"
-3. Выберите ветку: `main`
-4. Выберите папку: `/docs`
-5. Сохраните
+3. Настройте публикацию контента на выбранном статическом хостинге
 
 ## API взаимодействие
 
@@ -130,34 +128,45 @@ const API_BASE_URL = 'https://api.tsushimaru.com';
 
 ### mastery-config.json
 
-- Расположение: `docs/mastery-config.json`
+- Расположение: `docs/assets/data/mastery-config.json`
 - Содержит структуру категорий и уровней мастерства
-- Загружается через API: `/assets/mastery-config.json`
+- Загружается фронтендом из: `./assets/data/mastery-config.json`
+- Backend ищет: `/root/tsushimaru_app/docs/assets/data/mastery-config.json` (и относительный путь внутри репозитория)
 - Используется для отображения форм заявок на мастерство
-- Текущие категории: `solo`, `hellmode`, `raid`, `speedrun`, `glitch` (иконки лежат в `docs/assets/mastery/<key>/`)
 
 ### whats-new.json
 
-- Расположение: `docs/whats-new.json`
-- Содержит список новостей/обновлений
-- Загружается через API: `/assets/whats-new.json`
+- Расположение: `docs/assets/data/whats-new.json`
+- Загружается фронтендом из: `./assets/data/whats-new.json`
 - Отображается в разделе "Что нового?"
+
+### trophies.json
+
+- Расположение: `docs/assets/data/trophies.json`
+- Backend ищет: `/root/tsushimaru_app/docs/assets/data/trophies.json` (и относительный путь)
+
+## Иконки
+
+- Классы: `docs/assets/icons/classes/` (`samurai.*`, `hunter.*`, `assassin.*`, `ronin.*`)
+- Режимы: `docs/assets/icons/modes/` (`story.svg`, `survival.svg`, `rivals.svg`, `trials.svg`)
+- Навигация: `docs/assets/icons/navigation/` (WebP иконки нижней навигации)
+- Системные: `docs/assets/icons/system/` (`like.svg`, `dislike.svg`, `comments.svg`, `share.svg`, `sort.svg`, `tag.svg`, `edit.svg`)
 
 ## Структура экранов
 
-1. **Home Screen** - главный экран с кнопками навигации
-2. **Profile Screen** - профиль пользователя (просмотр и редактирование)
-3. **Builds Screen** - список билдов (создание, просмотр, редактирование)
-4. **Mastery Screen** - мастерство (просмотр уровней, подача заявок)
-5. **Participants Screen** - список участников с уровнями мастерства
-6. **Feedback Screen** - отправка отзывов и баг-репортов
-7. **Whats New Screen** - что нового в приложении
+1. **Home Screen** — главный экран с недельной ротацией (данные из `assets/data/rotation.json`, показывается "Неделя #N"; обновление по пятницам 18:00 МСК)
+2. **Profile Screen** — профиль пользователя (просмотр и редактирование)
+3. **Builds Screen** — список билдов (создание, просмотр, редактирование)
+4. **Mastery Screen** — мастерство (просмотр уровней, подача заявок)
+5. **Participants Screen** — список участников с уровнями мастерства
+6. **Feedback Screen** — отправка отзывов и баг-репортов
+7. **Whats New Screen** — что нового в приложении
 
 ## Разработка
 
 ### Обновление кода
 
-**Frontend**: Просто делайте commit и push - GitHub Pages обновится автоматически.
+**Frontend**: После изменений выполните обычный процесс публикации на выбранном статическом хостинге.
 
 **Backend**: Backend находится в отдельном репозитории `/root/miniapp_api`. Для обновления backend следуйте инструкциям в его README.
 
@@ -178,7 +187,7 @@ npx serve
 ## Безопасность
 
 - **Авторизация**: через Telegram `initData` (валидируется на стороне API)
-- **CORS**: настроен на стороне API для домена GitHub Pages
+- **CORS**: настроен на стороне API для клиентского домена
 - **Нет прямого доступа к БД**: все через REST API
 
 ## Интеграции
@@ -197,7 +206,7 @@ npx serve
 
 ## Дополнительная информация
 
-Для более детальной информации о работе с проектом см. [CONTEXT.md](CONTEXT.md) - файл с контекстом для AI-ассистента, содержащий важные нюансы структуры проекта, взаимодействия с API и примеры работы с модулями.
+Для более детальной информации о работе с проектом см. [CONTEXT.md](CONTEXT.md).
 
 ## Лицензия
 

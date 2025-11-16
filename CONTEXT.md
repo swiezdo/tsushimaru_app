@@ -5,7 +5,7 @@
 ## Общие принципы
 
 - Проект представляет собой **статический фронтенд** (HTML, CSS, JavaScript)
-- Деплоится на **GitHub Pages** из папки `docs/`
+- Содержимое публикуется как статический контент из папки `docs/`
 - Использует **Telegram WebApp SDK** для взаимодействия с Telegram
 - Взаимодействует с **miniapp_api** только через **REST API**
 - **Нет прямого доступа к БД** - все через API
@@ -16,8 +16,16 @@
 
 ```
 tsushimaru_app/
-└── docs/                    # Frontend (GitHub Pages)
-    ├── assets/             # Статические ресурсы (логотипы, иконки)
+└── docs/                    # Frontend (статический контент)
+    ├── assets/             # Статические ресурсы (логотипы, иконки, данные)
+    │   ├── icons/
+    │   │   ├── classes/    # Иконки классов (samurai.*, hunter.*, assassin.*, ronin.*)
+    │   │   ├── modes/      # Иконки режимов (story.svg, survival.svg, rivals.svg, trials.svg)
+    │   │   ├── navigation/ # Иконки навигации WebP (home.webp, users.webp, ...)
+    │   │   └── system/     # UI-иконки (like.svg, share.svg, sort.svg, tag.svg, ...)
+    │   ├── maps/
+    │   │   └── survival/   # Карты выживания
+    │   └── data/           # Данные JSON (rotation.json, whats-new.json, trophies.json, mastery-config.json)
     ├── css/                # Стили (style.css)
     ├── js/                 # JavaScript модули
     │   ├── main.js         # Главный файл, инициализация
@@ -31,21 +39,17 @@ tsushimaru_app/
     │   ├── whatsNew.js     # Что нового
     │   ├── ui.js            # UI утилиты
     │   └── utils.js         # Общие утилиты
-    ├── index.html          # Главная страница
-    ├── mastery-config.json # Конфигурация мастерства (загружается через API)
-    └── whats-new.json      # Что нового (загружается через API)
+    └── index.html          # Главная страница
 ```
 
 - `js/api.js` содержит helper `requestJson()` — новые запросы следует строить на нём вместо прямого `fetch`.
-- Навигация и BackButton централизованы в `main.js`/`ui.js`; избегайте дублирования переходов внутри экранов.
-- Для отказа от inline-стилей используйте утилитарные классы `hidden-input`, `mt-sm`, `build-edit-btn--left` из `css/style.css`.
+- Навигация и BackButton централизованы в `main.js`/`ui.js`.
+- Используйте утилитарные классы из `css/style.css` вместо инлайн-стилей.
 
-### GitHub Pages
+### Публикация
 
-- **Деплой**: автоматический из папки `docs/`
-- **URL**: `https://tsushimaru.com/`
-- **Настройка**: Settings → Pages → Source: `/docs`
-- **Обновление**: просто commit и push - GitHub Pages обновится автоматически
+- Сборка не требуется: контент из `docs/` может быть размещён на любом статическом хостинге
+- Обновление — обычный процесс деплоя выбранного хостинга
 
 ### Backend отдельно
 
@@ -84,6 +88,7 @@ tg.expand();
 - Мастерство: `/api/mastery.*`
 - Комментарии: `/api/comments.*`
 - Реакции: `/api/builds.toggleReaction`, `/api/builds.getReactions/{build_id}`
+- Ротация недель: `/api/rotation/current` (FastAPI), UI читает `assets/data/rotation.json`
 
 #### Обработка ошибок
 
@@ -95,42 +100,48 @@ tg.expand();
 
 #### mastery-config.json
 
-- Загружается через API: `/assets/mastery-config.json`
-- Содержит структуру категорий и уровней мастерства
-- Используется для отображения форм заявок на мастерство
-- Формат: JSON с ключами `categories`, каждый category содержит `levels`
-- Поддерживаемые ключи категорий: `solo`, `hellmode`, `raid`, `speedrun`, `glitch` (статические ассеты берутся из `docs/assets/mastery/<key>/`)
+- Расположение: `docs/assets/data/mastery-config.json`
+- Фронтенд: `./assets/data/mastery-config.json`
+- Backend fallback: `/root/tsushimaru_app/docs/assets/data/mastery-config.json` и относительные пути
+- Используется для отображения форм заявок
 
 #### whats-new.json
 
-- Загружается через API: `/assets/whats-new.json`
-- Содержит список новостей/обновлений
-- Отображается в разделе "Что нового?"
+- Расположение: `docs/assets/data/whats-new.json`
+- Фронтенд: `./assets/data/whats-new.json`
 
-### Структура JavaScript модулей
+#### trophies.json
+
+- Расположение: `docs/assets/data/trophies.json`
+- Backend fallback: `/root/tsushimaru_app/docs/assets/data/trophies.json` и относительные пути
+
+### Иконки
+
+- Классы: `docs/assets/icons/classes/` (`samurai.*`, `hunter.*`, `assassin.*`, `ronin.*`)
+- Режимы: `docs/assets/icons/modes/`
+- Навигация: `docs/assets/icons/navigation/`
+- Системные: `docs/assets/icons/system/`
+
+## Структура JavaScript модулей
 
 #### main.js
-
 - Инициализация приложения
 - Настройка роутинга между экранами
 - Обработка навигации
 
 #### telegram.js
-
 - Работа с Telegram WebApp SDK
 - Получение initData
 - Настройка темы
 - Отправка данных в Telegram
 
 #### api.js
-
 - Клиент для работы с miniapp_api
 - Все HTTP запросы проходят через этот модуль
 - Обработка ошибок
 - Добавление заголовков авторизации
 
 #### profile.js, builds.js, mastery.js и т.д.
-
 - Модули для работы с конкретными разделами
 - Каждый модуль отвечает за свой функционал
 - Используют `api.js` для запросов к серверу
@@ -138,73 +149,30 @@ tg.expand();
 ## Интеграции с другими проектами
 
 ### miniapp_api
-
 - **REST API**: все взаимодействие через HTTP запросы
 - **API endpoint**: `https://api.tsushimaru.com` (настраивается в `api.js`)
 - **Авторизация**: через `X-Telegram-Init-Data` заголовок
-- **CORS**: настроен на стороне API для GitHub Pages домена
+- **CORS**: настроен на стороне API для клиентского домена
 
 ### gyozenbot
-
 - **Нет прямой интеграции**
 - gyozenbot открывает Mini App через WebApp кнопку
 - Пользователь взаимодействует с фронтендом, который обращается к API
 
+## Домашний экран (home)
+
+- Полностью переработан: показывается недельная ротация из `assets/data/rotation.json`
+- Заголовок: `Неделя #N`
+- Кнопки: "Сюжет", "Выживание \"Кошмар\"", "Соперники", "Испытания Иё"
+- Иконки модификаторов берутся из `assets/icons/mod1|mod2|mods`
+- Обновление недели: бэкенд трекает текущую неделю, обновление по пятницам 18:00 МСК
+
 ## Частые задачи и их решения
-
-### Добавление нового экрана
-
-1. Добавить HTML секцию в `index.html` с `id="newScreen"` и классом `hidden`
-2. Создать JavaScript модуль `js/newScreen.js`
-3. Добавить обработчик навигации в `main.js`
-4. Добавить кнопку для открытия экрана
-
-### Работа с API
-
-```javascript
-// В api.js
-async function apiCall(endpoint, method = 'GET', data = null) {
-    const tg = window.Telegram.WebApp;
-    const initData = tg.initData;
-    
-    const options = {
-        method,
-        headers: {
-            'X-Telegram-Init-Data': initData,
-            'Content-Type': 'application/json'
-        }
-    };
-    
-    if (data) {
-        options.body = JSON.stringify(data);
-    }
-    
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-    return response.json();
-}
-```
-
-### Загрузка изображений
-
-```javascript
-// Для аватарок и фото билдов
-const formData = new FormData();
-formData.append('photo', file);
-
-const response = await fetch(`${API_BASE_URL}/api/endpoint`, {
-    method: 'POST',
-    headers: {
-        'X-Telegram-Init-Data': tg.initData
-    },
-    body: formData
-});
-```
 
 ### Обновление конфигурационных файлов
 
-- `mastery-config.json` и `whats-new.json` находятся в `docs/`
-- После изменения нужно сделать commit и push
-- GitHub Pages обновится автоматически
+- Все JSON-конфиги находятся в `docs/assets/data/`
+- После изменения следуйте процессу публикации на выбранном статическом хостинге
 - API маунтит эти файлы через `/assets/`
 
 ## Известные ограничения
@@ -212,18 +180,18 @@ const response = await fetch(`${API_BASE_URL}/api/endpoint`, {
 1. **Нет прямого доступа к БД**: все через REST API
 2. **Backend отдельно**: не в этом репозитории, в `/root/miniapp_api`
 3. **Статические файлы**: только HTML, CSS, JavaScript (нет серверной логики)
-4. **GitHub Pages**: ограничения на размер файлов, нет серверных возможностей
-5. **CORS**: должен быть настроен на стороне API для GitHub Pages домена
+4. **Ограничения статического хостинга**: нет серверных возможностей
+5. **CORS**: должен быть настроен на стороне API для клиентского домена
 
 ## Структура экранов
 
-1. **Home Screen** (`#homeScreen`) - главный экран с кнопками
-2. **Profile Screen** (`#profileScreen`) - профиль пользователя
-3. **Builds Screen** (`#buildsScreen`) - список билдов
-4. **Mastery Screen** (`#masteryScreen`) - мастерство
-5. **Participants Screen** (`#participantsScreen`) - список участников
-6. **Feedback Screen** (`#feedbackScreen`) - отзывы/баг-репорты
-7. **Whats New Screen** (`#whatsNewScreen`) - что нового
+1. **Home Screen** (`#homeScreen`) — главный экран с недельной ротацией
+2. **Profile Screen** (`#profileScreen`) — профиль пользователя
+3. **Builds Screen** (`#buildsScreen`) — список билдов
+4. **Mastery Screen** (`#masteryScreen`) — мастерство
+5. **Participants Screen** (`#participantsScreen`) — список участников
+6. **Feedback Screen** (`#feedbackScreen`) — отзывы/баг-репорты
+7. **Whats New Screen** (`#whatsNewScreen`) — что нового
 
 ## Важные замечания
 
