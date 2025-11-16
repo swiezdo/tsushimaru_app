@@ -6,6 +6,7 @@ import { loadProfileOnScreenOpen } from './profile.js';
 import { renderMasteryButtons } from './mastery.js';
 import { renderTrophiesCollection } from './trophies.js';
 import { renderTrophiesButtons } from './trophies_list.js';
+import { renderWhatsNewCards } from './whatsNew.js';
 import { refreshParticipantsList, resetParticipantSearch } from './participants.js';
 import { initHome } from './home.js';
 
@@ -80,6 +81,9 @@ const SCREEN_HOOKS = {
   reward: () => {
     renderMasteryButtons();
     renderTrophiesButtons();
+  },
+  whatsNew: () => {
+    renderWhatsNewCards();
   },
 };
 

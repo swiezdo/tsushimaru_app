@@ -8,6 +8,19 @@ import { tg, hapticTapSmart } from './telegram.js';
 import { checkUserRegistration } from './api.js';
 
 let rotationData = null;
+let rotationCountdownTimerId = null;
+
+// ===== Загрузка данных «Что нового?» =====
+async function loadWhatsNew() {
+  try {
+    const res = await fetch('./assets/data/whats-new.json');
+    if (!res.ok) throw new Error(`whats-new.json status ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.error('Ошибка загрузки whats-new.json:', e);
+    return null;
+  }
+}
 
 /**
  * Загружает данные ротации из rotation.json
@@ -183,6 +196,155 @@ export function renderHomeContent(weekData) {
   applyButtonBackground(trialsBtn, trialsImgUrl);
 }
 
+// ===== Превью-карточка «Что нового?» на главной =====
+function renderWhatsNewPreviewCard(latest) {
+  const home = document.getElementById('homeScreen');
+  if (!home || !latest) return;
+  let card = document.getElementById('whatsNewPreviewCard');
+  if (!card) {
+    card = document.createElement('section');
+    card.className = 'card';
+    card.id = 'whatsNewPreviewCard';
+    home.appendChild(card);
+  }
+  card.innerHTML = '';
+  // Заголовок + кнопка
+  const header = document.createElement('div');
+  header.className = 'card-header-row';
+  const title = document.createElement('h3');
+  title.className = 'card-title';
+  title.textContent = 'Что нового?';
+  const moreBtn = document.createElement('button');
+  moreBtn.className = 'author-chip';
+  moreBtn.type = 'button';
+  moreBtn.textContent = 'Подробнее';
+  moreBtn.addEventListener('click', () => showScreen('whatsNew'));
+  header.appendChild(title);
+  header.appendChild(moreBtn);
+  // Подзаголовки: title, version, date
+  const subTitle = document.createElement('div');
+  subTitle.className = 'mastery-level-name';
+  subTitle.textContent = latest.title || '';
+  const subVersion = document.createElement('div');
+  subVersion.className = 'mastery-category-name';
+  subVersion.textContent = latest.version ? `v${latest.version}` : '';
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const [day, month, year] = dateString.split('-').map(Number);
+    const d = new Date(year, month - 1, day);
+    return d.toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+  const dateEl = document.createElement('div');
+  dateEl.className = 'version-date';
+  dateEl.textContent = formatDate(latest.date);
+  // Список изменений с эмодзи как в whatsNew.js
+  const CHANGE_ICONS = { new: '✨', improvement: '⚡', fix: '🐛' };
+  const list = document.createElement('ul');
+  list.className = 'changelog-list';
+  (latest.changes || []).forEach((ch) => {
+    if (!ch?.text || !ch.text.trim()) return;
+    const li = document.createElement('li');
+    li.className = 'changelog-item';
+    const icon = document.createElement('span');
+    icon.className = 'changelog-icon';
+    icon.textContent = CHANGE_ICONS[ch.type] || '•';
+    const text = document.createElement('span');
+    text.className = 'changelog-text';
+    text.textContent = ch.text;
+    li.appendChild(icon);
+    li.appendChild(text);
+    list.appendChild(li);
+  });
+  card.appendChild(header);
+  card.appendChild(subTitle);
+  card.appendChild(subVersion);
+  card.appendChild(dateEl);
+  card.appendChild(list);
+}
+
+// ===== Таймер до следующей пятницы 18:00 МСК =====
+function getNextFridayMsk() {
+  const now = new Date();
+  const nowUtc = new Date(now.getTime());
+  const day = nowUtc.getUTCDay(); // 0..6, 5=Fri
+  let daysToFri = (5 - day + 7) % 7;
+  // 18:00 MSK == 15:00 UTC
+  const target = new Date(Date.UTC(
+    nowUtc.getUTCFullYear(),
+    nowUtc.getUTCMonth(),
+    nowUtc.getUTCDate(),
+    15, 0, 0, 0
+  ));
+  if (daysToFri === 0 && target <= nowUtc) daysToFri = 7;
+  if (daysToFri > 0) target.setUTCDate(target.getUTCDate() + daysToFri);
+  return target;
+}
+
+function formatCountdown(ms) {
+  if (ms < 0) ms = 0;
+  const sec = Math.floor(ms / 1000);
+  const d = Math.floor(sec / 86400);
+  const hNum = Math.floor((sec % 86400) / 3600);
+  const mNum = Math.floor((sec % 3600) / 60);
+  // Склонение для "день"
+  const plural = (n, one, few, many) => {
+    const n10 = n % 10, n100 = n % 100;
+    if (n10 === 1 && n100 !== 11) return one;
+    if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return few;
+    return many;
+  };
+  const daysLabel = plural(d, 'день', 'дня', 'дней');
+  // Формат: если есть часы — показываем часы, иначе минуты
+  if (hNum > 0) {
+    return `${d} ${daysLabel} и ${hNum} ч.`;
+  }
+  return `${d} ${daysLabel} и ${mNum} мин.`;
+}
+
+function renderRotationCountdown() {
+  const home = document.getElementById('homeScreen');
+  if (!home) return;
+
+  // Если ранее создавали отдельную карточку — удалим
+  const oldCard = document.getElementById('rotationCountdownCard');
+  if (oldCard && oldCard.parentElement) {
+    oldCard.parentElement.removeChild(oldCard);
+  }
+
+  // Вставляем таймер в конец основной карточки главной
+  const mainCard = home.querySelector('section.card');
+  if (!mainCard) return;
+
+  let timer = document.getElementById('rotationCountdownTimer');
+  if (!timer) {
+    // Заголовок для таймера
+    const title = document.createElement('h3');
+    title.className = 'card-title rotation-countdown-title';
+    title.textContent = 'До обновления ротации:';
+
+    timer = document.createElement('div');
+    timer.id = 'rotationCountdownTimer';
+    timer.className = 'rotation-countdown-timer';
+    timer.setAttribute('aria-live', 'polite');
+
+    mainCard.appendChild(title);
+    mainCard.appendChild(timer);
+  } else if (timer.parentElement !== mainCard) {
+    // Если уже существует, но в другом месте — переместим
+    mainCard.appendChild(timer);
+  }
+
+  if (!timer) return;
+  const target = getNextFridayMsk();
+  const update = () => {
+    const ms = target.getTime() - Date.now();
+    timer.textContent = formatCountdown(ms);
+  };
+  if (rotationCountdownTimerId) clearInterval(rotationCountdownTimerId);
+  update();
+  rotationCountdownTimerId = setInterval(update, 1000);
+}
+
 /**
  * Инициализация главной страницы
  */
@@ -209,6 +371,16 @@ export async function initHome() {
 
     // Отображаем контент
     renderHomeContent(weekData);
+
+    // Рендерим таймер до обновления ротации
+    renderRotationCountdown();
+
+    // Рендерим превью «Что нового?»
+    const whats = await loadWhatsNew();
+    if (Array.isArray(whats) && whats.length) {
+      const latest = whats[whats.length - 1];
+      renderWhatsNewPreviewCard(latest);
+    }
 
     // Настраиваем обработчики кнопок
     setupRotationButtons();

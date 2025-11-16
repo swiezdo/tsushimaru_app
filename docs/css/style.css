@@ -410,6 +410,39 @@ a svg,
   align-items: center;
   z-index: 2;
 }
+
+/* Таймер ротации */
+.rotation-countdown-timer {
+  font-size: var(--fs-16);
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+
+/* Отступы заголовка таймера: сверху var(--space-3), снизу 0 */
+.rotation-countdown-title {
+  font-size: var(--fs-16);
+  margin-top: var(--space-3);
+  margin-bottom: 0;
+}
+
+/* Хедер карточек с правой кнопкой */
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Список изменений в превью «Что нового?» */
+.whatsnew-card-list {
+  margin-top: var(--space-2);
+  display: grid;
+  gap: var(--space-2);
+}
+.whatsnew-card-item {
+  color: var(--tg-tx);
+}
 .waves-mod-icon img {
   width: 100%;
   height: 100%;
