@@ -428,13 +428,18 @@ export async function submitFeedback(description, photos = []) {
             throw new Error('Не удалось получить данные авторизации Telegram');
         }
 
+        // Всегда используем FormData для совместимости с бэкендом
         const data = new FormData();
-        data.append('description', description);
+        data.append('description', description || '');
         
         // Добавляем изображения, если они есть
-        photos.forEach(photo => {
-            data.append('photos', photo);
-        });
+        if (photos && photos.length > 0) {
+            photos.forEach(photo => {
+                if (photo) {
+                    data.append('photos', photo);
+                }
+            });
+        }
 
         return (await requestJson('/api/feedback.submit', {
             method: 'POST',

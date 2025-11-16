@@ -304,6 +304,22 @@ function renderWhatsNewPreviewCard(latest) {
   card.appendChild(subVersion);
   card.appendChild(dateEl);
   card.appendChild(list);
+  
+  // Добавляем кнопку "Отправить отзыв" под карточкой
+  let feedbackBtnContainer = document.getElementById('homeFeedbackBtnContainer');
+  if (!feedbackBtnContainer) {
+    feedbackBtnContainer = document.createElement('div');
+    feedbackBtnContainer.className = 'actions-bar';
+    feedbackBtnContainer.id = 'homeFeedbackBtnContainer';
+    home.appendChild(feedbackBtnContainer);
+    
+    const feedbackBtn = document.createElement('button');
+    feedbackBtn.id = 'sendFeedbackBtn';
+    feedbackBtn.className = 'btn primary wide';
+    feedbackBtn.type = 'button';
+    feedbackBtn.textContent = 'Отправить отзыв';
+    feedbackBtnContainer.appendChild(feedbackBtn);
+  }
 }
 
 // ===== Таймер до следующей пятницы 18:00 МСК =====

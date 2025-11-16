@@ -11,7 +11,7 @@ const feedbackSubmitBtn = $('feedbackSubmitBtn');
 const feedbackTextEl = $('feedbackText');
 const previewEl = $('feedbackPreview');
 const feedbackAddBtn = $('feedbackAddBtn');
-const MAX_FEEDBACK_FILES = 10;
+const MAX_FEEDBACK_FILES = 18;
 
 let feedbackSelected = [];
 let feedbackPreviewCleanup = () => {};
