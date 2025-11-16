@@ -473,80 +473,95 @@ function renderMasteryDetail(category, currentLevel) {
     container.innerHTML = '';
     
     const maxLevels = category.maxLevels;
-    const progress = calculateProgress(currentLevel, maxLevels);
-    const styles = getButtonStyles(category, currentLevel);
     
-    // Обновляем топбар с названием категории и уровнем
-    setTopbar(true, `${category.name} — Ур. ${currentLevel} из ${maxLevels}`);
+    // Обновляем топбар только с названием категории
+    setTopbar(true, category.name);
     
-    // Заголовок с названием текущего уровня
-    const headerCard = document.createElement('section');
-    headerCard.className = 'card mastery-header-card';
+    // Иконка категории по центру (128x128)
+    const iconWrapper = document.createElement('div');
+    iconWrapper.className = 'mastery-detail-icon-wrapper';
     
-    // Применяем фоновое изображение
-    applyBackgroundStyles(headerCard, styles.backgroundImage);
-    if (styles.backgroundImage) {
-        headerCard.classList.add('mastery-header-card--with-bg');
-    }
+    const icon = document.createElement('img');
+    icon.className = 'mastery-detail-icon';
+    icon.src = `./assets/mastery/${category.key}/icon.svg`;
+    icon.alt = category.name;
+    icon.decoding = 'async';
+    icon.loading = 'lazy';
+    iconWrapper.appendChild(icon);
+    container.appendChild(iconWrapper);
     
-    // Определяем название для заголовка карточки
-    let headerTitleText;
-    if (currentLevel > 0) {
-        const levelData = getLevelByNumber(category, currentLevel);
-        headerTitleText = levelData ? levelData.name : category.name;
+    // Карточка с текстом про иконку/максимальный уровень
+    const infoCard = document.createElement('section');
+    infoCard.className = 'card';
+    const infoText = document.createElement('div');
+    infoText.className = 'mastery-detail-main-text';
+    if (currentLevel < maxLevels) {
+        infoText.textContent = `Чтобы получить иконку "Мастерства" ${category.name}, получите ${maxLevels}-й уровень!`;
     } else {
-        headerTitleText = category.name;
+        infoText.textContent = 'Вы достигли максимального уровня';
     }
+    infoCard.appendChild(infoText);
+    container.appendChild(infoCard);
     
-    // Левая часть - название
-    const titleContainer = document.createElement('h2');
-    titleContainer.className = 'card-title reward-detail-header mastery-level-name';
-    titleContainer.textContent = headerTitleText;
-    headerCard.appendChild(titleContainer);
+    // Текст с прогрессом по уровням (по размеру как топбар)
+    const summary = document.createElement('div');
+    summary.className = 'mastery-progress-summary';
+    summary.textContent = `Завершено ${currentLevel} из ${maxLevels}`;
+    container.appendChild(summary);
     
-    // Правая часть - круговой прогресс или иконка
-    const progressContainer = document.createElement('div');
-    progressContainer.className = 'mastery-progress-container';
+    // Карточки уровней: текущие + следующий (если не достигнут максимум)
+    const levelsToShow = currentLevel < maxLevels ? currentLevel + 1 : maxLevels;
     
-    const isMaxLevel = currentLevel === maxLevels && styles.showIcon;
-    
-    if (isMaxLevel) {
-        // Максимальный уровень - иконка
-        const icon = createMaxLevelIcon(category.key);
-        progressContainer.appendChild(icon);
-    } else {
-        // Круговой прогресс + цифра
-        const { container: svg, levelNumber } = createProgressCircle(category, currentLevel, progress);
-        progressContainer.appendChild(svg);
-        progressContainer.appendChild(levelNumber);
-    }
-    
-    headerCard.appendChild(progressContainer);
-    container.appendChild(headerCard);
-    
-    // Текущий уровень (если level > 0 и не максимальный)
-    if (currentLevel > 0 && currentLevel < maxLevels) {
-        const currentLevelData = getLevelByNumber(category, currentLevel);
-        if (currentLevelData) {
-            const currentCard = document.createElement('section');
-            currentCard.className = 'card current-level';
-            
-            const currentTitle = document.createElement('h3');
-            currentTitle.className = 'card-title';
-            currentTitle.innerHTML = `✅ ${currentLevelData.name}`;
-            currentCard.appendChild(currentTitle);
-            
-            const currentDesc = document.createElement('div');
-            currentDesc.className = 'mastery-description';
-            currentDesc.style.whiteSpace = 'pre-line';
-            appendTextWithLinks(currentDesc, currentLevelData.description);
-            currentCard.appendChild(currentDesc);
-            
-            container.appendChild(currentCard);
+    for (let levelNum = 1; levelNum <= levelsToShow; levelNum++) {
+        const levelData = getLevelByNumber(category, levelNum);
+        if (!levelData) continue;
+        
+        const styles = getButtonStyles(category, levelNum);
+        
+        const levelCard = document.createElement('section');
+        levelCard.className = 'card mastery-level-card';
+        
+        // Применяем фоновое изображение
+        if (styles.backgroundImage) {
+            applyBackgroundStyles(levelCard, styles.backgroundImage);
+            levelCard.classList.add('mastery-header-card--with-bg');
         }
+        
+        // Заголовок карточки с названием уровня и галочкой
+        const header = document.createElement('div');
+        header.className = 'mastery-level-card-header';
+        
+        const title = document.createElement('div');
+        title.className = 'mastery-level-name';
+        title.textContent = levelData.name;
+        header.appendChild(title);
+        
+        // Галочка или иконка категории, если уровень получен
+        const status = document.createElement('div');
+        status.className = 'mastery-level-check';
+        if (levelNum <= currentLevel) {
+            // Если это максимальный уровень и он достигнут - показываем иконку категории
+            if (levelNum === maxLevels && currentLevel === maxLevels) {
+                const categoryIcon = createMaxLevelIcon(category.key);
+                categoryIcon.style.width = '36px';
+                categoryIcon.style.height = '36px';
+                status.appendChild(categoryIcon);
+            } else {
+                // Иначе показываем галочку
+                const checkIcon = document.createElement('img');
+                checkIcon.src = './assets/icons/system/done.svg';
+                checkIcon.alt = 'Готово';
+                checkIcon.className = 'mastery-level-check-icon';
+                status.appendChild(checkIcon);
+            }
+        }
+        header.appendChild(status);
+        
+        levelCard.appendChild(header);
+        container.appendChild(levelCard);
     }
     
-    // Следующий уровень или максимальный
+    // Блок условий следующего уровня и карточка заявки (только если не максимальный уровень)
     if (currentLevel < maxLevels) {
         const nextLevelNum = currentLevel + 1;
         const nextLevelData = getLevelByNumber(category, nextLevelNum);
@@ -555,17 +570,14 @@ function renderMasteryDetail(category, currentLevel) {
             const nextCard = document.createElement('section');
             nextCard.className = 'card next-level';
             
-            const nextTitle = document.createElement('h3');
-            nextTitle.className = 'card-title';
-            nextTitle.innerHTML = `➡️ Следующий уровень: ${nextLevelData.name}`;
-            nextCard.appendChild(nextTitle);
-            
+            // Описание условий следующего уровня (без заголовка)
             const nextDesc = document.createElement('div');
             nextDesc.className = 'mastery-description';
             nextDesc.style.whiteSpace = 'pre-line';
             appendTextWithLinks(nextDesc, nextLevelData.description);
             nextCard.appendChild(nextDesc);
             
+            // Условия/доказательства
             const nextProof = document.createElement('div');
             nextProof.className = 'mastery-proof';
             nextProof.style.marginTop = 'var(--space-3)';
@@ -578,30 +590,8 @@ function renderMasteryDetail(category, currentLevel) {
             
             container.appendChild(nextCard);
         }
-    } else {
-        // Максимальный уровень достигнут
-        const maxCard = document.createElement('section');
-        maxCard.className = 'card max-level';
         
-        const maxTitle = document.createElement('h3');
-        maxTitle.className = 'card-title';
-        maxTitle.innerHTML = '🎉 Вы достигли максимального уровня!';
-        maxCard.appendChild(maxTitle);
-        
-        const maxLevelData = getLevelByNumber(category, maxLevels);
-        if (maxLevelData) {
-            const maxDesc = document.createElement('div');
-            maxDesc.className = 'mastery-description';
-            maxDesc.style.whiteSpace = 'pre-line';
-            appendTextWithLinks(maxDesc, maxLevelData.description);
-            maxCard.appendChild(maxDesc);
-        }
-        
-        container.appendChild(maxCard);
-    }
-    
-    // Карточка заявки на повышение уровня (только если не максимальный уровень)
-    if (currentLevel < maxLevels) {
+        // Карточка заявки на следующий уровень
         renderMasteryApplicationCard(container, category, currentLevel);
     }
 }

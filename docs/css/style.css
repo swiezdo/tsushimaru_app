@@ -1402,7 +1402,8 @@ html.tg .only-browser { display: none; }
 }
 
 .mastery-header-card.mastery-header-card--with-bg .reward-detail-header,
-.mastery-header-card.mastery-header-card--with-bg .mastery-level-name {
+.mastery-header-card.mastery-header-card--with-bg .mastery-level-name,
+.mastery-level-card.mastery-header-card--with-bg .mastery-level-name {
   color: #fff;
   text-shadow:
     0 0 2px rgba(0, 0, 0, 0.85),
@@ -1522,7 +1523,8 @@ html.tg .only-browser { display: none; }
 }
 
 /* Полупрозрачный overlay для фоновых изображений в header card */
-.mastery-header-card[style*="background-image"]::before {
+.mastery-header-card[style*="background-image"]::before,
+.mastery-level-card[style*="background-image"]::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -1533,7 +1535,8 @@ html.tg .only-browser { display: none; }
 }
 
 /* Контент должен быть поверх overlay */
-.mastery-header-card > * {
+.mastery-header-card > *,
+.mastery-level-card > * {
   position: relative;
   z-index: 2;
 }
@@ -1706,6 +1709,74 @@ html.tg .only-browser { display: none; }
   font-size: var(--fs-14);
   color: var(--tg-hint);
   line-height: var(--lh-normal);
+}
+
+/* ========== MASTERY DETAIL SCREEN ========== */
+/* Контейнер для иконки категории */
+.mastery-detail-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: var(--space-4) 0;
+}
+
+/* Иконка категории (128x128) */
+.mastery-detail-icon {
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+}
+
+/* Текст в карточке про иконку/максимальный уровень */
+.mastery-detail-main-text {
+  text-align: left;
+  line-height: 1.5;
+}
+
+/* Текст с прогрессом "Завершено X из Y" (по размеру как топбар) */
+.mastery-progress-summary {
+  font-size: var(--fs-20);
+  font-weight: 600;
+  text-align: center;
+  margin: var(--space-4) 0;
+}
+
+/* Карточка уровня */
+.mastery-level-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+/* Заголовок карточки уровня (название + галочка) */
+.mastery-level-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+/* Контейнер для галочки */
+.mastery-level-check {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+/* Иконка галочки */
+.mastery-level-check-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
 }
 
 /* ========== FILTERS ========== */
