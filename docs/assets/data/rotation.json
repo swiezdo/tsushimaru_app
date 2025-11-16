@@ -17,6 +17,7 @@
     "survival_mod2": "Глаза Иё",
     "survival_mod2_icon": "eyes-of-iyo-hazard.svg",
     "trials": "Глава 1 — Деревня",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "the-village.jpg",
     "trials_slug": "the-village"
   },
@@ -38,6 +39,7 @@
     "survival_mod2": "Хвачхи",
     "survival_mod2_icon": "fire-spirits-hazard.svg",
     "trials": "Глава 2 — Кровавый ритуал",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "blood-ritual.jpg",
     "trials_slug": "blood-ritual"
   },
@@ -59,6 +61,7 @@
     "survival_mod2": "Приспешницы Иё",
     "survival_mod2_icon": "disciples-of-iyo-hazard.svg",
     "trials": "Глава 1 — Высота",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "overlook.jpg",
     "trials_slug": "overlook"
   },
@@ -80,6 +83,7 @@
     "survival_mod2": "Глаза Иё",
     "survival_mod2_icon": "eyes-of-iyo-hazard.svg",
     "trials": "Глава 2 — Врата крепости",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "fortress-gates.jpg",
     "trials_slug": "fortress-gates"
   },
@@ -101,6 +105,7 @@
     "survival_mod2": "Приспешницы Иё",
     "survival_mod2_icon": "disciples-of-iyo-hazard.svg",
     "trials": "Глава 3 — Последняя битва",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "the-final-battle.jpg",
     "trials_slug": "the-final-battle"
   },
@@ -124,6 +129,7 @@
     "survival_mod2": "Глаза Иё",
     "survival_mod2_icon": "eyes-of-iyo-hazard.svg",
     "trials": "Глава 2 — Обелиск",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "the-obelisk.jpg",
     "trials_slug": "the-obelisk"
   },
@@ -147,6 +153,7 @@
     "survival_mod2": "Хвачхи",
     "survival_mod2_icon": "fire-spirits-hazard.svg",
     "trials": "Глава 2 — Крепость",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "fortress.jpg",
     "trials_slug": "fortress"
   },
@@ -170,6 +177,7 @@
     "survival_mod2": "Приспешницы Иё",
     "survival_mod2_icon": "disciples-of-iyo-hazard.svg",
     "trials": "Глава 1 — Холм Богов",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "kami-ridge.jpg",
     "trials_slug": "kami-ridge"
   },
@@ -193,6 +201,7 @@
     "survival_mod2": "Глаза Иё",
     "survival_mod2_icon": "eyes-of-iyo-hazard.svg",
     "trials": "Глава 1 — Деревня",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "the-village.jpg",
     "trials_slug": "the-village"
   },
@@ -216,6 +225,7 @@
     "survival_mod2": "Хвачхи",
     "survival_mod2_icon": "fire-spirits-hazard.svg",
     "trials": "Глава 2 — Обелиск",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "the-obelisk.jpg",
     "trials_slug": "the-obelisk"
   },
@@ -239,6 +249,7 @@
     "survival_mod2": "Глаза Иё",
     "survival_mod2_icon": "eyes-of-iyo-hazard.svg",
     "trials": "Глава 3 — Последняя битва",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "the-final-battle.jpg",
     "trials_slug": "the-final-battle"
   },
@@ -262,6 +273,7 @@
     "survival_mod2": "Приспешницы Иё",
     "survival_mod2_icon": "disciples-of-iyo-hazard.svg",
     "trials": "Глава 1 — Высота",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "overlook.jpg",
     "trials_slug": "overlook"
   },
@@ -285,6 +297,7 @@
     "survival_mod2": "Хвачхи",
     "survival_mod2_icon": "fire-spirits-hazard.svg",
     "trials": "Глава 2 — Кровавый ритуал",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "blood-ritual.jpg",
     "trials_slug": "blood-ritual"
   },
@@ -308,6 +321,7 @@
     "survival_mod2": "Глаза Иё",
     "survival_mod2_icon": "eyes-of-iyo-hazard.svg",
     "trials": "Глава 2 — Крепость",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "fortress.jpg",
     "trials_slug": "fortress"
   },
@@ -331,6 +345,7 @@
     "survival_mod2": "Хвачхи",
     "survival_mod2_icon": "fire-spirits-hazard.svg",
     "trials": "Глава 1 — Холм Богов",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "kami-ridge.jpg",
     "trials_slug": "kami-ridge"
   },
@@ -354,6 +369,7 @@
     "survival_mod2": "Приспешницы Иё",
     "survival_mod2_icon": "disciples-of-iyo-hazard.svg",
     "trials": "Глава 2 — Врата крепости",
+    "trials_mod_icon": "aggresive-foes.svg",
     "trials_img": "fortress-gates.jpg",
     "trials_slug": "fortress-gates"
   }

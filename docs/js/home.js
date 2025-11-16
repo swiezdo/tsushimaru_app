@@ -15,7 +15,8 @@ let rotationData = null;
  */
 export async function loadRotationData() {
   try {
-    const response = await fetch('./assets/data/rotation.json');
+    const cacheBust = Date.now();
+    const response = await fetch(`./assets/data/rotation.json?v=${cacheBust}`, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -137,12 +138,49 @@ export function renderHomeContent(weekData) {
     trialsMap.textContent = weekData.trials || '—';
   }
 
+  // Иконка модификатора для испытаний Иё
+  if (trialsBtn) {
+    let trialsModIcons = document.getElementById('rotationTrialsModIcons');
+    if (!trialsModIcons) {
+      trialsModIcons = document.createElement('div');
+      trialsModIcons.id = 'rotationTrialsModIcons';
+      trialsModIcons.className = 'rotation-mod-icons';
+      trialsBtn.appendChild(trialsModIcons);
+    }
+    trialsModIcons.innerHTML = '';
+    if (weekData.trials_mod_icon) {
+      const modIconWrapper = document.createElement('div');
+      modIconWrapper.className = 'waves-mod-icon';
+      const modIconImg = document.createElement('img');
+      modIconImg.src = `./assets/icons/mods/${weekData.trials_mod_icon}`;
+      modIconImg.alt = weekData.trials_mod || '';
+      modIconWrapper.appendChild(modIconImg);
+      trialsModIcons.appendChild(modIconWrapper);
+    }
+  }
+
   // TODO: Подготовка для фоновых изображений карт
   // В будущем здесь будет подстановка фоновых изображений:
   // - story: ./assets/maps/story/{story_map}.jpg
   // - survival: ./assets/maps/survival/{survival_map}.jpg
   // - rivals: ./assets/maps/rivals/{rivals_map}.jpg
   // - trials: ./assets/maps/trials/{trials_map}.jpg
+
+  // Подстановка фоновых изображений на кнопки режимов
+  const storyImgName = weekData.story_img || (weekData.story_slug ? `${weekData.story_slug}.jpg` : '');
+  const survivalImgName = weekData.survival_img || (weekData.survival_slug ? `${weekData.survival_slug}.jpg` : '');
+  const rivalsImgName = weekData.rivals_img || (weekData.rivals_slug ? `${weekData.rivals_slug}.jpg` : '');
+  const trialsImgName = weekData.trials_img || (weekData.trials_slug ? `${weekData.trials_slug}.jpg` : '');
+
+  const storyImgUrl = storyImgName ? `./assets/maps/story/${storyImgName}` : '';
+  const survivalImgUrl = survivalImgName ? `./assets/maps/survival/${survivalImgName}` : '';
+  const rivalsImgUrl = rivalsImgName ? `./assets/maps/rivals/${rivalsImgName}` : '';
+  const trialsImgUrl = trialsImgName ? `./assets/maps/trials/${trialsImgName}` : '';
+
+  applyButtonBackground(storyBtn, storyImgUrl);
+  applyButtonBackground(survivalBtn, survivalImgUrl);
+  applyButtonBackground(rivalsBtn, rivalsImgUrl);
+  applyButtonBackground(trialsBtn, trialsImgUrl);
 }
 
 /**
@@ -250,3 +288,25 @@ function setupRotationButtons() {
   // (установлен атрибут disabled в HTML)
 }
 
+
+/**
+ * Утилита для установки/снятия фонового изображения на кнопках
+ * и применения существующих классов оформления фона.
+ * Ожидается, что стили для фоновых кнопок уже существуют (например, 'has-bg').
+ */
+function applyButtonBackground(el, url) {
+  if (!el) return;
+  if (url) {
+    el.style.backgroundImage = `url('${url}')`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.style.backgroundRepeat = 'no-repeat';
+    el.classList.add('badge-btn--with-bg');
+  } else {
+    el.style.backgroundImage = '';
+    el.style.backgroundSize = '';
+    el.style.backgroundPosition = '';
+    el.style.backgroundRepeat = '';
+    el.classList.remove('badge-btn--with-bg');
+  }
+}
