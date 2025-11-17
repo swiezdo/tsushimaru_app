@@ -261,6 +261,11 @@ function renderWhatsNewPreviewCard(latest) {
   const title = document.createElement('h3');
   title.className = 'card-title';
   title.textContent = 'Что нового?';
+  const icon = document.createElement('img');
+  icon.src = './assets/icons/system/whatsnew.webp';
+  icon.alt = '';
+  icon.className = 'card-title-icon';
+  title.appendChild(icon);
   const moreBtn = document.createElement('button');
   moreBtn.className = 'author-chip';
   moreBtn.type = 'button';
@@ -392,6 +397,11 @@ function renderRecentEventsCard(events) {
   const title = document.createElement('h3');
   title.className = 'card-title';
   title.textContent = 'Последние награды';
+  const icon = document.createElement('img');
+  icon.src = './assets/icons/system/reward.webp';
+  icon.alt = '';
+  icon.className = 'card-title-icon';
+  title.appendChild(icon);
   header.appendChild(title);
   card.appendChild(header);
 
@@ -490,6 +500,11 @@ function renderRecentCommentsCard(comments) {
   const title = document.createElement('h3');
   title.className = 'card-title';
   title.textContent = 'Лента комментариев';
+  const icon = document.createElement('img');
+  icon.src = './assets/icons/system/comments.webp';
+  icon.alt = '';
+  icon.className = 'card-title-icon';
+  title.appendChild(icon);
   header.appendChild(title);
   card.appendChild(header);
 

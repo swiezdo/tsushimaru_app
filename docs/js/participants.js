@@ -152,6 +152,19 @@ export async function initParticipants() {
     // Загружаем данные
     await loadParticipants();
     
+    // Добавляем иконку в заголовок "Поиск"
+    const searchCard = document.querySelector('#participantsScreen .card:first-child');
+    if (searchCard) {
+        const searchTitle = searchCard.querySelector('.card-title');
+        if (searchTitle && !searchTitle.querySelector('.card-title-icon')) {
+            const icon = document.createElement('img');
+            icon.src = './assets/icons/system/search.webp';
+            icon.alt = '';
+            icon.className = 'card-title-icon';
+            searchTitle.appendChild(icon);
+        }
+    }
+    
     // Рендерим интерфейс
     renderParticipants();
     
