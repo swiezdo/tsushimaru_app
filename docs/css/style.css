@@ -254,7 +254,6 @@ main.container {
 .field label { font-size: var(--fs-12); color: var(--tg-hint); margin-bottom: var(--space-1); display: block; }
 .value { font-size: var(--fs-15); word-break: break-word; }
 .value.lines { white-space: pre-line; }
-.span-2 { grid-column: 1 / -1; }
 
 /* ========== FORMS ========== */
 .form { display: grid; }
@@ -390,30 +389,6 @@ main.container {
 .btn.danger { background: var(--color-error); border-color: transparent; color: var(--color-accent-contrast); font-weight: 700; }
 
 /* ========== КНОПКИ С ФОНОВЫМИ ИЗОБРАЖЕНИЯМИ ========== */
-/* Базовые стили для кнопок с фоновыми изображениями */
-.btn--with-bg-image {
-  background: none !important;
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  border-color: transparent !important;
-  position: relative;
-  z-index: 1;
-  color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
-  font-weight: 700;
-}
-
-.btn--with-bg-image::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: inherit;
-  z-index: 0;
-  pointer-events: none;
-}
-
 /* Синие кнопки (blue.png) - по ID */
 #sendFeedbackBtn,
 #profileEditBtn,
@@ -623,10 +598,8 @@ button.btn[data-bg-image="red"]::before {
   z-index: 0;
   pointer-events: none;
 }
-.btn.ghost { opacity: var(--opacity-hover); }
 .btn.wide { width: 100%; }
 .btn:active { transform: translateY(1px); }
-.only-browser { display: block; }
 
 /* ========== HOME ========== */
 #telegramGroupBtn {
@@ -634,7 +607,6 @@ button.btn[data-bg-image="red"]::before {
   text-decoration: none;
   display: inline-block;
 }
-.brand { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); }
 /* Защита всех изображений и SVG от контекстного меню и перетаскивания */
 img, svg {
   pointer-events: none;
@@ -676,7 +648,6 @@ a svg,
   height: var(--size-avatar); 
   object-fit: contain; 
 }
-.brand-title { font-size: var(--fs-22); font-weight: 700; letter-spacing: .3px; }
 
 /* ========== WAVES ========== */
 .waves-meta-card {
@@ -741,16 +712,6 @@ a svg,
   justify-content: space-between;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
-}
-
-/* Список изменений в превью «Что нового?» */
-.whatsnew-card-list {
-  margin-top: var(--space-2);
-  display: grid;
-  gap: var(--space-2);
-}
-.whatsnew-card-item {
-  color: var(--tg-tx);
 }
 
 /* Хиро-блок главной */
@@ -1106,16 +1067,6 @@ a svg,
   align-items: flex-end;
 }
 
-.story-hero-content {
-  position: relative;
-  z-index: 1;
-}
-
-.story-hero-title {
-  margin: 0;
-  text-shadow: var(--shadow-text);
-}
-
 .story-hero-mod-main {
   position: absolute;
   top: var(--space-3);
@@ -1349,11 +1300,6 @@ a svg,
   font-size: var(--fs-14);
   line-height: var(--lh-base);
 }
-
-/* ========== FOOTER ACTIONS ========== */
-.footer-actions { margin: var(--space-2) 0 calc(var(--space-8) + var(--safe-bottom)); }
-#backToListBtn, #homeBtn, #buildsHomeBtn, #backToBuildsBtn { margin-bottom: calc(var(--space-8) + var(--safe-bottom)); }
-#submitInlineBtn { margin-bottom: var(--space-2); }
 
 /* ========== WHAT'S NEW ========== */
 .version-date {
@@ -1604,10 +1550,6 @@ a svg,
   opacity: 0.85;
 }
 
-/* ========== PROOF FORM ========== */
-#proofForm { gap: var(--space-2); }
-#filePreview:empty { display: none; margin-top: 0; }
-
 /* ========== ERROR & ANIMATIONS ========== */
 .error { border-color: var(--color-error); }
 .error-text { color: var(--color-error); font-size: var(--fs-12); margin-top: var(--space-1); }
@@ -1767,8 +1709,6 @@ button, .btn, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
 
-html.tg .only-browser { display: none; }
-
 /* ========== CLASS TABS ========== */
 .class-tabs-container {
   display: flex;
@@ -1864,72 +1804,7 @@ html.tg .only-browser { display: none; }
   transform: none;
 }
 
-.badge-title {
-  font-size: var(--fs-16);
-  font-weight: 600;
-  line-height: var(--lh-normal);
-  word-break: break-word;
-  /* мягкая тень вместо обводки для лучшей читаемости */
-  text-shadow: var(--shadow-text), 0 0 2px rgba(255, 255, 255, 0.12);
-}
-.badge-progress-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: var(--space-2);
-}
-.badge-level {
-  font-size: var(--fs-14);
-  color: var(--tg-tx);
-  white-space: nowrap;
-  /* чёрная светящаяся тень для читабельности */
-  text-shadow: 0 1px 2px var(--overlay-dark), 0 0 6px rgba(0, 0, 0, 0.45), 0 0 1px rgba(0, 0, 0, 0.55);
-}
-.badge-progress {
-  position: relative;
-  height: 7px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--elem-bg);
-  overflow: hidden;
-  /* базовое мягкое свечение потоньше */
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.10) inset;
-}
-.badge-progress-fill {
-  position: absolute;
-  top: 0;
-  left: 0; /* заполняем слева направо */
-  height: 100%;
-  width: var(--progress, 0%);
-  /* единый градиент: белый → кроваво-красный */
-  background: linear-gradient(90deg, #ffffff 0%, #8b0000 100%);
-}
-
-/* Базовые стили для всех категорий мастерства */
-.badge-btn.has-glow {
-  border-color: rgba(255, 68, 68, 0.6);
-  box-shadow:
-    0 0 0 1px rgba(255, 68, 68, 0.5),
-    0 0 8px rgba(255, 68, 68, 0.28);
-}
-
-.badge-btn.has-glow .badge-progress {
-  border-color: rgba(255, 68, 68, 0.75);
-  box-shadow:
-    0 0 0 1px rgba(255, 68, 68, 0.5),
-    0 0 8px rgba(255, 68, 68, 0.28);
-}
-
-.badge-btn .badge-level { 
-  color: var(--tg-tx); 
-}
-
-.badge-btn .badge-progress-fill { 
-  background: linear-gradient(90deg, #ffffff 0%, #8b0000 100%); 
-}
-.badge-btn.badge-btn--with-bg .badge-title,
-.badge-btn.badge-btn--with-bg .mastery-level-name,
-.badge-btn.badge-btn--with-bg .badge-level {
+.badge-btn.badge-btn--with-bg .mastery-level-name {
   color: #fff;
   text-shadow:
     0 0 2px rgba(0, 0, 0, 0.85),
@@ -1973,16 +1848,6 @@ html.tg .only-browser { display: none; }
 
 .mastery-header-card.mastery-header-card--with-bg .mastery-progress-container .mastery-level-number {
   color: #fff;
-}
-.theme-light .badge-btn:not(.badge-btn--with-bg) .badge-progress {
-  background: rgba(0, 0, 0, 0.12);
-  border-color: rgba(0, 0, 0, 0.2);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.08) inset,
-    0 0 4px rgba(0, 0, 0, 0.05) inset;
-}
-.theme-light .badge-btn:not(.badge-btn--with-bg) .badge-progress-fill {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.65) 0%, #8b0000 100%);
 }
 .theme-light .mastery-progress-svg [data-role="progress-bg"] {
   stroke: rgba(0, 0, 0, 0.16);
@@ -2163,46 +2028,6 @@ html.tg .only-browser { display: none; }
   padding: var(--space-2) var(--space-4);
 }
 
-.trophy-header-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  position: relative;
-  overflow: hidden;
-}
-
-.trophy-header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: var(--space-3);
-}
-
-.trophy-detail-header {
-  gap: 0 !important;
-  margin-bottom: 0 !important;
-  font-size: var(--fs-16) !important;
-  font-weight: 600 !important;
-  line-height: var(--lh-normal) !important;
-  flex: 1;
-}
-
-.trophy-detail-icon-container {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.trophy-icon-large {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  pointer-events: none;
-}
-
 .trophy-description {
   font-size: var(--fs-15);
   line-height: var(--lh-normal);
@@ -2223,32 +2048,11 @@ html.tg .only-browser { display: none; }
   border-top: 1px solid var(--color-border);
 }
 
-.trophy-obtained-message {
-  font-size: var(--fs-16);
-  color: var(--tg-tx);
-  text-align: center;
-  padding: var(--space-3);
-}
-
 /* ========== MASTERY DETAIL SCREEN ========== */
 #masteryDetailContainer .card {
   padding: var(--space-2) var(--space-4);
 }
 
-#masteryDetailContainer .reward-detail-header {
-  gap: 0 !important;
-  font-size: var(--fs-16) !important;
-  font-weight: 600 !important;
-  line-height: var(--lh-normal) !important;
-}
-
-#masteryDetailContainer .reward-detail-header[style*="inline-flex"] {
-  gap: 0 !important;
-}
-
-#masteryDetailContainer .reward-detail-header > span {
-  margin-right: 8px;
-}
 .card.current-level {
   border-left: 4px solid var(--color-success);
 }
@@ -2362,31 +2166,6 @@ html.tg .only-browser { display: none; }
   height: 36px;
   object-fit: contain;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
-}
-
-/* ========== FILTERS ========== */
-.filters-container {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
-  flex-wrap: wrap;
-}
-
-.reset-filters-btn {
-  padding: var(--space-2) var(--space-3);
-  border-radius: 999px;
-  border: 1px solid rgba(255, 68, 68, 0.5);
-  background: rgba(255, 68, 68, 0.15);
-  color: rgba(255, 68, 68, 0.9);
-  cursor: pointer;
-  font-size: var(--fs-14);
-  min-height: 36px;
-  transition: all var(--transition-base);
-}
-
-.reset-filters-btn.hidden {
-  display: none;
 }
 
 /* ========== FILTER MODAL ========== */
@@ -2620,24 +2399,6 @@ html.tg .only-browser { display: none; }
   .input textarea::placeholder {
     opacity: var(--opacity-secondary);
   }
-}
-
-/* Build ID chip */
-.build-id-chip {
-  position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
-  background: var(--tg-theme-button-color, rgba(0, 122, 255, 0.15));
-  color: var(--tg-theme-button-text-color, var(--color-info));
-  padding: var(--space-1) 10px;
-  border-radius: var(--radius-md);
-  font-size: var(--fs-12);
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 10;
 }
 
 /* Build edit button */
