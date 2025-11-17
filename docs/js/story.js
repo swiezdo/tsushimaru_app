@@ -6,9 +6,6 @@ import { setTopbar } from './ui.js';
 import { openLightbox } from './builds.js';
 import { hapticTapSmart } from './telegram.js';
 
-// Версия для SVG модификаторов сюжета (борьба с кэшем)
-const STORY_MOD_ICON_VERSION = 'v1';
-
 let storyDataCache = null;
 
 async function loadStoryConfig() {
@@ -84,7 +81,7 @@ function renderHeroCard(root, weekData) {
     chaptersContainer.className = 'story-hero-mod-chapters';
 
     chapters.forEach((chapter) => {
-      const path = `./assets/icons/story_mods/${chapter.slug}.svg?${STORY_MOD_ICON_VERSION}`;
+      const path = `./assets/icons/story_mods/${chapter.slug}.svg?t=${Date.now()}`;
       const icon = createModIcon(path, chapter.title || '');
       chaptersContainer.appendChild(icon);
     });
@@ -151,7 +148,7 @@ function renderModifiersCard(root, weekData) {
     row.className = 'story-mod-row';
 
     const img = document.createElement('img');
-    img.src = `./assets/icons/story_mods/${chapter.slug}.svg?${STORY_MOD_ICON_VERSION}`;
+    img.src = `./assets/icons/story_mods/${chapter.slug}.svg?t=${Date.now()}`;
     img.alt = chapter.title || '';
     img.decoding = 'async';
     img.loading = 'lazy';
