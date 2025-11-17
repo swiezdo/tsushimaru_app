@@ -68,6 +68,12 @@
   --overlay-medium: rgba(0, 0, 0, 0.4);
   --overlay-light: rgba(0, 0, 0, 0.25);
   --shadow-text: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.5);
+  --shadow-text-default: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  --bg-overlay-light: rgba(0, 0, 0, 0.15);
+  
+  /* Common Values */
+  --border-default: 1px solid var(--color-border);
+  --color-transparent: transparent;
   
   /* UI Element Sizes */
   --size-touch: 44px;
@@ -83,7 +89,10 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
+
+html, body {
+  height: 100%;
+}
 
 body {
   font: var(--fs-16) / var(--lh-base) system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu;
@@ -113,8 +122,19 @@ main.container {
   height: 100dvh;
 }
 
-.hidden { display: none; }
-.hidden-input { display: none; }
+.hidden,
+.hidden-input,
+.waves-empty.hidden,
+.waves-meta-list--empty,
+.thumbs-row:empty {
+  display: none;
+}
+
+.topbar-action.hidden,
+.lightbox.hidden,
+.filter-modal.hidden {
+  display: none !important;
+}
 .mt-sm { margin-top: var(--space-2); }
 
 /* ========== TOPBAR ========== */
@@ -160,9 +180,6 @@ main.container {
   outline-offset: 2px;
 }
 
-.topbar-action.hidden {
-  display: none !important;
-}
 
 /* ========== CARD ========== */
 .card {
@@ -292,7 +309,6 @@ main.container {
   grid-column: 1 / -1;
 }
 /* Кнопка отправки заявки мастерства должна быть полной ширины */
-#masteryApplicationSubmitBtn,
 #masteryApplicationCard .actions-bar .btn {
   width: 100%;
 }
@@ -384,6 +400,11 @@ main.container {
   cursor: pointer;
   min-height: var(--size-touch);
   font-size: var(--fs-16);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .btn.primary { background: var(--accent); border-color: transparent; color: var(--color-accent-contrast); font-weight: 700; }
 .btn.danger { background: var(--color-error); border-color: transparent; color: var(--color-accent-contrast); font-weight: 700; }
@@ -399,11 +420,11 @@ main.container {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  border-color: transparent !important;
+  border-color: var(--color-transparent) !important;
   position: relative;
   z-index: 1;
   color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-text-default);
 }
 
 #sendFeedbackBtn::before,
@@ -413,7 +434,7 @@ main.container {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-overlay-light);
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
@@ -426,18 +447,18 @@ main.container {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  border-color: transparent !important;
+  border-color: var(--color-transparent) !important;
   position: relative;
   z-index: 1;
   color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-text-default);
 }
 
 #publishBuildBtn:not(.btn--red):not(.danger)::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-overlay-light);
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
@@ -453,11 +474,11 @@ main.container {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  border-color: transparent !important;
+  border-color: var(--color-transparent) !important;
   position: relative;
   z-index: 1;
   color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-text-default);
 }
 
 #feedbackSubmitBtn::before,
@@ -467,7 +488,7 @@ main.container {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-overlay-light);
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
@@ -480,18 +501,18 @@ main.container {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  border-color: transparent !important;
+  border-color: var(--color-transparent) !important;
   position: relative;
   z-index: 1;
   color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-text-default);
 }
 
 #deleteBuildBtn::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-overlay-light);
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
@@ -505,11 +526,11 @@ main.container {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  border-color: transparent !important;
+  border-color: var(--color-transparent) !important;
   position: relative;
   z-index: 1;
   color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-text-default);
 }
 
 #publishBuildBtn.btn--red::before,
@@ -517,7 +538,7 @@ main.container {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-overlay-light);
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
@@ -533,11 +554,11 @@ button.btn[data-bg-image="green"],
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  border-color: transparent !important;
+  border-color: var(--color-transparent) !important;
   position: relative;
   z-index: 1;
   color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-text-default);
 }
 
 button.btn.primary[type="submit"]::before,
@@ -547,7 +568,7 @@ button.btn[data-bg-image="green"]::before,
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-overlay-light);
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
@@ -559,18 +580,18 @@ button.btn[data-bg-image="blue"] {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  border-color: transparent !important;
+  border-color: var(--color-transparent) !important;
   position: relative;
   z-index: 1;
   color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-text-default);
 }
 
 button.btn[data-bg-image="blue"]::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-overlay-light);
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
@@ -582,18 +603,18 @@ button.btn[data-bg-image="red"] {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  border-color: transparent !important;
+  border-color: var(--color-transparent) !important;
   position: relative;
   z-index: 1;
   color: #fff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 8px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--shadow-text-default);
 }
 
 button.btn[data-bg-image="red"]::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-overlay-light);
   border-radius: inherit;
   z-index: 0;
   pointer-events: none;
@@ -640,6 +661,24 @@ a svg,
   -webkit-user-select: auto;
   -moz-user-select: auto;
   -ms-user-select: auto;
+}
+
+.story-scroll-images img {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s ease-out;
+  transform-origin: center center;
+  touch-action: pan-x pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 /* Логотип на главной странице */
@@ -786,7 +825,8 @@ a svg,
 }
 
 /* Карточка последних наград */
-.recent-events-list {
+.recent-events-list,
+.recent-comments-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -801,7 +841,8 @@ a svg,
   align-items: center;
 }
 
-.recent-event-avatar {
+.recent-event-avatar,
+.recent-comment-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -815,11 +856,15 @@ a svg,
   text-transform: uppercase;
   overflow: hidden;
   flex-shrink: 0;
+}
+
+.recent-event-avatar {
   border: none;
   padding: 0;
 }
 
-.recent-event-avatar img {
+.recent-event-avatar img,
+.recent-comment-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -873,22 +918,6 @@ a svg,
   display: flex;
   gap: var(--space-3);
   align-items: flex-start;
-}
-
-.recent-comment-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--elem-bg);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: var(--fg);
-  text-transform: uppercase;
-  overflow: hidden;
-  flex-shrink: 0;
 }
 
 .recent-comment-avatar img {
@@ -1121,15 +1150,6 @@ a svg,
 
 .story-scroll-images img {
   width: 50%;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  object-fit: cover;
-  pointer-events: auto;
-  -webkit-user-drag: auto;
-  user-select: auto;
-  -webkit-user-select: auto;
-  -moz-user-select: auto;
-  -ms-user-select: auto;
 }
 
 .story-scroll-description {
@@ -1138,11 +1158,6 @@ a svg,
   color: var(--tg-tx);
 }
 
-@media (max-width: 640px) {
-  .story-scroll-images {
-    flex-direction: row;
-  }
-}
 .card.waves-table {
   padding: 0;
   margin: var(--space-4);
@@ -1172,6 +1187,7 @@ a svg,
 }
 .waves-table td {
   vertical-align: middle;
+  font-size: var(--fs-14);
 }
 .waves-table th {
   font-weight: 600;
@@ -1265,9 +1281,6 @@ a svg,
   margin-bottom: var(--card-spacing, var(--space-4));
   text-align: center;
 }
-.waves-empty.hidden {
-  display: none;
-}
 .waves-meta-extra {
   display: flex;
   flex-direction: column;
@@ -1281,9 +1294,6 @@ a svg,
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-}
-.waves-meta-list--empty {
-  display: none;
 }
 .waves-meta-item {
   display: flex;
@@ -1335,7 +1345,11 @@ a svg,
 }
 
 /* ========== LIST ========== */
-.grid-list { display: grid; gap: var(--space-2); }
+.grid-list,
+.list-buttons {
+  display: grid;
+  gap: var(--space-2);
+}
 .list-btn {
   display: flex;
   align-items: center;
@@ -1477,7 +1491,6 @@ a svg,
   flex-wrap: nowrap;
   overflow: visible;
 }
-.thumbs-row:empty { display: none; }
 .thumbs-row .preview-item,
 .thumbs-row .preview-more {
   width: var(--size-thumb-sm);
@@ -1579,6 +1592,7 @@ a svg,
   height: 70%; 
   object-fit: contain; 
   opacity: .95;
+  pointer-events: auto;
 }
 .theme-light .build-icon img {
   filter: brightness(0) saturate(100%);
@@ -1630,6 +1644,7 @@ a svg,
   height: 14px;
   flex-shrink: 0;
   opacity: 0.8;
+  pointer-events: auto;
 }
 
 .build-stat-count {
@@ -1647,7 +1662,12 @@ a svg,
   overflow: hidden; background: var(--elem-bg);
   display: flex; align-items: center; justify-content: center;
 }
-.shot-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.shot-thumb img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+  pointer-events: auto;
+}
 
 /* ========== LIGHTBOX ========== */
 .lightbox {
@@ -1665,16 +1685,9 @@ a svg,
 .lightbox img {
   max-width: 92vw;
   max-height: 88vh;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  transition: transform 0.2s ease-out;
   user-select: none;
   -webkit-user-drag: none;
-  transform-origin: center center;
-  pointer-events: auto;
-  touch-action: pan-x pan-y pinch-zoom;
 }
-.lightbox.hidden { display: none !important; }
 
 /* ========== BUILD DETAIL SCREENS ========== */
 #buildDetailScreen .profile-grid,
@@ -1696,6 +1709,9 @@ a svg,
   .shots-grid { grid-template-columns: 1fr; }
   .shots-two { grid-template-columns: repeat(2, auto); gap: var(--space-2); }
   .actions-bar { grid-template-columns: 1fr; gap: var(--space-2); }
+  .story-scroll-images {
+    flex-direction: row;
+  }
 }
 @media (max-width: 360px) {
   .thumbs-row { gap: var(--space-1); }
@@ -1704,7 +1720,7 @@ a svg,
 }
 
 /* ========== TOUCH ========== */
-button, .btn, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
+button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   -webkit-user-select: none; -moz-user-select: none; user-select: none;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
@@ -1921,6 +1937,7 @@ button, .btn, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   background-size: contain;
   filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 10px rgba(212, 175, 55, 0.35));
   opacity: 0.95;
+  pointer-events: auto;
 }
 
 /* Цифра уровня в центре прогресса */
@@ -1973,11 +1990,6 @@ button, .btn, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
 }
 
 /* ========== MASTERY SCREEN ========== */
-.list-buttons {
-  display: grid;
-  gap: var(--space-2);
-}
-
 .list-buttons#masteryButtonsContainer {
   gap: var(--space-2);
 }
@@ -2438,25 +2450,30 @@ button, .btn, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
 }
 
 /* Avatar upload button */
-.avatar-upload-btn {
+.avatar-upload-btn,
+.avatar-display {
   position: absolute;
   top: 12px;
   right: 12px;
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  border: 2px dashed var(--color-border);
   background: var(--elem-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   overflow: hidden;
   z-index: 10;
+}
+
+.avatar-upload-btn {
+  border: 2px dashed var(--color-border);
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.avatar-preview {
+.avatar-preview,
+.avatar-display img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -2475,25 +2492,7 @@ button, .btn, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
 
 /* Avatar display (read-only, for participant profile) */
 .avatar-display {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
   border: 1px solid var(--color-border);
-  background: var(--elem-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  z-index: 10;
-}
-
-.avatar-display img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 /* ========== BOTTOM NAVIGATION ========== */
