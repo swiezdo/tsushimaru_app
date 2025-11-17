@@ -490,13 +490,31 @@ function renderMasteryDetail(category, currentLevel) {
     iconWrapper.appendChild(icon);
     container.appendChild(iconWrapper);
     
+    // Функция для склонения слова "уровень"
+    const getLevelWord = (num) => {
+        const lastDigit = num % 10;
+        const lastTwoDigits = num % 100;
+        
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+            return 'уровней';
+        }
+        if (lastDigit === 1) {
+            return 'уровень';
+        }
+        if (lastDigit >= 2 && lastDigit <= 4) {
+            return 'уровня';
+        }
+        return 'уровней';
+    };
+    
     // Карточка с текстом про иконку/максимальный уровень
     const infoCard = document.createElement('section');
     infoCard.className = 'card';
     const infoText = document.createElement('div');
     infoText.className = 'mastery-detail-main-text';
     if (currentLevel < maxLevels) {
-        infoText.textContent = `Чтобы получить значок мастерства "${category.name}", получите ${maxLevels}-й уровень!`;
+        const levelWord = getLevelWord(maxLevels);
+        infoText.textContent = `Чтобы получить значок мастерства "${category.name}", завершите ${maxLevels} ${levelWord}!`;
     } else {
         infoText.textContent = 'Вы достигли максимального уровня';
     }
