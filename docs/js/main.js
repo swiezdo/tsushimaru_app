@@ -155,6 +155,8 @@ function installBackButton() {
         // По умолчанию возвращаемся на страницу участников
         nextScreen = 'participants';
       }
+    } else if ((currentScreen === 'story' || currentScreen === 'waves') && previousScreen?.startsWith('rotation:')) {
+      nextScreen = 'rotation';
     } else {
       // Для остальных экранов используем BACK_ROUTES
       nextScreen = BACK_ROUTES[currentScreen] || 'home';
@@ -303,6 +305,7 @@ function bindBottomNav() {
     const screenName = btn.dataset.screen;
     btn.addEventListener('click', () => {
       hapticTapSmart();
+      sessionStorage.removeItem('previousScreen');
       
       // Запускаем анимацию для всех кнопок с анимированными иконками
       const animatedImg = btn.querySelector('img[data-static="true"]');

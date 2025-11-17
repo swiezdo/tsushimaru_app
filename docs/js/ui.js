@@ -9,11 +9,12 @@ import { renderTrophiesButtons } from './trophies_list.js';
 import { renderWhatsNewCards } from './whatsNew.js';
 import { openStoryScreen } from './story.js';
 import { refreshParticipantsList, resetParticipantSearch } from './participants.js';
-import { initHome } from './home.js';
+import { initHome, initRotationScreen } from './home.js';
 
 // Ссылки на экраны
 export const screens = {
   home:               document.getElementById('homeScreen'),
+  rotation:           document.getElementById('rotationScreen'),
   story:              document.getElementById('storyScreen'),
   profile:            document.getElementById('profileScreen'),
   profileEdit:        document.getElementById('profileEditScreen'),
@@ -34,6 +35,7 @@ export const screens = {
 
 const SCREEN_TITLES = {
   home: 'Tsushima.Ru',
+  rotation: 'Ротация',
   story: 'Сюжет',
   profile: 'Профиль',
   profileEdit: 'Редактировать профиль',
@@ -52,6 +54,7 @@ const SCREEN_TITLES = {
 
 const SCREENS_WITH_BACK = new Set([
   'story',
+  'waves',
   'profileEdit',
   'participantDetail',
   'buildCreate',
@@ -66,6 +69,7 @@ const SCREENS_WITH_BACK = new Set([
 
 const SCREEN_HOOKS = {
   home: () => initHome(),
+  rotation: () => initRotationScreen(),
   story: () => openStoryScreen(),
   profile: () => {
     loadProfileOnScreenOpen();

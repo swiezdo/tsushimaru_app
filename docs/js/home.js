@@ -9,6 +9,7 @@ import { checkUserRegistration } from './api.js';
 
 let rotationData = null;
 let rotationCountdownTimerId = null;
+let rotationButtonsBound = false;
 
 // ===== Загрузка данных «Что нового?» =====
 async function loadWhatsNew() {
@@ -365,8 +366,8 @@ function formatCountdown(ms) {
 }
 
 function renderRotationCountdown() {
-  const home = document.getElementById('homeScreen');
-  if (!home) return;
+  const rotation = document.getElementById('rotationScreen');
+  if (!rotation) return;
 
   // Если ранее создавали отдельную карточку — удалим
   const oldCard = document.getElementById('rotationCountdownCard');
@@ -374,8 +375,8 @@ function renderRotationCountdown() {
     oldCard.parentElement.removeChild(oldCard);
   }
 
-  // Вставляем таймер в конец основной карточки главной
-  const mainCard = home.querySelector('section.card');
+  // Вставляем таймер в конец основной карточки ротации
+  const mainCard = rotation.querySelector('section.card');
   if (!mainCard) return;
 
   let timer = document.getElementById('rotationCountdownTimer');
@@ -409,9 +410,24 @@ function renderRotationCountdown() {
 }
 
 /**
- * Инициализация главной страницы
+ * Инициализация главной страницы (превью «Что нового?»)
  */
 export async function initHome() {
+  try {
+    const whats = await loadWhatsNew();
+    if (Array.isArray(whats) && whats.length) {
+      const latest = whats[whats.length - 1];
+      renderWhatsNewPreviewCard(latest);
+    }
+  } catch (error) {
+    console.error('Ошибка инициализации главной страницы:', error);
+  }
+}
+
+/**
+ * Инициализация экрана «Ротация»
+ */
+export async function initRotationScreen() {
   try {
     // Загружаем данные ротации и текущую неделю параллельно
     const [currentWeek, rotationJson] = await Promise.all([
@@ -438,17 +454,10 @@ export async function initHome() {
     // Рендерим таймер до обновления ротации
     renderRotationCountdown();
 
-    // Рендерим превью «Что нового?»
-    const whats = await loadWhatsNew();
-    if (Array.isArray(whats) && whats.length) {
-      const latest = whats[whats.length - 1];
-      renderWhatsNewPreviewCard(latest);
-    }
-
     // Настраиваем обработчики кнопок
     setupRotationButtons();
   } catch (error) {
-    console.error('Ошибка инициализации главной страницы:', error);
+    console.error('Ошибка инициализации экрана «Ротация»:', error);
   }
 }
 
@@ -456,6 +465,11 @@ export async function initHome() {
  * Настраивает обработчики кнопок ротации
  */
 function setupRotationButtons() {
+  if (rotationButtonsBound) {
+    return;
+  }
+  rotationButtonsBound = true;
+
   // Кнопка "Выживание" → ведет на страницу "Волны"
   const survivalBtn = document.getElementById('rotationSurvivalBtn');
   if (survivalBtn) {
@@ -498,6 +512,7 @@ function setupRotationButtons() {
         return;
       }
       
+      sessionStorage.setItem('previousScreen', 'rotation:waves');
       // Если зарегистрирован и в группе - переходим на волны
       showScreen('waves');
       openWavesScreen();
@@ -509,6 +524,7 @@ function setupRotationButtons() {
   if (storyBtn) {
     storyBtn.addEventListener('click', () => {
       hapticTapSmart();
+      sessionStorage.setItem('previousScreen', 'rotation:story');
       showScreen('story');
     });
   }

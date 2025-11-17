@@ -685,6 +685,11 @@ a svg,
 }
 
 /* ========== ROTATION MODE BUTTONS ========== */
+#rotationScreen .badge-btn {
+  min-height: calc(var(--size-touch) + var(--space-4) + var(--space-2));
+  padding: var(--space-4);
+}
+
 .rotation-mode-text {
   display: flex;
   flex-direction: column;

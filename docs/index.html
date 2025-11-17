@@ -79,14 +79,13 @@
       </header>
 
       <!-- ====== HOME ====== -->
-      <section id="homeScreen">
+      <section id="homeScreen"></section>
+
+      <!-- ====== РОТАЦИЯ ====== -->
+      <section id="rotationScreen" class="hidden">
         <section class="card">
-          <div class="brand">
-            <img class="logo" src="./assets/logo/logo.png" alt="Tsushima.Ru" />
-          </div>
-          
           <h2 class="card-title" id="rotationWeekTitle">Неделя #14</h2>
-          
+
           <div class="grid-list">
             <!-- Сюжет -->
             <button type="button" id="rotationStoryBtn" class="badge-btn">
@@ -100,7 +99,7 @@
                 </div>
               </div>
             </button>
-            
+
             <!-- Выживание "Кошмар" -->
             <button type="button" id="rotationSurvivalBtn" class="badge-btn">
               <div class="rotation-mode-text">
@@ -116,7 +115,7 @@
                 </div>
               </div>
             </button>
-            
+
             <!-- Соперники -->
             <button type="button" id="rotationRivalsBtn" class="badge-btn" disabled>
               <div class="rotation-mode-text">
@@ -127,7 +126,7 @@
                 <!-- Иконка будет добавлена динамически только если есть rivals_mod_icon -->
               </div>
             </button>
-            
+
             <!-- Испытания Иё -->
             <button type="button" id="rotationTrialsBtn" class="badge-btn" disabled>
               <div class="rotation-mode-text">
@@ -773,8 +772,8 @@
         <button type="button" class="bottom-nav-btn" id="bottomNavGroupBtn" aria-label="Группа">
           <img src="./assets/icons/navigation/Fox.webp" class="bottom-nav-icon" alt="Группа" />
         </button>
-        <button type="button" class="bottom-nav-btn" data-screen="waves" aria-label="Волны">
-          <img src="./assets/icons/navigation/waves.webp" class="bottom-nav-icon" data-static="true" alt="Волны" />
+        <button type="button" class="bottom-nav-btn" data-screen="rotation" aria-label="Ротация">
+          <img src="./assets/icons/navigation/rotation.webp" class="bottom-nav-icon" data-static="true" alt="Ротация" />
         </button>
         <button type="button" class="bottom-nav-btn" data-screen="builds" aria-label="Билды">
           <img src="./assets/icons/navigation/builds.webp" class="bottom-nav-icon" data-static="true" alt="Билды" />
