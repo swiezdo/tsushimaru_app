@@ -92,13 +92,25 @@ body {
   -webkit-font-smoothing: antialiased;
   max-width: 920px;
   margin: auto;
-  touch-action: manipulation;
+  touch-action: pan-y;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+main.container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+  height: 100dvh;
 }
 
 .hidden { display: none; }
