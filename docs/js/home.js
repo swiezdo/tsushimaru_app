@@ -106,7 +106,7 @@ export function renderHomeContent(weekData) {
   }
   
   if (storyModIcon && weekData.story_mod_icon) {
-    storyModIcon.src = `./assets/icons/mods/${weekData.story_mod_icon}`;
+    storyModIcon.src = `./assets/icons/mods/${weekData.story_mod_icon}?t=${Date.now()}`;
     storyModIcon.alt = weekData.story_mod || '';
   }
 
@@ -130,12 +130,12 @@ export function renderHomeContent(weekData) {
   }
   
   if (survivalMod1Icon && weekData.survival_mod1_icon) {
-    survivalMod1Icon.src = `./assets/icons/mod1/${weekData.survival_mod1_icon}`;
+    survivalMod1Icon.src = `./assets/icons/mod1/${weekData.survival_mod1_icon}?t=${Date.now()}`;
     survivalMod1Icon.alt = weekData.survival_mod1 || '';
   }
   
   if (survivalMod2Icon && weekData.survival_mod2_icon) {
-    survivalMod2Icon.src = `./assets/icons/mod2/${weekData.survival_mod2_icon}`;
+    survivalMod2Icon.src = `./assets/icons/mod2/${weekData.survival_mod2_icon}?t=${Date.now()}`;
     survivalMod2Icon.alt = weekData.survival_mod2 || '';
   }
 
@@ -172,7 +172,7 @@ export function renderHomeContent(weekData) {
       const modIconWrapper = document.createElement('div');
       modIconWrapper.className = 'waves-mod-icon';
       const modIconImg = document.createElement('img');
-      modIconImg.src = `./assets/icons/mods/${weekData.rivals_mod_icon}`;
+      modIconImg.src = `./assets/icons/mods/${weekData.rivals_mod_icon}?t=${Date.now()}`;
       modIconImg.alt = weekData.rivals_mod || '';
       modIconWrapper.appendChild(modIconImg);
       rivalsModIcons.appendChild(modIconWrapper);
@@ -212,7 +212,7 @@ export function renderHomeContent(weekData) {
       const modIconWrapper = document.createElement('div');
       modIconWrapper.className = 'waves-mod-icon';
       const modIconImg = document.createElement('img');
-      modIconImg.src = `./assets/icons/mods/${weekData.trials_mod_icon}`;
+      modIconImg.src = `./assets/icons/mods/${weekData.trials_mod_icon}?t=${Date.now()}`;
       modIconImg.alt = weekData.trials_mod || '';
       modIconWrapper.appendChild(modIconImg);
       trialsModIcons.appendChild(modIconWrapper);
