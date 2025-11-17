@@ -706,7 +706,7 @@ function renderHomeHero() {
   button.type = 'button';
   button.id = 'joinTelegramBtn';
   button.className = 'btn primary wide';
-  button.textContent = 'Перейти в Telegram';
+  button.textContent = 'Перейти в группу';
   button.addEventListener('click', () => {
     hapticTapSmart();
     if (tg?.openTelegramLink) {

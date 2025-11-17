@@ -73,6 +73,19 @@ function renderTrophyDetail(trophy, isObtained) {
     resetApplicationState();
     clearChildren(detailContainer);
 
+    const iconWrapper = document.createElement('div');
+    iconWrapper.className = 'trophy-detail-icon-wrapper';
+
+    const icon = document.createElement('img');
+    icon.className = 'trophy-detail-icon';
+    icon.src = `./assets/trophies/${trophy.key}.svg`;
+    icon.alt = trophy.name;
+    icon.loading = 'lazy';
+    icon.decoding = 'async';
+    iconWrapper.appendChild(icon);
+
+    detailContainer.appendChild(iconWrapper);
+
     if (isObtained) {
         detailContainer.appendChild(buildObtainedNoticeCard());
         detailContainer.appendChild(buildInfoCard(trophy, { includeProof: false }));

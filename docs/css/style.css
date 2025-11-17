@@ -2163,7 +2163,8 @@ html.tg .only-browser { display: none; }
 
 /* ========== MASTERY DETAIL SCREEN ========== */
 /* Контейнер для иконки категории */
-.mastery-detail-icon-wrapper {
+.mastery-detail-icon-wrapper,
+.trophy-detail-icon-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2171,7 +2172,8 @@ html.tg .only-browser { display: none; }
 }
 
 /* Иконка категории (128x128) */
-.mastery-detail-icon {
+.mastery-detail-icon,
+.trophy-detail-icon {
   width: 128px;
   height: 128px;
   object-fit: contain;
