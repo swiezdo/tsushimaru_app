@@ -31,6 +31,7 @@ export const screens = {
   reward:             document.getElementById('rewardScreen'),
   rewardDetail:       document.getElementById('rewardDetailScreen'),
   trophyDetail:       document.getElementById('trophyDetailScreen'),
+  joinGroup:          document.getElementById('joinGroupScreen'),
 };
 
 const SCREEN_TITLES = {
@@ -50,6 +51,7 @@ const SCREEN_TITLES = {
   whatsNew: 'Что нового?',
   feedback: 'Отправить отзыв',
   reward: 'Награды',
+  joinGroup: 'Требуется участие в группе',
 };
 
 const SCREENS_WITH_BACK = new Set([
@@ -103,6 +105,14 @@ const SCREEN_HOOKS = {
   },
   whatsNew: () => {
     renderWhatsNewCards();
+  },
+  joinGroup: () => {
+    // Инициализация экрана вступления в группу
+    import('./main.js').then(module => {
+      if (module.initJoinGroupScreen) {
+        module.initJoinGroupScreen();
+      }
+    }).catch(() => {});
   },
 };
 
@@ -196,8 +206,18 @@ export function showScreen(name, options = {}) {
   if (el) el.classList.remove('hidden');
 
   if (tg) {
-    if (SCREENS_WITH_BACK.has(name)) tg.BackButton.show();
-    else tg.BackButton.hide();
+    // Проверяем, не зарегистрирован ли пользователь (навигация скрыта)
+    const bottomNav = document.getElementById('bottomNav');
+    const isUnregistered = bottomNav && bottomNav.classList.contains('hidden');
+    
+    // Если пользователь не зарегистрирован и открыта страница редактирования профиля или экран вступления в группу - скрываем кнопку "Назад"
+    if ((isUnregistered && name === 'profileEdit') || name === 'joinGroup') {
+      tg.BackButton.hide();
+    } else if (SCREENS_WITH_BACK.has(name)) {
+      tg.BackButton.show();
+    } else {
+      tg.BackButton.hide();
+    }
   }
 
   const title = SCREEN_TITLES[name];

@@ -1,8 +1,11 @@
 // profile.js
 import { tg, $, hapticTapSmart, hapticERR, hapticOK, hideKeyboard } from './telegram.js';
 import { focusAndScrollIntoView, showScreen } from './ui.js';
-import { fetchProfile, saveProfile as apiSaveProfile, uploadAvatar, API_BASE } from './api.js';
+import { fetchProfile, saveProfile as apiSaveProfile, uploadAvatar, API_BASE, checkGroupMembership } from './api.js';
 import { renderChips, activeValues, setActive, shake, prettyLines, validatePSNId, safeLocalStorageGet, safeLocalStorageSet } from './utils.js';
+import { setBottomNavVisible } from './main.js';
+
+const TELEGRAM_COMMUNITY_URL = 'https://t.me/+ZFiVYVrz-PEzYjBi';
 
 // ---------- Константы ----------
 const PLATFORM   = ['🎮 PlayStation','💻 ПК'];
@@ -370,6 +373,11 @@ export function initProfile() {
       }
 
       hapticOK();
+      
+      // Проверяем, была ли это первая регистрация (навигация скрыта)
+      const bottomNav = document.getElementById('bottomNav');
+      const isFirstRegistration = bottomNav && bottomNav.classList.contains('hidden');
+      
       // Сбрасываем исходное состояние после успешного сохранения
       originalProfileState = null;
       selectedAvatarFile = null;
@@ -378,10 +386,36 @@ export function initProfile() {
         currentAvatarEditObjectUrl = null;
       }
       
-      tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные профиля успешно сохранены.', buttons: [{ type: 'ok' }] }, () => {
-        // Возвращаемся на страницу профиля после закрытия попапа
-        showScreen('profile');
-      });
+      if (isFirstRegistration) {
+        // Первая регистрация - проверяем участие в группе
+        try {
+          const isInGroup = await checkGroupMembership();
+          if (!isInGroup) {
+            // Пользователь не в группе - показываем экран требования вступления
+            setBottomNavVisible(false);
+            showScreen('joinGroup');
+            return;
+          }
+        } catch (error) {
+          console.error('Ошибка проверки участия в группе:', error);
+          // При ошибке считаем что пользователь не в группе
+          setBottomNavVisible(false);
+          showScreen('joinGroup');
+          return;
+        }
+        
+        // Пользователь в группе - показываем навигацию и переходим на главную
+        setBottomNavVisible(true);
+        tg?.showPopup?.({ title: 'Добро пожаловать!', message: 'Профиль успешно создан. Теперь вы можете пользоваться приложением.', buttons: [{ type: 'ok' }] }, () => {
+          showScreen('home');
+        });
+      } else {
+        // Обычное обновление профиля
+        tg?.showPopup?.({ title: 'Профиль обновлён', message: 'Данные профиля успешно сохранены.', buttons: [{ type: 'ok' }] }, () => {
+          // Возвращаемся на страницу профиля после закрытия попапа
+          showScreen('profile');
+        });
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
       // Обновляем список участников, если он открыт

@@ -10,7 +10,7 @@ import { initFeedback } from './feedback.js';
 import { initMastery } from './mastery.js';
 import { initTrophies } from './trophies.js';
 import { initTrophiesList } from './trophies_list.js';
-import { checkUserRegistration } from './api.js';
+import { checkUserRegistration, checkGroupMembership } from './api.js';
 import { initWaves, openWavesScreen } from './waves.js';
 import { initStaticImage, playAnimationOnce } from './utils.js';
 
@@ -190,8 +190,20 @@ function installBackButton() {
     }
     }
 
+    // Блокируем кнопку "Назад" на экране вступления в группу
+    if (currentScreen === 'joinGroup') {
+      return;
+    }
+    
     // Специальная проверка для страницы редактирования профиля
     if (currentScreen === 'profileEdit') {
+      // Блокируем кнопку "Назад", если пользователь не зарегистрирован (навигация скрыта)
+      const bottomNav = document.getElementById('bottomNav');
+      if (bottomNav && bottomNav.classList.contains('hidden')) {
+        // Пользователь не зарегистрирован - блокируем выход со страницы редактирования
+        return;
+      }
+      
       // Динамически импортируем модуль профиля для проверки изменений
       try {
         const profileModule = await import('./profile.js');
@@ -327,6 +339,11 @@ function bindBottomNav() {
   screenButtons.forEach(btn => {
     const screenName = btn.dataset.screen;
     btn.addEventListener('click', () => {
+      // Блокируем навигацию, если навигация скрыта (пользователь не зарегистрирован)
+      if (bottomNav.classList.contains('hidden')) {
+        return;
+      }
+      
       hapticTapSmart();
       sessionStorage.removeItem('previousScreen');
       
@@ -523,6 +540,97 @@ function applyButtonBackgroundStyles() {
   });
 }
 
+// ---------------- Управление видимостью нижней навигации ----------------
+export function setBottomNavVisible(visible) {
+  const bottomNav = document.getElementById('bottomNav');
+  if (bottomNav) {
+    if (visible) {
+      bottomNav.classList.remove('hidden');
+    } else {
+      bottomNav.classList.add('hidden');
+    }
+  }
+}
+
+// ---------------- Инициализация экрана требования вступления в группу ----------------
+const TELEGRAM_COMMUNITY_URL = 'https://t.me/+ZFiVYVrz-PEzYjBi';
+
+let joinGroupScreenInitialized = false;
+
+export function initJoinGroupScreen() {
+  const joinGroupBtn = document.getElementById('joinGroupBtn');
+  if (!joinGroupBtn || joinGroupScreenInitialized) return;
+  
+  joinGroupScreenInitialized = true;
+
+  joinGroupBtn.addEventListener('click', async () => {
+    hapticTapSmart();
+    
+    // Открываем ссылку на группу
+    if (tg?.openTelegramLink) {
+      tg.openTelegramLink(TELEGRAM_COMMUNITY_URL);
+    } else {
+      window.open(TELEGRAM_COMMUNITY_URL, '_blank');
+    }
+
+    // Проверяем участие в группе через небольшую задержку и периодически
+    let checkCount = 0;
+    const maxChecks = 20; // Проверяем максимум 20 раз (около 1 минуты)
+    let checkInterval = null;
+    
+    const stopChecking = () => {
+      if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+      }
+      window.removeEventListener('focus', checkOnFocus);
+    };
+    
+    const onGroupJoined = () => {
+      stopChecking();
+      setBottomNavVisible(true);
+      tg?.showPopup?.({ 
+        title: 'Добро пожаловать!', 
+        message: 'Вы успешно присоединились к группе. Теперь вы можете пользоваться приложением.', 
+        buttons: [{ type: 'ok' }] 
+      }, () => {
+        showScreen('home');
+      });
+    };
+    
+    checkInterval = setInterval(async () => {
+      checkCount++;
+      try {
+        const isInGroup = await checkGroupMembership();
+        if (isInGroup) {
+          onGroupJoined();
+        } else if (checkCount >= maxChecks) {
+          stopChecking();
+        }
+      } catch (error) {
+        console.error('Ошибка проверки участия в группе:', error);
+        if (checkCount >= maxChecks) {
+          stopChecking();
+        }
+      }
+    }, 3000); // Проверяем каждые 3 секунды
+
+    // Также проверяем при возврате фокуса на приложение
+    const checkOnFocus = async () => {
+      try {
+        const isInGroup = await checkGroupMembership();
+        if (isInGroup) {
+          onGroupJoined();
+        }
+      } catch (error) {
+        console.error('Ошибка проверки участия в группе:', error);
+      }
+    };
+    
+    window.addEventListener('focus', checkOnFocus);
+  });
+}
+
 // ---------------- Старт ----------------
 async function startApp() {
   applySafeInsets();
@@ -557,7 +665,32 @@ async function startApp() {
     settingsBtn.classList.add('hidden');
   }
 
-  await showInitialScreen();
+  // Проверка регистрации пользователя
+  try {
+    const registrationResult = await checkUserRegistration();
+    const isRegistered = typeof registrationResult === 'object' ? registrationResult.isRegistered : registrationResult;
+    const isInGroup = typeof registrationResult === 'object' ? registrationResult.isInGroup : true;
+    
+    if (!isRegistered) {
+      // Пользователь не зарегистрирован - показываем страницу редактирования профиля
+      setBottomNavVisible(false);
+      showScreen('profileEdit');
+    } else if (!isInGroup) {
+      // Пользователь зарегистрирован, но не в группе - показываем экран требования вступления
+      setBottomNavVisible(false);
+      showScreen('joinGroup');
+      initJoinGroupScreen();
+    } else {
+      // Пользователь зарегистрирован и в группе - показываем обычный стартовый экран
+      setBottomNavVisible(true);
+      await showInitialScreen();
+    }
+  } catch (error) {
+    console.error('Ошибка проверки регистрации:', error);
+    // При ошибке считаем что пользователь не зарегистрирован
+    setBottomNavVisible(false);
+    showScreen('profileEdit');
+  }
   
   // Защита SVG и изображений от скачивания (кроме билдов и свитков)
   installImageProtection();
