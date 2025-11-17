@@ -106,8 +106,51 @@ body {
 .mt-sm { margin-top: var(--space-2); }
 
 /* ========== TOPBAR ========== */
-.topbar { display: flex; justify-content: center; align-items: center; margin-top: var(--space-4); margin-bottom: var(--space-4); }
+.topbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+  position: relative;
+  padding: 0 var(--space-4);
+}
 .title { font-size: var(--fs-20); font-weight: 600; white-space: pre-line; text-align: center; }
+
+.topbar-action {
+  position: absolute;
+  right: var(--space-4);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--card-bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: none;
+  transition: transform 0.2s ease;
+}
+
+.topbar-action img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.topbar-action:active {
+  transform: scale(0.94);
+}
+
+.topbar-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.topbar-action.hidden {
+  display: none !important;
+}
 
 /* ========== CARD ========== */
 .card {
@@ -701,7 +744,6 @@ a svg,
 .home-hero-logo {
   width: 128px;
   height: 128px;
-  border-radius: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -723,6 +765,38 @@ a svg,
 
 .home-hero .actions-bar .btn {
   width: 100%;
+}
+
+.start-screen-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.start-screen-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--elem-bg);
+}
+
+.start-screen-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
+.start-screen-option span {
+  font-size: var(--fs-16);
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.start-screen-actions {
+  margin-top: var(--space-4);
 }
 
 /* Карточка последних наград */
@@ -888,6 +962,16 @@ a svg,
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Светлая тема для карточки комментариев */
+.theme-light .recent-comment-author,
+.theme-light .recent-comment-text {
+  color: #000;
+}
+
+.theme-light .recent-comment-build img {
+  filter: invert(1);
 }
 .waves-mod-icon img {
   width: 100%;
@@ -1921,6 +2005,12 @@ html.tg .only-browser { display: none; }
   flex: 1;
   z-index: 2;
   position: relative;
+}
+
+/* Убираем свечение в карточке "Что нового" для светлой темы */
+.theme-light #whatsNewPreviewCard .mastery-level-name,
+.theme-light #whatsNewPreviewCard .mastery-category-name {
+  text-shadow: none;
 }
 
 /* Контейнер для прогресса/иконки (правая часть badge) */

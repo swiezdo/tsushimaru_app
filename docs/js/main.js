@@ -34,6 +34,17 @@ import { initStaticImage, playAnimationOnce } from './utils.js';
   };
 })();
 
+const START_SCREEN_KEY = 'preferredScreen';
+const START_SCREEN_OPTIONS = [
+  { value: 'home', label: 'Главная' },
+  { value: 'participants', label: 'Участники' },
+  { value: 'reward', label: 'Награды' },
+  { value: 'rotation', label: 'Ротация' },
+  { value: 'builds', label: 'Билды' },
+  { value: 'profile', label: 'Профиль' },
+];
+const START_SCREEN_WITH_ACCESS_CHECK = new Set(['participants', 'reward', 'builds']);
+
 const BACK_ROUTES = {
   buildCreate: 'builds',
   buildEdit: 'buildDetail',
@@ -348,6 +359,113 @@ function bindBottomNav() {
 
 }
 
+const startScreenModal = $('startScreenModal');
+const startScreenOptionsEl = $('startScreenOptions');
+const startScreenSaveBtn = $('startScreenSaveBtn');
+
+function getPreferredStartScreen() {
+  const stored = localStorage.getItem(START_SCREEN_KEY);
+  return START_SCREEN_OPTIONS.some(option => option.value === stored) ? stored : 'home';
+}
+
+function setPreferredStartScreen(screen) {
+  if (START_SCREEN_OPTIONS.some(option => option.value === screen)) {
+    localStorage.setItem(START_SCREEN_KEY, screen);
+  } else {
+    localStorage.removeItem(START_SCREEN_KEY);
+  }
+}
+
+function renderStartScreenOptions() {
+  if (!startScreenOptionsEl || startScreenOptionsEl.childElementCount) return;
+  START_SCREEN_OPTIONS.forEach(({ value, label }) => {
+    const option = document.createElement('label');
+    option.className = 'start-screen-option';
+    option.innerHTML = `
+      <input type="radio" name="startScreen" value="${value}" />
+      <span>${label}</span>
+    `;
+    startScreenOptionsEl.appendChild(option);
+  });
+}
+
+function openStartScreenModal() {
+  if (!startScreenModal) return;
+  renderStartScreenOptions();
+  const current = getPreferredStartScreen();
+  const activeInput = startScreenOptionsEl?.querySelector(`input[value="${current}"]`);
+  if (activeInput) {
+    activeInput.checked = true;
+  }
+  startScreenModal.classList.remove('hidden');
+}
+
+function closeStartScreenModal() {
+  startScreenModal?.classList.add('hidden');
+}
+
+function initStartScreenPreferenceUI() {
+  if (!startScreenModal || !startScreenOptionsEl || !startScreenSaveBtn) return;
+
+  document.addEventListener('click', (event) => {
+    const btn = event.target.closest?.('#homeSettingsBtn');
+    if (btn) {
+      event.preventDefault();
+      hapticTapSmart();
+      openStartScreenModal();
+    }
+  });
+
+  startScreenModal.addEventListener('click', (event) => {
+    if (event.target === startScreenModal) {
+      closeStartScreenModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !startScreenModal.classList.contains('hidden')) {
+      closeStartScreenModal();
+    }
+  });
+
+  startScreenSaveBtn.addEventListener('click', () => {
+    const selected = startScreenOptionsEl.querySelector('input[name="startScreen"]:checked');
+    const value = selected?.value || 'home';
+    setPreferredStartScreen(value);
+    hapticTapSmart();
+    closeStartScreenModal();
+  });
+}
+
+async function ensureStartScreenAccess(screen) {
+  if (!START_SCREEN_WITH_ACCESS_CHECK.has(screen)) {
+    return true;
+  }
+  try {
+    const result = await checkUserRegistration();
+    const isRegistered = typeof result === 'object' ? result.isRegistered : result;
+    const isInGroup = typeof result === 'object' ? result.isInGroup : true;
+    return Boolean(isRegistered && isInGroup);
+  } catch (error) {
+    console.error('Ошибка проверки доступа к стартовому экрану:', error);
+    return false;
+  }
+}
+
+async function showInitialScreen() {
+  const preferred = getPreferredStartScreen();
+  if (preferred === 'home') {
+    showScreen('home');
+    return;
+  }
+  const allowed = await ensureStartScreenAccess(preferred);
+  if (!allowed) {
+    showScreen('home');
+    return;
+  }
+  showScreen(preferred);
+}
+
 // ---------------- Применение стилей к кнопкам с фоновыми изображениями ----------------
 function applyButtonBackgroundStyles() {
   // Функция для применения стилей к кнопкам по тексту
@@ -412,6 +530,7 @@ async function startApp() {
   bindBottomNav();
   installBackButton();
   applyButtonBackgroundStyles();
+  initStartScreenPreferenceUI();
 
   initProfile();
   await initParticipants();
@@ -432,7 +551,13 @@ async function startApp() {
   // Инициализация модуля волн
   initWaves();
 
-  showScreen('home');
+  // Инициализация видимости кнопки настроек
+  const settingsBtn = document.getElementById('homeSettingsBtn');
+  if (settingsBtn) {
+    settingsBtn.classList.add('hidden');
+  }
+
+  await showInitialScreen();
   
   // Защита SVG и изображений от скачивания (кроме билдов и свитков)
   installImageProtection();

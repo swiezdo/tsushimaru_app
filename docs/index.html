@@ -76,6 +76,14 @@
       <!-- ====== TOPBAR ====== -->
       <header class="topbar">
         <div class="title" id="appTitle">Tsushima.Ru</div>
+        <button
+          type="button"
+          id="homeSettingsBtn"
+          class="topbar-action hidden"
+          aria-label="Настройки стартового экрана"
+        >
+          <img src="./assets/icons/system/Gear.png" alt="Настройки" loading="lazy" decoding="async" />
+        </button>
       </header>
 
       <!-- ====== HOME ====== -->
@@ -794,6 +802,16 @@
           <!-- Динамически заполняется JavaScript -->
         </div>
         <button type="button" class="btn primary wide" id="filterModalOkBtn">ОК</button>
+      </div>
+    </div>
+
+    <div id="startScreenModal" class="filter-modal hidden" role="dialog" aria-modal="true">
+      <div class="filter-modal-content">
+        <h3 class="filter-modal-title">Стартовый экран</h3>
+        <div class="filter-modal-options start-screen-options" id="startScreenOptions"></div>
+        <div class="actions-bar start-screen-actions">
+          <button type="button" class="btn primary wide" id="startScreenSaveBtn">Сохранить</button>
+        </div>
       </div>
     </div>
 

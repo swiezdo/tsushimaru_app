@@ -204,6 +204,11 @@ export function showScreen(name, options = {}) {
   if (title) {
     setTopbar(true, title);
   }
+  const settingsBtn = document.getElementById('homeSettingsBtn');
+  if (settingsBtn) {
+    if (name === 'home') settingsBtn.classList.remove('hidden');
+    else settingsBtn.classList.add('hidden');
+  }
 
   const hook = SCREEN_HOOKS[name];
   if (typeof hook === 'function') {
