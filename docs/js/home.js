@@ -426,16 +426,11 @@ function renderRecentEventsCard(events) {
     const avatar = document.createElement('button');
     avatar.type = 'button';
     avatar.className = 'recent-event-avatar recent-event-link';
-    if (event?.avatar_url) {
-      const img = document.createElement('img');
-      img.src = event.avatar_url;
-      img.alt = event.psn_id || 'Участник';
-      img.loading = 'lazy';
-      avatar.appendChild(img);
-    } else {
-      const fallback = (event?.psn_id || '?').trim().charAt(0).toUpperCase() || '•';
-      avatar.textContent = fallback;
-    }
+    const img = document.createElement('img');
+    img.src = event?.avatar_url || './assets/default-avatar.svg';
+    img.alt = event.psn_id || 'Участник';
+    img.loading = 'lazy';
+    avatar.appendChild(img);
     const openProfile = createProfileLink(event);
     avatar.addEventListener('click', openProfile);
 
@@ -445,7 +440,7 @@ function renderRecentEventsCard(events) {
     const headline = document.createElement('button');
     headline.type = 'button';
     headline.className = 'recent-event-headline recent-event-link';
-    headline.textContent = event?.headline || `${event?.psn_id || 'Участник'} получил новую награду`;
+    headline.textContent = event?.headline || `${event?.psn_id || 'Участник'} получил(а) новую награду`;
     headline.addEventListener('click', openProfile);
 
     const details = document.createElement('div');
@@ -517,16 +512,11 @@ function renderRecentCommentsCard(comments) {
 
     const avatar = document.createElement('div');
     avatar.className = 'recent-comment-avatar';
-    if (comment?.avatar_url) {
-      const img = document.createElement('img');
-      img.src = comment.avatar_url;
-      img.alt = comment.psn_id || 'Участник';
-      img.loading = 'lazy';
-      avatar.appendChild(img);
-    } else {
-      const fallback = (comment?.psn_id || '?').trim().charAt(0).toUpperCase() || '•';
-      avatar.textContent = fallback;
-    }
+    const img = document.createElement('img');
+    img.src = comment?.avatar_url || './assets/default-avatar.svg';
+    img.alt = comment.psn_id || 'Участник';
+    img.loading = 'lazy';
+    avatar.appendChild(img);
 
     const body = document.createElement('div');
     body.className = 'recent-comment-body';
