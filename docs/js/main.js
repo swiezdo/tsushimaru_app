@@ -334,14 +334,6 @@ function bindBottomNav() {
     });
   });
 
-  // Обработчик для кнопки группы (Telegram)
-  const groupBtn = document.getElementById('bottomNavGroupBtn');
-  if (groupBtn) {
-    groupBtn.addEventListener('click', () => {
-      hapticTapSmart();
-      window.open("https://t.me/+ZFiVYVrz-PEzYjBi", "_blank");
-    });
-  }
 }
 
 // ---------------- Применение стилей к кнопкам с фоновыми изображениями ----------------
