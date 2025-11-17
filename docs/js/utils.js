@@ -198,6 +198,18 @@ export async function initStaticImage(img) {
   hiddenImg.src = baseSrc;
 }
 
+const CLASS_ICON_MAP = {
+  'Самурай': './assets/icons/classes/samurai.svg',
+  'Охотник': './assets/icons/classes/hunter.svg',
+  'Убийца': './assets/icons/classes/assassin.svg',
+  'Ронин': './assets/icons/classes/ronin.svg',
+};
+
+export function getClassIconPath(className) {
+  if (!className) return '';
+  return CLASS_ICON_MAP[className] || CLASS_ICON_MAP['Самурай'];
+}
+
 /**
  * Запускает анимацию изображения на один цикл
  * @param {HTMLImageElement} img - Элемент изображения с data-static="true"

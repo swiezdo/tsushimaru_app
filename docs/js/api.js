@@ -311,6 +311,30 @@ export async function getRecentEvents(limit = 3) {
     }
 }
 
+export async function getRecentComments(limit = 3) {
+    const normalizeAvatarUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return `${API_BASE}${url}`;
+    };
+
+    try {
+        const params = new URLSearchParams({ limit: String(Math.max(1, Math.min(limit, 10))) });
+        const data = await apiRequest(`/api/comments.recent?${params.toString()}`);
+        if (data && Array.isArray(data.comments)) {
+            return data.comments.map((comment) => ({
+                ...comment,
+                avatar_url: normalizeAvatarUrl(comment?.avatar_url || ''),
+                build_class: comment?.build_class || '',
+            }));
+        }
+        return [];
+    } catch (error) {
+        console.error('Ошибка получения комментариев:', error);
+        return [];
+    }
+}
+
 // ========== ФУНКЦИИ ДЛЯ РАБОТЫ С БИЛДАМИ ==========
 
 // Создание билда

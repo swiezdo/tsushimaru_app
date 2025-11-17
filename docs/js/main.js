@@ -119,7 +119,17 @@ async function handleSpecialBackNavigation({ currentScreen, nextScreen, previous
     } catch (error) {
       console.error('Ошибка импорта builds.js:', error);
     }
+    if (previousScreen === 'source:homeComments') {
+      showScreen('home', { skipScroll: true });
+      sessionStorage.removeItem('previousScreen');
+      return true;
+    }
     showScreen(nextScreen);
+    return true;
+  }
+
+  if (previousScreen === 'source:homeComments' && currentScreen === 'buildPublicDetail') {
+    showScreen('home', { skipScroll: true });
     return true;
   }
 
@@ -146,18 +156,17 @@ function installBackButton() {
     if (currentScreen === 'participantDetail') {
       // Возврат из профиля участника
       if (previousScreen === 'participants') {
-        // Пришли из списка участников - возвращаемся туда
         nextScreen = 'participants';
       } else if (previousScreen?.startsWith('buildPublicDetail:')) {
-        // Пришли из билда - обрабатывается в handleSpecialBackNavigation
         nextScreen = 'buildPublicDetail';
+      } else if (previousScreen === 'home') {
+        nextScreen = 'home';
       } else {
-        // По умолчанию возвращаемся на страницу участников
         nextScreen = 'participants';
       }
     } else if ((currentScreen === 'story' || currentScreen === 'waves') && previousScreen?.startsWith('rotation:')) {
       nextScreen = 'rotation';
-    } else {
+  } else {
       // Для остальных экранов используем BACK_ROUTES
       nextScreen = BACK_ROUTES[currentScreen] || 'home';
       
@@ -165,6 +174,9 @@ function installBackButton() {
     if (nextScreen === 'buildPublicDetail' && previousScreen?.startsWith('participantDetail:')) {
       nextScreen = 'participantDetail';
       }
+    if (currentScreen === 'feedback' && previousScreen) {
+      nextScreen = previousScreen;
+    }
     }
 
     // Специальная проверка для страницы редактирования профиля

@@ -1,10 +1,13 @@
 // home.js
 // Управление главной страницей с ротацией недель
 
-import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents } from './api.js';
+import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments } from './api.js';
 import { showScreen } from './ui.js';
 import { openWavesScreen } from './waves.js';
 import { tg, hapticTapSmart } from './telegram.js';
+import { getClassIconPath } from './utils.js';
+
+const TELEGRAM_COMMUNITY_URL = 'https://t.me/+ZFiVYVrz-PEzYjBi';
 
 let rotationData = null;
 let rotationCountdownTimerId = null;
@@ -321,7 +324,23 @@ function renderWhatsNewPreviewCard(latest) {
     feedbackBtn.className = 'btn primary wide';
     feedbackBtn.type = 'button';
     feedbackBtn.textContent = 'Отправить отзыв';
+    feedbackBtn.dataset.bound = 'true';
+    feedbackBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      sessionStorage.setItem('previousScreen', 'home');
+      showScreen('feedback');
+    });
     feedbackBtnContainer.appendChild(feedbackBtn);
+  } else {
+    const feedbackBtn = feedbackBtnContainer.querySelector('#sendFeedbackBtn');
+    if (feedbackBtn && !feedbackBtn.dataset.bound) {
+      feedbackBtn.dataset.bound = 'true';
+      feedbackBtn.addEventListener('click', () => {
+        hapticTapSmart();
+        sessionStorage.setItem('previousScreen', 'home');
+        showScreen('feedback');
+      });
+    }
   }
 }
 
@@ -357,7 +376,11 @@ function renderRecentEventsCard(events) {
     card = document.createElement('section');
     card.className = 'card recent-events-card';
     card.id = 'recentEventsCard';
-    home.prepend(card);
+  }
+
+  const hero = document.getElementById('homeHero');
+  if (hero && hero.parentElement === home) {
+    hero.insertAdjacentElement('afterend', card);
   } else if (!card.parentElement) {
     home.prepend(card);
   }
@@ -375,12 +398,24 @@ function renderRecentEventsCard(events) {
   const list = document.createElement('ul');
   list.className = 'recent-events-list';
 
+  const createProfileLink = (handler) => {
+    const fn = () => {
+      if (!handler?.user_id) return;
+      sessionStorage.setItem('previousScreen', 'home');
+      import('./participantDetail.js').then(module => {
+        module.openParticipantDetail(handler.user_id);
+      }).catch(err => console.error('Ошибка открытия профиля участника:', err));
+    };
+    return fn;
+  };
+
   events.slice(0, 3).forEach((event) => {
     const item = document.createElement('li');
     item.className = 'recent-event-item';
 
-    const avatar = document.createElement('div');
-    avatar.className = 'recent-event-avatar';
+    const avatar = document.createElement('button');
+    avatar.type = 'button';
+    avatar.className = 'recent-event-avatar recent-event-link';
     if (event?.avatar_url) {
       const img = document.createElement('img');
       img.src = event.avatar_url;
@@ -391,13 +426,17 @@ function renderRecentEventsCard(events) {
       const fallback = (event?.psn_id || '?').trim().charAt(0).toUpperCase() || '•';
       avatar.textContent = fallback;
     }
+    const openProfile = createProfileLink(event);
+    avatar.addEventListener('click', openProfile);
 
     const body = document.createElement('div');
     body.className = 'recent-event-body';
 
-    const headline = document.createElement('div');
-    headline.className = 'recent-event-headline';
+    const headline = document.createElement('button');
+    headline.type = 'button';
+    headline.className = 'recent-event-headline recent-event-link';
     headline.textContent = event?.headline || `${event?.psn_id || 'Участник'} получил новую награду`;
+    headline.addEventListener('click', openProfile);
 
     const details = document.createElement('div');
     details.className = 'recent-event-details';
@@ -412,6 +451,115 @@ function renderRecentEventsCard(events) {
     if (details.textContent) {
       body.appendChild(details);
     }
+
+    item.appendChild(avatar);
+    item.appendChild(body);
+    list.appendChild(item);
+  });
+
+  card.appendChild(list);
+}
+
+function renderRecentCommentsCard(comments) {
+  const home = document.getElementById('homeScreen');
+  if (!home) return;
+
+  const hasComments = Array.isArray(comments) && comments.length > 0;
+  let card = document.getElementById('recentCommentsCard');
+
+  if (!hasComments) {
+    card?.parentElement?.removeChild(card);
+    return;
+  }
+
+  if (!card) {
+    card = document.createElement('section');
+    card.className = 'card recent-comments-card';
+    card.id = 'recentCommentsCard';
+    const anchor = document.getElementById('whatsNewPreviewCard');
+    if (anchor && anchor.parentElement === home) {
+      home.insertBefore(card, anchor);
+    } else {
+      home.appendChild(card);
+    }
+  }
+
+  card.innerHTML = '';
+  const header = document.createElement('div');
+  header.className = 'card-header-row';
+  const title = document.createElement('h3');
+  title.className = 'card-title';
+  title.textContent = 'Лента комментариев';
+  header.appendChild(title);
+  card.appendChild(header);
+
+  const list = document.createElement('ul');
+  list.className = 'recent-comments-list';
+
+  comments.slice(0, 3).forEach((comment) => {
+    const item = document.createElement('li');
+    item.className = 'recent-comment-item';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'recent-comment-avatar';
+    if (comment?.avatar_url) {
+      const img = document.createElement('img');
+      img.src = comment.avatar_url;
+      img.alt = comment.psn_id || 'Участник';
+      img.loading = 'lazy';
+      avatar.appendChild(img);
+    } else {
+      const fallback = (comment?.psn_id || '?').trim().charAt(0).toUpperCase() || '•';
+      avatar.textContent = fallback;
+    }
+
+    const body = document.createElement('div');
+    body.className = 'recent-comment-body';
+
+    const meta = document.createElement('div');
+    meta.className = 'recent-comment-meta';
+    const author = document.createElement('span');
+    author.className = 'recent-comment-author';
+    author.textContent = comment?.psn_id || 'Участник';
+    const time = document.createElement('span');
+    time.className = 'recent-comment-time';
+    time.textContent = formatRelativeTime(comment?.created_at);
+    meta.appendChild(author);
+    if (time.textContent) {
+      meta.appendChild(document.createTextNode(' · '));
+      meta.appendChild(time);
+    }
+
+    const buildLink = document.createElement('button');
+    buildLink.type = 'button';
+    buildLink.className = 'author-chip recent-comment-build';
+
+    const classIconSrc = getClassIconPath(comment?.build_class);
+    if (classIconSrc) {
+      const iconImg = document.createElement('img');
+      iconImg.src = classIconSrc;
+      iconImg.alt = comment?.build_class || 'Класс';
+      iconImg.width = 18;
+      iconImg.height = 18;
+      buildLink.appendChild(iconImg);
+    }
+
+    const buildNameSpan = document.createElement('span');
+    buildNameSpan.textContent = comment?.build_name || 'Открыть билд';
+    buildLink.appendChild(buildNameSpan);
+    buildLink.addEventListener('click', async () => {
+      if (!comment?.build_id) return;
+      const { openPublicBuildDetail } = await import('./builds.js');
+      openPublicBuildDetail(comment.build_id, { source: 'homeComments' });
+    });
+
+    const text = document.createElement('div');
+    text.className = 'recent-comment-text';
+    text.textContent = comment?.comment_text || '';
+
+    body.appendChild(meta);
+    body.appendChild(buildLink);
+    body.appendChild(text);
 
     item.appendChild(avatar);
     item.appendChild(body);
@@ -509,12 +657,15 @@ function renderRotationCountdown() {
  */
 export async function initHome() {
   try {
-    const [events, whats] = await Promise.all([
+    renderHomeHero();
+    const [events, comments, whats] = await Promise.all([
       getRecentEvents(3).catch(() => []),
+      getRecentComments(3).catch(() => []),
       loadWhatsNew(),
     ]);
 
     renderRecentEventsCard(events);
+    renderRecentCommentsCard(comments);
     if (Array.isArray(whats) && whats.length) {
       const latest = whats[whats.length - 1];
       renderWhatsNewPreviewCard(latest);
@@ -522,6 +673,53 @@ export async function initHome() {
   } catch (error) {
     console.error('Ошибка инициализации главной страницы:', error);
   }
+}
+
+function renderHomeHero() {
+  const home = document.getElementById('homeScreen');
+  if (!home) return;
+
+  let hero = document.getElementById('homeHero');
+  if (!hero) {
+    hero = document.createElement('div');
+    hero.id = 'homeHero';
+    hero.className = 'home-hero';
+    home.prepend(hero);
+  }
+
+  hero.innerHTML = '';
+
+  const logoWrapper = document.createElement('div');
+  logoWrapper.className = 'home-hero-logo';
+  const logoImg = document.createElement('img');
+  logoImg.src = './assets/logo/logo.png';
+  logoImg.alt = 'Tsushima.Ru';
+  logoImg.width = 128;
+  logoImg.height = 128;
+  logoImg.loading = 'lazy';
+  logoWrapper.appendChild(logoImg);
+
+  const actionsBar = document.createElement('div');
+  actionsBar.className = 'actions-bar home-hero-actions';
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.id = 'joinTelegramBtn';
+  button.className = 'btn primary wide';
+  button.textContent = 'Перейти в Telegram';
+  button.addEventListener('click', () => {
+    hapticTapSmart();
+    if (tg?.openTelegramLink) {
+      tg.openTelegramLink(TELEGRAM_COMMUNITY_URL);
+    } else {
+      window.open(TELEGRAM_COMMUNITY_URL, '_blank');
+    }
+  });
+
+  actionsBar.appendChild(button);
+
+  hero.appendChild(logoWrapper);
+  hero.appendChild(actionsBar);
 }
 
 /**

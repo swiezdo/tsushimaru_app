@@ -236,6 +236,10 @@ body {
   margin-right: 0;
 }
 
+#homeFeedbackBtnContainer {
+  margin-bottom: var(--space-0);
+}
+
 /* ========== UPLOAD & SHOTS ========== */
 .shots-two {
   display: grid;
@@ -345,7 +349,8 @@ body {
 /* Синие кнопки (blue.png) - по ID */
 #sendFeedbackBtn,
 #profileEditBtn,
-#createBuildBtn {
+#createBuildBtn,
+#joinTelegramBtn {
   background: none !important;
   background-image: url('../assets/system/blue.png') !important;
   background-size: cover !important;
@@ -360,7 +365,8 @@ body {
 
 #sendFeedbackBtn::before,
 #profileEditBtn::before,
-#createBuildBtn::before {
+#createBuildBtn::before,
+#joinTelegramBtn::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -679,6 +685,46 @@ a svg,
   color: var(--tg-tx);
 }
 
+/* Хиро-блок главной */
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  padding-bottom: 0;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.home-hero-logo {
+  width: 128px;
+  height: 128px;
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.home-hero-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.home-hero .actions-bar {
+  width: 100%;
+  margin: 0;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.home-hero .actions-bar .btn {
+  width: 100%;
+}
+
 /* Карточка последних наград */
 .recent-events-list {
   list-style: none;
@@ -709,6 +755,8 @@ a svg,
   text-transform: uppercase;
   overflow: hidden;
   flex-shrink: 0;
+  border: none;
+  padding: 0;
 }
 
 .recent-event-avatar img {
@@ -730,12 +778,116 @@ a svg,
   font-size: var(--fs-15);
   font-weight: 600;
   line-height: var(--lh-normal);
+  border: none;
+  background: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--fg);
+}
+
+.recent-event-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 }
 
 .recent-event-details {
   font-size: var(--fs-13);
   color: var(--muted);
   line-height: var(--lh-tight);
+}
+.recent-comments-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.recent-comment-item {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.recent-comment-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--elem-bg);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--fg);
+  text-transform: uppercase;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.recent-comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+
+.recent-comment-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recent-comment-meta {
+  font-size: var(--fs-13);
+  color: var(--muted);
+}
+
+.recent-comment-author {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.recent-comment-build {
+  font-size: var(--fs-15);
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: transparent;
+  align-self: flex-start;
+  max-width: 240px;
+}
+.recent-comment-build span {
+  display: inline-block;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-comment-text {
+  font-size: var(--fs-15);
+  line-height: 1.3;
+  color: var(--fg);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .waves-mod-icon img {
   width: 100%;

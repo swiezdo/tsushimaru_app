@@ -1027,7 +1027,7 @@ function openBuildDetail(id) {
     hapticERR();
   });
 }
-function openPublicBuildDetail(pubId) {
+function openPublicBuildDetail(pubId, options = {}) {
   getPublicBuilds().then(pubs => {
     const p = pubs.find(x => String(x.build_id || x.id) === String(pubId));
     if (!p) { tg?.showAlert?.('Публикация не найдена'); return; }
@@ -1113,6 +1113,9 @@ function openPublicBuildDetail(pubId) {
       publicDetailShots.appendChild(wrap);
     });
 
+    if (options.source) {
+      sessionStorage.setItem('previousScreen', `source:${options.source}`);
+    }
     showScreen('buildPublicDetail');
     setTopbar(true, formatTopbarTitle(p.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
     
