@@ -4,7 +4,7 @@
 import { fetchMastery, submitMasteryApplication } from './api.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
-import { shake, createFileKey, isImageFile, isVideoFile, renderFilesPreview, startButtonDotsAnimation } from './utils.js';
+import { shake, createFileKey, isImageFile, isVideoFile, renderFilesPreview, startButtonDotsAnimation, validateFileSize } from './utils.js';
 
 // Кэш конфига
 let masteryConfig = null;
@@ -749,10 +749,41 @@ function renderMasteryApplicationCard(container, category, currentLevel) {
             });
         }
         
+        // Проверка размера файлов
+        const sizeErrors = [];
+        const validFiles = supportedFiles.filter((file) => {
+            const validation = validateFileSize(file);
+            if (!validation.valid) {
+                sizeErrors.push(validation.error);
+                return false;
+            }
+            return true;
+        });
+        
+        if (sizeErrors.length > 0) {
+            if (sizeErrors.length === 1) {
+                tg?.showPopup?.({
+                    title: 'Файл слишком большой',
+                    message: sizeErrors[0],
+                    buttons: [{ type: 'ok' }]
+                });
+            } else {
+                tg?.showPopup?.({
+                    title: 'Файлы слишком большие',
+                    message: 'Некоторые файлы превышают максимальный размер. Изображения: до 10 МБ, видео: до 50 МБ.',
+                    buttons: [{ type: 'ok' }]
+                });
+            }
+        }
+        
+        if (validFiles.length === 0) {
+            return;
+        }
+        
         const keyOf = (f) => createFileKey(f);
         const existing = new Set(masteryApplicationSelected.map(keyOf));
         const freeSlots = Math.max(0, MAX_MASTERY_FILES - masteryApplicationSelected.length);
-        const incoming = supportedFiles.filter((file) => !existing.has(keyOf(file)));
+        const incoming = validFiles.filter((file) => !existing.has(keyOf(file)));
         
         if (incoming.length > freeSlots) {
             incoming.length = freeSlots;

@@ -414,6 +414,10 @@ export function renderFilesPreview(files, previewEl, { limit = 4, onRemove } = {
 }
 
 // ---------- Работа с файлами ----------
+// Лимиты размера файлов
+export const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 МБ
+export const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 МБ
+
 export function createFileKey(file) {
   return `${file.name}::${file.size}::${file.lastModified}`;
 }
@@ -424,6 +428,38 @@ export function isImageFile(file) {
 
 export function isVideoFile(file) {
   return file.type.startsWith('video/');
+}
+
+/**
+ * Проверяет размер файла и возвращает результат валидации
+ * @param {File} file - Файл для проверки
+ * @returns {{ valid: boolean, error: string | null }} Результат валидации
+ */
+export function validateFileSize(file) {
+  if (!file) {
+    return { valid: false, error: 'Файл не указан' };
+  }
+
+  const isImage = isImageFile(file);
+  const isVideo = isVideoFile(file);
+
+  if (!isImage && !isVideo) {
+    return { valid: false, error: 'Неподдерживаемый тип файла' };
+  }
+
+  const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE;
+  const maxSizeMB = isImage ? 10 : 50;
+  const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+  const fileType = isImage ? 'изображений' : 'видео';
+
+  if (file.size > maxSize) {
+    return {
+      valid: false,
+      error: `Файл '${file.name}' (${fileSizeMB} МБ) превышает максимальный размер ${maxSizeMB} МБ для ${fileType}.`
+    };
+  }
+
+  return { valid: true, error: null };
 }
 
 export function startButtonDotsAnimation(button, baseText = 'Отправка', interval = 400) {

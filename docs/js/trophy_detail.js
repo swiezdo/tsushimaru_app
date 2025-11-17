@@ -12,6 +12,7 @@ import {
     clearChildren,
     renderFilesPreview,
     startButtonDotsAnimation,
+    validateFileSize,
 } from './utils.js';
 
 const MAX_TROPHY_FILES = 18;
@@ -216,12 +217,43 @@ function handleFilesSelected(files) {
         });
     }
 
+    // Проверка размера файлов
+    const sizeErrors = [];
+    const validFiles = supported.filter((file) => {
+        const validation = validateFileSize(file);
+        if (!validation.valid) {
+            sizeErrors.push(validation.error);
+            return false;
+        }
+        return true;
+    });
+
+    if (sizeErrors.length > 0) {
+        if (sizeErrors.length === 1) {
+            tg?.showPopup?.({
+                title: 'Файл слишком большой',
+                message: sizeErrors[0],
+                buttons: [{ type: 'ok' }],
+            });
+        } else {
+            tg?.showPopup?.({
+                title: 'Файлы слишком большие',
+                message: 'Некоторые файлы превышают максимальный размер. Изображения: до 10 МБ, видео: до 50 МБ.',
+                buttons: [{ type: 'ok' }],
+            });
+        }
+    }
+
+    if (validFiles.length === 0) {
+        return;
+    }
+
     const freeSlots = Math.max(0, MAX_TROPHY_FILES - applicationState.files.length);
     const knownKeys = new Set(applicationState.files.map((file) => createFileKey(file)));
     const uniqueNewFiles = [];
     let skippedByLimit = 0;
 
-    supported.forEach((file) => {
+    validFiles.forEach((file) => {
         const key = createFileKey(file);
         if (knownKeys.has(key)) return;
         if (uniqueNewFiles.length >= freeSlots) {
