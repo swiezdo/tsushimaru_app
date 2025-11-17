@@ -585,7 +585,9 @@ a svg,
 }
 
 /* Разрешаем полное взаимодействие со скриншотами в детальном просмотре билда */
-.shots-grid .shot-thumb img {
+.shots-grid .shot-thumb img,
+.story-scroll-images img,
+.lightbox img {
   pointer-events: auto;
   -webkit-user-drag: auto;
   user-select: auto;
@@ -1828,7 +1830,6 @@ html.tg .only-browser { display: none; }
 /* ========== TROPHY DETAIL ========== */
 #trophyDetailContainer .card {
   padding: var(--space-2) var(--space-4);
-  padding-bottom: 0;
 }
 
 .trophy-header-card {
@@ -1901,12 +1902,10 @@ html.tg .only-browser { display: none; }
 /* ========== MASTERY DETAIL SCREEN ========== */
 #masteryDetailContainer .card {
   padding: var(--space-2) var(--space-4);
-  padding-bottom: 0;
 }
 
 #masteryDetailContainer .reward-detail-header {
   gap: 0 !important;
-  margin-bottom: 0 !important;
   font-size: var(--fs-16) !important;
   font-weight: 600 !important;
   line-height: var(--lh-normal) !important;
@@ -2229,7 +2228,6 @@ html.tg .only-browser { display: none; }
 }
 
 #profileEditScreen .actions-bar,
-#homeScreen .actions-bar,
 #buildCreateScreen .actions-bar,
 #buildDetailScreen .actions-bar:last-of-type {
   margin-bottom: 0;

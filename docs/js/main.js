@@ -426,6 +426,63 @@ async function startApp() {
   initWaves();
 
   showScreen('home');
+  
+  // Защита SVG и изображений от скачивания (кроме билдов и свитков)
+  installImageProtection();
+}
+
+// Защита изображений и SVG от контекстного меню и скачивания
+function installImageProtection() {
+  // Обработчик для всех изображений и SVG, кроме билдов и свитков
+  document.addEventListener('contextmenu', (e) => {
+    const target = e.target;
+    
+    // Проверяем, является ли элемент изображением или SVG
+    if (target.tagName === 'IMG' || target.tagName === 'SVG' || target.closest('svg')) {
+      // Разрешаем контекстное меню для изображений билдов
+      if (target.closest('.shots-grid') || 
+          target.closest('.shot-thumb') ||
+          target.closest('.buildDetailShots') ||
+          target.closest('.publicDetailShots') ||
+          target.closest('.lightbox')) {
+        return; // Разрешаем контекстное меню
+      }
+      
+      // Разрешаем контекстное меню для изображений свитков Гёдзена
+      if (target.closest('.story-scroll-images')) {
+        return; // Разрешаем контекстное меню
+      }
+      
+      // Запрещаем контекстное меню для всех остальных изображений и SVG
+      e.preventDefault();
+      return false;
+    }
+  }, { passive: false });
+  
+  // Дополнительная защита: запрет перетаскивания для SVG и защищенных изображений
+  document.addEventListener('dragstart', (e) => {
+    const target = e.target;
+    
+    if (target.tagName === 'IMG' || target.tagName === 'SVG' || target.closest('svg')) {
+      // Разрешаем перетаскивание для изображений билдов
+      if (target.closest('.shots-grid') || 
+          target.closest('.shot-thumb') ||
+          target.closest('.buildDetailShots') ||
+          target.closest('.publicDetailShots') ||
+          target.closest('.lightbox')) {
+        return; // Разрешаем перетаскивание
+      }
+      
+      // Разрешаем перетаскивание для изображений свитков
+      if (target.closest('.story-scroll-images')) {
+        return; // Разрешаем перетаскивание
+      }
+      
+      // Запрещаем перетаскивание для всех остальных
+      e.preventDefault();
+      return false;
+    }
+  }, { passive: false });
 }
 
 // Надёжный запуск
