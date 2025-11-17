@@ -287,6 +287,30 @@ export async function checkUserRegistration() {
     }
 }
 
+// Получение последних событий наград/мастерства
+export async function getRecentEvents(limit = 3) {
+    const normalizeAvatarUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return `${API_BASE}${url}`;
+    };
+
+    try {
+        const params = new URLSearchParams({ limit: String(Math.max(1, Math.min(limit, 10))) });
+        const data = await apiRequest(`/api/events.recent?${params.toString()}`);
+        if (data && Array.isArray(data.events)) {
+            return data.events.map((event) => ({
+                ...event,
+                avatar_url: normalizeAvatarUrl(event?.avatar_url || ''),
+            }));
+        }
+        return [];
+    } catch (error) {
+        console.error('Ошибка получения ленты наград:', error);
+        return [];
+    }
+}
+
 // ========== ФУНКЦИИ ДЛЯ РАБОТЫ С БИЛДАМИ ==========
 
 // Создание билда

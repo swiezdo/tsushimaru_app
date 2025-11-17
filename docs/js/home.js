@@ -1,11 +1,10 @@
 // home.js
 // Управление главной страницей с ротацией недель
 
-import { getCurrentRotationWeek } from './api.js';
+import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents } from './api.js';
 import { showScreen } from './ui.js';
 import { openWavesScreen } from './waves.js';
 import { tg, hapticTapSmart } from './telegram.js';
-import { checkUserRegistration } from './api.js';
 
 let rotationData = null;
 let rotationCountdownTimerId = null;
@@ -326,6 +325,102 @@ function renderWhatsNewPreviewCard(latest) {
   }
 }
 
+function formatRelativeTime(timestamp) {
+  if (!timestamp) return '';
+  const ms = typeof timestamp === 'number'
+    ? (timestamp < 1e12 ? timestamp * 1000 : timestamp)
+    : Number(timestamp);
+  if (!Number.isFinite(ms)) return '';
+  const diff = Date.now() - ms;
+  if (diff < 45 * 1000) return 'только что';
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 60) return `${minutes} мин назад`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} ч назад`;
+  const days = Math.floor(hours / 24);
+  return `${days} дн назад`;
+}
+
+function renderRecentEventsCard(events) {
+  const home = document.getElementById('homeScreen');
+  if (!home) return;
+
+  const hasEvents = Array.isArray(events) && events.length > 0;
+  let card = document.getElementById('recentEventsCard');
+
+  if (!hasEvents) {
+    card?.parentElement?.removeChild(card);
+    return;
+  }
+
+  if (!card) {
+    card = document.createElement('section');
+    card.className = 'card recent-events-card';
+    card.id = 'recentEventsCard';
+    home.prepend(card);
+  } else if (!card.parentElement) {
+    home.prepend(card);
+  }
+
+  card.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'card-header-row';
+  const title = document.createElement('h3');
+  title.className = 'card-title';
+  title.textContent = 'Последние награды';
+  header.appendChild(title);
+  card.appendChild(header);
+
+  const list = document.createElement('ul');
+  list.className = 'recent-events-list';
+
+  events.slice(0, 3).forEach((event) => {
+    const item = document.createElement('li');
+    item.className = 'recent-event-item';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'recent-event-avatar';
+    if (event?.avatar_url) {
+      const img = document.createElement('img');
+      img.src = event.avatar_url;
+      img.alt = event.psn_id || 'Участник';
+      img.loading = 'lazy';
+      avatar.appendChild(img);
+    } else {
+      const fallback = (event?.psn_id || '?').trim().charAt(0).toUpperCase() || '•';
+      avatar.textContent = fallback;
+    }
+
+    const body = document.createElement('div');
+    body.className = 'recent-event-body';
+
+    const headline = document.createElement('div');
+    headline.className = 'recent-event-headline';
+    headline.textContent = event?.headline || `${event?.psn_id || 'Участник'} получил новую награду`;
+
+    const details = document.createElement('div');
+    details.className = 'recent-event-details';
+    const time = formatRelativeTime(event?.created_at);
+    if (event?.details && time) {
+      details.textContent = `${event.details} · ${time}`;
+    } else {
+      details.textContent = event?.details || time || '';
+    }
+
+    body.appendChild(headline);
+    if (details.textContent) {
+      body.appendChild(details);
+    }
+
+    item.appendChild(avatar);
+    item.appendChild(body);
+    list.appendChild(item);
+  });
+
+  card.appendChild(list);
+}
+
 // ===== Таймер до следующей пятницы 18:00 МСК =====
 function getNextFridayMsk() {
   const now = new Date();
@@ -414,7 +509,12 @@ function renderRotationCountdown() {
  */
 export async function initHome() {
   try {
-    const whats = await loadWhatsNew();
+    const [events, whats] = await Promise.all([
+      getRecentEvents(3).catch(() => []),
+      loadWhatsNew(),
+    ]);
+
+    renderRecentEventsCard(events);
     if (Array.isArray(whats) && whats.length) {
       const latest = whats[whats.length - 1];
       renderWhatsNewPreviewCard(latest);
