@@ -3,6 +3,7 @@
 
 import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments } from './api.js';
 import { showScreen } from './ui.js';
+import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
 import { tg, hapticTapSmart } from './telegram.js';
 import { getClassIconPath } from './utils.js';
@@ -331,9 +332,9 @@ function renderWhatsNewPreviewCard(latest) {
     feedbackBtn.textContent = 'Отправить отзыв';
     feedbackBtn.dataset.bound = 'true';
     feedbackBtn.addEventListener('click', () => {
-      hapticTapSmart();
-      sessionStorage.setItem('previousScreen', 'home');
-      showScreen('feedback');
+        hapticTapSmart();
+        pushNavigation('feedback');
+        showScreen('feedback');
     });
     feedbackBtnContainer.appendChild(feedbackBtn);
   } else {
@@ -342,7 +343,7 @@ function renderWhatsNewPreviewCard(latest) {
       feedbackBtn.dataset.bound = 'true';
       feedbackBtn.addEventListener('click', () => {
         hapticTapSmart();
-        sessionStorage.setItem('previousScreen', 'home');
+        pushNavigation('feedback');
         showScreen('feedback');
       });
     }
@@ -411,7 +412,7 @@ function renderRecentEventsCard(events) {
   const createProfileLink = (handler) => {
     const fn = () => {
       if (!handler?.user_id) return;
-      sessionStorage.setItem('previousScreen', 'home');
+      pushNavigation('participantDetail', { userId: handler.user_id });
       import('./participantDetail.js').then(module => {
         module.openParticipantDetail(handler.user_id);
       }).catch(err => console.error('Ошибка открытия профиля участника:', err));
@@ -554,6 +555,7 @@ function renderRecentCommentsCard(comments) {
     buildLink.appendChild(buildNameSpan);
     buildLink.addEventListener('click', async () => {
       if (!comment?.build_id) return;
+      pushNavigation('buildPublicDetail', { buildId: comment.build_id });
       const { openPublicBuildDetail } = await import('./builds.js');
       openPublicBuildDetail(comment.build_id, { source: 'homeComments' });
     });
@@ -815,8 +817,8 @@ function setupRotationButtons() {
         return;
       }
       
-      sessionStorage.setItem('previousScreen', 'rotation:waves');
       // Если зарегистрирован и в группе - переходим на волны
+      pushNavigation('waves');
       showScreen('waves');
       openWavesScreen();
     });
@@ -827,7 +829,7 @@ function setupRotationButtons() {
   if (storyBtn) {
     storyBtn.addEventListener('click', () => {
       hapticTapSmart();
-      sessionStorage.setItem('previousScreen', 'rotation:story');
+      pushNavigation('story');
       showScreen('story');
     });
   }

@@ -1,6 +1,7 @@
 // main.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, applySafeInsets, screens } from './ui.js';
+import { goBack, setMainScreen } from './navigation.js';
 import { initProfile } from './profile.js';
 import { initParticipants } from './participants.js';
 import { initBuilds } from './builds.js';
@@ -45,150 +46,17 @@ const START_SCREEN_OPTIONS = [
 ];
 const START_SCREEN_WITH_ACCESS_CHECK = new Set(['participants', 'reward', 'builds']);
 
-const BACK_ROUTES = {
-  buildCreate: 'builds',
-  buildEdit: 'buildDetail',
-  buildDetail: 'builds',
-  buildPublicDetail: 'builds',
-  profile: 'home',
-  profileEdit: 'profile',
-  waves: 'home',
-  participants: 'home',
-  builds: 'home',
-  whatsNew: 'home',
-  feedback: 'whatsNew',
-  reward: 'home',
-  rewardDetail: 'reward',
-  trophyDetail: 'reward',
-};
-
-function parseSpecialScreen(previousValue, prefix) {
-  if (!previousValue || !previousValue.startsWith(prefix)) return null;
-  const [, id] = previousValue.split(':');
-  return id || null;
-}
-
-async function importBuildsModule() {
-  return import('./builds.js');
-}
-
-async function importParticipantDetailModule() {
-  return import('./participantDetail.js');
-}
-
-async function handleSpecialBackNavigation({ currentScreen, nextScreen, previousScreen }) {
-  // Возврат в карточку участника после выбора другого участника
-  if (nextScreen === 'participantDetail') {
-    const participantId = parseSpecialScreen(previousScreen, 'participantDetail:');
-    if (participantId) {
-      try {
-        const module = await importParticipantDetailModule();
-        await module.openParticipantDetail(participantId);
-      } catch (error) {
-        console.error('Ошибка импорта participantDetail.js:', error);
-        showScreen('participants');
-      }
-      return true;
-    }
-  }
-
-  // Возврат к публичному билду из списка участников
-  if (nextScreen === 'buildPublicDetail') {
-    const buildId = parseSpecialScreen(previousScreen, 'buildPublicDetail:');
-    if (buildId) {
-      try {
-        const module = await importBuildsModule();
-        await module.openPublicBuildDetail(buildId);
-      } catch (error) {
-        console.error('Ошибка импорта builds.js:', error);
-        showScreen('builds');
-      }
-      return true;
-    }
-  }
-
-  // Переход назад из профиля участника к билду, откуда пришли
-  if (currentScreen === 'participantDetail') {
-    const buildId = parseSpecialScreen(previousScreen, 'buildPublicDetail:');
-    if (buildId) {
-      try {
-        const module = await importBuildsModule();
-        await module.openPublicBuildDetail(buildId);
-      } catch (error) {
-        console.error('Ошибка импорта builds.js:', error);
-        showScreen('builds');
-      }
-      return true;
-    }
-  }
-
-  // При возврате на экран билдов нужно обновить статистику
-  if (currentScreen === 'buildPublicDetail' && nextScreen === 'builds') {
-    try {
-      const module = await importBuildsModule();
-      await module.checkAndRefreshBuilds();
-    } catch (error) {
-      console.error('Ошибка импорта builds.js:', error);
-    }
-    if (previousScreen === 'source:homeComments') {
-      showScreen('home', { skipScroll: true });
-      sessionStorage.removeItem('previousScreen');
-      return true;
-    }
-    showScreen(nextScreen);
-    return true;
-  }
-
-  if (previousScreen === 'source:homeComments' && currentScreen === 'buildPublicDetail') {
-    showScreen('home', { skipScroll: true });
-    return true;
-  }
-
-  return false;
-}
 
 // ---------------- BackButton навигация + Tap ----------------
 function installBackButton() {
   tg?.onEvent?.('backButtonClicked', async () => {
     hapticTapSmart(); // Tap на Back
     
-    // Определяем текущий экран и следующий экран
+    // Определяем текущий экран
     const currentScreen = Object.keys(screens).find(key => {
       const screen = screens[key];
       return screen && !screen.classList.contains('hidden');
     });
-    
-    // Проверяем sessionStorage для специальных случаев навигации
-    const previousScreen = sessionStorage.getItem('previousScreen');
-    
-    // Обрабатываем специальные случаи ПЕРЕД использованием BACK_ROUTES
-    let nextScreen;
-    
-    if (currentScreen === 'participantDetail') {
-      // Возврат из профиля участника
-      if (previousScreen === 'participants') {
-        nextScreen = 'participants';
-      } else if (previousScreen?.startsWith('buildPublicDetail:')) {
-        nextScreen = 'buildPublicDetail';
-      } else if (previousScreen === 'home') {
-        nextScreen = 'home';
-      } else {
-        nextScreen = 'participants';
-      }
-    } else if ((currentScreen === 'story' || currentScreen === 'waves') && previousScreen?.startsWith('rotation:')) {
-      nextScreen = 'rotation';
-  } else {
-      // Для остальных экранов используем BACK_ROUTES
-      nextScreen = BACK_ROUTES[currentScreen] || 'home';
-      
-      // Специальный случай: возврат из билда к участнику
-    if (nextScreen === 'buildPublicDetail' && previousScreen?.startsWith('participantDetail:')) {
-      nextScreen = 'participantDetail';
-      }
-    if (currentScreen === 'feedback' && previousScreen) {
-      nextScreen = previousScreen;
-    }
-    }
 
     // Блокируем кнопку "Назад" на экране вступления в группу
     if (currentScreen === 'joinGroup') {
@@ -216,13 +84,10 @@ function installBackButton() {
               { id: 'cancel', type: 'default', text: 'Отменить' },
               { id: 'discard', type: 'destructive', text: 'Выйти без сохранения' }
             ]
-          }, (buttonId) => {
+          }, async (buttonId) => {
             if (buttonId === 'discard') {
-              // Выходим без сохранения
-              showScreen(nextScreen);
-              if (previousScreen) {
-                sessionStorage.removeItem('previousScreen');
-              }
+              // Выходим без сохранения - используем систему навигации
+              await goBack();
             }
             // Если buttonId === 'cancel', ничего не делаем - остаемся на странице
           });
@@ -234,25 +99,8 @@ function installBackButton() {
       }
     }
 
-    const handled = await handleSpecialBackNavigation({
-      currentScreen,
-      nextScreen,
-      previousScreen,
-    });
-
-    if (!handled) {
-      showScreen(nextScreen);
-      // Удаляем previousScreen только после успешного перехода
-      if (previousScreen) {
-        sessionStorage.removeItem('previousScreen');
-      }
-    } else {
-      // Если handled = true, previousScreen уже обработан в handleSpecialBackNavigation
-      // Но нужно его удалить, если переход выполнен
-      if (previousScreen && (previousScreen === 'participants' || previousScreen.startsWith('buildPublicDetail:'))) {
-        sessionStorage.removeItem('previousScreen');
-      }
-    }
+    // Используем систему навигации на основе стека
+    await goBack();
   });
 }
 
@@ -345,7 +193,6 @@ function bindBottomNav() {
       }
       
       hapticTapSmart();
-      sessionStorage.removeItem('previousScreen');
       
       // Запускаем анимацию для всех кнопок с анимированными иконками
       const animatedImg = btn.querySelector('img[data-static="true"]');
@@ -356,19 +203,23 @@ function bindBottomNav() {
       // Обработка разных экранов с requireRegistration
       if (screenName === 'reward') {
         requireRegistration(() => { 
+          setMainScreen('reward');
           showScreen('reward'); 
         });
       } else if (screenName === 'participants') {
-        requireRegistration(() => showScreen('participants'));
-      } else if (screenName === 'waves') {
-        requireRegistration(() => { 
-          showScreen('waves'); 
-          openWavesScreen(); 
+        requireRegistration(() => {
+          setMainScreen('participants');
+          showScreen('participants');
         });
       } else if (screenName === 'builds') {
-        requireRegistration(() => showScreen('builds'));
+        requireRegistration(() => {
+          setMainScreen('builds');
+          showScreen('builds');
+        });
       } else {
-        // Домой и Профиль - без requireRegistration
+        // Домой, Ротация и Профиль - без requireRegistration
+        // Но все равно устанавливаем главный экран и очищаем стек
+        setMainScreen(screenName);
         showScreen(screenName);
       }
     });
@@ -472,14 +323,17 @@ async function ensureStartScreenAccess(screen) {
 async function showInitialScreen() {
   const preferred = getPreferredStartScreen();
   if (preferred === 'home') {
+    setMainScreen('home');
     showScreen('home');
     return;
   }
   const allowed = await ensureStartScreenAccess(preferred);
   if (!allowed) {
+    setMainScreen('home');
     showScreen('home');
     return;
   }
+  setMainScreen(preferred);
   showScreen(preferred);
 }
 

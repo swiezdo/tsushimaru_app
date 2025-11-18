@@ -130,7 +130,6 @@ export function initWhatsNew() {
   // Обработчик кнопки отправки отзыва
   sendFeedbackBtn?.addEventListener('click', () => {
     hapticTapSmart();
-  sessionStorage.setItem('previousScreen', 'whatsNew');
     showScreen('feedback');
   });
 }

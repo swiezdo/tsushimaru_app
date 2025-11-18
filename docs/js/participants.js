@@ -3,6 +3,7 @@ import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen } from './ui.js';
 import { fetchParticipants, API_BASE } from './api.js';
 import { openParticipantDetail } from './participantDetail.js';
+import { pushNavigation } from './navigation.js';
 
 // Элементы интерфейса
 const participantsListEl = $('participantsList');
@@ -122,9 +123,7 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
             hapticTapSmart();
             const userId = btn.dataset.userId;
             if (userId) {
-                // Устанавливаем previousScreen перед открытием профиля участника
-                // Это гарантирует, что при возврате назад мы вернемся на страницу участников
-                sessionStorage.setItem('previousScreen', 'participants');
+                pushNavigation('participantDetail', { userId: parseInt(userId) });
                 openParticipantDetail(parseInt(userId));
             }
         });

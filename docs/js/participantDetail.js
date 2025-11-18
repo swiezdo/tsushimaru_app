@@ -1,6 +1,7 @@
 // participantDetail.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
+import { pushNavigation, setCurrentScreenParams } from './navigation.js';
 import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE, fetchUserTrophies, fetchTrophiesList } from './api.js';
 import { prettyLines, formatDate } from './utils.js';
 import { 
@@ -296,8 +297,8 @@ function createBuildElement(build, isPublic = false) {
 
 // Функция открытия деталей публичного билда (копия из builds.js)
 function openPublicBuildDetail(pubId) {
-    // Сохраняем информацию о том, откуда мы пришли
-    sessionStorage.setItem('previousScreen', `participantDetail:${currentParticipantId}`);
+    // Добавляем текущий экран в стек навигации перед переходом
+    pushNavigation('buildPublicDetail', { buildId: pubId });
     
     // Используем существующую функцию из builds.js
     import('./builds.js').then(module => {
@@ -319,10 +320,8 @@ export async function openParticipantDetail(userId) {
     try {
         currentParticipantId = userId;
         
-        // Сохраняем информацию о том, откуда мы пришли, только если она еще не установлена
-        if (!sessionStorage.getItem('previousScreen')) {
-            sessionStorage.setItem('previousScreen', 'participants');
-        }
+        // Сохраняем параметры текущего экрана
+        setCurrentScreenParams('participantDetail', { userId });
         
         const trophyDefinitionsPromise = trophyDefinitionsByKey.size
             ? Promise.resolve(null)

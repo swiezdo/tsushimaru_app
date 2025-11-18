@@ -1,6 +1,7 @@
 // builds.js
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
+import { pushNavigation, setCurrentScreenParams } from './navigation.js';
 import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate } from './utils.js';
 import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, updateBuild, createComment, getBuildComments, toggleReaction, getReactions, API_BASE } from './api.js';
 
@@ -966,6 +967,9 @@ async function shareBuildCommand(buildId) {
 }
 
 function openBuildDetail(id) {
+  // Сохраняем параметры текущего экрана
+  setCurrentScreenParams('buildDetail', { buildId: id });
+  
   getMyBuilds().then(builds => {
     const b = builds.find((x) => String(x.build_id || x.id) === String(id));
     if (!b) { tg?.showAlert?.('Билд не найден'); return; }
@@ -1028,6 +1032,9 @@ function openBuildDetail(id) {
   });
 }
 function openPublicBuildDetail(pubId, options = {}) {
+  // Сохраняем параметры текущего экрана
+  setCurrentScreenParams('buildPublicDetail', { buildId: pubId });
+  
   getPublicBuilds().then(pubs => {
     const p = pubs.find(x => String(x.build_id || x.id) === String(pubId));
     if (!p) { tg?.showAlert?.('Публикация не найдена'); return; }
@@ -1051,8 +1058,8 @@ function openPublicBuildDetail(pubId, options = {}) {
       pd_author._authorClickHandler = () => {
         hapticTapSmart();
         if (p.user_id) {
-          // Сохраняем информацию о том, откуда мы пришли
-          sessionStorage.setItem('previousScreen', `buildPublicDetail:${pubId}`);
+          // Добавляем текущий экран в стек навигации перед переходом
+          pushNavigation('participantDetail', { userId: p.user_id });
           
           // Импортируем и вызываем функцию открытия профиля участника
           import('./participantDetail.js').then(module => {
@@ -1113,9 +1120,6 @@ function openPublicBuildDetail(pubId, options = {}) {
       publicDetailShots.appendChild(wrap);
     });
 
-    if (options.source) {
-      sessionStorage.setItem('previousScreen', `source:${options.source}`);
-    }
     showScreen('buildPublicDetail');
     setTopbar(true, formatTopbarTitle(p.name || 'Билд')); // Устанавливаем название билда в topbar ПОСЛЕ showScreen
     
@@ -1761,8 +1765,8 @@ function renderPublicComments(comments) {
     if (comment.user_id) {
       authorName.addEventListener('click', () => {
         hapticTapSmart();
-        // Сохраняем информацию о том, откуда мы пришли
-        sessionStorage.setItem('previousScreen', `buildPublicDetail:${currentPublicBuildId}`);
+        // Добавляем текущий экран в стек навигации перед переходом
+        pushNavigation('participantDetail', { userId: comment.user_id });
         
         // Импортируем и вызываем функцию открытия профиля участника
         import('./participantDetail.js').then(module => {
