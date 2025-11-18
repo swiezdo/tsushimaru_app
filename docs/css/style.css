@@ -822,6 +822,9 @@ a svg,
 
 .start-screen-actions {
   margin-top: var(--space-4);
+  margin-left: 0;
+  margin-right: 0;
+  grid-template-columns: 1fr;
 }
 
 /* Карточка последних наград */
@@ -2240,6 +2243,13 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
 .filter-option span {
   font-size: var(--fs-15);
   color: var(--tg-tx);
+}
+
+/* ========== START SCREEN MODAL - LIGHT THEME ========== */
+.theme-light .filter-modal-title,
+.theme-light .start-screen-option span,
+.theme-light .filter-option span {
+  color: #000;
 }
 
 /* ========== AUTHOR FIELD ========== */
