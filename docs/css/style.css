@@ -414,7 +414,9 @@ main.container {
 #sendFeedbackBtn,
 #profileEditBtn,
 #createBuildBtn,
-#joinTelegramBtn {
+#joinTelegramBtn,
+#startScreenSaveBtn,
+#filterModalOkBtn {
   background: none !important;
   background-image: url('../assets/system/blue.png') !important;
   background-size: cover !important;
@@ -430,7 +432,9 @@ main.container {
 #sendFeedbackBtn::before,
 #profileEditBtn::before,
 #createBuildBtn::before,
-#joinTelegramBtn::before {
+#joinTelegramBtn::before,
+#startScreenSaveBtn::before,
+#filterModalOkBtn::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -2195,10 +2199,6 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   padding: var(--space-4);
 }
 
-.filter-modal.hidden {
-  display: none !important;
-}
-
 .filter-modal-content {
   background: var(--modal-bg);
   border: 1px solid var(--color-border);
@@ -2226,23 +2226,35 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
 .filter-option {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  border-radius: var(--radius-sm);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--elem-bg);
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.filter-option input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+.filter-option input[type="checkbox"],
+.filter-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
   margin: 0;
   accent-color: var(--accent);
 }
 
 .filter-option span {
-  font-size: var(--fs-15);
-  color: var(--tg-tx);
+  font-size: var(--fs-16);
+  font-weight: 600;
+  color: var(--fg);
+}
+
+/* ========== FILTER MODAL ACTIONS BAR ========== */
+.filter-modal-content .actions-bar {
+  margin-top: var(--space-4);
+  margin-left: 0;
+  margin-right: 0;
+  grid-template-columns: 1fr;
 }
 
 /* ========== START SCREEN MODAL - LIGHT THEME ========== */
