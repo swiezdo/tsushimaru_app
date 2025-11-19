@@ -92,6 +92,12 @@ export function getCategoryByKey(config, key) {
     return config.categories.find(cat => cat.key === key) || null;
 }
 
+// Получение URL иконки с cache-busting версией
+function getIconUrl(categoryKey, config = null) {
+    const version = (config && config.version) ? config.version : Date.now();
+    return `./assets/mastery/${categoryKey}/icon.svg?v=${version}`;
+}
+
 // Получение уровня по номеру в категории
 function getLevelByNumber(category, levelNum) {
     if (!category || !category.levels) return null;
@@ -211,7 +217,9 @@ export function createProgressCircle(category, currentLevel, progress) {
 export function createMaxLevelIcon(categoryKey) {
     const icon = document.createElement('div');
     icon.className = 'mastery-icon';
-    icon.style.backgroundImage = `url('./assets/mastery/${categoryKey}/icon.svg')`;
+    // Используем версию из конфига для cache-busting
+    const config = masteryConfig;
+    icon.style.backgroundImage = `url('${getIconUrl(categoryKey, config)}')`;
     return icon;
 }
 
@@ -483,7 +491,9 @@ function renderMasteryDetail(category, currentLevel) {
     
     const icon = document.createElement('img');
     icon.className = 'mastery-detail-icon';
-    icon.src = `./assets/mastery/${category.key}/icon.svg`;
+    // Используем версию из конфига для cache-busting
+    const config = masteryConfig;
+    icon.src = getIconUrl(category.key, config);
     icon.alt = category.name;
     icon.decoding = 'async';
     icon.loading = 'lazy';

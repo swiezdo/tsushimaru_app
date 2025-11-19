@@ -171,6 +171,11 @@ function renderScrollsCard(root, weekData, scrollBlock) {
   const title = document.createElement('h3');
   title.className = 'card-title';
   title.textContent = 'Свиток Гёдзена';
+  const icon = document.createElement('img');
+  icon.src = './assets/icons/system/scroll.svg';
+  icon.alt = '';
+  icon.className = 'card-title-icon';
+  title.appendChild(icon);
   card.appendChild(title);
 
   if (!scrollBlock || !scrollBlock.scroll) {
