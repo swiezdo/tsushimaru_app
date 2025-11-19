@@ -11,6 +11,7 @@ import { initFeedback } from './feedback.js';
 import { initMastery } from './mastery.js';
 import { initTrophies } from './trophies.js';
 import { initTrophiesList } from './trophies_list.js';
+import { initSeasonTrophy } from './season_trophy.js';
 import { checkUserRegistration, checkGroupMembership, notifyBotUserNotRegistered } from './api.js';
 import { initWaves, openWavesScreen } from './waves.js';
 import { initStaticImage, playAnimationOnce } from './utils.js';
@@ -361,6 +362,9 @@ async function startApp() {
   
   // Инициализация модуля списка трофеев
   initTrophiesList();
+  
+  // Инициализация модуля сезонного трофея
+  initSeasonTrophy();
 
   // Инициализация модуля волн
   initWaves();

@@ -6,6 +6,7 @@ import { loadProfileOnScreenOpen } from './profile.js';
 import { renderMasteryButtons } from './mastery.js';
 import { renderTrophiesCollection } from './trophies.js';
 import { renderTrophiesButtons } from './trophies_list.js';
+import { renderSeasonTrophy } from './season_trophy.js';
 import { renderWhatsNewCards } from './whatsNew.js';
 import { openStoryScreen } from './story.js';
 import { refreshParticipantsList, resetParticipantSearch } from './participants.js';
@@ -31,6 +32,7 @@ export const screens = {
   reward:             document.getElementById('rewardScreen'),
   rewardDetail:       document.getElementById('rewardDetailScreen'),
   trophyDetail:       document.getElementById('trophyDetailScreen'),
+  seasonTrophy:       document.getElementById('seasonTrophyScreen'),
 };
 
 const SCREEN_TITLES = {
@@ -50,6 +52,7 @@ const SCREEN_TITLES = {
   whatsNew: 'Что нового?',
   feedback: 'Отправить отзыв',
   reward: 'Награды',
+  seasonTrophy: 'Сезонный трофей',
 };
 
 const SCREENS_WITH_BACK = new Set([
@@ -65,6 +68,7 @@ const SCREENS_WITH_BACK = new Set([
   'feedback',
   'rewardDetail',
   'trophyDetail',
+  'seasonTrophy',
 ]);
 
 const SCREEN_HOOKS = {
@@ -91,6 +95,7 @@ const SCREEN_HOOKS = {
     });
   },
   reward: () => {
+    renderSeasonTrophy();
     renderMasteryButtons();
     renderTrophiesButtons();
     // Восстанавливаем позицию скролла после рендеринга контента

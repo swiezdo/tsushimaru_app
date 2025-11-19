@@ -2067,6 +2067,182 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   border-top: 1px solid var(--color-border);
 }
 
+/* ========== SEASON TROPHY CARD ========== */
+#seasonTrophyCard {
+  margin: var(--space-4);
+  margin-bottom: var(--card-spacing, var(--space-4));
+}
+
+.season-trophy-card {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  text-align: left;
+  /* Красивый цветной градиент: красный, бордовый, оранжевый, черный, белый */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 0, 0.5) 0%,
+    rgba(128, 0, 32, 0.5) 25%,
+    rgba(255, 165, 0, 0.5) 50%,
+    rgba(0, 0, 0, 0.6) 75%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  background-size: 200% 200%;
+  animation: season-trophy-gradient 8s ease infinite;
+  
+  /* Блестящая рамка с анимацией через box-shadow */
+  box-shadow: 
+    0 0 0 2px rgba(212, 175, 55, 0.3),
+    0 0 10px rgba(212, 175, 55, 0.2),
+    0 0 20px rgba(255, 215, 0, 0.1);
+  animation: season-trophy-border-glow 3s ease-in-out infinite, season-trophy-gradient 8s ease infinite;
+}
+
+/* Фон с паттерном из иконки трофея (повернутый на 45 градусов) */
+.season-trophy-bg {
+  position: absolute;
+  /* Увеличиваем размер, чтобы покрыть повернутый паттерн и заполнить углы */
+  top: -75%;
+  left: -75%;
+  width: 250%;
+  height: 250%;
+  /* Фон устанавливается через inline стиль в JS */
+  /* Размер ячейки паттерна - 50px (создается через canvas в JS) */
+  background-size: 50px 50px;
+  background-repeat: repeat;
+  background-position: 0 0;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+  transform: rotate(45deg);
+  transform-origin: center center;
+}
+
+/* Дополнительный слой для затемнения фона и улучшения читаемости */
+.season-trophy-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(14, 22, 33, 0.2) 0%,
+    rgba(14, 22, 33, 0.35) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  border-radius: var(--radius-lg);
+}
+
+/* Блестящий эффект через отдельный элемент внутри карточки */
+.season-trophy-shine {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 70%
+  );
+  animation: season-trophy-shine 4s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Анимация градиента фона */
+@keyframes season-trophy-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Анимация свечения рамки */
+@keyframes season-trophy-border-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 2px rgba(212, 175, 55, 0.4),
+      0 0 15px rgba(212, 175, 55, 0.3),
+      0 0 25px rgba(255, 215, 0, 0.2),
+      inset 0 0 20px rgba(212, 175, 55, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 2px rgba(255, 215, 0, 0.6),
+      0 0 20px rgba(255, 215, 0, 0.4),
+      0 0 35px rgba(255, 255, 255, 0.3),
+      inset 0 0 30px rgba(255, 215, 0, 0.15);
+  }
+}
+
+
+@keyframes season-trophy-shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+.season-trophy-card:active {
+  transform: scale(0.98);
+}
+
+.season-trophy-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  position: relative;
+  z-index: 3;
+  background: rgba(14, 22, 33, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+}
+
+.season-trophy-icon-wrapper {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--elem-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.season-trophy-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.season-trophy-text {
+  font-size: var(--fs-22);
+  font-weight: 700;
+  color: var(--fg);
+  text-shadow: var(--shadow-text);
+  flex: 1;
+  line-height: var(--lh-tight);
+}
+
 /* ========== MASTERY DETAIL SCREEN ========== */
 #masteryDetailContainer .card {
   padding: var(--space-2) var(--space-4);
