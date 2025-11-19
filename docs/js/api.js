@@ -252,38 +252,32 @@ export async function checkGroupMembership() {
     }
 }
 
-// Проверка регистрации пользователя
+// Проверка регистрации пользователя (упрощенная версия - только проверка наличия в БД)
 export async function checkUserRegistration() {
     try {
         // Проверяем наличие профиля в БД
         await fetchProfile();
-        const isRegistered = true;
-        
-        // Дополнительно проверяем участие в группе
-        const isInGroup = await checkGroupMembership();
-        
-        // Возвращаем объект с результатами обеих проверок
-        return {
-            isRegistered: isRegistered,
-            isInGroup: isInGroup
-        };
+        return true;
     } catch (error) {
         if (error.status === 404) {
             // Пользователь не зарегистрирован
-            // Все равно проверяем участие в группе (может быть зарегистрирован, но не в группе)
-            const isInGroup = await checkGroupMembership();
-            return {
-                isRegistered: false,
-                isInGroup: isInGroup
-            };
+            return false;
         }
         // Для других ошибок (сеть, сервер) считаем что пользователь не зарегистрирован
         console.error('Ошибка проверки регистрации:', error);
-        const isInGroup = await checkGroupMembership();
-        return {
-            isRegistered: false,
-            isInGroup: isInGroup
-        };
+        return false;
+    }
+}
+
+// Уведомление бота о том, что пользователь не в группе
+export async function notifyBotUserNotRegistered() {
+    try {
+        await apiRequest('/api/user.notifyNotRegistered', {
+            method: 'POST'
+        });
+    } catch (error) {
+        console.error('Ошибка уведомления бота:', error);
+        // Не критично, если не удалось отправить - просто логируем
     }
 }
 

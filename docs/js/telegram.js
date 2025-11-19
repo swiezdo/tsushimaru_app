@@ -163,3 +163,14 @@ export function isDesktop() {
 export function isMobile() {
   return platformInfo.isMobile;
 }
+
+// Функция для закрытия мини-приложения
+export function closeWebApp() {
+  try {
+    if (tg && tg.close) {
+      tg.close();
+    }
+  } catch (error) {
+    console.error('Ошибка при закрытии WebApp:', error);
+  }
+}

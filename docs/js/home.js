@@ -781,43 +781,7 @@ function setupRotationButtons() {
     survivalBtn.addEventListener('click', async () => {
       hapticTapSmart();
       
-      // Проверка регистрации
-      const result = await checkUserRegistration();
-      const isRegistered = typeof result === 'object' ? result.isRegistered : result;
-      const isInGroup = typeof result === 'object' ? result.isInGroup : true;
-      
-      if (!isRegistered || !isInGroup) {
-        if (!isRegistered) {
-          tg?.showPopup({
-            title: "Требуется регистрация",
-            message: "Эти функции доступны только зарегистрированным пользователям",
-            buttons: [
-              { id: "cancel", type: "default", text: "Ок" },
-              { id: "register", type: "destructive", text: "Создать профиль" }
-            ]
-          }, (buttonId) => {
-            if (buttonId === "register") {
-              showScreen('profile');
-            }
-          });
-        } else if (!isInGroup) {
-          tg?.showPopup({
-            title: "Требуется участие в группе",
-            message: "Эти функции доступны только участникам группы Tsushima.Ru. Пожалуйста, присоединитесь к группе.",
-            buttons: [
-              { id: "cancel", type: "default", text: "Ок" },
-              { id: "joinGroup", type: "destructive", text: "Открыть группу" }
-            ]
-          }, (buttonId) => {
-            if (buttonId === "joinGroup") {
-              window.open("https://t.me/+ZFiVYVrz-PEzYjBi", "_blank");
-            }
-          });
-        }
-        return;
-      }
-      
-      // Если зарегистрирован и в группе - переходим на волны
+      // Переходим на волны
       pushNavigation('waves');
       showScreen('waves');
       openWavesScreen();

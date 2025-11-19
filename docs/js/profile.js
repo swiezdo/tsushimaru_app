@@ -1,7 +1,7 @@
 // profile.js
 import { tg, $, hapticTapSmart, hapticERR, hapticOK, hideKeyboard } from './telegram.js';
 import { focusAndScrollIntoView, showScreen } from './ui.js';
-import { fetchProfile, saveProfile as apiSaveProfile, uploadAvatar, API_BASE, checkGroupMembership } from './api.js';
+import { fetchProfile, saveProfile as apiSaveProfile, uploadAvatar, API_BASE } from './api.js';
 import { renderChips, activeValues, setActive, shake, prettyLines, validatePSNId, safeLocalStorageGet, safeLocalStorageSet } from './utils.js';
 import { setBottomNavVisible } from './main.js';
 
@@ -387,24 +387,7 @@ export function initProfile() {
       }
       
       if (isFirstRegistration) {
-        // Первая регистрация - проверяем участие в группе
-        try {
-          const isInGroup = await checkGroupMembership();
-          if (!isInGroup) {
-            // Пользователь не в группе - показываем экран требования вступления
-            setBottomNavVisible(false);
-            showScreen('joinGroup');
-            return;
-          }
-        } catch (error) {
-          console.error('Ошибка проверки участия в группе:', error);
-          // При ошибке считаем что пользователь не в группе
-          setBottomNavVisible(false);
-          showScreen('joinGroup');
-          return;
-        }
-        
-        // Пользователь в группе - показываем навигацию и переходим на главную
+        // Первая регистрация - показываем навигацию и переходим на главную
         setBottomNavVisible(true);
         tg?.showPopup?.({ title: 'Добро пожаловать!', message: 'Профиль успешно создан. Теперь вы можете пользоваться приложением.', buttons: [{ type: 'ok' }] }, () => {
           showScreen('home');

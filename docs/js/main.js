@@ -1,5 +1,5 @@
 // main.js
-import { tg, $, hapticTapSmart } from './telegram.js';
+import { tg, $, hapticTapSmart, closeWebApp } from './telegram.js';
 import { showScreen, applySafeInsets, screens } from './ui.js';
 import { goBack, setMainScreen } from './navigation.js';
 import { initProfile } from './profile.js';
@@ -11,7 +11,7 @@ import { initFeedback } from './feedback.js';
 import { initMastery } from './mastery.js';
 import { initTrophies } from './trophies.js';
 import { initTrophiesList } from './trophies_list.js';
-import { checkUserRegistration, checkGroupMembership } from './api.js';
+import { checkUserRegistration, checkGroupMembership, notifyBotUserNotRegistered } from './api.js';
 import { initWaves, openWavesScreen } from './waves.js';
 import { initStaticImage, playAnimationOnce } from './utils.js';
 
@@ -104,57 +104,6 @@ function installBackButton() {
   });
 }
 
-// ---------------- Проверка регистрации ----------------
-async function requireRegistration(callback) {
-  const result = await checkUserRegistration();
-  
-  // Проверяем, что result - это объект (новый формат) или boolean (старый формат для обратной совместимости)
-  const isRegistered = typeof result === 'object' ? result.isRegistered : result;
-  const isInGroup = typeof result === 'object' ? result.isInGroup : true; // Для обратной совместимости считаем что в группе
-  
-  // Если пользователь не зарегистрирован
-  if (!isRegistered) {
-    // Показываем Telegram попап
-    tg?.showPopup({
-      title: "Требуется регистрация",
-      message: "Эти функции доступны только зарегистрированным пользователям",
-      buttons: [
-        { id: "cancel", type: "default", text: "Ок" },
-        { id: "register", type: "destructive", text: "Создать профиль" }
-      ]
-    }, (buttonId) => {
-      if (buttonId === "register") {
-        showScreen('profile');
-      }
-      // При нажатии "Ок" или закрытии попапа остаемся на главной
-    });
-    return;
-  }
-  
-  // Если пользователь зарегистрирован, но не в группе
-  if (!isInGroup) {
-    // Показываем Telegram попап с предложением присоединиться к группе
-    tg?.showPopup({
-      title: "Требуется участие в группе",
-      message: "Эти функции доступны только участникам группы Tsushima.Ru. Пожалуйста, присоединитесь к группе.",
-      buttons: [
-        { id: "cancel", type: "default", text: "Ок" },
-        { id: "joinGroup", type: "destructive", text: "Открыть группу" }
-      ]
-    }, (buttonId) => {
-      if (buttonId === "joinGroup") {
-        // Открываем ссылку на группу
-        window.open("https://t.me/+ZFiVYVrz-PEzYjBi", "_blank");
-      }
-      // При нажатии "Ок" или закрытии попапа остаемся на главной
-    });
-    return;
-  }
-  
-  // Если зарегистрирован и в группе - выполняем callback
-  callback();
-}
-
 // ---------------- Главная: обработчики удалены (теперь в home.js) ----------------
 function bindHomeButtons() {
   // Обработчики кнопок главной страницы перенесены в home.js
@@ -200,28 +149,9 @@ function bindBottomNav() {
         playAnimationOnce(animatedImg);
       }
       
-      // Обработка разных экранов с requireRegistration
-      if (screenName === 'reward') {
-        requireRegistration(() => { 
-          setMainScreen('reward');
-          showScreen('reward'); 
-        });
-      } else if (screenName === 'participants') {
-        requireRegistration(() => {
-          setMainScreen('participants');
-          showScreen('participants');
-        });
-      } else if (screenName === 'builds') {
-        requireRegistration(() => {
-          setMainScreen('builds');
-          showScreen('builds');
-        });
-      } else {
-        // Домой, Ротация и Профиль - без requireRegistration
-        // Но все равно устанавливаем главный экран и очищаем стек
-        setMainScreen(screenName);
-        showScreen(screenName);
-      }
+      // Переход на экран
+      setMainScreen(screenName);
+      showScreen(screenName);
     });
   });
 
@@ -406,84 +336,6 @@ export function setBottomNavVisible(visible) {
   }
 }
 
-// ---------------- Инициализация экрана требования вступления в группу ----------------
-const TELEGRAM_COMMUNITY_URL = 'https://t.me/+ZFiVYVrz-PEzYjBi';
-
-let joinGroupScreenInitialized = false;
-
-export function initJoinGroupScreen() {
-  const joinGroupBtn = document.getElementById('joinGroupBtn');
-  if (!joinGroupBtn || joinGroupScreenInitialized) return;
-  
-  joinGroupScreenInitialized = true;
-
-  joinGroupBtn.addEventListener('click', async () => {
-    hapticTapSmart();
-    
-    // Открываем ссылку на группу
-    if (tg?.openTelegramLink) {
-      tg.openTelegramLink(TELEGRAM_COMMUNITY_URL);
-    } else {
-      window.open(TELEGRAM_COMMUNITY_URL, '_blank');
-    }
-
-    // Проверяем участие в группе через небольшую задержку и периодически
-    let checkCount = 0;
-    const maxChecks = 20; // Проверяем максимум 20 раз (около 1 минуты)
-    let checkInterval = null;
-    
-    const stopChecking = () => {
-      if (checkInterval) {
-        clearInterval(checkInterval);
-        checkInterval = null;
-      }
-      window.removeEventListener('focus', checkOnFocus);
-    };
-    
-    const onGroupJoined = () => {
-      stopChecking();
-      setBottomNavVisible(true);
-      tg?.showPopup?.({ 
-        title: 'Добро пожаловать!', 
-        message: 'Вы успешно присоединились к группе. Теперь вы можете пользоваться приложением.', 
-        buttons: [{ type: 'ok' }] 
-      }, () => {
-        showScreen('home');
-      });
-    };
-    
-    checkInterval = setInterval(async () => {
-      checkCount++;
-      try {
-        const isInGroup = await checkGroupMembership();
-        if (isInGroup) {
-          onGroupJoined();
-        } else if (checkCount >= maxChecks) {
-          stopChecking();
-        }
-      } catch (error) {
-        console.error('Ошибка проверки участия в группе:', error);
-        if (checkCount >= maxChecks) {
-          stopChecking();
-        }
-      }
-    }, 3000); // Проверяем каждые 3 секунды
-
-    // Также проверяем при возврате фокуса на приложение
-    const checkOnFocus = async () => {
-      try {
-        const isInGroup = await checkGroupMembership();
-        if (isInGroup) {
-          onGroupJoined();
-        }
-      } catch (error) {
-        console.error('Ошибка проверки участия в группе:', error);
-      }
-    };
-    
-    window.addEventListener('focus', checkOnFocus);
-  });
-}
 
 // ---------------- Старт ----------------
 async function startApp() {
@@ -519,21 +371,25 @@ async function startApp() {
     settingsBtn.classList.add('hidden');
   }
 
-  // Проверка регистрации пользователя
+  // Проверка участия в группе и регистрации пользователя
   try {
-    const registrationResult = await checkUserRegistration();
-    const isRegistered = typeof registrationResult === 'object' ? registrationResult.isRegistered : registrationResult;
-    const isInGroup = typeof registrationResult === 'object' ? registrationResult.isInGroup : true;
+    // Сначала проверяем участие в группе
+    const isInGroup = await checkGroupMembership();
+    
+    if (!isInGroup) {
+      // Пользователь не в группе - уведомляем бота и закрываем приложение
+      await notifyBotUserNotRegistered();
+      closeWebApp();
+      return;
+    }
+    
+    // Пользователь в группе - проверяем наличие в БД
+    const isRegistered = await checkUserRegistration();
     
     if (!isRegistered) {
       // Пользователь не зарегистрирован - показываем страницу редактирования профиля
       setBottomNavVisible(false);
       showScreen('profileEdit');
-    } else if (!isInGroup) {
-      // Пользователь зарегистрирован, но не в группе - показываем экран требования вступления
-      setBottomNavVisible(false);
-      showScreen('joinGroup');
-      initJoinGroupScreen();
     } else {
       // Пользователь зарегистрирован и в группе - показываем обычный стартовый экран
       setBottomNavVisible(true);
