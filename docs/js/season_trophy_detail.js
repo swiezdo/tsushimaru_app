@@ -13,6 +13,8 @@ import {
     renderFilesPreview,
     startButtonDotsAnimation,
     validateFileSize,
+    parseDateTime,
+    formatTimeRemaining,
 } from './utils.js';
 import { fetchTrophies } from './api.js';
 
@@ -32,6 +34,34 @@ const applicationState = {
     filesInput: null,
     submitBtn: null,
 };
+
+let countdownTimerId = null;
+
+/**
+ * Форматирует текст трофея с поддержкой разметки:
+ * *текст* - серый цвет (класс muted)
+ * #текст# - жирный шрифт
+ * 
+ * @param {string} text - Исходный текст
+ * @returns {string} - Отформатированный HTML
+ */
+function formatTrophyText(text) {
+    if (!text) return '';
+    
+    // Экранируем HTML символы для безопасности
+    let formatted = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    
+    // Сначала обрабатываем #текст# (жирный), чтобы избежать конфликтов
+    formatted = formatted.replace(/#([^#]+)#/g, '<strong>$1</strong>');
+    
+    // Затем обрабатываем *текст* (серый)
+    formatted = formatted.replace(/\*([^*]+)\*/g, '<span class="muted">$1</span>');
+    
+    return formatted;
+}
 
 /**
  * Загружает данные сезонного трофея из JSON файла
@@ -121,6 +151,11 @@ function renderSeasonTrophyDetail(trophy, isObtained) {
     // Карточка с испытаниями
     detailContainer.appendChild(buildChallengesCard(trophy));
 
+    // Карточка с оставшимся временем (если есть поле time и трофей не получен)
+    if (trophy.time && !isObtained) {
+        detailContainer.appendChild(buildTimeRemainingCard(trophy));
+    }
+
     // Карточка для подачи заявки (если трофей не получен)
     if (!isObtained) {
         detailContainer.appendChild(buildApplicationCard(trophy));
@@ -151,7 +186,7 @@ function buildInfoCard(trophy) {
     const description = document.createElement('div');
     description.className = 'trophy-description';
     description.style.whiteSpace = 'pre-line';
-    description.textContent = trophy.card_msg || '';
+    description.innerHTML = formatTrophyText(trophy.card_msg || '');
     card.appendChild(description);
 
     return card;
@@ -169,7 +204,7 @@ function buildConditionsCard(trophy) {
     const description = document.createElement('div');
     description.className = 'trophy-description';
     description.style.whiteSpace = 'pre-line';
-    description.textContent = trophy.conditions || '';
+    description.innerHTML = formatTrophyText(trophy.conditions || '');
     card.appendChild(description);
 
     return card;
@@ -187,7 +222,7 @@ function buildProofCard(trophy) {
     const description = document.createElement('div');
     description.className = 'trophy-description';
     description.style.whiteSpace = 'pre-line';
-    description.textContent = trophy.proof || '';
+    description.innerHTML = formatTrophyText(trophy.proof || '');
     card.appendChild(description);
 
     return card;
@@ -205,8 +240,47 @@ function buildChallengesCard(trophy) {
     const description = document.createElement('div');
     description.className = 'trophy-description';
     description.style.whiteSpace = 'pre-line';
-    description.textContent = trophy.description || '';
+    description.innerHTML = formatTrophyText(trophy.description || '');
     card.appendChild(description);
+
+    return card;
+}
+
+function buildTimeRemainingCard(trophy) {
+    const card = document.createElement('section');
+    card.className = 'card next-level';
+
+    const title = document.createElement('h3');
+    title.className = 'card-title';
+    title.textContent = 'Оставшееся время';
+    card.appendChild(title);
+
+    const timeEl = document.createElement('div');
+    timeEl.className = 'trophy-description';
+    timeEl.id = 'seasonTrophyTimeRemaining';
+    timeEl.setAttribute('aria-live', 'polite');
+    card.appendChild(timeEl);
+
+    // Обновляем таймер
+    const updateTimer = () => {
+        const targetDate = parseDateTime(trophy.time);
+        if (!targetDate) {
+            timeEl.textContent = '—';
+            return;
+        }
+
+        const ms = targetDate.getTime() - Date.now();
+        timeEl.textContent = formatTimeRemaining(ms);
+    };
+
+    // Очищаем предыдущий таймер
+    if (countdownTimerId) {
+        clearInterval(countdownTimerId);
+    }
+
+    // Обновляем сразу и затем каждую секунду
+    updateTimer();
+    countdownTimerId = setInterval(updateTimer, 1000);
 
     return card;
 }
@@ -444,5 +518,11 @@ function resetApplicationState() {
     applicationState.previewEl = null;
     applicationState.filesInput = null;
     applicationState.submitBtn = null;
+    
+    // Очищаем таймер
+    if (countdownTimerId) {
+        clearInterval(countdownTimerId);
+        countdownTimerId = null;
+    }
 }
 

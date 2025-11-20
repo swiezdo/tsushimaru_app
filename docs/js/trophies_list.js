@@ -32,9 +32,15 @@ function createTrophyRow(trophy) {
         icon.classList.add('is-dimmed');
     }
 
-    button.addEventListener('click', () => {
+    button.addEventListener('click', async () => {
         hapticTapSmart();
-        openTrophyDetail(trophy.key);
+        // Проверяем, является ли трофей сезонным
+        if (trophy.is_season) {
+            const { openSeasonTrophyDetail } = await import('./season_trophy_detail.js');
+            openSeasonTrophyDetail(trophy.key);
+        } else {
+            openTrophyDetail(trophy.key);
+        }
     });
 
     return button;

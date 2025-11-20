@@ -518,6 +518,109 @@ export function formatDateTime(dateString) {
   }
 }
 
+/**
+ * Парсит дату из формата "дд-мм-гггг чч:мм" или "дд.мм.гггг чч:мм"
+ * @param {string} dateString - Дата в формате "дд-мм-гггг чч:мм" или "дд.мм.гггг чч:мм"
+ * @returns {Date|null} Объект Date или null при ошибке
+ */
+export function parseDateTime(dateString) {
+  if (!dateString) return null;
+  try {
+    // Поддерживаем оба формата: с дефисами и с точками
+    // Формат: "дд-мм-гггг чч:мм" или "дд.мм.гггг чч:мм"
+    const match = dateString.match(/^(\d{2})[.-](\d{2})[.-](\d{4})\s+(\d{2}):(\d{2})$/);
+    if (!match) return null;
+    
+    const [, day, month, year, hour, minute] = match.map(Number);
+    const date = new Date(year, month - 1, day, hour, minute, 0, 0);
+    
+    // Проверяем валидность даты
+    if (isNaN(date.getTime())) return null;
+    
+    return date;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Функция для склонения слов
+ */
+function plural(n, one, few, many) {
+  const n10 = n % 10;
+  const n100 = n % 100;
+  if (n10 === 1 && n100 !== 11) return one;
+  if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return few;
+  return many;
+}
+
+/**
+ * Форматирует оставшееся время в полном формате
+ * @param {number} ms - Миллисекунды до даты
+ * @returns {string} Отформатированная строка (например, "5 дней, 3 часа и 15 минут")
+ */
+export function formatTimeRemaining(ms) {
+  if (ms < 0) return 'Время истекло';
+  
+  const sec = Math.floor(ms / 1000);
+  const days = Math.floor(sec / 86400);
+  const hours = Math.floor((sec % 86400) / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
+  
+  const parts = [];
+  
+  if (days > 0) {
+    parts.push(`${days} ${plural(days, 'день', 'дня', 'дней')}`);
+  }
+  
+  if (hours > 0) {
+    parts.push(`${hours} ${plural(hours, 'час', 'часа', 'часов')}`);
+  }
+  
+  if (minutes > 0 || parts.length === 0) {
+    parts.push(`${minutes} ${plural(minutes, 'минута', 'минуты', 'минут')}`);
+  }
+  
+  // Форматируем с запятыми и "и"
+  if (parts.length === 1) {
+    return parts[0];
+  } else if (parts.length === 2) {
+    return `${parts[0]} и ${parts[1]}`;
+  } else {
+    return `${parts.slice(0, -1).join(', ')} и ${parts[parts.length - 1]}`;
+  }
+}
+
+/**
+ * Форматирует оставшееся время в сокращенном формате
+ * @param {number} ms - Миллисекунды до даты
+ * @returns {string} Отформатированная строка (например, "5д 3ч" или "3ч 15м")
+ */
+export function formatTimeRemainingShort(ms) {
+  if (ms < 0) return 'Истекло';
+  
+  const sec = Math.floor(ms / 1000);
+  const days = Math.floor(sec / 86400);
+  const hours = Math.floor((sec % 86400) / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
+  
+  const parts = [];
+  
+  if (days > 0) {
+    parts.push(`${days}д`);
+  }
+  
+  if (hours > 0) {
+    parts.push(`${hours}ч`);
+  }
+  
+  if (minutes > 0 || parts.length === 0) {
+    parts.push(`${minutes}м`);
+  }
+  
+  return parts.join(' ');
+}
+
 // ---------- LocalStorage утилиты ----------
 export function safeLocalStorageGet(key, defaultValue = null) {
   try {

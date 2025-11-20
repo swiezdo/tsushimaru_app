@@ -2,9 +2,11 @@
 // Модуль для работы с сезонным трофеем
 
 import { hapticTapSmart, $ } from './telegram.js';
+import { parseDateTime, formatTimeRemainingShort } from './utils.js';
 
 let cachedSeasonTrophy = null;
 let seasonTrophyRendered = false;
+let cardCountdownTimerId = null;
 
 const cardContainer = $('seasonTrophyCard');
 
@@ -95,9 +97,38 @@ async function createSeasonTrophyCard(trophy) {
             <div class="season-trophy-icon-wrapper">
                 <img class="season-trophy-icon" src="${iconUrl}" alt="${trophy.name || 'Сезонный трофей'}" loading="lazy" />
             </div>
-            <div class="season-trophy-text">${trophy.name || 'Сезонный трофей!'}</div>
+            <div class="season-trophy-text-wrapper">
+                <div class="season-trophy-text">${trophy.name || 'Сезонный трофей!'}</div>
+                ${trophy.time ? '<div class="season-trophy-timer" id="seasonTrophyCardTimer" aria-live="polite"></div>' : ''}
+            </div>
         </div>
     `;
+    
+    // Обновляем таймер на карточке, если есть поле time
+    if (trophy.time) {
+        const timerEl = card.querySelector('#seasonTrophyCardTimer');
+        if (timerEl) {
+            const updateCardTimer = () => {
+                const targetDate = parseDateTime(trophy.time);
+                if (!targetDate) {
+                    timerEl.textContent = '';
+                    return;
+                }
+                
+                const ms = targetDate.getTime() - Date.now();
+                timerEl.textContent = formatTimeRemainingShort(ms);
+            };
+            
+            // Очищаем предыдущий таймер
+            if (cardCountdownTimerId) {
+                clearInterval(cardCountdownTimerId);
+            }
+            
+            // Обновляем сразу и затем каждую секунду
+            updateCardTimer();
+            cardCountdownTimerId = setInterval(updateCardTimer, 1000);
+        }
+    }
 
     // Обработчик клика - переход на страницу деталей
     card.addEventListener('click', async () => {
@@ -154,6 +185,12 @@ export async function renderSeasonTrophy() {
 export function invalidateSeasonTrophyCache() {
     cachedSeasonTrophy = null;
     seasonTrophyRendered = false;
+    
+    // Очищаем таймер карточки
+    if (cardCountdownTimerId) {
+        clearInterval(cardCountdownTimerId);
+        cardCountdownTimerId = null;
+    }
 }
 
 /**

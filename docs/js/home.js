@@ -649,9 +649,14 @@ function renderRotationCountdown() {
   }
 
   if (!timer) return;
-  const target = getNextFridayMsk();
+  let target = getNextFridayMsk();
   const update = () => {
-    const ms = target.getTime() - Date.now();
+    let ms = target.getTime() - Date.now();
+    // Если время истекло, пересчитываем следующую пятницу
+    if (ms <= 0) {
+      target = getNextFridayMsk();
+      ms = target.getTime() - Date.now();
+    }
     timer.textContent = formatCountdown(ms);
   };
   if (rotationCountdownTimerId) clearInterval(rotationCountdownTimerId);

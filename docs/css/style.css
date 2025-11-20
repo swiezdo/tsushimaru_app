@@ -309,12 +309,15 @@ main.container {
   grid-column: 1 / -1;
 }
 /* Кнопка отправки заявки мастерства должна быть полной ширины */
-#masteryApplicationCard .actions-bar .btn {
+#masteryApplicationCard .actions-bar .btn,
+#trophyApplicationCard .actions-bar .btn,
+#seasonTrophyApplicationCard .actions-bar .btn {
   width: 100%;
 }
 /* Убираем боковые отступы у actions-bar в карточках заявок */
 #masteryApplicationCard .actions-bar,
-#trophyApplicationCard .actions-bar {
+#trophyApplicationCard .actions-bar,
+#seasonTrophyApplicationCard .actions-bar {
   margin-left: 0;
   margin-right: 0;
 }
@@ -2234,13 +2237,27 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   pointer-events: none;
 }
 
+.season-trophy-text-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
 .season-trophy-text {
   font-size: var(--fs-22);
   font-weight: 700;
   color: var(--fg);
   text-shadow: var(--shadow-text);
-  flex: 1;
   line-height: var(--lh-tight);
+}
+
+.season-trophy-timer {
+  font-size: var(--fs-14);
+  font-weight: 500;
+  color: var(--muted);
+  text-shadow: var(--shadow-text);
+  opacity: 0.9;
 }
 
 /* ========== MASTERY DETAIL SCREEN ========== */
