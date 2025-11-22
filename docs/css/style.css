@@ -786,6 +786,20 @@ a svg,
   width: 100%;
   height: 100%;
   object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(139, 0, 0, 0.25)) 
+          drop-shadow(0 0 18px rgba(220, 20, 60, 0.2));
+  animation: logoGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes logoGlow {
+  from {
+    filter: drop-shadow(0 0 10px rgba(139, 0, 0, 0.25)) 
+            drop-shadow(0 0 18px rgba(220, 20, 60, 0.2));
+  }
+  to {
+    filter: drop-shadow(0 0 12px rgba(139, 0, 0, 0.3)) 
+            drop-shadow(0 0 22px rgba(220, 20, 60, 0.25));
+  }
 }
 
 .home-hero .actions-bar {

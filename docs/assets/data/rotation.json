@@ -30,8 +30,11 @@
     "week": 2,
     "story": "Повесть об Утицунэ",
     "story_mods": {
-      "chapter1": { "slug": "archer-demons", "title": "Демоны-лучники" },
-      "chapter2": { "slug": "floating-shrine", "title": "Плавучее святилище богов" },
+      "chapter1": "",
+      "chapter2": [
+        { "slug": "archer-demons", "title": "Демоны-лучники" },
+        { "slug": "floating-shrine", "title": "Плавучее святилище богов" }
+      ],
       "chapter3": { "slug": "warlord-demons", "title": "Демоны-военачальники" }
     },
     "story_img": "the-tale-of-uchitsune.jpg",
@@ -112,8 +115,11 @@
     "story": "Завеса между мирами",
     "story_mods": {
       "chapter1": { "slug": "floating-shrine", "title": "Плавучее святилище богов" },
-      "chapter2": { "slug": "beast-demons", "title": "Зверодемоны" },
-      "chapter3": { "slug": "floating-shrine", "title": "Плавучее святилище богов" }
+      "chapter2": [
+        { "slug": "beast-demons", "title": "Зверодемоны" },
+        { "slug": "floating-shrine", "title": "Плавучее святилище богов" }
+      ],
+      "chapter3": ""
     },
     "story_img": "the-veil-between-realms.jpg",
     "story_slug": "the-veil-between-realms",
@@ -139,8 +145,11 @@
     "story": "Демоны-вороны Оцуны",
     "story_mods": {
       "chapter1": { "slug": "demon-hounds", "title": "Псы-демоны" },
-      "chapter2": { "slug": "beast-demons", "title": "Зверодемоны" },
-      "chapter3": { "slug": "archer-demons", "title": "Демоны-лучники" }
+      "chapter2": [
+        { "slug": "beast-demons", "title": "Зверодемоны" },
+        { "slug": "archer-demons", "title": "Демоны-лучники" }
+      ],
+      "chapter3": ""
     },
     "story_img": "the-crow-demons-of-otsuna.jpg",
     "story_slug": "the-crow-demons-of-otsuna",
@@ -167,9 +176,12 @@
     "week": 7,
     "story": "Злосчастные мертвецы",
     "story_mods": {
-      "chapter1": { "slug": "demon-horde", "title": "Полчище демонов" },
-      "chapter2": { "slug": "death-maidens", "title": "Приспешницы смерти" },
-      "chapter3": { "slug": "demon-horde", "title": "Полчище демонов" }
+      "chapter1": "",
+      "chapter2": { "slug": "demon-horde", "title": "Полчище демонов" },
+      "chapter3": [
+        { "slug": "death-maidens", "title": "Приспешницы смерти" },
+        { "slug": "demon-horde", "title": "Полчище демонов" }
+      ]
     },
     "story_img": "the-stranded-dead.jpg",
     "story_slug": "the-stranded-dead",
@@ -255,8 +267,11 @@
     "story": "Повесть об Утицунэ",
     "story_mods": {
       "chapter1": { "slug": "demon-hounds", "title": "Псы-демоны" },
-      "chapter2": { "slug": "beast-demons", "title": "Зверодемоны" },
-      "chapter3": { "slug": "demon-hounds", "title": "Псы-демоны" }
+      "chapter2": [
+        { "slug": "beast-demons", "title": "Зверодемоны" },
+        { "slug": "demon-hounds", "title": "Псы-демоны" }
+      ],
+      "chapter3": ""
     },
     "story_img": "the-tale-of-uchitsune.jpg",
     "story_slug": "the-tale-of-uchitsune",
@@ -342,8 +357,11 @@
     "story": "Завеса между мирами",
     "story_mods": {
       "chapter1": { "slug": "guardian-demons", "title": "Демоны-защитники" },
-      "chapter2": { "slug": "bound-enemies", "title": "Связанные враги" },
-      "chapter3": { "slug": "fire-spirits", "title": "Огненные духи" }
+      "chapter2": [
+        { "slug": "bound-enemies", "title": "Связанные враги" },
+        { "slug": "fire-spirits", "title": "Огненные духи" }
+      ],
+      "chapter3": ""
     },
     "story_img": "the-veil-between-realms.jpg",
     "story_slug": "the-veil-between-realms",
@@ -371,8 +389,11 @@
     "story": "Демоны-вороны Оцуны",
     "story_mods": {
       "chapter1": { "slug": "bound-enemies", "title": "Связанные враги" },
-      "chapter2": { "slug": "guardian-demons", "title": "Демоны-защитники" },
-      "chapter3": { "slug": "fire-spirits", "title": "Духи огня" }
+      "chapter2": [
+        { "slug": "guardian-demons", "title": "Демоны-защитники" },
+        { "slug": "fire-spirits", "title": "Духи огня" }
+      ],
+      "chapter3": ""
     },
     "story_img": "the-crow-demons-of-otsuna.jpg",
     "story_slug": "the-crow-demons-of-otsuna",
@@ -399,9 +420,12 @@
     "week": 15,
     "story": "Злосчастные мертвецы",
     "story_mods": {
-      "chapter1": { "slug": "bears", "title": "Медведи" },
-      "chapter2": { "slug": "spirit-bow", "title": "Лук духов" },
-      "chapter3": { "slug": "bound-enemies", "title": "Связанные враги" }
+      "chapter1": "",
+      "chapter2": { "slug": "bears", "title": "Медведи" },
+      "chapter3": [
+        { "slug": "spirit-bow", "title": "Лук духов" },
+        { "slug": "bound-enemies", "title": "Связанные враги" }
+      ]
     },
     "story_img": "the-stranded-dead.jpg",
     "story_slug": "the-stranded-dead",

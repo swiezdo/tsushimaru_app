@@ -72,17 +72,27 @@ function renderHeroCard(root, weekData) {
 
   // Модификаторы глав (справа)
   const storyMods = weekData.story_mods || {};
-  const chapters = ['chapter1', 'chapter2', 'chapter3']
-    .map((key) => storyMods[key])
-    .filter((c) => c && c.slug);
+  const chapterKeys = ['chapter1', 'chapter2', 'chapter3'];
+  
+  // Собираем все модификаторы из всех глав
+  const allMods = [];
+  chapterKeys.forEach((key) => {
+    const chapterData = storyMods[key];
+    const mods = normalizeChapterMods(chapterData);
+    
+    // Если глава не пустая, добавляем все её модификаторы
+    if (mods && mods.length > 0) {
+      allMods.push(...mods);
+    }
+  });
 
-  if (chapters.length) {
+  if (allMods.length > 0) {
     const chaptersContainer = document.createElement('div');
     chaptersContainer.className = 'story-hero-mod-chapters';
 
-    chapters.forEach((chapter) => {
-      const path = `./assets/icons/story_mods/${chapter.slug}.svg?t=${Date.now()}`;
-      const icon = createModIcon(path, chapter.title || '');
+    allMods.forEach((mod) => {
+      const path = `./assets/icons/story_mods/${mod.slug}.svg?t=${Date.now()}`;
+      const icon = createModIcon(path, mod.title || '');
       chaptersContainer.appendChild(icon);
     });
 
@@ -90,6 +100,26 @@ function renderHeroCard(root, weekData) {
   }
 
   root.appendChild(card);
+}
+
+function normalizeChapterMods(chapterData) {
+  // Если пустая строка - вернуть null
+  if (chapterData === '' || chapterData === null || chapterData === undefined) {
+    return null;
+  }
+  
+  // Если это массив - вернуть как есть
+  if (Array.isArray(chapterData)) {
+    return chapterData.filter(mod => mod && mod.slug); // Фильтруем валидные элементы
+  }
+  
+  // Если это объект с slug - вернуть как массив из одного элемента
+  if (typeof chapterData === 'object' && chapterData.slug) {
+    return [chapterData];
+  }
+  
+  // В остальных случаях - вернуть null
+  return null;
 }
 
 function renderModifiersCard(root, weekData) {
@@ -141,21 +171,29 @@ function renderModifiersCard(root, weekData) {
   ];
 
   chapterDefs.forEach(({ key, label }) => {
-    const chapter = storyMods[key];
-    if (!chapter || !chapter.slug) return;
+    const chapterData = storyMods[key];
+    const mods = normalizeChapterMods(chapterData);
+    
+    // Пропускаем пустые главы
+    if (!mods || mods.length === 0) return;
 
     const row = document.createElement('div');
     row.className = 'story-mod-row';
 
-    const img = document.createElement('img');
-    img.src = `./assets/icons/story_mods/${chapter.slug}.svg?t=${Date.now()}`;
-    img.alt = chapter.title || '';
-    img.decoding = 'async';
-    img.loading = 'lazy';
-    row.appendChild(img);
+    // Добавляем иконки для всех модификаторов
+    mods.forEach((mod) => {
+      const img = document.createElement('img');
+      img.src = `./assets/icons/story_mods/${mod.slug}.svg?t=${Date.now()}`;
+      img.alt = mod.title || '';
+      img.decoding = 'async';
+      img.loading = 'lazy';
+      row.appendChild(img);
+    });
 
+    // Формируем текст: "Глава X — Название1, Название2"
+    const titles = mods.map(mod => mod.title || '').filter(title => title);
     const text = document.createElement('div');
-    text.textContent = `${label} — ${chapter.title || ''}`;
+    text.textContent = `${label} — ${titles.join(', ')}`;
     row.appendChild(text);
 
     card.appendChild(row);

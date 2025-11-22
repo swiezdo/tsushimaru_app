@@ -704,7 +704,7 @@ function renderHomeHero() {
   const logoWrapper = document.createElement('div');
   logoWrapper.className = 'home-hero-logo';
   const logoImg = document.createElement('img');
-  logoImg.src = './assets/logo/logo.png';
+    logoImg.src = './assets/logo/logo1_anim.gif';
   logoImg.alt = 'Tsushima.Ru';
   logoImg.width = 128;
   logoImg.height = 128;
