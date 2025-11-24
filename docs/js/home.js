@@ -1,7 +1,7 @@
 // home.js
 // Управление главной страницей с ротацией недель
 
-import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays } from './api.js';
+import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile } from './api.js';
 import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
@@ -831,11 +831,32 @@ function renderRotationCountdown() {
 }
 
 /**
+ * Обновляет отображение баланса в топбаре
+ */
+export async function updateBalance() {
+  try {
+    const profile = await fetchProfile();
+    const balance = profile?.balance ?? 0;
+    const balanceValue = document.getElementById('balanceValue');
+    if (balanceValue) {
+      balanceValue.textContent = balance.toString();
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки баланса:', error);
+    const balanceValue = document.getElementById('balanceValue');
+    if (balanceValue) {
+      balanceValue.textContent = '0';
+    }
+  }
+}
+
+/**
  * Инициализация главной страницы (превью «Что нового?»)
  */
 export async function initHome() {
   try {
     renderHomeHero();
+    updateBalance();
     const [events, comments, birthdays, whats] = await Promise.all([
       getRecentEvents(3).catch(() => []),
       getRecentComments(3).catch(() => []),

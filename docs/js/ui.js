@@ -115,9 +115,16 @@ const SCREEN_HOOKS = {
 export function setTopbar(visible, title) {
   const tb = document.querySelector('.topbar');
   if (tb) tb.style.display = visible ? 'flex' : 'none';
-  if (title) {
-    const t = document.getElementById('appTitle');
-    if (t) t.textContent = title;
+  const t = document.getElementById('appTitle');
+  if (t) {
+    if (title) {
+      t.textContent = title;
+      t.style.display = '';
+    } else {
+      // Используем неразрывный пробел для сохранения высоты
+      t.textContent = '\u00A0';
+      t.style.display = '';
+    }
   }
 }
 
@@ -216,13 +223,22 @@ export function showScreen(name, options = {}) {
   }
 
   const title = SCREEN_TITLES[name];
-  if (title) {
+  if (name === 'home') {
+    // На главной странице скрываем только заголовок
+    setTopbar(true, '');
+  } else if (title) {
     setTopbar(true, title);
   }
   const settingsBtn = document.getElementById('homeSettingsBtn');
   if (settingsBtn) {
     if (name === 'home') settingsBtn.classList.remove('hidden');
     else settingsBtn.classList.add('hidden');
+  }
+  
+  const balanceBtn = document.getElementById('homeBalanceBtn');
+  if (balanceBtn) {
+    if (name === 'home') balanceBtn.classList.remove('hidden');
+    else balanceBtn.classList.add('hidden');
   }
 
   const hook = SCREEN_HOOKS[name];

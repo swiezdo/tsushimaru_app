@@ -165,10 +165,28 @@ main.container {
   transition: transform 0.2s ease;
 }
 
+.topbar-action-left {
+  right: auto;
+  left: var(--space-4);
+  width: auto;
+  min-width: 44px;
+  padding: 0 var(--space-3);
+  gap: var(--space-2);
+  justify-content: center;
+}
+
 .topbar-action img {
   width: 24px;
   height: 24px;
   object-fit: contain;
+  flex-shrink: 0;
+}
+
+.balance-value {
+  font-size: var(--fs-15);
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
 }
 
 .topbar-action:active {
