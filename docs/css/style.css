@@ -903,6 +903,16 @@ a svg,
   display: flex;
   gap: var(--space-3);
   align-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.recent-event-item:active {
+  background-color: transparent;
+  opacity: 1;
 }
 
 .recent-comment-avatar {
@@ -920,14 +930,22 @@ a svg,
   overflow: hidden;
   flex-shrink: 0;
   padding: 0;
-  cursor: pointer;
   box-sizing: border-box;
   margin: 0;
   outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
-button.recent-comment-avatar {
-  border: 1px solid var(--color-border) !important;
+.recent-comment-avatar img {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .recent-comment-avatar img {
@@ -949,11 +967,6 @@ button.recent-comment-avatar {
   font-size: var(--fs-15);
   font-weight: 600;
   line-height: var(--lh-normal);
-  border: none;
-  background: none;
-  padding: 0;
-  text-align: left;
-  cursor: pointer;
   color: var(--fg);
 }
 
@@ -988,6 +1001,16 @@ button.recent-comment-avatar {
   display: flex;
   gap: var(--space-3);
   align-items: flex-start;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.recent-comment-item:active {
+  background-color: transparent;
+  opacity: 1;
 }
 
 .recent-comment-avatar img {
@@ -1011,7 +1034,9 @@ button.recent-comment-avatar {
 }
 
 .recent-comment-author {
+  font-size: var(--fs-15);
   font-weight: 600;
+  line-height: var(--lh-normal);
   color: var(--fg);
 }
 
@@ -1064,6 +1089,16 @@ button.recent-comment-avatar {
   display: flex;
   gap: var(--space-3);
   align-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.upcoming-birthday-item:active {
+  background-color: transparent;
+  opacity: 1;
 }
 
 .upcoming-birthday-body {
@@ -1077,11 +1112,6 @@ button.recent-comment-avatar {
   font-size: var(--fs-15);
   font-weight: 600;
   line-height: var(--lh-normal);
-  border: none;
-  background: none;
-  padding: 0;
-  text-align: left;
-  cursor: pointer;
   color: var(--fg);
 }
 

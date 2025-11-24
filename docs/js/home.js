@@ -412,6 +412,7 @@ function renderRecentEventsCard(events) {
   const createProfileLink = (handler) => {
     const fn = () => {
       if (!handler?.user_id) return;
+      hapticTapSmart();
       pushNavigation('participantDetail', { userId: handler.user_id });
       import('./participantDetail.js').then(module => {
         module.openParticipantDetail(handler.user_id);
@@ -423,26 +424,26 @@ function renderRecentEventsCard(events) {
   events.slice(0, 3).forEach((event) => {
     const item = document.createElement('li');
     item.className = 'recent-event-item';
+    const openProfile = createProfileLink(event);
+    item.addEventListener('click', openProfile);
 
-    const avatar = document.createElement('button');
-    avatar.type = 'button';
-    avatar.className = 'recent-comment-avatar recent-event-link';
+    const avatar = document.createElement('div');
+    avatar.className = 'recent-comment-avatar';
     const img = document.createElement('img');
     img.src = event?.avatar_url || './assets/default-avatar.svg';
     img.alt = event.psn_id || 'Участник';
     img.loading = 'lazy';
+    img.draggable = false;
+    img.style.pointerEvents = 'none';
+    img.style.userSelect = 'none';
     avatar.appendChild(img);
-    const openProfile = createProfileLink(event);
-    avatar.addEventListener('click', openProfile);
 
     const body = document.createElement('div');
     body.className = 'recent-event-body';
 
-    const headline = document.createElement('button');
-    headline.type = 'button';
-    headline.className = 'recent-event-headline recent-event-link';
+    const headline = document.createElement('div');
+    headline.className = 'recent-event-headline';
     headline.textContent = event?.headline || `${event?.psn_id || 'Участник'} получил(а) новую награду`;
-    headline.addEventListener('click', openProfile);
 
     const details = document.createElement('div');
     details.className = 'recent-event-details';
@@ -510,6 +511,15 @@ function renderRecentCommentsCard(comments) {
   comments.slice(0, 3).forEach((comment) => {
     const item = document.createElement('li');
     item.className = 'recent-comment-item';
+    
+    const openBuild = async () => {
+      if (!comment?.build_id) return;
+      hapticTapSmart();
+      pushNavigation('buildPublicDetail', { buildId: comment.build_id });
+      const { openPublicBuildDetail } = await import('./builds.js');
+      openPublicBuildDetail(comment.build_id, { source: 'homeComments' });
+    };
+    item.addEventListener('click', openBuild);
 
     const avatar = document.createElement('div');
     avatar.className = 'recent-comment-avatar';
@@ -517,6 +527,9 @@ function renderRecentCommentsCard(comments) {
     img.src = comment?.avatar_url || './assets/default-avatar.svg';
     img.alt = comment.psn_id || 'Участник';
     img.loading = 'lazy';
+    img.draggable = false;
+    img.style.pointerEvents = 'none';
+    img.style.userSelect = 'none';
     avatar.appendChild(img);
 
     const body = document.createElement('div');
@@ -536,8 +549,7 @@ function renderRecentCommentsCard(comments) {
       meta.appendChild(time);
     }
 
-    const buildLink = document.createElement('button');
-    buildLink.type = 'button';
+    const buildLink = document.createElement('div');
     buildLink.className = 'author-chip recent-comment-build';
 
     const classIconSrc = getClassIconPath(comment?.build_class);
@@ -553,12 +565,6 @@ function renderRecentCommentsCard(comments) {
     const buildNameSpan = document.createElement('span');
     buildNameSpan.textContent = comment?.build_name || 'Открыть билд';
     buildLink.appendChild(buildNameSpan);
-    buildLink.addEventListener('click', async () => {
-      if (!comment?.build_id) return;
-      pushNavigation('buildPublicDetail', { buildId: comment.build_id });
-      const { openPublicBuildDetail } = await import('./builds.js');
-      openPublicBuildDetail(comment.build_id, { source: 'homeComments' });
-    });
 
     const text = document.createElement('div');
     text.className = 'recent-comment-text';
@@ -688,6 +694,7 @@ function renderUpcomingBirthdaysCard(birthdays) {
   const createProfileLink = (handler) => {
     const fn = () => {
       if (!handler?.user_id) return;
+      hapticTapSmart();
       pushNavigation('participantDetail', { userId: handler.user_id });
       import('./participantDetail.js').then(module => {
         module.openParticipantDetail(handler.user_id);
@@ -699,26 +706,26 @@ function renderUpcomingBirthdaysCard(birthdays) {
   birthdays.slice(0, 3).forEach((birthday) => {
     const item = document.createElement('li');
     item.className = 'upcoming-birthday-item';
+    const openProfile = createProfileLink(birthday);
+    item.addEventListener('click', openProfile);
 
-    const avatar = document.createElement('button');
-    avatar.type = 'button';
-    avatar.className = 'recent-comment-avatar upcoming-birthday-link';
+    const avatar = document.createElement('div');
+    avatar.className = 'recent-comment-avatar';
     const img = document.createElement('img');
     img.src = birthday?.avatar_url || './assets/default-avatar.svg';
     img.alt = birthday.psn_id || 'Участник';
     img.loading = 'lazy';
+    img.draggable = false;
+    img.style.pointerEvents = 'none';
+    img.style.userSelect = 'none';
     avatar.appendChild(img);
-    const openProfile = createProfileLink(birthday);
-    avatar.addEventListener('click', openProfile);
 
     const body = document.createElement('div');
     body.className = 'upcoming-birthday-body';
 
-    const name = document.createElement('button');
-    name.type = 'button';
-    name.className = 'upcoming-birthday-name upcoming-birthday-link';
+    const name = document.createElement('div');
+    name.className = 'upcoming-birthday-name';
     name.textContent = birthday?.psn_id || 'Участник';
-    name.addEventListener('click', openProfile);
 
     const date = document.createElement('div');
     date.className = 'upcoming-birthday-date';
