@@ -183,6 +183,11 @@ export async function saveProfile(formData) {
         difficulties.forEach(difficulty => {
             data.append('difficulties', difficulty);
         });
+        
+        // Добавляем день рождения, если указан
+        if (formData.birthday) {
+            data.append('birthday', formData.birthday);
+        }
 
         const result = await requestJson('/api/profile.save', {
             method: 'POST',
@@ -325,6 +330,29 @@ export async function getRecentComments(limit = 3) {
         return [];
     } catch (error) {
         console.error('Ошибка получения комментариев:', error);
+        return [];
+    }
+}
+
+export async function getUpcomingBirthdays(limit = 3) {
+    const normalizeAvatarUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return `${API_BASE}${url}`;
+    };
+
+    try {
+        const params = new URLSearchParams({ limit: String(Math.max(1, Math.min(limit, 10))) });
+        const data = await apiRequest(`/api/birthdays.upcoming?${params.toString()}`);
+        if (data && Array.isArray(data.birthdays)) {
+            return data.birthdays.map((birthday) => ({
+                ...birthday,
+                avatar_url: normalizeAvatarUrl(birthday?.avatar_url || ''),
+            }));
+        }
+        return [];
+    } catch (error) {
+        console.error('Ошибка получения ближайших дней рождения:', error);
         return [];
     }
 }

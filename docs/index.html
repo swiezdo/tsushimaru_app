@@ -152,6 +152,11 @@
               <label>Сложность</label>
               <div id="v_difficulty" class="value lines">—</div>
             </div>
+
+            <div class="field">
+              <label class="muted">День рождения</label>
+              <div id="v_birthday" class="value lines">—</div>
+            </div>
           </div>
         </section>
 
@@ -201,6 +206,21 @@
                 placeholder="например, PUPkin"
               />
               <div id="psnError" class="error-text hidden"></div>
+            </div>
+
+            <div class="input">
+              <label class="muted">День рождения (необязательно)</label>
+              <div class="birthday-selects">
+                <select id="birthdayDay" name="birthdayDay">
+                  <option value="">День</option>
+                </select>
+                <select id="birthdayMonth" name="birthdayMonth">
+                  <option value="">Месяц</option>
+                </select>
+                <select id="birthdayYear" name="birthdayYear">
+                  <option value="">Год (опционально)</option>
+                </select>
+              </div>
             </div>
 
             <div class="input">

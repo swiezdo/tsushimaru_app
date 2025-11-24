@@ -13,6 +13,74 @@ const MODES      = ['📖 Сюжет','🏹 Выживание','🗻 Испыт
 const GOALS      = ['🔎 Узнать что-то новое','👥 Поиск тиммейтов','🏆 Получение наград'];
 const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','💎 Платина','👻 Кошмар','🔥 HellMode'];
 
+// Константы для дня рождения
+const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+const MONTHS_GENITIVE = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 
+                         'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
+const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: CURRENT_YEAR - 1949 }, (_, i) => CURRENT_YEAR - i); // От текущего года до 1950
+
+// Форматирование дня рождения для отображения
+function formatBirthday(birthday) {
+  if (!birthday) return '—';
+  
+  // Парсим формат DD.MM.YYYY или DD.MM
+  const parts = birthday.split('.');
+  if (parts.length < 2) return birthday;
+  
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  const year = parts.length > 2 ? parseInt(parts[2], 10) : null;
+  
+  if (isNaN(day) || isNaN(month) || month < 1 || month > 12) {
+    return birthday;
+  }
+  
+  const monthName = MONTHS_GENITIVE[month - 1];
+  let result = `${day} ${monthName}`;
+  
+  // Если год указан, добавляем год и возраст
+  if (year && !isNaN(year)) {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1;
+    const currentDay = today.getDate();
+    
+    let age = currentYear - year;
+    
+    // Если день рождения еще не наступил в этом году, уменьшаем возраст на 1
+    if (currentMonth < month || (currentMonth === month && currentDay < day)) {
+      age--;
+    }
+    
+    result = `${result} ${year} (${age} ${getAgeWord(age)})`;
+  }
+  
+  return result;
+}
+
+// Получение правильной формы слова "лет/год/года"
+function getAgeWord(age) {
+  const lastDigit = age % 10;
+  const lastTwoDigits = age % 100;
+  
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return 'лет';
+  }
+  
+  if (lastDigit === 1) {
+    return 'год';
+  }
+  
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return 'года';
+  }
+  
+  return 'лет';
+}
+
 // ---------- LocalStorage ----------
 // Удалено: больше не используем localStorage для профиля
 
@@ -29,6 +97,11 @@ const profileForm     = $('profileForm');
 const profileSaveBtn  = $('profileSaveBtn');
 const nameErrorEl     = $('nameError');
 const psnErrorEl      = $('psnError');
+
+// ---------- День рождения ----------
+const birthdayDaySelect   = $('birthdayDay');
+const birthdayMonthSelect = $('birthdayMonth');
+const birthdayYearSelect  = $('birthdayYear');
 
 // ---------- Аватарка (страница "Профиль" - неактивная) ----------
 const avatarDisplay = $('avatarDisplay');
@@ -71,6 +144,105 @@ function refreshProfileView() {
   if (v_difficulty) v_difficulty.textContent = prettyLines(activeValues(cache.difficulty));
 }
 
+// Инициализация дропдаунов дня рождения
+function initBirthdayDropdowns() {
+  if (!birthdayDaySelect || !birthdayMonthSelect || !birthdayYearSelect) {
+    return;
+  }
+  
+  // Очищаем существующие опции (кроме первой placeholder)
+  while (birthdayDaySelect.options.length > 1) {
+    birthdayDaySelect.remove(1);
+  }
+  while (birthdayMonthSelect.options.length > 1) {
+    birthdayMonthSelect.remove(1);
+  }
+  while (birthdayYearSelect.options.length > 1) {
+    birthdayYearSelect.remove(1);
+  }
+  
+  // Заполняем дни
+  DAYS.forEach(day => {
+    const option = document.createElement('option');
+    option.value = day.toString().padStart(2, '0');
+    option.textContent = day;
+    birthdayDaySelect.appendChild(option);
+  });
+  
+  // Заполняем месяцы
+  MONTHS.forEach((month, index) => {
+    const option = document.createElement('option');
+    option.value = (index + 1).toString().padStart(2, '0');
+    option.textContent = month;
+    birthdayMonthSelect.appendChild(option);
+  });
+  
+  // Заполняем годы
+  YEARS.forEach(year => {
+    const option = document.createElement('option');
+    option.value = year.toString();
+    option.textContent = year;
+    birthdayYearSelect.appendChild(option);
+  });
+}
+
+// Получение дня рождения из формы
+function getBirthdayFromForm() {
+  if (!birthdayDaySelect || !birthdayMonthSelect) {
+    return null;
+  }
+  
+  const day = birthdayDaySelect.value;
+  const month = birthdayMonthSelect.value;
+  const year = birthdayYearSelect?.value || '';
+  
+  if (!day || !month) {
+    return null;
+  }
+  
+  return year ? `${day}.${month}.${year}` : `${day}.${month}`;
+}
+
+// Установка дня рождения в форму
+function setBirthdayToForm(birthday) {
+  // Убеждаемся, что дропдауны инициализированы
+  if (!birthdayDaySelect || !birthdayMonthSelect || !birthdayYearSelect) {
+    return;
+  }
+  
+  // Если дропдауны пустые, инициализируем их
+  if (birthdayDaySelect.options.length <= 1 || birthdayMonthSelect.options.length <= 1) {
+    initBirthdayDropdowns();
+  }
+  
+  if (!birthday) {
+    // Сбрасываем значения
+    birthdayDaySelect.value = '';
+    birthdayMonthSelect.value = '';
+    birthdayYearSelect.value = '';
+    return;
+  }
+  
+  // Парсим формат DD.MM.YYYY или DD.MM
+  const parts = birthday.split('.');
+  if (parts.length < 2) {
+    // Неверный формат
+    birthdayDaySelect.value = '';
+    birthdayMonthSelect.value = '';
+    birthdayYearSelect.value = '';
+    return;
+  }
+  
+  const day = parts[0].padStart(2, '0');
+  const month = parts[1].padStart(2, '0');
+  const year = parts.length > 2 ? parts[2] : '';
+  
+  // Устанавливаем значения
+  birthdayDaySelect.value = day;
+  birthdayMonthSelect.value = month;
+  birthdayYearSelect.value = year || '';
+}
+
 function loadProfileToForm(profile) {
   if (!profile) return;
   
@@ -89,6 +261,13 @@ function loadProfileToForm(profile) {
   if (profile.goals) setActive(cache.goals, profile.goals);
   if (profile.difficulties) setActive(cache.difficulty, profile.difficulties);
   
+  // Устанавливаем день рождения в форму
+  if (profile.birthday) {
+    setBirthdayToForm(profile.birthday);
+  } else {
+    setBirthdayToForm(null);
+  }
+  
   // Сохраняем исходное состояние для отслеживания изменений
   originalProfileState = {
     real_name: profile.real_name || '',
@@ -97,12 +276,14 @@ function loadProfileToForm(profile) {
     modes: [...(profile.modes || [])],
     goals: [...(profile.goals || [])],
     difficulties: [...(profile.difficulties || [])],
+    birthday: profile.birthday || null,
     avatar_url: profile.avatar_url || null
   };
   
   // Обновляем отображение в карточке "Ваш профиль"
   if (v_real_name) v_real_name.textContent = profile.real_name || '—';
   if (v_psn_id) v_psn_id.textContent = profile.psn_id || '—';
+  if (v_birthday) v_birthday.textContent = formatBirthday(profile.birthday);
   refreshProfileView();
   
   // Обновляем аватарку на странице "Профиль" (неактивная)
@@ -188,6 +369,9 @@ export function initProfile() {
   renderChips(cache.modes,      MODES,      { onChange: refreshProfileView });
   renderChips(cache.goals,      GOALS,      { onChange: refreshProfileView });
   renderChips(cache.difficulty, DIFFICULTY, { onChange: refreshProfileView });
+  
+  // Инициализируем дропдауны дня рождения
+  initBirthdayDropdowns();
 
   // Профиль не загружается при инициализации
   // Загрузка происходит только при открытии экрана профиля
@@ -315,13 +499,15 @@ export function initProfile() {
 
     // Подготавливаем данные профиля
     const cache = getChipsCache();
+    const birthday = getBirthdayFromForm();
     const profileData = {
       real_name: (nameInput?.value || '').trim(),
       psn_id: (psnInput?.value || '').trim(),
       platforms: activeValues(cache.platform),
       modes: activeValues(cache.modes),
       goals: activeValues(cache.goals),
-      difficulties: activeValues(cache.difficulty)
+      difficulties: activeValues(cache.difficulty),
+      birthday: birthday
     };
 
     // Показываем индикатор загрузки
@@ -359,16 +545,21 @@ export function initProfile() {
             URL.revokeObjectURL(currentAvatarEditObjectUrl);
             currentAvatarEditObjectUrl = null;
           }
-          // Перезагружаем профиль чтобы получить обновленную аватарку
-          await fetchProfileFromServer();
           selectedAvatarFile = null; // Очищаем после успешной загрузки
         } catch (avatarError) {
           // Не прерываем успех сохранения профиля, просто игнорируем ошибку
         }
-      } else {
-        // Обновляем отображение только если аватарка не загружалась
+      }
+      
+      // Всегда перезагружаем профиль с сервера после успешного сохранения
+      // чтобы получить актуальные данные (включая birthday)
+      try {
+        await fetchProfileFromServer();
+      } catch (fetchError) {
+        // Если не удалось загрузить, обновляем отображение из локальных данных
         if (v_real_name) v_real_name.textContent = profileData.real_name || '—';
         if (v_psn_id) v_psn_id.textContent = profileData.psn_id || '—';
+        if (v_birthday) v_birthday.textContent = formatBirthday(profileData.birthday);
         refreshProfileView();
       }
 
@@ -449,6 +640,7 @@ export function hasUnsavedChanges() {
     modes: activeValues(cache.modes).sort(),
     goals: activeValues(cache.goals).sort(),
     difficulties: activeValues(cache.difficulty).sort(),
+    birthday: getBirthdayFromForm(),
     hasNewAvatar: selectedAvatarFile !== null
   };
   
@@ -459,6 +651,7 @@ export function hasUnsavedChanges() {
     modes: (originalProfileState.modes || []).sort(),
     goals: (originalProfileState.goals || []).sort(),
     difficulties: (originalProfileState.difficulties || []).sort(),
+    birthday: originalProfileState.birthday || null,
     hasNewAvatar: false
   };
   
@@ -471,6 +664,9 @@ export function hasUnsavedChanges() {
   if (JSON.stringify(currentState.modes) !== JSON.stringify(originalState.modes)) return true;
   if (JSON.stringify(currentState.goals) !== JSON.stringify(originalState.goals)) return true;
   if (JSON.stringify(currentState.difficulties) !== JSON.stringify(originalState.difficulties)) return true;
+  
+  // Проверяем изменения в дне рождения
+  if (currentState.birthday !== originalState.birthday) return true;
   
   // Проверяем изменения в аватарке
   if (currentState.hasNewAvatar !== originalState.hasNewAvatar) return true;

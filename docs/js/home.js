@@ -1,7 +1,7 @@
 // home.js
 // Управление главной страницей с ротацией недель
 
-import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments } from './api.js';
+import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays } from './api.js';
 import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
@@ -426,7 +426,7 @@ function renderRecentEventsCard(events) {
 
     const avatar = document.createElement('button');
     avatar.type = 'button';
-    avatar.className = 'recent-event-avatar recent-event-link';
+    avatar.className = 'recent-comment-avatar recent-event-link';
     const img = document.createElement('img');
     img.src = event?.avatar_url || './assets/default-avatar.svg';
     img.alt = event.psn_id || 'Участник';
@@ -576,6 +576,165 @@ function renderRecentCommentsCard(comments) {
   card.appendChild(list);
 }
 
+// Форматирование дня рождения с относительной датой
+function formatBirthdayRelative(birthday, nextDateStr) {
+  if (!birthday) return '—';
+  
+  // Парсим формат DD.MM.YYYY или DD.MM
+  const parts = birthday.split('.');
+  if (parts.length < 2) return birthday;
+  
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  
+  if (isNaN(day) || isNaN(month) || month < 1 || month > 12) {
+    return birthday;
+  }
+  
+  const MONTHS_GENITIVE = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 
+                           'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
+  const monthName = MONTHS_GENITIVE[month - 1];
+  let result = `${day} ${monthName}`;
+  
+  // Если есть nextDateStr, вычисляем относительную дату
+  if (nextDateStr) {
+    try {
+      const nextDate = new Date(nextDateStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      nextDate.setHours(0, 0, 0, 0);
+      
+      const diffTime = nextDate - today;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) {
+        result = `${result} (сегодня)`;
+      } else if (diffDays === 1) {
+        result = `${result} (завтра)`;
+      } else {
+        result = `${result} (через ${diffDays} ${getDaysWord(diffDays)})`;
+      }
+    } catch (e) {
+      // Если не удалось распарсить дату, просто возвращаем дату без относительной части
+    }
+  }
+  
+  return result;
+}
+
+// Получение правильной формы слова "день/дня/дней"
+function getDaysWord(days) {
+  const lastDigit = days % 10;
+  const lastTwoDigits = days % 100;
+  
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return 'дней';
+  }
+  
+  if (lastDigit === 1) {
+    return 'день';
+  }
+  
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return 'дня';
+  }
+  
+  return 'дней';
+}
+
+function renderUpcomingBirthdaysCard(birthdays) {
+  const home = document.getElementById('homeScreen');
+  if (!home) return;
+
+  const hasBirthdays = Array.isArray(birthdays) && birthdays.length > 0;
+  let card = document.getElementById('upcomingBirthdaysCard');
+
+  if (!hasBirthdays) {
+    card?.parentElement?.removeChild(card);
+    return;
+  }
+
+  if (!card) {
+    card = document.createElement('section');
+    card.className = 'card upcoming-birthdays-card';
+    card.id = 'upcomingBirthdaysCard';
+    // Размещаем после карточки комментариев
+    const anchor = document.getElementById('recentCommentsCard');
+    if (anchor && anchor.parentElement === home) {
+      anchor.insertAdjacentElement('afterend', card);
+    } else {
+      home.appendChild(card);
+    }
+  }
+
+  card.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'card-header-row';
+  const title = document.createElement('h3');
+  title.className = 'card-title';
+  title.textContent = 'Ближайшие дни рождения';
+  const icon = document.createElement('img');
+  icon.src = './assets/icons/system/hurra.webp';
+  icon.alt = '';
+  icon.className = 'card-title-icon';
+  title.appendChild(icon);
+  header.appendChild(title);
+  card.appendChild(header);
+
+  const list = document.createElement('ul');
+  list.className = 'upcoming-birthdays-list';
+
+  const createProfileLink = (handler) => {
+    const fn = () => {
+      if (!handler?.user_id) return;
+      pushNavigation('participantDetail', { userId: handler.user_id });
+      import('./participantDetail.js').then(module => {
+        module.openParticipantDetail(handler.user_id);
+      }).catch(err => console.error('Ошибка открытия профиля участника:', err));
+    };
+    return fn;
+  };
+
+  birthdays.slice(0, 3).forEach((birthday) => {
+    const item = document.createElement('li');
+    item.className = 'upcoming-birthday-item';
+
+    const avatar = document.createElement('button');
+    avatar.type = 'button';
+    avatar.className = 'recent-comment-avatar upcoming-birthday-link';
+    const img = document.createElement('img');
+    img.src = birthday?.avatar_url || './assets/default-avatar.svg';
+    img.alt = birthday.psn_id || 'Участник';
+    img.loading = 'lazy';
+    avatar.appendChild(img);
+    const openProfile = createProfileLink(birthday);
+    avatar.addEventListener('click', openProfile);
+
+    const body = document.createElement('div');
+    body.className = 'upcoming-birthday-body';
+
+    const name = document.createElement('button');
+    name.type = 'button';
+    name.className = 'upcoming-birthday-name upcoming-birthday-link';
+    name.textContent = birthday?.psn_id || 'Участник';
+    name.addEventListener('click', openProfile);
+
+    const date = document.createElement('div');
+    date.className = 'upcoming-birthday-date';
+    date.textContent = formatBirthdayRelative(birthday?.birthday, birthday?.next_birthday_date);
+
+    body.appendChild(name);
+    body.appendChild(date);
+
+    item.appendChild(avatar);
+    item.appendChild(body);
+    list.appendChild(item);
+  });
+
+  card.appendChild(list);
+}
+
 // ===== Таймер до следующей пятницы 18:00 МСК =====
 function getNextFridayMsk() {
   const now = new Date();
@@ -670,14 +829,16 @@ function renderRotationCountdown() {
 export async function initHome() {
   try {
     renderHomeHero();
-    const [events, comments, whats] = await Promise.all([
+    const [events, comments, birthdays, whats] = await Promise.all([
       getRecentEvents(3).catch(() => []),
       getRecentComments(3).catch(() => []),
+      getUpcomingBirthdays(3).catch(() => []),
       loadWhatsNew(),
     ]);
 
     renderRecentEventsCard(events);
     renderRecentCommentsCard(comments);
+    renderUpcomingBirthdaysCard(birthdays);
     if (Array.isArray(whats) && whats.length) {
       const latest = whats[whats.length - 1];
       renderWhatsNewPreviewCard(latest);
