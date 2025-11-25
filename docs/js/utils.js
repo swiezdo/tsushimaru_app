@@ -210,6 +210,19 @@ export function getClassIconPath(className) {
   return CLASS_ICON_MAP[className] || CLASS_ICON_MAP['Самурай'];
 }
 
+// Версия иконок трофеев для cache busting (увеличивать при обновлении иконок)
+const TROPHY_ICONS_VERSION = '2';
+
+/**
+ * Получает путь к иконке трофея с версией для cache busting
+ * @param {string} trophyKey - Ключ трофея (например, 'raid')
+ * @returns {string} Путь к иконке с версией
+ */
+export function getTrophyIconPath(trophyKey) {
+  if (!trophyKey) return '';
+  return `./assets/trophies/${trophyKey}.svg?v=${TROPHY_ICONS_VERSION}`;
+}
+
 /**
  * Запускает анимацию изображения на один цикл
  * @param {HTMLImageElement} img - Элемент изображения с data-static="true"

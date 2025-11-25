@@ -2,7 +2,7 @@
 // Модуль для работы с сезонным трофеем
 
 import { hapticTapSmart, $ } from './telegram.js';
-import { parseDateTime, formatTimeRemainingShort } from './utils.js';
+import { parseDateTime, formatTimeRemainingShort, getTrophyIconPath } from './utils.js';
 
 let cachedSeasonTrophy = null;
 let seasonTrophyRendered = false;
@@ -84,7 +84,7 @@ async function createSeasonTrophyCard(trophy) {
     card.setAttribute('data-trophy-key', trophy.key);
 
     // Фон с паттерном из иконки трофея
-    const iconUrl = `./assets/trophies/${trophy.key}.svg`;
+    const iconUrl = getTrophyIconPath(trophy.key);
     
     // Создаем паттерн с отступами (уменьшенный отступ - 50px вместо 60px)
     const patternUrl = await createPatternWithSpacing(iconUrl, 22, 50);

@@ -4,6 +4,7 @@ import { showScreen } from './ui.js';
 import { fetchParticipants, API_BASE } from './api.js';
 import { openParticipantDetail } from './participantDetail.js';
 import { pushNavigation } from './navigation.js';
+import { getTrophyIconPath } from './utils.js';
 
 // Элементы интерфейса
 const participantsListEl = $('participantsList');
@@ -99,7 +100,10 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
             // Сортируем трофеи по алфавиту (они уже должны быть отсортированы с сервера, но на всякий случай)
             const sortedTrophies = [...activeTrophies].sort();
             const icons = sortedTrophies
-                .map(trophyKey => `<img src="./assets/trophies/${trophyKey}.svg" alt="${trophyKey}" class="mastery-icon" />`)
+                .map(trophyKey => {
+                    const iconPath = getTrophyIconPath(trophyKey);
+                    return `<img src="${iconPath}" alt="${trophyKey}" class="mastery-icon" loading="lazy" />`;
+                })
                 .join('');
             trophyIconsHtml = `<div class="mastery-icons">${icons}</div>`;
         }

@@ -3,7 +3,7 @@
 
 import { fetchTrophies, updateActiveTrophies } from './api.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
-import { clearChildren, createButton, createImage, insertHintAfter, removeElements } from './utils.js';
+import { clearChildren, createButton, createImage, insertHintAfter, removeElements, getTrophyIconPath } from './utils.js';
 
 const MAX_ACTIVE_TROPHIES = 8;
 const HINT_ROLE = 'trophy-hint';
@@ -54,7 +54,7 @@ function attachHint(text) {
 
 function createTrophyButton(trophyKey) {
     const button = createButton('button', 'tile-btn', '', { trophyKey });
-    const icon = createImage(`./assets/trophies/${trophyKey}.svg`, 'tile-icon', trophyKey, { loading: 'lazy' });
+    const icon = createImage(getTrophyIconPath(trophyKey), 'tile-icon', trophyKey, { loading: 'lazy' });
     button.appendChild(icon);
     button.addEventListener('click', () => handleTrophyClick(trophyKey));
     return button;

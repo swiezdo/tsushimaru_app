@@ -3,7 +3,7 @@
 
 import { fetchTrophiesList } from './api.js';
 import { hapticTapSmart, $ } from './telegram.js';
-import { createButton } from './utils.js';
+import { createButton, getTrophyIconPath } from './utils.js';
 import { openTrophyDetail } from './trophy_detail.js';
 
 let trophiesListRendered = false;
@@ -12,6 +12,7 @@ const listContainer = $('trophiesButtonsContainer');
 
 function createTrophyRow(trophy) {
     const button = createButton('button', 'list-btn', '', { trophyKey: trophy.key });
+    const iconPath = getTrophyIconPath(trophy.key);
 
     button.innerHTML = `
         <div class="list-btn-content">
@@ -19,7 +20,7 @@ function createTrophyRow(trophy) {
                 <span class="list-btn-name">${trophy.name}</span>
             </div>
             <div class="list-btn-trailing">
-                <img class="list-btn-icon" src="./assets/trophies/${trophy.key}.svg" alt="${trophy.name}" loading="lazy" />
+                <img class="list-btn-icon" src="${iconPath}" alt="${trophy.name}" loading="lazy" />
                 <span class="right">›</span>
             </div>
         </div>

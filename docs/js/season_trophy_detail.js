@@ -4,6 +4,7 @@
 import { submitTrophyApplication } from './api.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
+import { getTrophyIconPath } from './utils.js';
 import {
     shake,
     createFileKey,
@@ -123,7 +124,7 @@ function renderSeasonTrophyDetail(trophy, isObtained) {
 
     const icon = document.createElement('img');
     icon.className = 'trophy-detail-icon';
-    icon.src = `./assets/trophies/${trophy.key}.svg`;
+    icon.src = getTrophyIconPath(trophy.key);
     icon.alt = trophy.name;
     icon.loading = 'lazy';
     icon.decoding = 'async';

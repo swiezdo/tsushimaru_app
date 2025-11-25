@@ -101,7 +101,8 @@ function renderParticipantTrophies(trophiesData) {
 
         const icon = document.createElement('img');
         icon.className = 'list-btn-icon';
-        icon.src = `./assets/trophies/${trophyKey}.svg`;
+        icon.src = getTrophyIconPath(trophyKey);
+        icon.loading = 'lazy';
         icon.alt = titleText;
         icon.loading = 'lazy';
 
