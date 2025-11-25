@@ -183,7 +183,7 @@ export async function saveProfile(formData) {
         difficulties.forEach(difficulty => {
             data.append('difficulties', difficulty);
         });
-        
+
         // Добавляем день рождения, если указан
         if (formData.birthday) {
             data.append('birthday', formData.birthday);

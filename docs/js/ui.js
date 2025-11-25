@@ -117,7 +117,7 @@ export function setTopbar(visible, title) {
   if (tb) tb.style.display = visible ? 'flex' : 'none';
   const t = document.getElementById('appTitle');
   if (t) {
-    if (title) {
+  if (title) {
       t.textContent = title;
       t.style.display = '';
     } else {

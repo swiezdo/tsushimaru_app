@@ -1,0 +1,222 @@
+{
+  "hellmode": {
+    "baseReward": 350,
+    "minReward": 350,
+    "maxReward": 550,
+    "description": "Пройти \"Идеальный\" HellMode с 7-ю модификаторами в составе из 1-4 человек (без потерь точек, выполнив все бонусные задачи и без падений)",
+    "proof": "Доказательство:Сохранить короткое видео на котором видно: Использование эмоции недели + Получение наград + Экран статистики на котором видно что сделано минимум 80 убийств. + Экран лобби, где вы показываете надетое снаряжение.",
+    "emote": [
+      {
+        "name": "ЗА МНОЙ!",
+        "slug": "rolly-up"
+      },
+      {
+        "name": "Я ЗА ТОБОЙ СЛЕЖУ",
+        "slug": "watching-you"
+      },
+      {
+        "name": "ПРЕДУПРЕЖДЕНИЕ",
+        "slug": "admonish"
+      },
+      {
+        "name": "ТИХО",
+        "slug": "shush"
+      },
+      {
+        "name": "КАНПАЙ",
+        "slug": "kanpai"
+      },
+      {
+        "name": "ВПЕРЁД",
+        "slug": "lets-go"
+      },
+      {
+        "name": "УСТАЛОСТЬ",
+        "slug": "exhausted"
+      },
+      {
+        "name": "ПОКЛОН",
+        "slug": "yes-my-lord"
+      },
+      {
+        "name": "ТАНЕЦ ОБЕЗЬЯНЫ",
+        "slug": "monkey-dance"
+      },
+      {
+        "name": "УРА",
+        "slug": "hooray"
+      },
+      {
+        "name": "БАНЗАЙ",
+        "slug": "banzai"
+      },
+      {
+        "name": "МОЛЬБА",
+        "slug": "please"
+      },
+      {
+        "name": "СПОКОЙСТВИЕ",
+        "slug": "tranquility"
+      },
+      {
+        "name": "УГРОЗА",
+        "slug": "threaten"
+      },
+      {
+        "name": "ВУЛКАН",
+        "slug": "scorched"
+      },
+      {
+        "name": "ТОШНОТА",
+        "slug": "purge"
+      },
+      {
+        "name": "МЕДИТАЦИЯ",
+        "slug": "meditate"
+      },
+      {
+        "name": "ПОЕДИНОК",
+        "slug": "challenge"
+      },
+      {
+        "name": "КАТА С КОЛЕН",
+        "slug": "kneeling-kata"
+      },
+      {
+        "name": "САКЭ",
+        "slug": "sake"
+      },
+      {
+        "name": "ПОЕДИНЩИК",
+        "slug": "duelist"
+      },
+      {
+        "name": "ПОРА ПЕРЕКУСИТЬ",
+        "slug": "time-to-eat"
+      },
+      {
+        "name": "КАТА СТОЯ",
+        "slug": "standing-kata"
+      },
+      {
+        "name": "НО",
+        "slug": "noh"
+      },
+      {
+        "name": "ЗАЩИТНИК",
+        "slug": "protector"
+      },
+      {
+        "name": "СУМО",
+        "slug": "sumo-stomp"
+      },
+      {
+        "name": "КАТА ОДУХОТВОРЕНИЯ",
+        "slug": "spirited-kata"
+      },
+      {
+        "name": "ЗОВ ЗАРЯНКИ",
+        "slug": "robins-call"
+      }
+    ],
+    "map": [
+      {
+        "name": "Берега оОмщения",
+        "slug": "the-shores-of-vengeance",
+        "bonus": 15
+      },
+      {
+        "name": "Оборона Деревни Аой",
+        "slug": "the-defence-of-aoi-village",
+        "bonus": 10
+      },
+      {
+        "name": "Тени Войны",
+        "slug": "the-shadows-of-war",
+        "bonus": 30
+      },
+      {
+        "name": "Кровь на Снегу",
+        "slug": "blood-in-the-snow",
+        "bonus": 0
+      },
+      {
+        "name": "Сумерки и Пепел",
+        "slug": "twilight-and-ashes",
+        "bonus": 40
+      },
+      {
+        "name": "Кровь и Сталь",
+        "slug": "blood-and-steel",
+        "bonus": 50
+      }
+    ],
+    "class": [
+      {
+        "name": "Самурай",
+        "slug": "samurai",
+        "bonus": 50
+      },
+      {
+        "name": "Охотник",
+        "slug": "hunter",
+        "bonus": 15
+      },
+      {
+        "name": "Ронин",
+        "slug": "ronin",
+        "bonus": 30
+      },
+      {
+        "name": "Убийца",
+        "slug": "assassin",
+        "bonus": 0
+      }
+    ],
+    "gear": [
+      {
+        "name": "Дымовая бомба",
+        "slug": "smoke-bomb",
+        "bonus": 10,
+        "color": "epic"
+      },
+      {
+        "name": "Туман над Ягатой",
+        "slug": "the-mist-of-yagata",
+        "bonus": 10,
+        "color": "legendary"
+      },
+      {
+        "name": "Проволочные силки",
+        "slug": "caltrops",
+        "bonus": 20,
+        "color": "epic"
+      },
+      {
+        "name": "Демоничиские семена",
+        "slug": "demon-seeds",
+        "bonus": 20,
+        "color": "legendary"
+      },
+      {
+        "name": "Исцеляющая тыква",
+        "slug": "healing-gourd",
+        "bonus": 30,
+        "color": "epic"
+      },
+      {
+        "name": "Щедрость Кэндзи",
+        "slug": "kenjis-shared-brew",
+        "bonus": 50,
+        "color": "legendary"
+      },
+      {
+        "name": "Бутыль жидкого мужества",
+        "slug": "bottle-of-liquid-courage",
+        "bonus": 50,
+        "color": "legendary"
+      }
+    ]
+  }
+}
+
