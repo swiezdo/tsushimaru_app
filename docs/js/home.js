@@ -1,7 +1,7 @@
 // home.js
 // Управление главной страницей с ротацией недель
 
-import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile } from './api.js';
+import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile, getHellmodeQuest } from './api.js';
 import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
@@ -364,6 +364,133 @@ function formatRelativeTime(timestamp) {
   if (hours < 24) return `${hours} ч назад`;
   const days = Math.floor(hours / 24);
   return `${days} дн назад`;
+}
+
+function renderHellmodeQuestCard(quest) {
+  const home = document.getElementById('homeScreen');
+  if (!home) return;
+
+  if (!quest || !quest.map_slug || !quest.map_name) {
+    // Если задания нет, удаляем карточку если она существует
+    const card = document.getElementById('hellmodeQuestCard');
+    card?.parentElement?.removeChild(card);
+    return;
+  }
+
+  let card = document.getElementById('hellmodeQuestCard');
+
+  if (!card) {
+    card = document.createElement('section');
+    card.className = 'card hellmode-quest-card';
+    card.id = 'hellmodeQuestCard';
+  }
+
+  // Вставляем карточку после hero, но перед другими карточками
+  const hero = document.getElementById('homeHero');
+  const recentEventsCard = document.getElementById('recentEventsCard');
+  
+  if (recentEventsCard && recentEventsCard.parentElement === home) {
+    recentEventsCard.insertAdjacentElement('beforebegin', card);
+  } else if (hero && hero.parentElement === home) {
+    hero.insertAdjacentElement('afterend', card);
+  } else if (!card.parentElement) {
+    home.prepend(card);
+  }
+
+  card.innerHTML = '';
+
+  // Заголовок карточки
+  const header = document.createElement('div');
+  header.className = 'card-header-row';
+  const title = document.createElement('h3');
+  title.className = 'card-title';
+  title.textContent = 'Еженедельные задания';
+  header.appendChild(title);
+  card.appendChild(header);
+
+  // Контейнер для кнопки (как на странице ротации)
+  const gridList = document.createElement('div');
+  gridList.className = 'grid-list';
+
+  // Кнопка с заданием
+  const badgeBtn = document.createElement('button');
+  badgeBtn.type = 'button';
+  badgeBtn.className = 'badge-btn badge-btn--with-bg';
+  badgeBtn.style.backgroundImage = `url('./assets/maps/survival/${quest.map_slug}.jpg')`;
+  badgeBtn.style.backgroundSize = 'cover';
+  badgeBtn.style.backgroundPosition = 'center';
+
+  // Текст слева
+  const modeText = document.createElement('div');
+  modeText.className = 'rotation-mode-text';
+
+  const modeName = document.createElement('div');
+  modeName.className = 'rotation-mode-name';
+  modeName.textContent = 'HellMode';
+
+  const modeMap = document.createElement('div');
+  modeMap.className = 'rotation-mode-map';
+  modeMap.textContent = quest.map_name;
+
+  const modeHint = document.createElement('div');
+  modeHint.className = 'rotation-mode-hint';
+  modeHint.textContent = 'Нажмите, чтобы открыть';
+
+  modeText.appendChild(modeName);
+  modeText.appendChild(modeMap);
+  modeText.appendChild(modeHint);
+
+  // Иконки справа сверху (без магатамы)
+  const modIcons = document.createElement('div');
+  modIcons.className = 'rotation-mod-icons';
+
+  // 1. Class
+  const classIcon = document.createElement('div');
+  classIcon.className = 'waves-mod-icon waves-mod-icon--class';
+  const classImg = document.createElement('img');
+  classImg.src = `./assets/icons/classes/${quest.class}.svg`;
+  classImg.alt = quest.class || '';
+  classIcon.appendChild(classImg);
+
+  // 2. Gear
+  const gearIcon = document.createElement('div');
+  gearIcon.className = 'waves-mod-icon';
+  const gearImg = document.createElement('img');
+  gearImg.src = `./assets/icons/ghost-weapons/${quest.gear}.svg`;
+  gearImg.alt = quest.gear || '';
+  gearIcon.appendChild(gearImg);
+
+  // 3. Emote
+  const emoteIcon = document.createElement('div');
+  emoteIcon.className = 'waves-mod-icon';
+  const emoteImg = document.createElement('img');
+  emoteImg.src = `./assets/icons/emotes/${quest.emote}.svg`;
+  emoteImg.alt = quest.emote || '';
+  emoteIcon.appendChild(emoteImg);
+
+  modIcons.appendChild(classIcon);
+  modIcons.appendChild(gearIcon);
+  modIcons.appendChild(emoteIcon);
+
+  // Награда внизу справа (прямоугольник с числом и иконкой)
+  const rewardBadge = document.createElement('div');
+  rewardBadge.className = 'quest-reward-badge';
+  const rewardValue = document.createElement('span');
+  rewardValue.className = 'quest-reward-value';
+  rewardValue.textContent = quest.reward || 0;
+  const magatamaImg = document.createElement('img');
+  magatamaImg.src = './assets/icons/system/magatama.svg';
+  magatamaImg.alt = 'Награда';
+  magatamaImg.className = 'quest-reward-icon';
+  rewardBadge.appendChild(rewardValue);
+  rewardBadge.appendChild(magatamaImg);
+
+  badgeBtn.appendChild(modeText);
+  badgeBtn.appendChild(modIcons);
+  badgeBtn.appendChild(rewardBadge);
+
+  gridList.appendChild(badgeBtn);
+  card.appendChild(gridList);
 }
 
 function renderRecentEventsCard(events) {
@@ -857,13 +984,15 @@ export async function initHome() {
   try {
     renderHomeHero();
     updateBalance();
-    const [events, comments, birthdays, whats] = await Promise.all([
+    const [quest, events, comments, birthdays, whats] = await Promise.all([
+      getHellmodeQuest().catch(() => null),
       getRecentEvents(3).catch(() => []),
       getRecentComments(3).catch(() => []),
       getUpcomingBirthdays(3).catch(() => []),
       loadWhatsNew(),
     ]);
 
+    // renderHellmodeQuestCard(quest); // Временно скрыто
     renderRecentEventsCard(events);
     renderRecentCommentsCard(comments);
     renderUpcomingBirthdaysCard(birthdays);

@@ -357,6 +357,16 @@ export async function getUpcomingBirthdays(limit = 3) {
     }
 }
 
+export async function getHellmodeQuest() {
+    try {
+        const data = await apiRequest('/api/quests.hellmode');
+        return data || null;
+    } catch (error) {
+        console.error('Ошибка получения задания HellMode:', error);
+        return null;
+    }
+}
+
 // ========== ФУНКЦИИ ДЛЯ РАБОТЫ С БИЛДАМИ ==========
 
 // Создание билда
