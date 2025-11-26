@@ -3,7 +3,7 @@ import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
 import { pushNavigation, setCurrentScreenParams } from './navigation.js';
 import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE, fetchUserTrophies, fetchTrophiesList } from './api.js';
-import { prettyLines, formatDate, getTrophyIconPath } from './utils.js';
+import { prettyLines, formatDate, getTrophyIconPath, getDynamicAssetPath, getStaticAssetPath, getSystemIconPath, getClassIconPath } from './utils.js';
 import { 
     loadMasteryConfig, 
     getCategoryByKey,
@@ -43,8 +43,8 @@ function renderParticipantProfile(profile) {
     // Обновляем аватарку с timestamp для предотвращения кеширования
     if (participantAvatarEl) {
         const avatarSrc = profile.avatar_url 
-            ? `${API_BASE}${profile.avatar_url}?t=${Date.now()}` 
-            : './assets/default-avatar.svg';
+            ? getDynamicAssetPath(`${API_BASE}${profile.avatar_url}`)
+            : getStaticAssetPath('./assets/default-avatar.svg');
         participantAvatarEl.src = avatarSrc;
     }
 }
@@ -197,13 +197,6 @@ function createParticipantBadge(category, currentLevel) {
 
 // Функция создания элемента билда (копия из builds.js)
 function createBuildElement(build, isPublic = false) {
-    const CLASS_ICON = {
-        'Самурай': './assets/icons/classes/samurai.svg',
-        'Охотник': './assets/icons/classes/hunter.svg',
-        'Убийца': './assets/icons/classes/assassin.svg',
-        'Ронин': './assets/icons/classes/ronin.svg'
-    };
-    
     const row = document.createElement('button');
     row.className = 'build-item';
     row.type = 'button';
@@ -213,7 +206,7 @@ function createBuildElement(build, isPublic = false) {
     icon.className = 'build-icon';
     const img = document.createElement('img');
     img.alt = build.class || 'Класс';
-    img.src = CLASS_ICON[build.class] || CLASS_ICON['Самурай'];
+    img.src = getClassIconPath(build.class);
     icon.appendChild(img);
 
     const title = document.createElement('div');
@@ -270,9 +263,9 @@ function createBuildElement(build, isPublic = false) {
             dislikesCount = build.reactions.dislikes_count || build.reactions.dislikesCount || dislikesCount;
         }
         
-        statsDiv.appendChild(createStatItem('./assets/icons/system/comments.svg', commentsCount, 'Комментарии'));
-        statsDiv.appendChild(createStatItem('./assets/icons/system/like.svg', likesCount, 'Лайки'));
-        statsDiv.appendChild(createStatItem('./assets/icons/system/dislike.svg', dislikesCount, 'Дизлайки'));
+        statsDiv.appendChild(createStatItem(getSystemIconPath('comments.svg'), commentsCount, 'Комментарии'));
+        statsDiv.appendChild(createStatItem(getSystemIconPath('like.svg'), likesCount, 'Лайки'));
+        statsDiv.appendChild(createStatItem(getSystemIconPath('dislike.svg'), dislikesCount, 'Дизлайки'));
         
         metaDiv.appendChild(authorText);
         metaDiv.appendChild(statsDiv);

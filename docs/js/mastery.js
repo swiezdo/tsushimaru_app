@@ -4,7 +4,7 @@
 import { fetchMastery, submitMasteryApplication } from './api.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
-import { shake, createFileKey, isImageFile, isVideoFile, renderFilesPreview, startButtonDotsAnimation, validateFileSize } from './utils.js';
+import { shake, createFileKey, isImageFile, isVideoFile, renderFilesPreview, startButtonDotsAnimation, validateFileSize, getStaticAssetPath, getSystemIconPath } from './utils.js';
 
 // Кэш конфига
 let masteryConfig = null;
@@ -94,8 +94,14 @@ export function getCategoryByKey(config, key) {
 
 // Получение URL иконки с cache-busting версией
 function getIconUrl(categoryKey, config = null) {
-    const version = (config && config.version) ? config.version : Date.now();
-    return `./assets/mastery/${categoryKey}/icon.svg?v=${version}`;
+    // Используем версию из конфига если есть, иначе статическую версию
+    const path = `./assets/mastery/${categoryKey}/icon.svg`;
+    if (config && config.version) {
+        // Если версия указана в конфиге, используем её (для обратной совместимости)
+        return `${path}?v=${config.version}`;
+    }
+    // Иначе используем общую систему версионирования
+    return getStaticAssetPath(path);
 }
 
 // Получение уровня по номеру в категории
@@ -251,7 +257,7 @@ export function getButtonStyles(category, currentLevel) {
     for (const rule of rules) {
         if (currentLevel >= rule.level) {
             if (rule.bg) {
-                styles.backgroundImage = `url('./assets/mastery/${category.key}/${rule.bg}')`;
+                styles.backgroundImage = `url('${getStaticAssetPath(`./assets/mastery/${category.key}/${rule.bg}`)}')`;
             }
             if (rule.icon) {
                 styles.showIcon = true;
@@ -303,7 +309,7 @@ async function preloadMasteryAssets(config, levels) {
             const promise = new Promise((resolve, reject) => {
                 img.onload = resolve;
                 img.onerror = reject;
-                img.src = `./assets/mastery/${category.key}/${asset}`;
+                img.src = getStaticAssetPath(`./assets/mastery/${category.key}/${asset}`);
             });
             preloadPromises.push(promise);
         }
@@ -585,7 +591,7 @@ function renderMasteryDetail(category, currentLevel) {
             } else {
                 // Иначе показываем галочку
                 const checkIcon = document.createElement('img');
-                checkIcon.src = './assets/icons/system/done.svg';
+                checkIcon.src = getSystemIconPath('done.svg');
                 checkIcon.alt = 'Готово';
                 checkIcon.className = 'mastery-level-check-icon';
                 status.appendChild(checkIcon);

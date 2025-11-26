@@ -2,18 +2,13 @@
 import { tg, $, hapticTapSmart, hapticOK, hapticERR, hideKeyboard } from './telegram.js';
 import { showScreen, focusAndScrollIntoView, setTopbar } from './ui.js';
 import { pushNavigation, setCurrentScreenParams } from './navigation.js';
-import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate } from './utils.js';
+import { renderChips, activeValues, setActive, shake, createButton, validateBuildName, formatDate, getClassIconPath, getSystemIconPath, getStaticAssetPath, getDynamicAssetPath } from './utils.js';
 import { createBuild, getMyBuilds, getPublicBuilds, toggleBuildPublish, deleteBuild, updateBuild, createComment, getBuildComments, toggleReaction, getReactions, API_BASE } from './api.js';
 
 const CLASS_VALUES = ['Самурай','Охотник','Убийца','Ронин'];
 const TAG_VALUES   = ['HellMode','Соло','Выживание','Спидран','Набег','Сюжет','Соперники','Ключевой урон','Без дыма','Негативные эффекты'];
 
-const CLASS_ICON = {
-  'Самурай':'./assets/icons/classes/samurai.svg',
-  'Охотник':'./assets/icons/classes/hunter.svg',
-  'Убийца':'./assets/icons/classes/assassin.svg',
-  'Ронин':'./assets/icons/classes/ronin.svg'
-};
+// CLASS_ICON удален - используем getClassIconPath из utils.js
 
 // Элементы
 const myBuildsList     = $('myBuildsList');
@@ -164,7 +159,7 @@ function createBuildElement(build, isPublic = false) {
   icon.className = 'build-icon';
   const img = document.createElement('img');
   img.alt = build.class || 'Класс';
-  img.src = CLASS_ICON[build.class] || CLASS_ICON['Самурай'];
+  img.src = getClassIconPath(build.class);
   icon.appendChild(img);
 
   const title = document.createElement('div');
@@ -233,9 +228,9 @@ function createBuildElement(build, isPublic = false) {
       console.warn('Возможная проблема: likes_count совпадает с comments_count для билда', build.build_id);
     }
     
-    statsDiv.appendChild(createStatItem('./assets/icons/system/comments.svg', commentsCount, 'Комментарии'));
-    statsDiv.appendChild(createStatItem('./assets/icons/system/like.svg', likesCount, 'Лайки'));
-    statsDiv.appendChild(createStatItem('./assets/icons/system/dislike.svg', dislikesCount, 'Дизлайки'));
+    statsDiv.appendChild(createStatItem(getSystemIconPath('comments.svg'), commentsCount, 'Комментарии'));
+    statsDiv.appendChild(createStatItem(getSystemIconPath('like.svg'), likesCount, 'Лайки'));
+    statsDiv.appendChild(createStatItem(getSystemIconPath('dislike.svg'), dislikesCount, 'Дизлайки'));
     
     metaDiv.appendChild(authorText);
     metaDiv.appendChild(statsDiv);
@@ -269,9 +264,9 @@ function createBuildElement(build, isPublic = false) {
       console.warn('Возможная проблема: likes_count совпадает с comments_count для билда', build.build_id);
     }
     
-    statsDiv.appendChild(createStatItem('./assets/icons/system/comments.svg', commentsCount, 'Комментарии'));
-    statsDiv.appendChild(createStatItem('./assets/icons/system/like.svg', likesCount, 'Лайки'));
-    statsDiv.appendChild(createStatItem('./assets/icons/system/dislike.svg', dislikesCount, 'Дизлайки'));
+    statsDiv.appendChild(createStatItem(getSystemIconPath('comments.svg'), commentsCount, 'Комментарии'));
+    statsDiv.appendChild(createStatItem(getSystemIconPath('like.svg'), likesCount, 'Лайки'));
+    statsDiv.appendChild(createStatItem(getSystemIconPath('dislike.svg'), dislikesCount, 'Дизлайки'));
     
     metaDiv.appendChild(dateText);
     metaDiv.appendChild(statsDiv);
@@ -453,7 +448,7 @@ function renderClassTabs() {
     }
     
     const icon = document.createElement('img');
-    icon.src = CLASS_ICON[className];
+    icon.src = getClassIconPath(className);
     icon.alt = className;
     tab.appendChild(icon);
     
@@ -483,7 +478,7 @@ function renderClassTabs() {
   }
   
   const tagsIcon = document.createElement('img');
-  tagsIcon.src = './assets/icons/system/tag.svg';
+  tagsIcon.src = getSystemIconPath('tag.svg');
   tagsIcon.alt = 'Теги';
   tagsTab.appendChild(tagsIcon);
   
@@ -499,7 +494,7 @@ function renderClassTabs() {
   sortTab.type = 'button';
   sortTab.className = 'class-tab sort-tab';
   const sortIcon = document.createElement('img');
-  sortIcon.src = './assets/icons/system/sort.svg';
+  sortIcon.src = getSystemIconPath('sort.svg');
   sortIcon.alt = 'Сортировка';
   // Устанавливаем заголовок в зависимости от текущего типа сортировки
   const sortTitles = {
@@ -1750,8 +1745,8 @@ function renderPublicComments(comments) {
     const avatarImg = document.createElement('img');
     avatarImg.className = 'comment-avatar';
     const avatarSrc = comment.avatar_url 
-        ? `${API_BASE}${comment.avatar_url}` 
-        : './assets/default-avatar.svg';
+        ? getDynamicAssetPath(`${API_BASE}${comment.avatar_url}`)
+        : getStaticAssetPath('./assets/default-avatar.svg');
     avatarImg.src = avatarSrc;
     avatarImg.alt = comment.author || 'Автор';
     

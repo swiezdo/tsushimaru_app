@@ -6,7 +6,7 @@ import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
 import { tg, hapticTapSmart } from './telegram.js';
-import { getClassIconPath } from './utils.js';
+import { getClassIconPath, getStaticAssetPath, getDynamicAssetPath, getSystemIconPath, getModIconPath, getMapPath, getEmoteIconPath, getGearIconPath } from './utils.js';
 
 const TELEGRAM_COMMUNITY_URL = 'https://t.me/+ZFiVYVrz-PEzYjBi';
 
@@ -17,7 +17,7 @@ let rotationButtonsBound = false;
 // ===== Загрузка данных «Что нового?» =====
 async function loadWhatsNew() {
   try {
-    const res = await fetch(`./assets/data/whats-new.json?v=${Date.now()}`, { cache: 'no-store' });
+    const res = await fetch(getDynamicAssetPath('./assets/data/whats-new.json'), { cache: 'no-store' });
     if (!res.ok) throw new Error(`whats-new.json status ${res.status}`);
     return await res.json();
   } catch (e) {
@@ -32,8 +32,7 @@ async function loadWhatsNew() {
  */
 export async function loadRotationData() {
   try {
-    const cacheBust = Date.now();
-    const response = await fetch(`./assets/data/rotation.json?v=${cacheBust}`, { cache: 'no-store' });
+    const response = await fetch(getDynamicAssetPath('./assets/data/rotation.json'), { cache: 'no-store' });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -107,7 +106,7 @@ export function renderHomeContent(weekData) {
   }
   
   if (storyModIcon && weekData.story_mod_icon) {
-    storyModIcon.src = `./assets/icons/mods/${weekData.story_mod_icon}?t=${Date.now()}`;
+    storyModIcon.src = getModIconPath(weekData.story_mod_icon, 'mods');
     storyModIcon.alt = weekData.story_mod || '';
   }
 
@@ -131,12 +130,12 @@ export function renderHomeContent(weekData) {
   }
   
   if (survivalMod1Icon && weekData.survival_mod1_icon) {
-    survivalMod1Icon.src = `./assets/icons/mod1/${weekData.survival_mod1_icon}?t=${Date.now()}`;
+    survivalMod1Icon.src = getModIconPath(weekData.survival_mod1_icon, 'mod1');
     survivalMod1Icon.alt = weekData.survival_mod1 || '';
   }
   
   if (survivalMod2Icon && weekData.survival_mod2_icon) {
-    survivalMod2Icon.src = `./assets/icons/mod2/${weekData.survival_mod2_icon}?t=${Date.now()}`;
+    survivalMod2Icon.src = getModIconPath(weekData.survival_mod2_icon, 'mod2');
     survivalMod2Icon.alt = weekData.survival_mod2 || '';
   }
 
@@ -173,7 +172,7 @@ export function renderHomeContent(weekData) {
       const modIconWrapper = document.createElement('div');
       modIconWrapper.className = 'waves-mod-icon';
       const modIconImg = document.createElement('img');
-      modIconImg.src = `./assets/icons/mods/${weekData.rivals_mod_icon}?t=${Date.now()}`;
+      modIconImg.src = getModIconPath(weekData.rivals_mod_icon, 'mods');
       modIconImg.alt = weekData.rivals_mod || '';
       modIconWrapper.appendChild(modIconImg);
       rivalsModIcons.appendChild(modIconWrapper);
@@ -213,30 +212,23 @@ export function renderHomeContent(weekData) {
       const modIconWrapper = document.createElement('div');
       modIconWrapper.className = 'waves-mod-icon';
       const modIconImg = document.createElement('img');
-      modIconImg.src = `./assets/icons/mods/${weekData.trials_mod_icon}?t=${Date.now()}`;
+      modIconImg.src = getModIconPath(weekData.trials_mod_icon, 'mods');
       modIconImg.alt = weekData.trials_mod || '';
       modIconWrapper.appendChild(modIconImg);
       trialsModIcons.appendChild(modIconWrapper);
     }
   }
 
-  // TODO: Подготовка для фоновых изображений карт
-  // В будущем здесь будет подстановка фоновых изображений:
-  // - story: ./assets/maps/story/{story_map}.jpg
-  // - survival: ./assets/maps/survival/{survival_map}.jpg
-  // - rivals: ./assets/maps/rivals/{rivals_map}.jpg
-  // - trials: ./assets/maps/trials/{trials_map}.jpg
-
   // Подстановка фоновых изображений на кнопки режимов
-  const storyImgName = weekData.story_img || (weekData.story_slug ? `${weekData.story_slug}.jpg` : '');
-  const survivalImgName = weekData.survival_img || (weekData.survival_slug ? `${weekData.survival_slug}.jpg` : '');
-  const rivalsImgName = weekData.rivals_img || (weekData.rivals_slug ? `${weekData.rivals_slug}.jpg` : '');
-  const trialsImgName = weekData.trials_img || (weekData.trials_slug ? `${weekData.trials_slug}.jpg` : '');
+  const storySlug = weekData.story_slug || (weekData.story_img ? weekData.story_img.replace('.jpg', '') : '');
+  const survivalSlug = weekData.survival_slug || (weekData.survival_img ? weekData.survival_img.replace('.jpg', '') : '');
+  const rivalsSlug = weekData.rivals_slug || (weekData.rivals_img ? weekData.rivals_img.replace('.jpg', '') : '');
+  const trialsSlug = weekData.trials_slug || (weekData.trials_img ? weekData.trials_img.replace('.jpg', '') : '');
 
-  const storyImgUrl = storyImgName ? `./assets/maps/story/${storyImgName}` : '';
-  const survivalImgUrl = survivalImgName ? `./assets/maps/survival/${survivalImgName}` : '';
-  const rivalsImgUrl = rivalsImgName ? `./assets/maps/rivals/${rivalsImgName}` : '';
-  const trialsImgUrl = trialsImgName ? `./assets/maps/trials/${trialsImgName}` : '';
+  const storyImgUrl = storySlug ? getMapPath(storySlug, 'story') : '';
+  const survivalImgUrl = survivalSlug ? getMapPath(survivalSlug, 'survival') : '';
+  const rivalsImgUrl = rivalsSlug ? getMapPath(rivalsSlug, 'rivals') : '';
+  const trialsImgUrl = trialsSlug ? getMapPath(trialsSlug, 'trials') : '';
 
   applyButtonBackground(storyBtn, storyImgUrl);
   applyButtonBackground(survivalBtn, survivalImgUrl);
@@ -263,7 +255,7 @@ function renderWhatsNewPreviewCard(latest) {
   title.className = 'card-title';
   title.textContent = 'Что нового?';
   const icon = document.createElement('img');
-  icon.src = './assets/icons/system/whatsnew.webp';
+  icon.src = getSystemIconPath('whatsnew.webp');
   icon.alt = '';
   icon.className = 'card-title-icon';
   title.appendChild(icon);
@@ -416,7 +408,7 @@ function renderHellmodeQuestCard(quest) {
   const badgeBtn = document.createElement('button');
   badgeBtn.type = 'button';
   badgeBtn.className = 'badge-btn badge-btn--with-bg';
-  badgeBtn.style.backgroundImage = `url('./assets/maps/survival/${quest.map_slug}.jpg')`;
+  badgeBtn.style.backgroundImage = `url('${getMapPath(quest.map_slug, 'survival')}')`;
   badgeBtn.style.backgroundSize = 'cover';
   badgeBtn.style.backgroundPosition = 'center';
 
@@ -448,7 +440,7 @@ function renderHellmodeQuestCard(quest) {
   const classIcon = document.createElement('div');
   classIcon.className = 'waves-mod-icon waves-mod-icon--class';
   const classImg = document.createElement('img');
-  classImg.src = `./assets/icons/classes/${quest.class}.svg`;
+  classImg.src = getClassIconPath(quest.class);
   classImg.alt = quest.class || '';
   classIcon.appendChild(classImg);
 
@@ -456,7 +448,7 @@ function renderHellmodeQuestCard(quest) {
   const gearIcon = document.createElement('div');
   gearIcon.className = 'waves-mod-icon';
   const gearImg = document.createElement('img');
-  gearImg.src = `./assets/icons/ghost-weapons/${quest.gear}.svg`;
+  gearImg.src = getGearIconPath(quest.gear);
   gearImg.alt = quest.gear || '';
   gearIcon.appendChild(gearImg);
 
@@ -464,7 +456,7 @@ function renderHellmodeQuestCard(quest) {
   const emoteIcon = document.createElement('div');
   emoteIcon.className = 'waves-mod-icon';
   const emoteImg = document.createElement('img');
-  emoteImg.src = `./assets/icons/emotes/${quest.emote}.svg`;
+  emoteImg.src = getEmoteIconPath(quest.emote);
   emoteImg.alt = quest.emote || '';
   emoteIcon.appendChild(emoteImg);
 
@@ -479,7 +471,7 @@ function renderHellmodeQuestCard(quest) {
   rewardValue.className = 'quest-reward-value';
   rewardValue.textContent = quest.reward || 0;
   const magatamaImg = document.createElement('img');
-  magatamaImg.src = './assets/icons/system/magatama.svg';
+  magatamaImg.src = getSystemIconPath('magatama.svg');
   magatamaImg.alt = 'Награда';
   magatamaImg.className = 'quest-reward-icon';
   rewardBadge.appendChild(rewardValue);
@@ -526,7 +518,7 @@ function renderRecentEventsCard(events) {
   title.className = 'card-title';
   title.textContent = 'Последние награды';
   const icon = document.createElement('img');
-  icon.src = './assets/icons/system/reward.webp';
+  icon.src = getSystemIconPath('reward.webp');
   icon.alt = '';
   icon.className = 'card-title-icon';
   title.appendChild(icon);
@@ -557,8 +549,8 @@ function renderRecentEventsCard(events) {
     const avatar = document.createElement('div');
     avatar.className = 'recent-comment-avatar';
     const img = document.createElement('img');
-    const avatarUrl = event?.avatar_url || './assets/default-avatar.svg';
-    img.src = avatarUrl + (avatarUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+    const avatarUrl = event?.avatar_url || getStaticAssetPath('./assets/default-avatar.svg');
+    img.src = avatarUrl && avatarUrl.startsWith('http') ? getDynamicAssetPath(avatarUrl) : avatarUrl;
     img.alt = event.psn_id || 'Участник';
     img.loading = 'lazy';
     img.draggable = false;
@@ -626,7 +618,7 @@ function renderRecentCommentsCard(comments) {
   title.className = 'card-title';
   title.textContent = 'Лента комментариев';
   const icon = document.createElement('img');
-  icon.src = './assets/icons/system/comments.webp';
+  icon.src = getSystemIconPath('comments.webp');
   icon.alt = '';
   icon.className = 'card-title-icon';
   title.appendChild(icon);
@@ -652,8 +644,8 @@ function renderRecentCommentsCard(comments) {
     const avatar = document.createElement('div');
     avatar.className = 'recent-comment-avatar';
     const img = document.createElement('img');
-    const avatarUrl = comment?.avatar_url || './assets/default-avatar.svg';
-    img.src = avatarUrl + (avatarUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+    const avatarUrl = comment?.avatar_url || getStaticAssetPath('./assets/default-avatar.svg');
+    img.src = avatarUrl && avatarUrl.startsWith('http') ? getDynamicAssetPath(avatarUrl) : avatarUrl;
     img.alt = comment.psn_id || 'Участник';
     img.loading = 'lazy';
     img.draggable = false;
@@ -810,7 +802,7 @@ function renderUpcomingBirthdaysCard(birthdays) {
   title.className = 'card-title';
   title.textContent = 'Ближайшие дни рождения';
   const icon = document.createElement('img');
-  icon.src = './assets/icons/system/hurra.webp';
+  icon.src = getSystemIconPath('hurra.webp');
   icon.alt = '';
   icon.className = 'card-title-icon';
   title.appendChild(icon);
@@ -841,8 +833,8 @@ function renderUpcomingBirthdaysCard(birthdays) {
     const avatar = document.createElement('div');
     avatar.className = 'recent-comment-avatar';
     const img = document.createElement('img');
-    const avatarUrl = birthday?.avatar_url || './assets/default-avatar.svg';
-    img.src = avatarUrl + (avatarUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+    const avatarUrl = birthday?.avatar_url || getStaticAssetPath('./assets/default-avatar.svg');
+    img.src = avatarUrl && avatarUrl.startsWith('http') ? getDynamicAssetPath(avatarUrl) : avatarUrl;
     img.alt = birthday.psn_id || 'Участник';
     img.loading = 'lazy';
     img.draggable = false;
@@ -1025,7 +1017,7 @@ function renderHomeHero() {
   const logoWrapper = document.createElement('div');
   logoWrapper.className = 'home-hero-logo';
   const logoImg = document.createElement('img');
-    logoImg.src = './assets/logo/logo1_anim.gif';
+    logoImg.src = getStaticAssetPath('./assets/logo/logo1_anim.gif');
   logoImg.alt = 'Tsushima.Ru';
   logoImg.width = 128;
   logoImg.height = 128;

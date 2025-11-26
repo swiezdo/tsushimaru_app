@@ -198,6 +198,34 @@ export async function initStaticImage(img) {
   hiddenImg.src = baseSrc;
 }
 
+// ========== ASSET VERSIONING SYSTEM ==========
+// Версии для статических ресурсов (увеличивать при обновлении ресурсов)
+const ASSETS_VERSION = '1';
+
+/**
+ * Добавляет версию к пути статического ресурса для cache busting
+ * @param {string} path - Относительный путь к ресурсу (например, './assets/icons/system/icon.svg')
+ * @returns {string} Путь с версией (например, './assets/icons/system/icon.svg?v=1')
+ */
+export function getStaticAssetPath(path) {
+  if (!path) return '';
+  const separator = path.includes('?') ? '&' : '?';
+  return `${path}${separator}v=${ASSETS_VERSION}`;
+}
+
+/**
+ * Добавляет timestamp к пути динамического ресурса для cache busting
+ * @param {string} path - Относительный путь к ресурсу
+ * @returns {string} Путь с timestamp
+ */
+export function getDynamicAssetPath(path) {
+  if (!path) return '';
+  const separator = path.includes('?') ? '&' : '?';
+  return `${path}${separator}t=${Date.now()}`;
+}
+
+// ========== SPECIALIZED ASSET PATH FUNCTIONS ==========
+
 const CLASS_ICON_MAP = {
   'Самурай': './assets/icons/classes/samurai.svg',
   'Охотник': './assets/icons/classes/hunter.svg',
@@ -205,22 +233,81 @@ const CLASS_ICON_MAP = {
   'Ронин': './assets/icons/classes/ronin.svg',
 };
 
+/**
+ * Получает путь к иконке класса с версией
+ * @param {string} className - Название класса
+ * @returns {string} Путь к иконке с версией
+ */
 export function getClassIconPath(className) {
   if (!className) return '';
-  return CLASS_ICON_MAP[className] || CLASS_ICON_MAP['Самурай'];
+  const path = CLASS_ICON_MAP[className] || CLASS_ICON_MAP['Самурай'];
+  return getStaticAssetPath(path);
 }
 
-// Версия иконок трофеев для cache busting (увеличивать при обновлении иконок)
-const TROPHY_ICONS_VERSION = '2';
-
 /**
- * Получает путь к иконке трофея с версией для cache busting
+ * Получает путь к иконке трофея с версией
  * @param {string} trophyKey - Ключ трофея (например, 'raid')
  * @returns {string} Путь к иконке с версией
  */
 export function getTrophyIconPath(trophyKey) {
   if (!trophyKey) return '';
-  return `./assets/trophies/${trophyKey}.svg?v=${TROPHY_ICONS_VERSION}`;
+  return getStaticAssetPath(`./assets/trophies/${trophyKey}.svg`);
+}
+
+/**
+ * Получает путь к системной иконке с версией
+ * @param {string} iconName - Имя иконки (например, 'magatama.svg', 'reward.webp')
+ * @returns {string} Путь к иконке с версией
+ */
+export function getSystemIconPath(iconName) {
+  if (!iconName) return '';
+  return getStaticAssetPath(`./assets/icons/system/${iconName}`);
+}
+
+/**
+ * Получает путь к иконке мода с версией
+ * @param {string} modSlug - Slug мода
+ * @param {string} category - Категория ('mods', 'mod1', 'mod2', 'story_mods')
+ * @returns {string} Путь к иконке с версией
+ */
+export function getModIconPath(modSlug, category = 'mods') {
+  if (!modSlug) return '';
+  // Если уже есть расширение, не добавляем его
+  const filename = modSlug.endsWith('.svg') ? modSlug : `${modSlug}.svg`;
+  return getStaticAssetPath(`./assets/icons/${category}/${filename}`);
+}
+
+/**
+ * Получает путь к карте с версией
+ * @param {string} mapSlug - Slug карты
+ * @param {string} category - Категория ('survival', 'story', 'rivals', 'trials')
+ * @returns {string} Путь к карте с версией
+ */
+export function getMapPath(mapSlug, category = 'survival') {
+  if (!mapSlug) return '';
+  // Если уже есть расширение, не добавляем его
+  const filename = mapSlug.endsWith('.jpg') ? mapSlug : `${mapSlug}.jpg`;
+  return getStaticAssetPath(`./assets/maps/${category}/${filename}`);
+}
+
+/**
+ * Получает путь к иконке эмоции с версией
+ * @param {string} emoteSlug - Slug эмоции
+ * @returns {string} Путь к иконке с версией
+ */
+export function getEmoteIconPath(emoteSlug) {
+  if (!emoteSlug) return '';
+  return getStaticAssetPath(`./assets/icons/emotes/${emoteSlug}.svg`);
+}
+
+/**
+ * Получает путь к иконке оружия с версией
+ * @param {string} gearSlug - Slug оружия
+ * @returns {string} Путь к иконке с версией
+ */
+export function getGearIconPath(gearSlug) {
+  if (!gearSlug) return '';
+  return getStaticAssetPath(`./assets/icons/ghost-weapons/${gearSlug}.svg`);
 }
 
 /**

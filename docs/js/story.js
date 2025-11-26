@@ -5,13 +5,14 @@ import { loadRotationData, loadCurrentWeek, getWeekData } from './home.js';
 import { setTopbar } from './ui.js';
 import { openLightbox } from './builds.js';
 import { hapticTapSmart } from './telegram.js';
+import { getStaticAssetPath, getDynamicAssetPath, getModIconPath, getMapPath, getSystemIconPath } from './utils.js';
 
 let storyDataCache = null;
 
 async function loadStoryConfig() {
   if (storyDataCache) return storyDataCache;
   try {
-    const res = await fetch(`./assets/data/story.json?v=${Date.now()}`, { cache: 'no-store' });
+    const res = await fetch(getDynamicAssetPath('./assets/data/story.json'), { cache: 'no-store' });
     if (!res.ok) throw new Error(`story.json status ${res.status}`);
     const data = await res.json();
     if (!Array.isArray(data)) {
@@ -51,7 +52,8 @@ function renderHeroCard(root, weekData) {
 
   const storyImgName = weekData.story_img || (weekData.story_slug ? `${weekData.story_slug}.jpg` : '');
   if (storyImgName) {
-    const url = `./assets/maps/story/${storyImgName}`;
+    const mapSlug = storyImgName.replace('.jpg', '');
+    const url = getMapPath(mapSlug, 'story');
     // Фон карты напрямую на карточку
     card.style.backgroundImage = `url('${url}')`;
     card.style.backgroundSize = 'cover';
@@ -64,7 +66,7 @@ function renderHeroCard(root, weekData) {
   if (weekData.story_mod_icon) {
     const mainMod = document.createElement('div');
     mainMod.className = 'story-hero-mod-main';
-    const path = `./assets/icons/mods/${weekData.story_mod_icon}`;
+    const path = getModIconPath(weekData.story_mod_icon, 'mods');
     const icon = createModIcon(path, weekData.story_mod || '');
     mainMod.appendChild(icon);
     card.appendChild(mainMod);
@@ -91,7 +93,7 @@ function renderHeroCard(root, weekData) {
     chaptersContainer.className = 'story-hero-mod-chapters';
 
     allMods.forEach((mod) => {
-      const path = `./assets/icons/story_mods/${mod.slug}.svg?t=${Date.now()}`;
+      const path = getModIconPath(mod.slug, 'story_mods');
       const icon = createModIcon(path, mod.title || '');
       chaptersContainer.appendChild(icon);
     });
@@ -143,7 +145,7 @@ function renderModifiersCard(root, weekData) {
 
     if (weekData.story_mod_icon) {
       const img = document.createElement('img');
-      img.src = `./assets/icons/mods/${weekData.story_mod_icon}`;
+      img.src = getModIconPath(weekData.story_mod_icon, 'mods');
       img.alt = weekData.story_mod || '';
       img.decoding = 'async';
       img.loading = 'lazy';
@@ -183,7 +185,7 @@ function renderModifiersCard(root, weekData) {
     // Добавляем иконки для всех модификаторов
     mods.forEach((mod) => {
       const img = document.createElement('img');
-      img.src = `./assets/icons/story_mods/${mod.slug}.svg?t=${Date.now()}`;
+      img.src = getModIconPath(mod.slug, 'story_mods');
       img.alt = mod.title || '';
       img.decoding = 'async';
       img.loading = 'lazy';
@@ -210,7 +212,7 @@ function renderScrollsCard(root, weekData, scrollBlock) {
   title.className = 'card-title';
   title.textContent = 'Свиток Гёдзена';
   const icon = document.createElement('img');
-  icon.src = './assets/icons/system/scroll.svg';
+  icon.src = getSystemIconPath('scroll.svg');
   icon.alt = '';
   icon.className = 'card-title-icon';
   title.appendChild(icon);
@@ -249,13 +251,13 @@ function renderScrollsCard(root, weekData, scrollBlock) {
     imagesRow.className = 'story-scroll-images';
 
     const img1 = document.createElement('img');
-    img1.src = `./assets/scrolls/${storySlug}/${key}.jpg`;
+    img1.src = getStaticAssetPath(`./assets/scrolls/${storySlug}/${key}.jpg`);
     img1.alt = `Свиток ${key}`;
     img1.decoding = 'async';
     img1.loading = 'lazy';
 
     const img2 = document.createElement('img');
-    img2.src = `./assets/scrolls/${storySlug}/${key}_.jpg`;
+    img2.src = getStaticAssetPath(`./assets/scrolls/${storySlug}/${key}_.jpg`);
     img2.alt = `Свиток ${key} (обратная сторона)`;
     img2.decoding = 'async';
     img2.loading = 'lazy';

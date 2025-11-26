@@ -3,6 +3,7 @@
 
 import { getWavesData } from './api.js';
 import { setTopbar } from './ui.js';
+import { getMapPath } from './utils.js';
 
 const elements = {
   map: null,
@@ -213,13 +214,18 @@ function renderHeader(data) {
   if (elements.mapCard) {
     const slug = data?.slug;
     if (slug) {
-      elements.mapCard.style.setProperty(
-        '--waves-map-bg',
-        `url('../assets/maps/survival/${slug}.jpg')`,
-      );
+      const mapPath = getMapPath(slug, 'survival');
+      // Устанавливаем фон напрямую на элемент, как в story-hero-card
+      elements.mapCard.style.backgroundImage = `url('${mapPath}')`;
+      elements.mapCard.style.backgroundSize = 'cover';
+      elements.mapCard.style.backgroundPosition = 'center';
+      elements.mapCard.style.backgroundRepeat = 'no-repeat';
       elements.mapCard.classList.add('waves-meta-card--with-bg');
     } else {
-      elements.mapCard.style.removeProperty('--waves-map-bg');
+      elements.mapCard.style.backgroundImage = '';
+      elements.mapCard.style.backgroundSize = '';
+      elements.mapCard.style.backgroundPosition = '';
+      elements.mapCard.style.backgroundRepeat = '';
       elements.mapCard.classList.remove('waves-meta-card--with-bg');
     }
   }

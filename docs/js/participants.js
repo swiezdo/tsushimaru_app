@@ -4,7 +4,7 @@ import { showScreen } from './ui.js';
 import { fetchParticipants, API_BASE } from './api.js';
 import { openParticipantDetail } from './participantDetail.js';
 import { pushNavigation } from './navigation.js';
-import { getTrophyIconPath } from './utils.js';
+import { getTrophyIconPath, getDynamicAssetPath, getStaticAssetPath, getSystemIconPath } from './utils.js';
 
 // Элементы интерфейса
 const participantsListEl = $('participantsList');
@@ -90,8 +90,8 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
         
         // Определяем источник аватарки с timestamp для предотвращения кеширования
         const avatarSrc = user.avatar_url 
-            ? `${API_BASE}${user.avatar_url}?t=${Date.now()}` 
-            : './assets/default-avatar.svg';
+            ? getDynamicAssetPath(`${API_BASE}${user.avatar_url}`)
+            : getStaticAssetPath('./assets/default-avatar.svg');
         
         // Создаем иконки активных трофеев
         let trophyIconsHtml = '';
@@ -161,7 +161,7 @@ export async function initParticipants() {
         const searchTitle = searchCard.querySelector('.card-title');
         if (searchTitle && !searchTitle.querySelector('.card-title-icon')) {
             const icon = document.createElement('img');
-            icon.src = './assets/icons/system/search.webp';
+            icon.src = getSystemIconPath('search.webp');
             icon.alt = '';
             icon.className = 'card-title-icon';
             searchTitle.appendChild(icon);

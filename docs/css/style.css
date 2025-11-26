@@ -1272,28 +1272,16 @@ a svg,
   font-size: var(--fs-15);
   color: var(--muted);
 }
-.waves-meta-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--waves-map-bg, none);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0;
-  transition: opacity var(--transition-base);
-  z-index: 0;
-}
 .waves-meta-card::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(14, 22, 33, 0.75), rgba(14, 22, 33, 0.85));
+  background: linear-gradient(180deg, rgba(14, 22, 33, 0.2), rgba(14, 22, 33, 0.4));
   opacity: 0;
   transition: opacity var(--transition-base);
-  z-index: 0;
+  z-index: 1;
+  pointer-events: none;
 }
-.waves-meta-card--with-bg::after,
 .waves-meta-card--with-bg::before {
   opacity: 1;
 }
@@ -1312,6 +1300,15 @@ a svg,
   min-height: 120px;
   display: flex;
   align-items: flex-end;
+}
+
+.story-hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 22, 33, 0.2), rgba(14, 22, 33, 0.4));
+  z-index: 1;
+  pointer-events: none;
 }
 
 .story-hero-mod-main {
