@@ -3,7 +3,7 @@ import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
 import { pushNavigation, setCurrentScreenParams } from './navigation.js';
 import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE, fetchUserTrophies, fetchTrophiesList } from './api.js';
-import { prettyLines, formatDate } from './utils.js';
+import { prettyLines, formatDate, getTrophyIconPath } from './utils.js';
 import { 
     loadMasteryConfig, 
     getCategoryByKey,
