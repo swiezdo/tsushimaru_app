@@ -310,6 +310,29 @@ export async function getRecentEvents(limit = 3) {
     }
 }
 
+export async function getTop100Prize() {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const response = await requestJson('/api/top100.prize', {
+            method: 'GET',
+            includeAuth: true
+        });
+
+        if (!response || response.status !== 'ok') {
+            throw new Error(response?.detail || 'Ошибка получения приза Top100');
+        }
+
+        return response.prize;
+    } catch (error) {
+        console.error('Ошибка получения приза Top100:', error);
+        throw error;
+    }
+}
+
 export async function getRecentComments(limit = 3) {
     const normalizeAvatarUrl = (url) => {
         if (!url) return '';

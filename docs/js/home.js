@@ -1,7 +1,7 @@
 // home.js
 // Управление главной страницей с ротацией недель
 
-import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile, getHellmodeQuest } from './api.js';
+import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile, getHellmodeQuest, getTop100Prize } from './api.js';
 import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
@@ -359,143 +359,426 @@ function formatRelativeTime(timestamp) {
   return `${days} дн назад`;
 }
 
-function renderHellmodeQuestCard(quest) {
+async function renderQuestCard(quest) {
   const home = document.getElementById('homeScreen');
   if (!home) return;
 
   if (!quest || !quest.map_slug || !quest.map_name) {
     // Если задания нет, удаляем карточку если она существует
-    const card = document.getElementById('hellmodeQuestCard');
-    card?.parentElement?.removeChild(card);
+    const card = document.getElementById('questCard');
+    card?.remove();
     return;
   }
 
-  let card = document.getElementById('hellmodeQuestCard');
+  // Загружаем данные недели для кнопок ротации
+  let weekData = null;
+  try {
+    const [currentWeek, rotationJson] = await Promise.all([
+      loadCurrentWeek(),
+      loadRotationData()
+    ]);
+    if (rotationJson) {
+      weekData = getWeekData(currentWeek);
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки данных недели для карточки заданий:', error);
+  }
 
+  // Получаем или создаем карточку
+  let card = document.getElementById('questCard');
+  
   if (!card) {
     card = document.createElement('section');
-    card.className = 'card hellmode-quest-card';
-    card.id = 'hellmodeQuestCard';
+    card.className = 'card quest-card';
+    card.id = 'questCard';
+    
+    // Вставляем карточку после hero, но перед другими карточками
+    const hero = document.getElementById('homeHero');
+    const recentEventsCard = document.getElementById('recentEventsCard');
+    
+    if (recentEventsCard && recentEventsCard.parentElement === home) {
+      recentEventsCard.insertAdjacentElement('beforebegin', card);
+    } else if (hero && hero.parentElement === home) {
+      hero.insertAdjacentElement('afterend', card);
+    } else {
+      home.prepend(card);
+    }
+
+    // Создаем структуру карточки один раз
+    const header = document.createElement('div');
+    header.className = 'card-header-row';
+    const title = document.createElement('h3');
+    title.className = 'card-title';
+    title.id = 'questCardTitle';
+    const icon = document.createElement('img');
+    icon.src = getSystemIconPath('money.webp');
+    icon.alt = '';
+    icon.className = 'card-title-icon';
+    title.appendChild(icon);
+    header.appendChild(title);
+    card.appendChild(header);
+
+    const gridList = document.createElement('div');
+    gridList.className = 'grid-list';
+    gridList.id = 'questCardGridList';
+    card.appendChild(gridList);
+
+    // Создаем кнопку HellMode один раз
+    const badgeBtn = document.createElement('button');
+    badgeBtn.type = 'button';
+    badgeBtn.className = 'badge-btn badge-btn--with-bg';
+    badgeBtn.id = 'questCardHellmodeBtn';
+
+    const modeText = document.createElement('div');
+    modeText.className = 'rotation-mode-text';
+    const modeName = document.createElement('div');
+    modeName.className = 'rotation-mode-name';
+    modeName.id = 'questCardHellmodeName';
+    const modeMap = document.createElement('div');
+    modeMap.className = 'rotation-mode-map';
+    modeMap.id = 'questCardHellmodeMap';
+    const modeHint = document.createElement('div');
+    modeHint.className = 'rotation-mode-hint';
+    modeHint.id = 'questCardHellmodeHint';
+    modeText.appendChild(modeName);
+    modeText.appendChild(modeMap);
+    modeText.appendChild(modeHint);
+
+    const modIcons = document.createElement('div');
+    modIcons.className = 'rotation-mod-icons';
+    modIcons.id = 'questCardHellmodeModIcons';
+
+    const rewardBadge = document.createElement('div');
+    rewardBadge.className = 'quest-reward-badge';
+    rewardBadge.id = 'questCardHellmodeReward';
+    const rewardValue = document.createElement('span');
+    rewardValue.className = 'quest-reward-value';
+    rewardValue.id = 'questCardHellmodeRewardValue';
+    const magatamaImg = document.createElement('img');
+    magatamaImg.src = getSystemIconPath('magatama.svg');
+    magatamaImg.alt = 'Награда';
+    magatamaImg.className = 'quest-reward-icon';
+    rewardBadge.appendChild(rewardValue);
+    rewardBadge.appendChild(magatamaImg);
+
+    badgeBtn.appendChild(modeText);
+    badgeBtn.appendChild(modIcons);
+    badgeBtn.appendChild(rewardBadge);
+
+    // Обработчик клика на карточку (добавляем один раз)
+    badgeBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      pushNavigation('hellmodeQuestDetail');
+      openHellmodeQuestDetail();
+    });
+
+    gridList.appendChild(badgeBtn);
+
+    // Создаем кнопки Top100 один раз
+    const storyBtn = document.createElement('button');
+    storyBtn.type = 'button';
+    storyBtn.className = 'badge-btn';
+    storyBtn.id = 'questCardStoryBtn';
+    storyBtn.disabled = true;
+    gridList.appendChild(storyBtn);
+
+    const survivalBtn = document.createElement('button');
+    survivalBtn.type = 'button';
+    survivalBtn.className = 'badge-btn';
+    survivalBtn.id = 'questCardSurvivalBtn';
+    survivalBtn.disabled = true;
+    gridList.appendChild(survivalBtn);
+
+    const trialsBtn = document.createElement('button');
+    trialsBtn.type = 'button';
+    trialsBtn.className = 'badge-btn';
+    trialsBtn.id = 'questCardTrialsBtn';
+    trialsBtn.disabled = true;
+    gridList.appendChild(trialsBtn);
   }
 
-  // Вставляем карточку после hero, но перед другими карточками
-  const hero = document.getElementById('homeHero');
-  const recentEventsCard = document.getElementById('recentEventsCard');
-  
-  if (recentEventsCard && recentEventsCard.parentElement === home) {
-    recentEventsCard.insertAdjacentElement('beforebegin', card);
-  } else if (hero && hero.parentElement === home) {
-    hero.insertAdjacentElement('afterend', card);
-  } else if (!card.parentElement) {
-    home.prepend(card);
+  // Обновляем содержимое (не пересоздаем элементы)
+  const title = document.getElementById('questCardTitle');
+  if (title) {
+    title.textContent = 'Еженедельные задания (Бета тест)';
   }
 
-  card.innerHTML = '';
+  // Обновляем кнопку HellMode
+  const hellmodeBtn = document.getElementById('questCardHellmodeBtn');
+  if (hellmodeBtn) {
+    const mapName = document.getElementById('questCardHellmodeName');
+    if (mapName) mapName.textContent = 'HellMode';
+    const map = document.getElementById('questCardHellmodeMap');
+    if (map) map.textContent = quest.map_name;
+    const hint = document.getElementById('questCardHellmodeHint');
+    if (hint) hint.textContent = 'Нажмите, чтобы открыть';
+    
+    applyButtonBackground(hellmodeBtn, getMapPath(quest.map_slug, 'survival'));
 
-  // Заголовок карточки
-  const header = document.createElement('div');
-  header.className = 'card-header-row';
-  const title = document.createElement('h3');
-  title.className = 'card-title';
-  title.textContent = 'Еженедельные задания (Бета тест)';
-  const icon = document.createElement('img');
-  icon.src = getSystemIconPath('money.webp');
-  icon.alt = '';
-  icon.className = 'card-title-icon';
-  title.appendChild(icon);
-  header.appendChild(title);
-  card.appendChild(header);
+    // Обновляем иконки
+    const modIcons = document.getElementById('questCardHellmodeModIcons');
+    if (modIcons) {
+      modIcons.innerHTML = '';
+      
+      const classIcon = document.createElement('div');
+      classIcon.className = 'waves-mod-icon waves-mod-icon--class';
+      const classImg = document.createElement('img');
+      classImg.src = getClassIconPath(quest.class_name);
+      classImg.alt = quest.class_name || '';
+      classIcon.appendChild(classImg);
 
-  // Контейнер для кнопки (как на странице ротации)
-  const gridList = document.createElement('div');
-  gridList.className = 'grid-list';
+      const gearIcon = document.createElement('div');
+      gearIcon.className = 'waves-mod-icon';
+      const gearImg = document.createElement('img');
+      gearImg.src = getGearIconPath(quest.gear_slug);
+      gearImg.alt = quest.gear_slug || '';
+      gearIcon.appendChild(gearImg);
 
-  // Кнопка с заданием
-  const badgeBtn = document.createElement('button');
-  badgeBtn.type = 'button';
-  badgeBtn.className = 'badge-btn badge-btn--with-bg';
-  badgeBtn.style.backgroundImage = `url('${getMapPath(quest.map_slug, 'survival')}')`;
-  badgeBtn.style.backgroundSize = 'cover';
-  badgeBtn.style.backgroundPosition = 'center';
+      const emoteIcon = document.createElement('div');
+      emoteIcon.className = 'waves-mod-icon';
+      const emoteImg = document.createElement('img');
+      emoteImg.src = getEmoteIconPath(quest.emote_slug);
+      emoteImg.alt = quest.emote_slug || '';
+      emoteIcon.appendChild(emoteImg);
+
+      modIcons.appendChild(classIcon);
+      modIcons.appendChild(gearIcon);
+      modIcons.appendChild(emoteIcon);
+    }
+
+    // Обновляем награду
+    const rewardValue = document.getElementById('questCardHellmodeRewardValue');
+    if (rewardValue) {
+      rewardValue.textContent = quest.reward || 0;
+    }
+  }
+
+  // Обновляем кнопки Top100
+  if (weekData) {
+    let top100Prize = null;
+    try {
+      top100Prize = await getTop100Prize();
+    } catch (error) {
+      console.error('Ошибка получения приза Top100:', error);
+    }
+
+    // Обновляем кнопку Сюжет
+    updateTop100Button('questCardStoryBtn', 'Топ-100 "Сюжет"', weekData.story || '—', weekData.story_mod_icon, weekData.story_slug || (weekData.story_img ? weekData.story_img.replace('.jpg', '') : ''), 'story', null, null, top100Prize);
+
+    // Обновляем кнопку Выживание
+    updateTop100Button('questCardSurvivalBtn', 'Топ-100 "Выживание"', weekData.survival || '—', null, weekData.survival_slug || (weekData.survival_img ? weekData.survival_img.replace('.jpg', '') : ''), 'survival', weekData.survival_mod1_icon, weekData.survival_mod2_icon, top100Prize);
+
+    // Обновляем кнопку Испытания Иё
+    updateTop100Button('questCardTrialsBtn', 'Топ-100 "Испытания Иё"', weekData.trials || '—', weekData.trials_mod_icon, weekData.trials_slug || (weekData.trials_img ? weekData.trials_img.replace('.jpg', '') : ''), 'trials', null, null, top100Prize);
+  }
+}
+
+/**
+ * Обновляет содержимое кнопки Top100 (не пересоздает элемент)
+ */
+function updateTop100Button(btnId, modeName, mapName, modIcon, mapSlug, mapType, mod1Icon, mod2Icon, reward) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+
+  // Обновляем текст
+  let modeText = btn.querySelector('.rotation-mode-text');
+  if (!modeText) {
+    modeText = document.createElement('div');
+    modeText.className = 'rotation-mode-text';
+    btn.appendChild(modeText);
+  }
+
+  let modeNameEl = modeText.querySelector('.rotation-mode-name');
+  if (!modeNameEl) {
+    modeNameEl = document.createElement('div');
+    modeNameEl.className = 'rotation-mode-name';
+    modeText.insertBefore(modeNameEl, modeText.firstChild);
+  }
+  modeNameEl.textContent = modeName;
+
+  let modeMapEl = modeText.querySelector('.rotation-mode-map');
+  if (!modeMapEl) {
+    modeMapEl = document.createElement('div');
+    modeMapEl.className = 'rotation-mode-map';
+    modeText.insertBefore(modeMapEl, modeNameEl.nextSibling);
+  }
+  modeMapEl.textContent = mapName;
+
+  let modeHint = modeText.querySelector('.rotation-mode-hint');
+  if (!modeHint) {
+    modeHint = document.createElement('div');
+    modeHint.className = 'rotation-mode-hint';
+    modeText.appendChild(modeHint);
+  }
+  modeHint.textContent = 'Нажмите, чтобы открыть';
+
+  // Обновляем иконки модификаторов
+  let modIcons = btn.querySelector('.rotation-mod-icons');
+  if (!modIcons) {
+    modIcons = document.createElement('div');
+    modIcons.className = 'rotation-mod-icons';
+    btn.appendChild(modIcons);
+  }
+  modIcons.innerHTML = '';
+
+  if (modIcon) {
+    const modIconWrapper = document.createElement('div');
+    modIconWrapper.className = 'waves-mod-icon';
+    const modIconImg = document.createElement('img');
+    modIconImg.src = getModIconPath(modIcon, 'mods');
+    modIconImg.alt = '';
+    modIconWrapper.appendChild(modIconImg);
+    modIcons.appendChild(modIconWrapper);
+  } else if (mod1Icon || mod2Icon) {
+    if (mod1Icon) {
+      const mod1Wrapper = document.createElement('div');
+      mod1Wrapper.className = 'waves-mod-icon';
+      const mod1Img = document.createElement('img');
+      mod1Img.src = getModIconPath(mod1Icon, 'mod1');
+      mod1Img.alt = '';
+      mod1Wrapper.appendChild(mod1Img);
+      modIcons.appendChild(mod1Wrapper);
+    }
+    if (mod2Icon) {
+      const mod2Wrapper = document.createElement('div');
+      mod2Wrapper.className = 'waves-mod-icon';
+      const mod2Img = document.createElement('img');
+      mod2Img.src = getModIconPath(mod2Icon, 'mod2');
+      mod2Img.alt = '';
+      mod2Wrapper.appendChild(mod2Img);
+      modIcons.appendChild(mod2Wrapper);
+    }
+  }
+
+  // Обновляем фон
+  if (mapSlug) {
+    const mapImgUrl = getMapPath(mapSlug, mapType);
+    applyButtonBackground(btn, mapImgUrl);
+  }
+
+  // Обновляем награду
+  let rewardBadge = btn.querySelector('.quest-reward-badge');
+  if (reward !== null && reward !== undefined) {
+    if (!rewardBadge) {
+      rewardBadge = document.createElement('div');
+      rewardBadge.className = 'quest-reward-badge';
+      btn.appendChild(rewardBadge);
+    }
+    let rewardValue = rewardBadge.querySelector('.quest-reward-value');
+    if (!rewardValue) {
+      rewardValue = document.createElement('span');
+      rewardValue.className = 'quest-reward-value';
+      rewardBadge.appendChild(rewardValue);
+    }
+    rewardValue.textContent = reward || 0;
+    
+    let magatamaImg = rewardBadge.querySelector('.quest-reward-icon');
+    if (!magatamaImg) {
+      magatamaImg = document.createElement('img');
+      magatamaImg.src = getSystemIconPath('magatama.svg');
+      magatamaImg.alt = 'Награда';
+      magatamaImg.className = 'quest-reward-icon';
+      rewardBadge.appendChild(magatamaImg);
+    }
+  } else if (rewardBadge) {
+    rewardBadge.remove();
+  }
+}
+
+/**
+ * Создает кнопку режима ротации (копия со страницы ротации)
+ */
+function createRotationButton(modeName, mapName, modIcon, mapSlug, mapType, mod1Icon = null, mod2Icon = null, reward = null) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'badge-btn';
+  btn.disabled = true; // Пока не кликабельные
 
   // Текст слева
   const modeText = document.createElement('div');
   modeText.className = 'rotation-mode-text';
 
-  const modeName = document.createElement('div');
-  modeName.className = 'rotation-mode-name';
-  modeName.textContent = 'HellMode';
+  const modeNameEl = document.createElement('div');
+  modeNameEl.className = 'rotation-mode-name';
+  modeNameEl.textContent = modeName;
 
-  const modeMap = document.createElement('div');
-  modeMap.className = 'rotation-mode-map';
-  modeMap.textContent = quest.map_name;
+  const modeMapEl = document.createElement('div');
+  modeMapEl.className = 'rotation-mode-map';
+  modeMapEl.textContent = mapName;
 
   const modeHint = document.createElement('div');
   modeHint.className = 'rotation-mode-hint';
   modeHint.textContent = 'Нажмите, чтобы открыть';
 
-  modeText.appendChild(modeName);
-  modeText.appendChild(modeMap);
+  modeText.appendChild(modeNameEl);
+  modeText.appendChild(modeMapEl);
   modeText.appendChild(modeHint);
 
-  // Иконки справа сверху (без магатамы)
+  // Иконки модификаторов справа
   const modIcons = document.createElement('div');
   modIcons.className = 'rotation-mod-icons';
 
-  // 1. Class
-  const classIcon = document.createElement('div');
-  classIcon.className = 'waves-mod-icon waves-mod-icon--class';
-  const classImg = document.createElement('img');
-  classImg.src = getClassIconPath(quest.class_name);
-  classImg.alt = quest.class_name || '';
-  classIcon.appendChild(classImg);
+  if (modIcon) {
+    // Одна иконка модификатора
+    const modIconWrapper = document.createElement('div');
+    modIconWrapper.className = 'waves-mod-icon';
+    const modIconImg = document.createElement('img');
+    modIconImg.src = getModIconPath(modIcon, 'mods');
+    modIconImg.alt = '';
+    modIconWrapper.appendChild(modIconImg);
+    modIcons.appendChild(modIconWrapper);
+  } else if (mod1Icon || mod2Icon) {
+    // Две иконки модификаторов (для Кошмара)
+    if (mod1Icon) {
+      const mod1Wrapper = document.createElement('div');
+      mod1Wrapper.className = 'waves-mod-icon';
+      const mod1Img = document.createElement('img');
+      mod1Img.src = getModIconPath(mod1Icon, 'mod1');
+      mod1Img.alt = '';
+      mod1Wrapper.appendChild(mod1Img);
+      modIcons.appendChild(mod1Wrapper);
+    }
+    if (mod2Icon) {
+      const mod2Wrapper = document.createElement('div');
+      mod2Wrapper.className = 'waves-mod-icon';
+      const mod2Img = document.createElement('img');
+      mod2Img.src = getModIconPath(mod2Icon, 'mod2');
+      mod2Img.alt = '';
+      mod2Wrapper.appendChild(mod2Img);
+      modIcons.appendChild(mod2Wrapper);
+    }
+  }
 
-  // 2. Gear
-  const gearIcon = document.createElement('div');
-  gearIcon.className = 'waves-mod-icon';
-  const gearImg = document.createElement('img');
-  gearImg.src = getGearIconPath(quest.gear_slug);
-  gearImg.alt = quest.gear_slug || '';
-  gearIcon.appendChild(gearImg);
+  btn.appendChild(modeText);
+  if (modIcons.children.length > 0) {
+    btn.appendChild(modIcons);
+  }
 
-  // 3. Emote
-  const emoteIcon = document.createElement('div');
-  emoteIcon.className = 'waves-mod-icon';
-  const emoteImg = document.createElement('img');
-  emoteImg.src = getEmoteIconPath(quest.emote_slug);
-  emoteImg.alt = quest.emote_slug || '';
-  emoteIcon.appendChild(emoteImg);
+  // Награда внизу справа (если указана)
+  if (reward !== null && reward !== undefined) {
+    const rewardBadge = document.createElement('div');
+    rewardBadge.className = 'quest-reward-badge';
+    const rewardValue = document.createElement('span');
+    rewardValue.className = 'quest-reward-value';
+    rewardValue.textContent = reward || 0;
+    const magatamaImg = document.createElement('img');
+    magatamaImg.src = getSystemIconPath('magatama.svg');
+    magatamaImg.alt = 'Награда';
+    magatamaImg.className = 'quest-reward-icon';
+    rewardBadge.appendChild(rewardValue);
+    rewardBadge.appendChild(magatamaImg);
+    btn.appendChild(rewardBadge);
+  }
 
-  modIcons.appendChild(classIcon);
-  modIcons.appendChild(gearIcon);
-  modIcons.appendChild(emoteIcon);
+  // Применяем фоновое изображение
+  if (mapSlug) {
+    const mapImgUrl = getMapPath(mapSlug, mapType);
+    if (mapImgUrl) {
+      applyButtonBackground(btn, mapImgUrl);
+    }
+  }
 
-  // Награда внизу справа (прямоугольник с числом и иконкой)
-  const rewardBadge = document.createElement('div');
-  rewardBadge.className = 'quest-reward-badge';
-  const rewardValue = document.createElement('span');
-  rewardValue.className = 'quest-reward-value';
-  rewardValue.textContent = quest.reward || 0;
-  const magatamaImg = document.createElement('img');
-  magatamaImg.src = getSystemIconPath('magatama.svg');
-  magatamaImg.alt = 'Награда';
-  magatamaImg.className = 'quest-reward-icon';
-  rewardBadge.appendChild(rewardValue);
-  rewardBadge.appendChild(magatamaImg);
-
-  badgeBtn.appendChild(modeText);
-  badgeBtn.appendChild(modIcons);
-  badgeBtn.appendChild(rewardBadge);
-
-  // Обработчик клика на карточку
-  badgeBtn.addEventListener('click', () => {
-    hapticTapSmart();
-    pushNavigation('hellmodeQuestDetail');
-    openHellmodeQuestDetail();
-  });
-
-  gridList.appendChild(badgeBtn);
-  card.appendChild(gridList);
+  return btn;
 }
 
 function renderRecentEventsCard(events) {
@@ -1000,7 +1283,7 @@ export async function initHome() {
       loadWhatsNew(),
     ]);
 
-    renderHellmodeQuestCard(quest);
+    await renderQuestCard(quest);
     renderRecentEventsCard(events);
     renderRecentCommentsCard(comments);
     renderUpcomingBirthdaysCard(birthdays);

@@ -195,6 +195,11 @@ main.container {
   color: #000;
 }
 
+/* Белое название карты в первой карточке на странице сюжет при светлой теме */
+.theme-light .story-hero-card--with-bg .story-hero-title {
+  color: #fff;
+}
+
 .topbar-action:active {
   transform: scale(0.94);
 }
@@ -1268,7 +1273,7 @@ a svg,
 }
 
 /* Уменьшаем размер иконки класса в карточке заданий */
-.hellmode-quest-card .waves-mod-icon--class img,
+.quest-card .waves-mod-icon--class img,
 .waves-meta-card .waves-mod-icon--class img {
   width: 80%;
   height: 80%;
@@ -1624,7 +1629,7 @@ a svg,
 }
 
 /* Кнопки заданий должны иметь такую же высоту как на странице ротации */
-.hellmode-quest-card .badge-btn {
+.quest-card .badge-btn {
   min-height: calc(var(--size-touch) + var(--space-4) + var(--space-2));
   padding: var(--space-4);
 }
