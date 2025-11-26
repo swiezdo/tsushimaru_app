@@ -441,8 +441,8 @@ function renderHellmodeQuestCard(quest) {
   const classIcon = document.createElement('div');
   classIcon.className = 'waves-mod-icon waves-mod-icon--class';
   const classImg = document.createElement('img');
-  classImg.src = getClassIconPath(quest.class_slug);
-  classImg.alt = quest.class_slug || '';
+  classImg.src = getClassIconPath(quest.class_name);
+  classImg.alt = quest.class_name || '';
   classIcon.appendChild(classImg);
 
   // 2. Gear

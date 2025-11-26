@@ -806,6 +806,36 @@ export async function submitTrophyApplication(trophyKey, comment = '', media = [
     }
 }
 
+// Отправка заявки на задание HellMode Quest
+export async function submitHellmodeQuestApplication(comment = '', files = [], options = {}) {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const data = new FormData();
+        
+        if (comment) {
+            data.append('comment', comment);
+        }
+        
+        const fileArray = Array.isArray(files) ? files : Array.from(files || []);
+
+        fileArray.forEach((file) => {
+            if (file) {
+                data.append('photos', file);
+            }
+        });
+
+        const url = `${API_BASE}/api/hellmodeQuest.submit`;
+        return await postFormDataWithProgress(url, data, initData, options);
+    } catch (error) {
+        console.error('Ошибка отправки заявки на задание HellMode:', error);
+        throw error;
+    }
+}
+
 // Обновление активных трофеев
 export async function updateActiveTrophies(activeTrophiesList) {
     try {

@@ -368,13 +368,15 @@ main.container {
 /* Кнопка отправки заявки мастерства должна быть полной ширины */
 #masteryApplicationCard .actions-bar .btn,
 #trophyApplicationCard .actions-bar .btn,
-#seasonTrophyApplicationCard .actions-bar .btn {
+#seasonTrophyApplicationCard .actions-bar .btn,
+#hellmodeApplicationCard .actions-bar .btn {
   width: 100%;
 }
 /* Убираем боковые отступы у actions-bar в карточках заявок */
 #masteryApplicationCard .actions-bar,
 #trophyApplicationCard .actions-bar,
-#seasonTrophyApplicationCard .actions-bar {
+#seasonTrophyApplicationCard .actions-bar,
+#hellmodeApplicationCard .actions-bar {
   margin-left: 0;
   margin-right: 0;
 }
@@ -2505,6 +2507,10 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
 
 /* ========== MASTERY DETAIL SCREEN ========== */
 #masteryDetailContainer .card {
+  padding: var(--space-2) var(--space-4);
+}
+
+#hellmodeQuestDetailContainer .card {
   padding: var(--space-2) var(--space-4);
 }
 
