@@ -397,7 +397,12 @@ function renderHellmodeQuestCard(quest) {
   header.className = 'card-header-row';
   const title = document.createElement('h3');
   title.className = 'card-title';
-  title.textContent = 'Еженедельные задания';
+  title.textContent = 'Еженедельные задания (Бета тест)';
+  const icon = document.createElement('img');
+  icon.src = getSystemIconPath('money.webp');
+  icon.alt = '';
+  icon.className = 'card-title-icon';
+  title.appendChild(icon);
   header.appendChild(title);
   card.appendChild(header);
 

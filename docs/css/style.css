@@ -189,6 +189,12 @@ main.container {
   white-space: nowrap;
 }
 
+/* ========== TOPBAR BALANCE - LIGHT THEME ========== */
+/* Черное число магатамы в топбаре при светлой теме */
+.theme-light .balance-value {
+  color: #000;
+}
+
 .topbar-action:active {
   transform: scale(0.94);
 }
@@ -1009,6 +1015,16 @@ a svg,
   color: var(--muted);
   line-height: var(--lh-tight);
 }
+
+/* ========== RECENT EVENTS - LIGHT THEME ========== */
+/* Черный текст в карточке "Последние награды" при светлой теме */
+.theme-light .recent-event-headline {
+  color: #000;
+}
+
+.theme-light .recent-event-details {
+  color: #666;
+}
 .recent-comments-list {
   list-style: none;
   padding: 0;
@@ -1242,6 +1258,13 @@ a svg,
   height: 20px;
   flex-shrink: 0;
   object-fit: contain;
+}
+
+
+/* ========== UPCOMING BIRTHDAYS - LIGHT THEME ========== */
+/* Черные ники участников в карточке дней рождения при светлой теме */
+.theme-light .upcoming-birthday-name {
+  color: #000;
 }
 
 /* Уменьшаем размер иконки класса в карточке заданий */
@@ -2512,6 +2535,18 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
 
 #hellmodeQuestDetailContainer .card {
   padding: var(--space-2) var(--space-4);
+}
+
+/* ========== HELLMODE QUEST DETAIL - LIGHT THEME ========== */
+/* Инвертирование иконок в карточке "Описание" при светлой теме (кроме магатамы) */
+.theme-light #hellmodeQuestDetailContainer .profile-grid .value img:not([alt="Награда"]) {
+  filter: brightness(0) saturate(100%);
+  opacity: 0.8;
+}
+
+/* Черный текст в карточке "Доказательство" при светлой теме */
+.theme-light #hellmodeQuestDetailContainer .trophy-proof {
+  color: #000 !important;
 }
 
 .card.current-level {
