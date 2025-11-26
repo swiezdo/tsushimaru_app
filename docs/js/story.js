@@ -101,6 +101,22 @@ function renderHeroCard(root, weekData) {
     card.appendChild(chaptersContainer);
   }
 
+  // Добавляем текст с названием карты и модификатора (как в waves-meta-card)
+  const header = document.createElement('div');
+  header.className = 'story-hero-header';
+  
+  const title = document.createElement('div');
+  title.className = 'story-hero-title';
+  title.textContent = weekData.story || '—';
+  
+  const subtitle = document.createElement('div');
+  subtitle.className = 'story-hero-subtitle muted';
+  subtitle.textContent = weekData.story_mod || '—';
+  
+  header.appendChild(title);
+  header.appendChild(subtitle);
+  card.appendChild(header);
+
   root.appendChild(card);
 }
 

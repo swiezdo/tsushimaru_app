@@ -1327,6 +1327,31 @@ a svg,
   z-index: 2;
 }
 
+.story-hero-header {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.story-hero-title {
+  font-size: var(--fs-18);
+  font-weight: 600;
+}
+
+.story-hero-subtitle {
+  font-size: var(--fs-15);
+}
+
+.story-hero-card--with-bg .story-hero-subtitle {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.story-hero-card--with-bg .story-hero-title,
+.story-hero-card--with-bg .story-hero-header {
+  text-shadow: var(--shadow-text);
+}
+
 /* Увеличенные иконки модификаторов глав в карточке сюжета */
 .story-hero-mod-chapters .waves-mod-icon {
   width: 44px;
