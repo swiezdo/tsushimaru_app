@@ -5,6 +5,7 @@ import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRece
 import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
+import { openHellmodeQuestDetail } from './hellmode_quest_detail.js';
 import { tg, hapticTapSmart } from './telegram.js';
 import { getClassIconPath, getStaticAssetPath, getDynamicAssetPath, getSystemIconPath, getModIconPath, getMapPath, getEmoteIconPath, getGearIconPath } from './utils.js';
 
@@ -440,24 +441,24 @@ function renderHellmodeQuestCard(quest) {
   const classIcon = document.createElement('div');
   classIcon.className = 'waves-mod-icon waves-mod-icon--class';
   const classImg = document.createElement('img');
-  classImg.src = getClassIconPath(quest.class);
-  classImg.alt = quest.class || '';
+  classImg.src = getClassIconPath(quest.class_slug);
+  classImg.alt = quest.class_slug || '';
   classIcon.appendChild(classImg);
 
   // 2. Gear
   const gearIcon = document.createElement('div');
   gearIcon.className = 'waves-mod-icon';
   const gearImg = document.createElement('img');
-  gearImg.src = getGearIconPath(quest.gear);
-  gearImg.alt = quest.gear || '';
+  gearImg.src = getGearIconPath(quest.gear_slug);
+  gearImg.alt = quest.gear_slug || '';
   gearIcon.appendChild(gearImg);
 
   // 3. Emote
   const emoteIcon = document.createElement('div');
   emoteIcon.className = 'waves-mod-icon';
   const emoteImg = document.createElement('img');
-  emoteImg.src = getEmoteIconPath(quest.emote);
-  emoteImg.alt = quest.emote || '';
+  emoteImg.src = getEmoteIconPath(quest.emote_slug);
+  emoteImg.alt = quest.emote_slug || '';
   emoteIcon.appendChild(emoteImg);
 
   modIcons.appendChild(classIcon);
@@ -480,6 +481,13 @@ function renderHellmodeQuestCard(quest) {
   badgeBtn.appendChild(modeText);
   badgeBtn.appendChild(modIcons);
   badgeBtn.appendChild(rewardBadge);
+
+  // Обработчик клика на карточку
+  badgeBtn.addEventListener('click', () => {
+    hapticTapSmart();
+    pushNavigation('hellmodeQuestDetail');
+    openHellmodeQuestDetail();
+  });
 
   gridList.appendChild(badgeBtn);
   card.appendChild(gridList);
@@ -987,7 +995,7 @@ export async function initHome() {
       loadWhatsNew(),
     ]);
 
-    // renderHellmodeQuestCard(quest); // Временно скрыто
+    renderHellmodeQuestCard(quest);
     renderRecentEventsCard(events);
     renderRecentCommentsCard(comments);
     renderUpcomingBirthdaysCard(birthdays);

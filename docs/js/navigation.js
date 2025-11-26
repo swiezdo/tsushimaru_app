@@ -174,6 +174,11 @@ async function restoreScreen(screen, params = {}) {
       }
       break;
       
+    case 'hellmodeQuestDetail':
+      const hellmodeModule = await import('./hellmode_quest_detail.js');
+      await hellmodeModule.openHellmodeQuestDetail();
+      break;
+      
     default:
       // Для остальных экранов просто показываем их
       showScreen(screen);

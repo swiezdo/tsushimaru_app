@@ -759,6 +759,7 @@ a svg,
   position: relative;
   overflow: hidden;
   color: var(--fg);
+  min-height: 96px;
 }
 .waves-mod-icons {
   position: absolute;
@@ -1209,7 +1210,8 @@ a svg,
 }
 
 /* Прямоугольник с наградой внизу справа */
-.badge-btn .quest-reward-badge {
+.badge-btn .quest-reward-badge,
+.waves-meta-card .quest-reward-badge {
   position: absolute !important;
   bottom: var(--space-3);
   right: var(--space-3);
@@ -1241,7 +1243,8 @@ a svg,
 }
 
 /* Уменьшаем размер иконки класса в карточке заданий */
-.hellmode-quest-card .waves-mod-icon--class img {
+.hellmode-quest-card .waves-mod-icon--class img,
+.waves-meta-card .waves-mod-icon--class img {
   width: 80%;
   height: 80%;
 }
