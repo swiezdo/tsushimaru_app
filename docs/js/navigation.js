@@ -60,13 +60,28 @@ export function pushNavigation(newScreen, newParams = {}) {
   // Определяем текущий экран
   const currentScreen = getCurrentScreen();
   
+  // Предотвращаем дубликаты: если текущий экран уже является тем, на который мы переходим,
+  // не добавляем его в стек (это может произойти при повторном открытии того же экрана)
+  if (currentScreen === newScreen) {
+    // Просто обновляем параметры текущего экрана
+    setCurrentScreenParams(newScreen, newParams);
+    return;
+  }
+  
   // Если есть текущий экран, добавляем его в стек с параметрами
   if (currentScreen) {
     const params = getCurrentScreenParams(currentScreen);
-    navigationStack.push({
-      screen: currentScreen,
-      params: params
-    });
+    // ВАЖНО: Всегда добавляем текущий экран в стек перед переходом на новый,
+    // даже если он уже есть в стеке - это нужно для правильной навигации назад
+    // НО: не добавляем, если последний элемент стека уже является этим экраном с теми же параметрами
+    // (это предотвращает дубликаты при быстрых переходах)
+    const lastStackItem = navigationStack.length > 0 ? navigationStack[navigationStack.length - 1] : null;
+    if (!lastStackItem || lastStackItem.screen !== currentScreen || JSON.stringify(lastStackItem.params) !== JSON.stringify(params)) {
+      navigationStack.push({
+        screen: currentScreen,
+        params: params
+      });
+    }
     
     // Если текущий экран - главный, сохраняем его как последний главный экран
     if (isMainScreen(currentScreen)) {
@@ -141,6 +156,24 @@ async function restoreScreen(screen, params = {}) {
       }
       break;
       
+    case 'trophyDetail':
+      if (params.trophyKey) {
+        const module = await import('./trophy_detail.js');
+        await module.openTrophyDetail(params.trophyKey);
+      } else {
+        showScreen('reward');
+      }
+      break;
+      
+    case 'seasonTrophy':
+      if (params.trophyKey) {
+        const module = await import('./season_trophy_detail.js');
+        await module.openSeasonTrophyDetail(params.trophyKey);
+      } else {
+        showScreen('reward');
+      }
+      break;
+      
     default:
       // Для остальных экранов просто показываем их
       showScreen(screen);
@@ -156,16 +189,15 @@ export async function goBack() {
   const previous = popNavigation();
   
   if (!previous) {
-    // Если стек пуст, возвращаемся на последний главный экран
     showScreen(lastMainScreen);
     return;
   }
   
-  // Устанавливаем флаг, чтобы не добавить текущий экран в стек при восстановлении
   isNavigatingBack = true;
-  
-  // Восстанавливаем предыдущий экран
+  showScreen(previous.screen);
+  setCurrentScreenParams(previous.screen, previous.params);
   await restoreScreen(previous.screen, previous.params);
+  isNavigatingBack = false;
 }
 
 /**

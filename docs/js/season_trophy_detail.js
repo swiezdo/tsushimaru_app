@@ -5,6 +5,7 @@ import { submitTrophyApplication } from './api.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
 import { getTrophyIconPath } from './utils.js';
+import { pushNavigation } from './navigation.js';
 import {
     shake,
     createFileKey,
@@ -90,6 +91,7 @@ async function loadSeasonTrophy(trophyKey) {
 }
 
 export async function openSeasonTrophyDetail(trophyKey) {
+    pushNavigation('seasonTrophy', { trophyKey });
     showScreen('seasonTrophy');
     setTopbar(true, 'Сезонный трофей');
 

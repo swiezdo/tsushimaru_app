@@ -5,6 +5,7 @@ import { fetchTrophiesList, fetchTrophies, submitTrophyApplication } from './api
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR, $ } from './telegram.js';
 import { getTrophyIconPath } from './utils.js';
+import { pushNavigation } from './navigation.js';
 import {
     shake,
     createFileKey,
@@ -36,6 +37,7 @@ const applicationState = {
 };
 
 export async function openTrophyDetail(trophyKey) {
+    pushNavigation('trophyDetail', { trophyKey });
     showScreen('trophyDetail');
     setTopbar(true, 'Просмотр трофея');
 

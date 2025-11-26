@@ -283,8 +283,18 @@ function createBuildElement(build, isPublic = false) {
   row.appendChild(title);
   
   const clickHandler = isPublic ? 
-    () => { hapticTapSmart(); openPublicBuildDetail(build.build_id || build.id); } :
-    () => { hapticTapSmart(); openBuildDetail(build.build_id || build.id); };
+    () => { 
+      hapticTapSmart(); 
+      const buildId = build.build_id || build.id;
+      pushNavigation('buildPublicDetail', { buildId });
+      openPublicBuildDetail(buildId); 
+    } :
+    () => { 
+      hapticTapSmart(); 
+      const buildId = build.build_id || build.id;
+      pushNavigation('buildDetail', { buildId });
+      openBuildDetail(buildId); 
+    };
   
   row.addEventListener('click', clickHandler);
   return row;
@@ -1437,6 +1447,7 @@ export function initBuilds() {
       // Переходим на страницу деталей только что созданного билда
       const buildId = response.build_id;
       if (buildId) {
+        pushNavigation('buildDetail', { buildId });
         openBuildDetail(buildId);
       } else {
         // Fallback на случай, если build_id не пришел
@@ -1578,6 +1589,7 @@ export function initBuilds() {
       
       // Ждем немного чтобы данные обновились, затем переходим на страницу деталей
       setTimeout(() => {
+        pushNavigation('buildDetail', { buildId: editingBuildId });
         openBuildDetail(editingBuildId);
       }, 300);
     }).catch(err => {

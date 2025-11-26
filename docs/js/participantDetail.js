@@ -1,7 +1,7 @@
 // participantDetail.js
 import { tg, $, hapticTapSmart } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
-import { pushNavigation, setCurrentScreenParams } from './navigation.js';
+import { pushNavigation, setCurrentScreenParams, getCurrentScreenParams } from './navigation.js';
 import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE, fetchUserTrophies, fetchTrophiesList } from './api.js';
 import { prettyLines, formatDate, getTrophyIconPath, getDynamicAssetPath, getStaticAssetPath, getSystemIconPath, getClassIconPath } from './utils.js';
 import { 
@@ -314,8 +314,13 @@ export async function openParticipantDetail(userId) {
     try {
         currentParticipantId = userId;
         
-        // Сохраняем параметры текущего экрана
-        setCurrentScreenParams('participantDetail', { userId });
+        // Сохраняем параметры текущего экрана (если они еще не сохранены)
+        // Это важно для правильной работы навигации
+        // При восстановлении через restoreScreen параметры уже сохранены в goBack()
+        const currentParams = getCurrentScreenParams('participantDetail');
+        if (!currentParams.userId || currentParams.userId !== userId) {
+            setCurrentScreenParams('participantDetail', { userId });
+        }
         
         const trophyDefinitionsPromise = trophyDefinitionsByKey.size
             ? Promise.resolve(null)
@@ -347,7 +352,8 @@ export async function openParticipantDetail(userId) {
         renderParticipantBuilds(builds);
         await renderParticipantMastery(userId);
         
-        // Показываем экран
+        // Показываем экран (если он еще не показан - например, при восстановлении через restoreScreen)
+        // Это безопасно, так как showScreen не делает ничего лишнего, если экран уже показан
         showScreen('participantDetail');
         setTopbar(true, 'Участник');
         
