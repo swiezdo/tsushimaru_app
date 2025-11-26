@@ -557,7 +557,8 @@ function renderRecentEventsCard(events) {
     const avatar = document.createElement('div');
     avatar.className = 'recent-comment-avatar';
     const img = document.createElement('img');
-    img.src = event?.avatar_url || './assets/default-avatar.svg';
+    const avatarUrl = event?.avatar_url || './assets/default-avatar.svg';
+    img.src = avatarUrl + (avatarUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
     img.alt = event.psn_id || 'Участник';
     img.loading = 'lazy';
     img.draggable = false;
@@ -651,7 +652,8 @@ function renderRecentCommentsCard(comments) {
     const avatar = document.createElement('div');
     avatar.className = 'recent-comment-avatar';
     const img = document.createElement('img');
-    img.src = comment?.avatar_url || './assets/default-avatar.svg';
+    const avatarUrl = comment?.avatar_url || './assets/default-avatar.svg';
+    img.src = avatarUrl + (avatarUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
     img.alt = comment.psn_id || 'Участник';
     img.loading = 'lazy';
     img.draggable = false;
@@ -839,7 +841,8 @@ function renderUpcomingBirthdaysCard(birthdays) {
     const avatar = document.createElement('div');
     avatar.className = 'recent-comment-avatar';
     const img = document.createElement('img');
-    img.src = birthday?.avatar_url || './assets/default-avatar.svg';
+    const avatarUrl = birthday?.avatar_url || './assets/default-avatar.svg';
+    img.src = avatarUrl + (avatarUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
     img.alt = birthday.psn_id || 'Участник';
     img.loading = 'lazy';
     img.draggable = false;
