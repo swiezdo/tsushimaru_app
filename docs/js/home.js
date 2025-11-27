@@ -392,13 +392,9 @@ async function renderQuestCard(quest) {
     card.className = 'card quest-card';
     card.id = 'questCard';
     
-    // Вставляем карточку после hero, но перед другими карточками
+    // Вставляем карточку после hero
     const hero = document.getElementById('homeHero');
-    const recentEventsCard = document.getElementById('recentEventsCard');
-    
-    if (recentEventsCard && recentEventsCard.parentElement === home) {
-      recentEventsCard.insertAdjacentElement('beforebegin', card);
-    } else if (hero && hero.parentElement === home) {
+    if (hero && hero.parentElement === home) {
       hero.insertAdjacentElement('afterend', card);
     } else {
       home.prepend(card);
@@ -410,6 +406,7 @@ async function renderQuestCard(quest) {
     const title = document.createElement('h3');
     title.className = 'card-title';
     title.id = 'questCardTitle';
+    title.textContent = 'Еженедельные задания (Тестирование)';
     const icon = document.createElement('img');
     icon.src = getSystemIconPath('money.webp');
     icon.alt = '';
@@ -498,10 +495,7 @@ async function renderQuestCard(quest) {
   }
 
   // Обновляем содержимое (не пересоздаем элементы)
-  const title = document.getElementById('questCardTitle');
-  if (title) {
-    title.textContent = 'Еженедельные задания (Бета тест)';
-  }
+  // Заголовок уже содержит текст и иконку, не нужно обновлять
 
   // Обновляем кнопку HellMode
   const hellmodeBtn = document.getElementById('questCardHellmodeBtn');
@@ -799,8 +793,13 @@ function renderRecentEventsCard(events) {
     card.id = 'recentEventsCard';
   }
 
+  // Вставляем карточку после карточки заданий
+  const questCard = document.getElementById('questCard');
   const hero = document.getElementById('homeHero');
-  if (hero && hero.parentElement === home) {
+  
+  if (questCard && questCard.parentElement === home) {
+    questCard.insertAdjacentElement('afterend', card);
+  } else if (hero && hero.parentElement === home) {
     hero.insertAdjacentElement('afterend', card);
   } else if (!card.parentElement) {
     home.prepend(card);
@@ -899,11 +898,22 @@ function renderRecentCommentsCard(comments) {
     card = document.createElement('section');
     card.className = 'card recent-comments-card';
     card.id = 'recentCommentsCard';
-    const anchor = document.getElementById('whatsNewPreviewCard');
-    if (anchor && anchor.parentElement === home) {
-      home.insertBefore(card, anchor);
+    // Вставляем карточку после карточки "Последние награды"
+    const recentEventsCard = document.getElementById('recentEventsCard');
+    if (recentEventsCard && recentEventsCard.parentElement === home) {
+      recentEventsCard.insertAdjacentElement('afterend', card);
     } else {
-      home.appendChild(card);
+      const questCard = document.getElementById('questCard');
+      if (questCard && questCard.parentElement === home) {
+        questCard.insertAdjacentElement('afterend', card);
+      } else {
+        const hero = document.getElementById('homeHero');
+        if (hero && hero.parentElement === home) {
+          hero.insertAdjacentElement('afterend', card);
+        } else {
+          home.appendChild(card);
+        }
+      }
     }
   }
 

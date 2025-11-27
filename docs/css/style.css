@@ -390,6 +390,7 @@ main.container {
 #hellmodeApplicationCard .actions-bar {
   margin-left: 0;
   margin-right: 0;
+  margin-bottom: 0;
 }
 
 #homeFeedbackBtnContainer {
@@ -2318,11 +2319,6 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   pointer-events: none;
 }
 
-/* ========== TROPHY DETAIL ========== */
-#trophyDetailContainer .card {
-  padding: var(--space-2) var(--space-4);
-}
-
 .trophy-description {
   font-size: var(--fs-15);
   line-height: var(--lh-normal);
@@ -2533,18 +2529,15 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   opacity: 0.9;
 }
 
-/* ========== MASTERY DETAIL SCREEN ========== */
-#masteryDetailContainer .card {
-  padding: var(--space-2) var(--space-4);
-}
-
-#hellmodeQuestDetailContainer .card {
-  padding: var(--space-2) var(--space-4);
-}
-
 /* ========== HELLMODE QUEST DETAIL - LIGHT THEME ========== */
 /* Инвертирование иконок в карточке "Описание" при светлой теме (кроме магатамы) */
 .theme-light #hellmodeQuestDetailContainer .profile-grid .value img:not([alt="Награда"]) {
+  filter: brightness(0) saturate(100%);
+  opacity: 0.8;
+}
+
+/* Инвертирование иконки share на странице детального просмотра билда при светлой теме */
+.theme-light .build-edit-btn img[src*="share.svg"] {
   filter: brightness(0) saturate(100%);
   opacity: 0.8;
 }
