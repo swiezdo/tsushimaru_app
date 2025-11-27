@@ -407,7 +407,7 @@ async function renderQuestCard(quest) {
     const title = document.createElement('h3');
     title.className = 'card-title';
     title.id = 'questCardTitle';
-    title.textContent = 'Еженедельные задания (Тестирование)';
+    title.textContent = 'Еженедельные задания';
     const icon = document.createElement('img');
     icon.src = getSystemIconPath('money.webp');
     icon.alt = '';
