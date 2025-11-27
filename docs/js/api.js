@@ -380,6 +380,29 @@ export async function getUpcomingBirthdays(limit = 3) {
     }
 }
 
+export async function getWeekHeroes(limit = 3) {
+    const normalizeAvatarUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return `${API_BASE}${url}`;
+    };
+
+    try {
+        const params = new URLSearchParams({ limit: String(Math.max(1, Math.min(limit, 10))) });
+        const data = await apiRequest(`/api/weekHeroes?${params.toString()}`);
+        if (data && Array.isArray(data.heroes)) {
+            return data.heroes.map((hero) => ({
+                ...hero,
+                avatar_url: normalizeAvatarUrl(hero?.avatar_url || ''),
+            }));
+        }
+        return [];
+    } catch (error) {
+        console.error('Ошибка получения героев недели:', error);
+        return [];
+    }
+}
+
 export async function getHellmodeQuest() {
     try {
         const data = await apiRequest('/api/quests.hellmode');

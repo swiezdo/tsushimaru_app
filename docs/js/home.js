@@ -1,7 +1,7 @@
 // home.js
 // Управление главной страницей с ротацией недель
 
-import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile, getHellmodeQuest, getTop100Prize } from './api.js';
+import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile, getHellmodeQuest, getTop100Prize, getWeekHeroes } from './api.js';
 import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
@@ -393,12 +393,17 @@ async function renderQuestCard(quest) {
     card.className = 'card quest-card';
     card.id = 'questCard';
     
-    // Вставляем карточку после hero
-    const hero = document.getElementById('homeHero');
-    if (hero && hero.parentElement === home) {
-      hero.insertAdjacentElement('afterend', card);
+    // Вставляем карточку после weekHeroesCard, если она есть, иначе после homeHero
+    const weekHeroesCard = document.getElementById('weekHeroesCard');
+    if (weekHeroesCard && weekHeroesCard.parentElement === home) {
+      weekHeroesCard.insertAdjacentElement('afterend', card);
     } else {
-      home.prepend(card);
+      const hero = document.getElementById('homeHero');
+      if (hero && hero.parentElement === home) {
+        hero.insertAdjacentElement('afterend', card);
+      } else {
+        home.prepend(card);
+      }
     }
 
     // Создаем структуру карточки один раз
@@ -1099,6 +1104,129 @@ function getDaysWord(days) {
   return 'дней';
 }
 
+function getWeeksWord(count) {
+  // Функция склонения слова "неделя"
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+  
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return 'недель';
+  }
+  
+  if (lastDigit === 1) {
+    return 'неделя';
+  }
+  
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return 'недели';
+  }
+  
+  return 'недель';
+}
+
+function renderWeekHeroesCard(heroes) {
+  const home = document.getElementById('homeScreen');
+  if (!home) return;
+
+  const hasHeroes = Array.isArray(heroes) && heroes.length > 0;
+  let card = document.getElementById('weekHeroesCard');
+
+  if (!hasHeroes) {
+    card?.parentElement?.removeChild(card);
+    return;
+  }
+
+  if (!card) {
+    card = document.createElement('section');
+    card.className = 'card week-heroes-card';
+    card.id = 'weekHeroesCard';
+    // Размещаем сразу после homeHero (первой карточкой)
+    const hero = document.getElementById('homeHero');
+    if (hero && hero.parentElement === home) {
+      hero.insertAdjacentElement('afterend', card);
+    } else {
+      // Если homeHero нет, ищем questCard и размещаем перед ним
+      const questCard = document.getElementById('questCard');
+      if (questCard && questCard.parentElement === home) {
+        questCard.insertAdjacentElement('beforebegin', card);
+      } else {
+        home.appendChild(card);
+      }
+    }
+  }
+
+  card.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'card-header-row';
+  const title = document.createElement('h3');
+  title.className = 'card-title';
+  title.textContent = 'Герои недели';
+  const icon = document.createElement('img');
+  icon.src = getSystemIconPath('hurra.webp');
+  icon.alt = '';
+  icon.className = 'card-title-icon';
+  title.appendChild(icon);
+  header.appendChild(title);
+  card.appendChild(header);
+
+  const list = document.createElement('ul');
+  list.className = 'week-heroes-list';
+
+  const createProfileLink = (handler) => {
+    const fn = () => {
+      if (!handler?.user_id) return;
+      hapticTapSmart();
+      pushNavigation('participantDetail', { userId: handler.user_id });
+      import('./participantDetail.js').then(module => {
+        module.openParticipantDetail(handler.user_id);
+      }).catch(err => console.error('Ошибка открытия профиля участника:', err));
+    };
+    return fn;
+  };
+
+  heroes.slice(0, 3).forEach((hero) => {
+    const item = document.createElement('li');
+    item.className = 'week-hero-item';
+    const openProfile = createProfileLink(hero);
+    item.addEventListener('click', openProfile);
+
+    const avatar = document.createElement('div');
+    avatar.className = 'recent-comment-avatar';
+    const img = document.createElement('img');
+    const avatarUrl = hero?.avatar_url || getStaticAssetPath('./assets/default-avatar.svg');
+    img.src = avatarUrl && avatarUrl.startsWith('http') ? getDynamicAssetPath(avatarUrl) : avatarUrl;
+    img.alt = hero.psn_id || 'Участник';
+    img.loading = 'lazy';
+    img.draggable = false;
+    img.style.pointerEvents = 'none';
+    img.style.userSelect = 'none';
+    avatar.appendChild(img);
+
+    const body = document.createElement('div');
+    body.className = 'upcoming-birthday-body';
+
+    const name = document.createElement('div');
+    name.className = 'upcoming-birthday-name';
+    name.textContent = hero?.psn_id || 'Участник';
+
+    const weeks = document.createElement('div');
+    weeks.className = 'upcoming-birthday-date';
+    const weeksCount = hero?.all_completed || 0;
+    const weeksWord = getWeeksWord(weeksCount);
+    weeks.textContent = `${weeksCount} ${weeksWord} без пропусков`;
+
+    body.appendChild(name);
+    body.appendChild(weeks);
+
+    item.appendChild(avatar);
+    item.appendChild(body);
+    list.appendChild(item);
+  });
+
+  card.appendChild(list);
+}
+
 function renderUpcomingBirthdaysCard(birthdays) {
   const home = document.getElementById('homeScreen');
   if (!home) return;
@@ -1309,14 +1437,16 @@ export async function initHome() {
   try {
     renderHomeHero();
     updateBalance();
-    const [quest, events, comments, birthdays, whats] = await Promise.all([
+    const [quest, events, comments, birthdays, heroes, whats] = await Promise.all([
       getHellmodeQuest().catch(() => null),
       getRecentEvents(3).catch(() => []),
       getRecentComments(3).catch(() => []),
       getUpcomingBirthdays(3).catch(() => []),
+      getWeekHeroes(3).catch(() => []),
       loadWhatsNew(),
     ]);
 
+    renderWeekHeroesCard(heroes);
     await renderQuestCard(quest);
     renderRecentEventsCard(events);
     renderRecentCommentsCard(comments);
