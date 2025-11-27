@@ -869,10 +869,10 @@ export async function submitTop100Application(category, comment = '') {
 
         const response = await requestJson('/api/top100.submit', {
             method: 'POST',
-            body: JSON.stringify({
+            body: {
                 category: category,
                 comment: comment || undefined
-            }),
+            },
             includeAuth: true
         });
 
