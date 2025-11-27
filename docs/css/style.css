@@ -1200,6 +1200,68 @@ a svg,
   opacity: 1;
 }
 
+/* ========== WEEK HEROES CARD ========== */
+.week-hero-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.week-hero-avatar--leader {
+  border: 2px solid #DC143C !important;
+  box-shadow: 0 0 12px rgba(220, 20, 60, 0.4);
+}
+
+.week-hero-item--leader {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.08), rgba(139, 0, 0, 0.03));
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  margin: calc(var(--space-2) * -1);
+  border: 1px solid rgba(220, 20, 60, 0.2);
+}
+
+.week-hero-crown {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 20px;
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  animation: crown-glow 2s ease-in-out infinite;
+}
+
+@keyframes crown-glow {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 2px 8px rgba(220, 20, 60, 0.6));
+  }
+}
+
+.week-hero-progress {
+  width: 100%;
+  height: 4px;
+  background: var(--elem-bg);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: var(--space-2);
+}
+
+.week-hero-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #DC143C, #B22222);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(220, 20, 60, 0.5);
+}
+
+.week-hero-item--leader .week-hero-progress-bar {
+  background: linear-gradient(90deg, #DC143C, #FF1744);
+  box-shadow: 0 0 12px rgba(220, 20, 60, 0.7);
+}
+
 .upcoming-birthday-date {
   font-size: var(--fs-13);
   color: var(--muted);

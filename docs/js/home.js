@@ -1163,7 +1163,7 @@ function renderWeekHeroesCard(heroes) {
   title.className = 'card-title';
   title.textContent = 'Герои недели';
   const icon = document.createElement('img');
-  icon.src = getSystemIconPath('hurra.webp');
+  icon.src = getSystemIconPath('hero.webp');
   icon.alt = '';
   icon.className = 'card-title-icon';
   title.appendChild(icon);
@@ -1185,14 +1185,18 @@ function renderWeekHeroesCard(heroes) {
     return fn;
   };
 
-  heroes.slice(0, 3).forEach((hero) => {
+  heroes.slice(0, 3).forEach((hero, index) => {
     const item = document.createElement('li');
-    item.className = 'week-hero-item';
+    const isLeader = index === 0;
+    item.className = `week-hero-item${isLeader ? ' week-hero-item--leader' : ''}`;
     const openProfile = createProfileLink(hero);
     item.addEventListener('click', openProfile);
 
+    const avatarWrapper = document.createElement('div');
+    avatarWrapper.className = 'week-hero-avatar-wrapper';
+    
     const avatar = document.createElement('div');
-    avatar.className = 'recent-comment-avatar';
+    avatar.className = `recent-comment-avatar${isLeader ? ' week-hero-avatar--leader' : ''}`;
     const img = document.createElement('img');
     const avatarUrl = hero?.avatar_url || getStaticAssetPath('./assets/default-avatar.svg');
     img.src = avatarUrl && avatarUrl.startsWith('http') ? getDynamicAssetPath(avatarUrl) : avatarUrl;
@@ -1202,6 +1206,15 @@ function renderWeekHeroesCard(heroes) {
     img.style.pointerEvents = 'none';
     img.style.userSelect = 'none';
     avatar.appendChild(img);
+    
+    if (isLeader) {
+      const crown = document.createElement('div');
+      crown.className = 'week-hero-crown';
+      crown.innerHTML = '👑';
+      avatarWrapper.appendChild(crown);
+    }
+    
+    avatarWrapper.appendChild(avatar);
 
     const body = document.createElement('div');
     body.className = 'upcoming-birthday-body';
@@ -1215,11 +1228,22 @@ function renderWeekHeroesCard(heroes) {
     const weeksCount = hero?.all_completed || 0;
     const weeksWord = getWeeksWord(weeksCount);
     weeks.textContent = `${weeksCount} ${weeksWord} без пропусков`;
+    
+    // Полоска прогресса
+    const progress = document.createElement('div');
+    progress.className = 'week-hero-progress';
+    const progressBar = document.createElement('div');
+    progressBar.className = 'week-hero-progress-bar';
+    const maxWeeks = 10;
+    const progressWidth = Math.min((weeksCount / maxWeeks) * 100, 100);
+    progressBar.style.width = `${progressWidth}%`;
+    progress.appendChild(progressBar);
 
     body.appendChild(name);
     body.appendChild(weeks);
+    body.appendChild(progress);
 
-    item.appendChild(avatar);
+    item.appendChild(avatarWrapper);
     item.appendChild(body);
     list.appendChild(item);
   });
