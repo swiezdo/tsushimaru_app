@@ -90,12 +90,18 @@ function renderTrophyDetail(trophy, isObtained) {
 
     detailContainer.appendChild(iconWrapper);
 
+    // Трофей week-hero автоматически выдаётся системой, карточка заявки не нужна
+    const isAutoTrophy = trophy.key === 'week-hero';
+    
     if (isObtained) {
         detailContainer.appendChild(buildObtainedNoticeCard());
         detailContainer.appendChild(buildInfoCard(trophy, { includeProof: false }));
     } else {
         detailContainer.appendChild(buildInfoCard(trophy, { includeProof: Boolean(trophy.proof) }));
-        detailContainer.appendChild(buildApplicationCard(trophy));
+        // Не показываем карточку заявки для автоматических трофеев
+        if (!isAutoTrophy) {
+            detailContainer.appendChild(buildApplicationCard(trophy));
+        }
     }
 }
 
@@ -123,7 +129,10 @@ function buildInfoCard(trophy, { includeProof }) {
     const description = document.createElement('div');
     description.className = 'trophy-description';
     description.style.whiteSpace = 'pre-line';
-    description.textContent = trophy.description;
+    // Поддерживаем жирный шрифт через **текст** в описании
+    let descText = trophy.description || '';
+    descText = descText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    description.innerHTML = descText;
     card.appendChild(description);
 
     if (includeProof && trophy.proof) {
