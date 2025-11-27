@@ -200,7 +200,7 @@ export async function initStaticImage(img) {
 
 // ========== ASSET VERSIONING SYSTEM ==========
 // Версии для статических ресурсов (увеличивать при обновлении ресурсов)
-const ASSETS_VERSION = '1';
+const ASSETS_VERSION = '2';
 
 /**
  * Добавляет версию к пути статического ресурса для cache busting
