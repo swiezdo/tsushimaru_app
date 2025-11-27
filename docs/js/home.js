@@ -557,17 +557,37 @@ async function renderQuestCard(quest) {
       console.error('Ошибка получения приза Top100:', error);
     }
 
-    // Обновляем кнопку Сюжет
-    updateTop100Button('questCardStoryBtn', 'Топ-100 "Сюжет"', weekData.story || '—', weekData.story_mod_icon, weekData.story_slug || (weekData.story_img ? weekData.story_img.replace('.jpg', '') : ''), 'story', null, null, top100Prize);
-
-    // Обновляем кнопку Выживание
-    updateTop100Button('questCardSurvivalBtn', 'Топ-100 "Выживание"', weekData.survival || '—', null, weekData.survival_slug || (weekData.survival_img ? weekData.survival_img.replace('.jpg', '') : ''), 'survival', weekData.survival_mod1_icon, weekData.survival_mod2_icon, top100Prize);
-
-    // Обновляем кнопку Испытания Иё
-    updateTop100Button('questCardTrialsBtn', 'Топ-100 "Испытания Иё"', weekData.trials || '—', weekData.trials_mod_icon, weekData.trials_slug || (weekData.trials_img ? weekData.trials_img.replace('.jpg', '') : ''), 'trials', null, null, top100Prize);
+    // Скрываем кнопки, если приз равен 0 или null/undefined
+    const shouldHideTop100Buttons = !top100Prize || top100Prize === 0;
     
-    // Включаем кнопки и добавляем обработчики
-    setupTop100Buttons();
+    const storyBtn = document.getElementById('questCardStoryBtn');
+    const survivalBtn = document.getElementById('questCardSurvivalBtn');
+    const trialsBtn = document.getElementById('questCardTrialsBtn');
+    
+    if (storyBtn) {
+      storyBtn.style.display = shouldHideTop100Buttons ? 'none' : '';
+    }
+    if (survivalBtn) {
+      survivalBtn.style.display = shouldHideTop100Buttons ? 'none' : '';
+    }
+    if (trialsBtn) {
+      trialsBtn.style.display = shouldHideTop100Buttons ? 'none' : '';
+    }
+
+    // Обновляем кнопки только если они не скрыты
+    if (!shouldHideTop100Buttons) {
+      // Обновляем кнопку Сюжет
+      updateTop100Button('questCardStoryBtn', 'Топ-100 "Сюжет"', weekData.story || '—', weekData.story_mod_icon, weekData.story_slug || (weekData.story_img ? weekData.story_img.replace('.jpg', '') : ''), 'story', null, null, top100Prize);
+
+      // Обновляем кнопку Выживание
+      updateTop100Button('questCardSurvivalBtn', 'Топ-100 "Выживание"', weekData.survival || '—', null, weekData.survival_slug || (weekData.survival_img ? weekData.survival_img.replace('.jpg', '') : ''), 'survival', weekData.survival_mod1_icon, weekData.survival_mod2_icon, top100Prize);
+
+      // Обновляем кнопку Испытания Иё
+      updateTop100Button('questCardTrialsBtn', 'Топ-100 "Испытания Иё"', weekData.trials || '—', weekData.trials_mod_icon, weekData.trials_slug || (weekData.trials_img ? weekData.trials_img.replace('.jpg', '') : ''), 'trials', null, null, top100Prize);
+      
+      // Включаем кнопки и добавляем обработчики
+      setupTop100Buttons();
+    }
   }
 }
 
