@@ -90,27 +90,12 @@ const SCREEN_HOOKS = {
     resetParticipantSearch();
     refreshParticipantsList().catch((err) => {
       console.error('Ошибка обновления списка участников:', err);
-    }).then(() => {
-      // Восстанавливаем позицию скролла после загрузки списка участников
-      const savedPosition = scrollPositions.get('participants');
-      if (savedPosition !== undefined && savedPosition > 0) {
-        setTimeout(() => {
-          window.scrollTo({ top: savedPosition, behavior: 'auto' });
-        }, 150);
-      }
     });
   },
   reward: () => {
     renderSeasonTrophy();
     renderMasteryButtons();
     renderTrophiesButtons();
-    // Восстанавливаем позицию скролла после рендеринга контента
-    const savedPosition = scrollPositions.get('reward');
-    if (savedPosition !== undefined && savedPosition > 0) {
-      setTimeout(() => {
-        window.scrollTo({ top: savedPosition, behavior: 'auto' });
-      }, 150);
-    }
   },
   whatsNew: () => {
     renderWhatsNewCards();
@@ -152,66 +137,35 @@ export function updateBottomNav(activeScreen) {
   }
 }
 
-// Хранилище позиций скролла для экранов
-const scrollPositions = new Map();
-
-// Экраны, для которых нужно сохранять позицию скролла (списки)
-const SCREENS_WITH_SCROLL_POSITION = new Set([
-  'participants',
-  'builds',
-  'reward',
-]);
-
-// Сохранение позиции скролла для экрана
-function saveScrollPosition(screenName) {
-  // Сохраняем позицию только для экранов-списков
-  if (SCREENS_WITH_SCROLL_POSITION.has(screenName)) {
-    if (screens[screenName] && screens[screenName].classList.contains('hidden') === false) {
-      const scrollY = window.scrollY || window.pageYOffset || 0;
-      scrollPositions.set(screenName, scrollY);
-    }
-  }
-}
-
-// Восстановление позиции скролла для экрана
-function restoreScrollPosition(screenName) {
-  // Восстанавливаем позицию только для экранов-списков
-  if (!SCREENS_WITH_SCROLL_POSITION.has(screenName)) {
-    return false;
-  }
-  
-  const savedPosition = scrollPositions.get(screenName);
-  if (savedPosition !== undefined && savedPosition > 0) {
-    // Используем двойной requestAnimationFrame для восстановления после полного рендеринга
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        window.scrollTo({ top: savedPosition, behavior: 'auto' });
-      });
-    });
-    return true;
-  }
-  return false;
-}
 
 // Показ экрана
 export function showScreen(name, options = {}) {
-  // Определяем текущий активный экран перед переключением
-  let currentActiveScreen = null;
-  for (const [screenName, screenEl] of Object.entries(screens)) {
-    if (screenEl && !screenEl.classList.contains('hidden')) {
-      currentActiveScreen = screenName;
-      break;
+  // ВСЕГДА сбрасываем скролл ДО переключения экрана
+  // Скролл происходит на main.container, а не на window
+  if (!options.skipScroll) {
+    const mainContainer = document.querySelector('main.container');
+    if (mainContainer) {
+      mainContainer.scrollTop = 0;
     }
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }
-
-  // Сохраняем позицию скролла для текущего экрана перед переключением
-  if (currentActiveScreen) {
-    saveScrollPosition(currentActiveScreen);
-  }
-
+  
   Object.values(screens).forEach((el) => el && el.classList.add('hidden'));
   const el = screens[name];
   if (el) el.classList.remove('hidden');
+  
+  // ВСЕГДА сбрасываем скролл ПОСЛЕ переключения экрана
+  if (!options.skipScroll) {
+    const mainContainer = document.querySelector('main.container');
+    if (mainContainer) {
+      mainContainer.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
 
   if (tg) {
     // Проверяем, не зарегистрирован ли пользователь (навигация скрыта)
@@ -255,21 +209,50 @@ export function showScreen(name, options = {}) {
   // Обновляем активное состояние bottom navigation
   updateBottomNav(name);
 
-  // Восстанавливаем позицию скролла или скроллим вверх
+  // Дополнительный скролл через requestAnimationFrame и setTimeout для гарантии после рендеринга
   // Если options.skipScroll === true, не скроллим вообще
-  if (options.skipScroll) {
-    // Не скроллим
-  } else if (restoreScrollPosition(name)) {
-    // Позиция восстановлена - дополнительная задержка для асинхронного контента
+  if (!options.skipScroll) {
+    const mainContainer = document.querySelector('main.container');
+    
+    // Через requestAnimationFrame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (mainContainer) {
+          mainContainer.scrollTop = 0;
+        }
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
+    });
+    
+    // Также через setTimeout для гарантии после всех асинхронных операций
     setTimeout(() => {
-      const savedPosition = scrollPositions.get(name);
-      if (savedPosition !== undefined && savedPosition > 0) {
-        window.scrollTo({ top: savedPosition, behavior: 'auto' });
+      if (mainContainer) {
+        mainContainer.scrollTop = 0;
       }
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 0);
+    
+    setTimeout(() => {
+      if (mainContainer) {
+        mainContainer.scrollTop = 0;
+      }
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 50);
+    
+    setTimeout(() => {
+      if (mainContainer) {
+        mainContainer.scrollTop = 0;
+      }
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     }, 100);
-  } else {
-    // Скроллим вверх только если позиция не была сохранена
-    scrollTopSmooth();
   }
 }
 export function applySafeInsets() {
