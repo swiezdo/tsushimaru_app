@@ -446,11 +446,19 @@ async function submitTop100ApplicationForm(category) {
   } catch (error) {
     hapticERR();
     
-    const errorMessage = error?.message || error?.detail || 'Произошла ошибка при отправке заявки';
+    // Определяем текст и заголовок ошибки
+    let title = 'Ошибка';
+    let message = error?.message || error?.detail || 'Произошла ошибка при отправке заявки';
+    
+    // Специальная обработка для ошибки "уже выполнили"
+    if (error.status === 400 && message.includes('уже выполнили')) {
+      title = 'Задание уже выполнено';
+      message = 'Вы уже выполнили это задание на этой неделе.';
+    }
     
     tg?.showPopup?.({
-      title: 'Ошибка',
-      message: errorMessage,
+      title: title,
+      message: message,
       buttons: [{ type: 'ok' }],
     });
     
@@ -458,8 +466,7 @@ async function submitTop100ApplicationForm(category) {
   } finally {
     submitBtn.disabled = false;
     if (dotsAnimation) {
-      clearInterval(dotsAnimation);
-      submitBtn.textContent = 'Подать заявку';
+      dotsAnimation.stop('Подать заявку');
     }
   }
 }

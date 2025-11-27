@@ -567,9 +567,19 @@ async function submitHellmodeApplicationForm(quest) {
         console.error('Ошибка отправки заявки:', error);
         hapticERR();
 
+        // Определяем текст и заголовок ошибки
+        let title = 'Ошибка';
+        let message = error.message || error?.detail || 'Не удалось отправить заявку. Попробуйте позже.';
+        
+        // Специальная обработка для ошибки "уже выполнили"
+        if (error.status === 400 && message.includes('уже выполнили')) {
+            title = 'Задание уже выполнено';
+            message = 'Вы уже выполнили это задание на этой неделе.';
+        }
+
         tg?.showPopup?.({
-            title: 'Ошибка',
-            message: error.message || 'Не удалось отправить заявку. Попробуйте позже.',
+            title: title,
+            message: message,
             buttons: [{ type: 'ok' }],
         });
     } finally {
