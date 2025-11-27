@@ -4,12 +4,26 @@
 import { getTop100Prize, submitTop100Application } from './api.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
-import { getModIconPath, getMapPath, getSystemIconPath } from './utils.js';
+import { getModIconPath, getMapPath, getSystemIconPath, isImageFile, isVideoFile, createFileKey, renderFilesPreview, validateFileSize, clearChildren, startButtonDotsAnimation } from './utils.js';
 import { loadRotationData, loadCurrentWeek, getWeekData } from './home.js';
 import { pushNavigation } from './navigation.js';
-import { clearChildren, startButtonDotsAnimation } from './utils.js';
 
 const detailContainer = document.getElementById('top100DetailContainer');
+
+const MAX_TOP100_FILES = 18;
+
+function isSupportedMediaFile(file) {
+    return isImageFile(file) || isVideoFile(file);
+}
+
+const applicationState = {
+    files: [],
+    cleanupPreview: () => {},
+    commentEl: null,
+    previewEl: null,
+    filesInput: null,
+    submitBtn: null,
+};
 
 const categoryNames = {
   story: 'Сюжет',
@@ -56,6 +70,8 @@ export async function openTop100Detail(category) {
 function renderTop100Detail(category, weekData) {
   if (!detailContainer) return;
   
+  // Сброс состояния перед рендером
+  resetApplicationState();
   clearChildren(detailContainer);
   
   // Hero-карточка
@@ -367,7 +383,7 @@ function renderProofCard() {
   
   const content = document.createElement('div');
   content.innerHTML = `
-    <p>Единственное что вам необходимо сделать, это убедиться что в вашем профиле правильно указан ваш ник PSN, по нему мы будем проверять ваше место в списке лидеров, никаких скриншотов/видео не требуется.</p>
+    <p>Пришлите нам скриншот списка лидеров в выбранной вами категории. На скриншоте должны быть видны ваш PSN-ник, ваш счёт и ваше место в списке. Пожалуйста, убедитесь, что в вашем профиле мини-приложения указан ваш настоящий PSN-ник.</p>
   `;
   card.appendChild(content);
   
@@ -386,6 +402,12 @@ function renderApplicationCard(category) {
         <label for="top100ApplicationComment">Комментарии (необязательно)</label>
         <textarea id="top100ApplicationComment" rows="1" placeholder="Дополнительная информация"></textarea>
       </div>
+      <div class="input">
+        <label for="top100ApplicationFiles">Прикрепите файлы</label>
+        <input id="top100ApplicationFiles" type="file" multiple accept="image/*,video/*" hidden />
+        <button type="button" class="fileline-btn" id="top100ApplicationAddBtn" aria-label="Прикрепить файлы">＋ Прикрепить</button>
+        <div id="top100ApplicationPreview" class="thumbs-row"></div>
+      </div>
     </form>
     <div class="actions-bar">
       <button type="button" class="btn primary wide" id="top100ApplicationSubmitBtn">Подать заявку</button>
@@ -398,7 +420,15 @@ function renderApplicationCard(category) {
 
 function setupApplicationForm(card, category) {
   const commentEl = card.querySelector('#top100ApplicationComment');
+  const filesInput = card.querySelector('#top100ApplicationFiles');
+  const addBtn = card.querySelector('#top100ApplicationAddBtn');
+  const previewEl = card.querySelector('#top100ApplicationPreview');
   const submitBtn = card.querySelector('#top100ApplicationSubmitBtn');
+
+  applicationState.commentEl = commentEl;
+  applicationState.filesInput = filesInput;
+  applicationState.previewEl = previewEl;
+  applicationState.submitBtn = submitBtn;
   
   if (commentEl) {
     const autoResize = () => {
@@ -409,6 +439,17 @@ function setupApplicationForm(card, category) {
     commentEl.addEventListener('focus', () => { hapticTapSmart(); }, { passive: true });
     autoResize();
   }
+
+  addBtn?.addEventListener('click', () => {
+    hapticTapSmart();
+    if (!filesInput) return;
+    try { filesInput.value = ''; } catch {}
+    filesInput.click();
+  });
+
+  filesInput?.addEventListener('change', () => {
+    handleFilesSelected(Array.from(filesInput.files || []));
+  });
   
   submitBtn?.addEventListener('pointerdown', () => { hapticTapSmart(); });
   submitBtn?.addEventListener('click', (e) => {
@@ -417,21 +458,146 @@ function setupApplicationForm(card, category) {
   });
 }
 
+function handleFilesSelected(files) {
+    if (!files.length) {
+        shake(applicationState.previewEl || applicationState.submitBtn);
+        focusAndScrollIntoView(applicationState.previewEl || applicationState.submitBtn);
+        return;
+    }
+
+    const supported = files.filter((file) => isSupportedMediaFile(file));
+    if (supported.length !== files.length) {
+        tg?.showPopup?.({
+            title: 'Неподдерживаемый формат',
+            message: 'Можно прикреплять изображения и видео (например, MP4, MOV).',
+            buttons: [{ type: 'ok' }],
+        });
+    }
+
+    // Проверка размера файлов
+    const sizeErrors = [];
+    const validFiles = supported.filter((file) => {
+        const validation = validateFileSize(file);
+        if (!validation.valid) {
+            sizeErrors.push(validation.error);
+            return false;
+        }
+        return true;
+    });
+
+    if (sizeErrors.length > 0) {
+        if (sizeErrors.length === 1) {
+            tg?.showPopup?.({
+                title: 'Файл слишком большой',
+                message: sizeErrors[0],
+                buttons: [{ type: 'ok' }],
+            });
+        } else {
+            tg?.showPopup?.({
+                title: 'Файлы слишком большие',
+                message: 'Некоторые файлы превышают максимальный размер. Изображения: до 10 МБ, видео: до 50 МБ.',
+                buttons: [{ type: 'ok' }],
+            });
+        }
+    }
+
+    if (validFiles.length === 0) {
+        return;
+    }
+
+    const freeSlots = Math.max(0, MAX_TOP100_FILES - applicationState.files.length);
+    const knownKeys = new Set(applicationState.files.map((file) => createFileKey(file)));
+    const uniqueNewFiles = [];
+    let skippedByLimit = 0;
+
+    validFiles.forEach((file) => {
+        const key = createFileKey(file);
+        if (knownKeys.has(key)) return;
+        if (uniqueNewFiles.length >= freeSlots) {
+            skippedByLimit += 1;
+            return;
+        }
+        knownKeys.add(key);
+        uniqueNewFiles.push(file);
+    });
+
+    if (skippedByLimit > 0) {
+        tg?.showPopup?.({
+            title: 'Лимит файлов',
+            message: `Можно прикрепить не более ${MAX_TOP100_FILES} файлов.`,
+            buttons: [{ type: 'ok' }],
+        });
+    }
+
+    if (!uniqueNewFiles.length) return;
+
+    applicationState.files.push(...uniqueNewFiles);
+    refreshPreview();
+}
+
+function refreshPreview() {
+    applicationState.cleanupPreview();
+    applicationState.cleanupPreview = renderFilesPreview(applicationState.files, applicationState.previewEl, {
+        limit: 4,
+        onRemove: (idx) => {
+            applicationState.files.splice(idx, 1);
+            hapticTapSmart();
+            refreshPreview();
+        },
+    });
+}
+
+function resetApplicationState() {
+    applicationState.cleanupPreview();
+    applicationState.cleanupPreview = () => {};
+    applicationState.files = [];
+    applicationState.commentEl = null;
+    applicationState.previewEl = null;
+    applicationState.filesInput = null;
+    applicationState.submitBtn = null;
+}
+
 async function submitTop100ApplicationForm(category) {
-  const commentEl = document.getElementById('top100ApplicationComment');
-  const submitBtn = document.getElementById('top100ApplicationSubmitBtn');
-  
+  const submitBtn = applicationState.submitBtn;
   if (!submitBtn) return;
-  
-  const comment = commentEl?.value?.trim() || '';
-  
+
+  if (applicationState.files.length === 0) {
+      shake(submitBtn);
+      focusAndScrollIntoView(submitBtn);
+      tg?.showPopup?.({
+          title: 'Ошибка',
+          message: 'Необходимо прикрепить хотя бы один файл (изображение или видео).',
+          buttons: [{ type: 'ok' }],
+      });
+      hapticERR();
+      return;
+  }
+
   if (submitBtn.disabled) return;
   
+  const originalText = submitBtn.textContent;
   submitBtn.disabled = true;
-  const dotsAnimation = startButtonDotsAnimation(submitBtn, 'Подать заявку');
+  submitBtn.classList.add('is-loading');
+  const dotsAnimation = startButtonDotsAnimation(submitBtn, 'Отправка');
   
   try {
-    await submitTop100Application(category, comment);
+    const comment = (applicationState.commentEl?.value || '').trim();
+    
+    await submitTop100Application(category, comment, applicationState.files);
+    
+    applicationState.files = [];
+    applicationState.cleanupPreview();
+    applicationState.cleanupPreview = () => {};
+    if (applicationState.filesInput) {
+        applicationState.filesInput.value = '';
+    }
+    if (applicationState.commentEl) {
+        applicationState.commentEl.value = '';
+        applicationState.commentEl.style.height = 'auto';
+    }
+    if (applicationState.previewEl) {
+        applicationState.previewEl.innerHTML = '';
+    }
     
     hapticOK();
     
@@ -466,10 +632,9 @@ async function submitTop100ApplicationForm(category) {
     
     focusAndScrollIntoView(submitBtn);
   } finally {
+    dotsAnimation?.stop(originalText);
     submitBtn.disabled = false;
-    if (dotsAnimation) {
-      dotsAnimation.stop('Подать заявку');
-    }
+    submitBtn.classList.remove('is-loading');
   }
 }
 

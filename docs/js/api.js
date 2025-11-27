@@ -883,27 +883,31 @@ export async function submitHellmodeQuestApplication(comment = '', files = [], o
 }
 
 // Отправка заявки на ТОП-100
-export async function submitTop100Application(category, comment = '') {
+export async function submitTop100Application(category, comment = '', files = [], options = {}) {
     try {
         const initData = getInitData();
         if (!initData) {
             throw new Error('Не удалось получить данные авторизации Telegram');
         }
 
-        const response = await requestJson('/api/top100.submit', {
-            method: 'POST',
-            body: {
-                category: category,
-                comment: comment || undefined
-            },
-            includeAuth: true
+        const data = new FormData();
+        
+        data.append('category', category);
+        
+        if (comment) {
+            data.append('comment', comment);
+        }
+        
+        const fileArray = Array.isArray(files) ? files : Array.from(files || []);
+
+        fileArray.forEach((file) => {
+            if (file) {
+                data.append('photos', file);
+            }
         });
 
-        if (!response || response.status !== 'ok') {
-            throw new Error(response?.detail || 'Ошибка отправки заявки ТОП-100');
-        }
-
-        return response;
+        const url = `${API_BASE}/api/top100.submit`;
+        return await postFormDataWithProgress(url, data, initData, options);
     } catch (error) {
         console.error('Ошибка отправки заявки ТОП-100:', error);
         throw error;
