@@ -1034,6 +1034,43 @@ a svg,
 .theme-light .recent-event-details {
   color: #666;
 }
+
+.theme-light .recent-comment-meta {
+  color: #666;
+}
+
+.theme-light .upcoming-birthday-date {
+  color: #666;
+}
+
+.theme-light .waves-subtitle {
+  color: #666;
+}
+
+.theme-light .build-author {
+  color: #666;
+}
+
+.theme-light .build-stat-count {
+  color: #666;
+}
+
+.theme-light .muted {
+  color: #666;
+}
+
+.theme-light .season-trophy-timer {
+  color: #666;
+}
+
+.theme-light .avatar-placeholder {
+  color: #666;
+}
+
+.theme-light .version-date {
+  color: #666;
+}
+
 .recent-comments-list {
   list-style: none;
   padding: 0;

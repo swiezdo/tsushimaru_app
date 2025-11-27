@@ -1234,7 +1234,7 @@ function renderWeekHeroesCard(heroes) {
     progress.className = 'week-hero-progress';
     const progressBar = document.createElement('div');
     progressBar.className = 'week-hero-progress-bar';
-    const maxWeeks = 10;
+    const maxWeeks = 5;
     const progressWidth = Math.min((weeksCount / maxWeeks) * 100, 100);
     progressBar.style.width = `${progressWidth}%`;
     progress.appendChild(progressBar);
