@@ -348,6 +348,8 @@ function renderRewardCard() {
   const hint = document.createElement('p');
   hint.className = 'muted';
   hint.style.marginTop = 'var(--space-3)';
+  hint.style.paddingTop = 'var(--space-3)';
+  hint.style.borderTop = '1px solid var(--color-border)';
   hint.textContent = 'Повышение наград происходит в 9 часов утра по Московскому времени';
   content.appendChild(hint);
   

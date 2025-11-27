@@ -277,6 +277,15 @@ function buildDescriptionCard(quest) {
 
     card.appendChild(profileGrid);
 
+    // Добавляем информацию об обновлении задания
+    const updateInfo = document.createElement('div');
+    updateInfo.className = 'muted';
+    updateInfo.style.marginTop = 'var(--space-3)';
+    updateInfo.style.paddingTop = 'var(--space-3)';
+    updateInfo.style.borderTop = '1px solid var(--color-border)';
+    updateInfo.textContent = 'Обновление еженедельного задания HellMode происходит каждую субботу в 9 часов утра по Московскому времени';
+    card.appendChild(updateInfo);
+
     return card;
 }
 
