@@ -859,6 +859,34 @@ export async function submitHellmodeQuestApplication(comment = '', files = [], o
     }
 }
 
+// Отправка заявки на ТОП-100
+export async function submitTop100Application(category, comment = '') {
+    try {
+        const initData = getInitData();
+        if (!initData) {
+            throw new Error('Не удалось получить данные авторизации Telegram');
+        }
+
+        const response = await requestJson('/api/top100.submit', {
+            method: 'POST',
+            body: JSON.stringify({
+                category: category,
+                comment: comment || undefined
+            }),
+            includeAuth: true
+        });
+
+        if (!response || response.status !== 'ok') {
+            throw new Error(response?.detail || 'Ошибка отправки заявки ТОП-100');
+        }
+
+        return response;
+    } catch (error) {
+        console.error('Ошибка отправки заявки ТОП-100:', error);
+        throw error;
+    }
+}
+
 // Обновление активных трофеев
 export async function updateActiveTrophies(activeTrophiesList) {
     try {

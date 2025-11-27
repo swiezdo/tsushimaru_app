@@ -378,6 +378,7 @@ main.container {
 }
 /* Кнопка отправки заявки мастерства должна быть полной ширины */
 #masteryApplicationCard .actions-bar .btn,
+#top100ApplicationCard .actions-bar .btn,
 #trophyApplicationCard .actions-bar .btn,
 #seasonTrophyApplicationCard .actions-bar .btn,
 #hellmodeApplicationCard .actions-bar .btn {
@@ -385,6 +386,7 @@ main.container {
 }
 /* Убираем боковые отступы у actions-bar в карточках заявок */
 #masteryApplicationCard .actions-bar,
+#top100ApplicationCard .actions-bar,
 #trophyApplicationCard .actions-bar,
 #seasonTrophyApplicationCard .actions-bar,
 #hellmodeApplicationCard .actions-bar {
@@ -544,6 +546,7 @@ main.container {
 
 /* Зеленые кнопки (green.png) - по ID */
 #feedbackSubmitBtn,
+#top100ApplicationSubmitBtn,
 #profileSaveBtn,
 #buildSubmitBtn,
 #buildEditSubmitBtn {
@@ -1235,7 +1238,9 @@ a svg,
 
 /* Прямоугольник с наградой внизу справа */
 .badge-btn .quest-reward-badge,
-.waves-meta-card .quest-reward-badge {
+.waves-meta-card .quest-reward-badge,
+.story-hero-card .quest-reward-badge,
+.trials-meta-card .quest-reward-badge {
   position: absolute !important;
   bottom: var(--space-3);
   right: var(--space-3);
@@ -1390,6 +1395,60 @@ a svg,
 .story-hero-mod-chapters .waves-mod-icon {
   width: 44px;
   height: 44px;
+}
+
+/* ========== TRIALS META CARD ========== */
+.trials-meta-card .waves-title,
+.trials-meta-card .waves-header {
+  text-shadow: var(--shadow-text);
+}
+
+.trials-meta-card--with-bg .waves-subtitle {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.trials-meta-card--with-bg .waves-title,
+.trials-meta-card--with-bg .waves-header {
+  text-shadow: var(--shadow-text);
+}
+
+/* ========== ТОП-100 СТРАНИЦА ========== */
+#top100DetailContainer .story-hero-card,
+#top100DetailContainer .trials-meta-card {
+  min-height: 96px;
+  align-items: flex-start;
+}
+
+#top100DetailContainer .story-hero-header {
+  margin-top: 0;
+}
+
+/* ========== ТАБЛИЦА НАГРАД ТОП-100 ========== */
+.top100-rewards-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-3);
+}
+
+.top100-rewards-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.top100-rewards-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.top100-rewards-table td {
+  text-align: left;
+}
+
+.top100-rewards-table td:first-child {
+  font-weight: 500;
+}
+
+.top100-rewards-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
 }
 
 .story-mod-row {

@@ -6,6 +6,7 @@ import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
 import { openHellmodeQuestDetail } from './hellmode_quest_detail.js';
+import { openTop100Detail } from './top100_detail.js';
 import { tg, hapticTapSmart } from './telegram.js';
 import { getClassIconPath, getStaticAssetPath, getDynamicAssetPath, getSystemIconPath, getModIconPath, getMapPath, getEmoteIconPath, getGearIconPath } from './utils.js';
 
@@ -564,6 +565,9 @@ async function renderQuestCard(quest) {
 
     // Обновляем кнопку Испытания Иё
     updateTop100Button('questCardTrialsBtn', 'Топ-100 "Испытания Иё"', weekData.trials || '—', weekData.trials_mod_icon, weekData.trials_slug || (weekData.trials_img ? weekData.trials_img.replace('.jpg', '') : ''), 'trials', null, null, top100Prize);
+    
+    // Включаем кнопки и добавляем обработчики
+    setupTop100Buttons();
   }
 }
 
@@ -1426,6 +1430,53 @@ function setupRotationButtons() {
   // (установлен атрибут disabled в HTML)
 }
 
+/**
+ * Настраивает обработчики кликов для кнопок ТОП-100
+ */
+function setupTop100Buttons() {
+  // Кнопка "ТОП-100 Сюжет"
+  const storyBtn = document.getElementById('questCardStoryBtn');
+  if (storyBtn) {
+    storyBtn.disabled = false;
+    // Удаляем старые обработчики, если они есть
+    const newStoryBtn = storyBtn.cloneNode(true);
+    storyBtn.parentNode.replaceChild(newStoryBtn, storyBtn);
+    
+    newStoryBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      pushNavigation('top100Detail', { category: 'story' });
+      openTop100Detail('story');
+    });
+  }
+
+  // Кнопка "ТОП-100 Выживание"
+  const survivalBtn = document.getElementById('questCardSurvivalBtn');
+  if (survivalBtn) {
+    survivalBtn.disabled = false;
+    const newSurvivalBtn = survivalBtn.cloneNode(true);
+    survivalBtn.parentNode.replaceChild(newSurvivalBtn, survivalBtn);
+    
+    newSurvivalBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      pushNavigation('top100Detail', { category: 'survival' });
+      openTop100Detail('survival');
+    });
+  }
+
+  // Кнопка "ТОП-100 Испытания Иё"
+  const trialsBtn = document.getElementById('questCardTrialsBtn');
+  if (trialsBtn) {
+    trialsBtn.disabled = false;
+    const newTrialsBtn = trialsBtn.cloneNode(true);
+    trialsBtn.parentNode.replaceChild(newTrialsBtn, trialsBtn);
+    
+    newTrialsBtn.addEventListener('click', () => {
+      hapticTapSmart();
+      pushNavigation('top100Detail', { category: 'trials' });
+      openTop100Detail('trials');
+    });
+  }
+}
 
 /**
  * Утилита для установки/снятия фонового изображения на кнопках
