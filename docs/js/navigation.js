@@ -1,7 +1,7 @@
 // navigation.js
 // Система навигации на основе стека
 
-import { showScreen, screens } from './ui.js';
+import { showScreen, screens, saveScrollPosition } from './ui.js';
 
 // Главные экраны - доступны через нижнюю панель навигации
 const MAIN_SCREENS = ['home', 'participants', 'reward', 'rotation', 'builds', 'profile'];
@@ -59,6 +59,12 @@ export function pushNavigation(newScreen, newParams = {}) {
 
   // Определяем текущий экран
   const currentScreen = getCurrentScreen();
+  
+  // ВАЖНО: Сохраняем позицию скролла ДО всех действий, если текущий экран требует сохранения
+  // Это должно быть ПЕРВЫМ действием, чтобы зафиксировать реальную позицию скролла
+  if (currentScreen && ['participants', 'builds', 'home'].includes(currentScreen)) {
+    saveScrollPosition(currentScreen);
+  }
   
   // Предотвращаем дубликаты: если текущий экран уже является тем, на который мы переходим,
   // не добавляем его в стек (это может произойти при повторном открытии того же экрана)
@@ -134,7 +140,7 @@ async function restoreScreen(screen, params = {}) {
         const module = await import('./participantDetail.js');
         await module.openParticipantDetail(params.userId);
       } else {
-        showScreen('participants');
+        showScreen('participants', { restoring: true });
       }
       break;
       
@@ -143,7 +149,7 @@ async function restoreScreen(screen, params = {}) {
         const module = await import('./builds.js');
         module.openPublicBuildDetail(params.buildId);
       } else {
-        showScreen('builds');
+        showScreen('builds', { restoring: true });
       }
       break;
       
@@ -152,7 +158,7 @@ async function restoreScreen(screen, params = {}) {
         const module = await import('./builds.js');
         module.openBuildDetail(params.buildId);
       } else {
-        showScreen('builds');
+        showScreen('builds', { restoring: true });
       }
       break;
       
@@ -184,8 +190,16 @@ async function restoreScreen(screen, params = {}) {
         const top100Module = await import('./top100_detail.js');
         await top100Module.openTop100Detail(params.category);
       } else {
-        showScreen('home');
+        showScreen('home', { restoring: true });
       }
+      break;
+      
+    case 'home':
+    case 'participants':
+    case 'builds':
+      // Для этих экранов уже вызван showScreen с restoring: true в goBack()
+      // Здесь просто выполняем hook'и через вызов функции напрямую
+      // Ничего не делаем, hook'и уже вызваны в showScreen
       break;
       
     default:
@@ -203,14 +217,19 @@ export async function goBack() {
   const previous = popNavigation();
   
   if (!previous) {
-    showScreen(lastMainScreen);
+    showScreen(lastMainScreen, { restoring: true });
     return;
   }
   
   isNavigatingBack = true;
-  showScreen(previous.screen);
+  // Передаем флаг restoring для восстановления позиции скролла
+  showScreen(previous.screen, { restoring: true });
   setCurrentScreenParams(previous.screen, previous.params);
   await restoreScreen(previous.screen, previous.params);
+  
+  // Восстановление позиции теперь происходит в showScreen после выполнения hook'ов
+  // Дополнительное восстановление не нужно, так как showScreen уже обрабатывает это
+  
   isNavigatingBack = false;
 }
 
