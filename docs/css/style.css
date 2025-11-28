@@ -2320,6 +2320,26 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
     0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
+/* ========== HELLMODE BUTTON ON HOME PAGE ========== */
+/* Иконки HellMode на главной странице - сверху слева */
+#questCardHellmodeBtn .rotation-mod-icons {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 2;
+}
+
+/* Отступ для текста в кнопке HellMode, чтобы не перекрывался иконками слева */
+#questCardHellmodeBtn .rotation-mode-text {
+  padding-top: var(--size-touch);
+}
+
+/* Бейдж награды в кнопке HellMode - справа сверху */
+#questCardHellmodeBtn .quest-reward-badge {
+  bottom: auto;
+  top: var(--space-3);
+}
+
 .mastery-header-card.mastery-header-card--with-bg .reward-detail-header,
 .mastery-header-card.mastery-header-card--with-bg .mastery-level-name,
 .mastery-level-card.mastery-header-card--with-bg .mastery-level-name {
