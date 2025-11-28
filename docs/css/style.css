@@ -2733,6 +2733,24 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   opacity: 0.9;
 }
 
+/* ========== HELLMODE QUEST DETAIL ========== */
+/* Иконки HellMode на странице деталей - сверху слева */
+#hellmodeQuestDetailContainer .waves-meta-card .waves-mod-icons {
+  right: auto;
+  left: var(--space-3);
+}
+
+/* Отступ для заголовка в карточке HellMode, чтобы не перекрывался иконками */
+#hellmodeQuestDetailContainer .waves-meta-card .waves-header {
+  padding-top: 36px;
+}
+
+/* Бейдж награды в карточке HellMode на странице деталей - справа сверху */
+#hellmodeQuestDetailContainer .waves-meta-card .quest-reward-badge {
+  bottom: auto;
+  top: var(--space-3);
+}
+
 /* ========== HELLMODE QUEST DETAIL - LIGHT THEME ========== */
 /* Инвертирование иконок в карточке "Описание" при светлой теме (кроме магатамы) */
 .theme-light #hellmodeQuestDetailContainer .profile-grid .value img:not([alt="Награда"]) {
