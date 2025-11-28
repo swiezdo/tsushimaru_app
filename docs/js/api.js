@@ -310,25 +310,25 @@ export async function getRecentEvents(limit = 3) {
     }
 }
 
-export async function getTop100Prize() {
+export async function getTop50Prize() {
     try {
         const initData = getInitData();
         if (!initData) {
             throw new Error('Не удалось получить данные авторизации Telegram');
         }
 
-        const response = await requestJson('/api/top100.prize', {
+        const response = await requestJson('/api/top50.prize', {
             method: 'GET',
             includeAuth: true
         });
 
         if (!response || response.status !== 'ok') {
-            throw new Error(response?.detail || 'Ошибка получения приза Top100');
+            throw new Error(response?.detail || 'Ошибка получения приза Top50');
         }
 
         return response.prize;
     } catch (error) {
-        console.error('Ошибка получения приза Top100:', error);
+        console.error('Ошибка получения приза Top50:', error);
         throw error;
     }
 }
@@ -882,8 +882,8 @@ export async function submitHellmodeQuestApplication(comment = '', files = [], o
     }
 }
 
-// Отправка заявки на ТОП-100
-export async function submitTop100Application(category, comment = '', files = [], options = {}) {
+// Отправка заявки на ТОП-50
+export async function submitTop50Application(category, comment = '', files = [], options = {}) {
     try {
         const initData = getInitData();
         if (!initData) {
@@ -906,10 +906,10 @@ export async function submitTop100Application(category, comment = '', files = []
             }
         });
 
-        const url = `${API_BASE}/api/top100.submit`;
+        const url = `${API_BASE}/api/top50.submit`;
         return await postFormDataWithProgress(url, data, initData, options);
     } catch (error) {
-        console.error('Ошибка отправки заявки ТОП-100:', error);
+        console.error('Ошибка отправки заявки ТОП-50:', error);
         throw error;
     }
 }

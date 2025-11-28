@@ -185,10 +185,10 @@ async function restoreScreen(screen, params = {}) {
       await hellmodeModule.openHellmodeQuestDetail();
       break;
       
-    case 'top100Detail':
+    case 'top50Detail':
       if (params.category) {
-        const top100Module = await import('./top100_detail.js');
-        await top100Module.openTop100Detail(params.category);
+        const top50Module = await import('./top50_detail.js');
+        await top50Module.openTop50Detail(params.category);
       } else {
         showScreen('home', { restoring: true });
       }

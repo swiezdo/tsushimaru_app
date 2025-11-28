@@ -34,7 +34,7 @@ export const screens = {
   trophyDetail:       document.getElementById('trophyDetailScreen'),
   seasonTrophy:       document.getElementById('seasonTrophyScreen'),
   hellmodeQuestDetail: document.getElementById('hellmodeQuestDetailScreen'),
-  top100Detail:       document.getElementById('top100DetailScreen'),
+  top50Detail:       document.getElementById('top50DetailScreen'),
 };
 
 const SCREEN_TITLES = {
@@ -56,7 +56,7 @@ const SCREEN_TITLES = {
   reward: 'Награды',
   seasonTrophy: 'Сезонный трофей',
   hellmodeQuestDetail: 'Задание HellMode',
-  top100Detail: 'ТОП-100',
+  top50Detail: 'ТОП-50',
 };
 
 const SCREENS_WITH_BACK = new Set([
@@ -74,7 +74,7 @@ const SCREENS_WITH_BACK = new Set([
   'trophyDetail',
   'seasonTrophy',
   'hellmodeQuestDetail',
-  'top100Detail',
+  'top50Detail',
 ]);
 
 const SCREEN_HOOKS = {

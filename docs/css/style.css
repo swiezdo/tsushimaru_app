@@ -378,7 +378,7 @@ main.container {
 }
 /* Кнопка отправки заявки мастерства должна быть полной ширины */
 #masteryApplicationCard .actions-bar .btn,
-#top100ApplicationCard .actions-bar .btn,
+#top50ApplicationCard .actions-bar .btn,
 #trophyApplicationCard .actions-bar .btn,
 #seasonTrophyApplicationCard .actions-bar .btn,
 #hellmodeApplicationCard .actions-bar .btn {
@@ -386,7 +386,7 @@ main.container {
 }
 /* Убираем боковые отступы у actions-bar в карточках заявок */
 #masteryApplicationCard .actions-bar,
-#top100ApplicationCard .actions-bar,
+#top50ApplicationCard .actions-bar,
 #trophyApplicationCard .actions-bar,
 #seasonTrophyApplicationCard .actions-bar,
 #hellmodeApplicationCard .actions-bar {
@@ -546,7 +546,7 @@ main.container {
 
 /* Зеленые кнопки (green.png) - по ID */
 #feedbackSubmitBtn,
-#top100ApplicationSubmitBtn,
+#top50ApplicationSubmitBtn,
 #profileSaveBtn,
 #buildSubmitBtn,
 #buildEditSubmitBtn {
@@ -1537,41 +1537,41 @@ a svg,
   text-shadow: var(--shadow-text);
 }
 
-/* ========== ТОП-100 СТРАНИЦА ========== */
-#top100DetailContainer .story-hero-card,
-#top100DetailContainer .trials-meta-card {
+/* ========== ТОП-50 СТРАНИЦА ========== */
+#top50DetailContainer .story-hero-card,
+#top50DetailContainer .trials-meta-card {
   min-height: 96px;
   align-items: flex-start;
 }
 
-#top100DetailContainer .story-hero-header {
+#top50DetailContainer .story-hero-header {
   margin-top: 0;
 }
 
-/* ========== ТАБЛИЦА НАГРАД ТОП-100 ========== */
-.top100-rewards-table {
+/* ========== ТАБЛИЦА НАГРАД ТОП-50 ========== */
+.top50-rewards-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: var(--space-3);
 }
 
-.top100-rewards-table tbody tr {
+.top50-rewards-table tbody tr {
   border-bottom: 1px solid var(--border);
 }
 
-.top100-rewards-table tbody tr:last-child {
+.top50-rewards-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.top100-rewards-table td {
+.top50-rewards-table td {
   text-align: left;
 }
 
-.top100-rewards-table td:first-child {
+.top50-rewards-table td:first-child {
   font-weight: 500;
 }
 
-.top100-rewards-table td:last-child {
+.top50-rewards-table td:last-child {
   text-align: right;
   white-space: nowrap;
 }

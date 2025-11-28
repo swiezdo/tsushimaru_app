@@ -1,12 +1,12 @@
 // home.js
 // Управление главной страницей с ротацией недель
 
-import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile, getHellmodeQuest, getTop100Prize, getWeekHeroes } from './api.js';
+import { getCurrentRotationWeek, checkUserRegistration, getRecentEvents, getRecentComments, getUpcomingBirthdays, fetchProfile, getHellmodeQuest, getTop50Prize, getWeekHeroes } from './api.js';
 import { showScreen } from './ui.js';
 import { pushNavigation } from './navigation.js';
 import { openWavesScreen } from './waves.js';
 import { openHellmodeQuestDetail } from './hellmode_quest_detail.js';
-import { openTop100Detail } from './top100_detail.js';
+import { openTop50Detail } from './top50_detail.js';
 import { tg, hapticTapSmart } from './telegram.js';
 import { getClassIconPath, getStaticAssetPath, getDynamicAssetPath, getSystemIconPath, getModIconPath, getMapPath, getEmoteIconPath, getGearIconPath } from './utils.js';
 
@@ -477,7 +477,7 @@ async function renderQuestCard(quest) {
 
     gridList.appendChild(badgeBtn);
 
-    // Создаем кнопки Top100 один раз
+    // Создаем кнопки Top50 один раз
     const storyBtn = document.createElement('button');
     storyBtn.type = 'button';
     storyBtn.className = 'badge-btn';
@@ -553,53 +553,53 @@ async function renderQuestCard(quest) {
     }
   }
 
-  // Обновляем кнопки Top100
+  // Обновляем кнопки Top50
   if (weekData) {
-    let top100Prize = null;
+    let top50Prize = null;
     try {
-      top100Prize = await getTop100Prize();
+      top50Prize = await getTop50Prize();
     } catch (error) {
-      console.error('Ошибка получения приза Top100:', error);
+      console.error('Ошибка получения приза Top50:', error);
     }
 
     // Скрываем кнопки, если приз равен 0 или null/undefined
-    const shouldHideTop100Buttons = !top100Prize || top100Prize === 0;
+    const shouldHideTop50Buttons = !top50Prize || top50Prize === 0;
     
     const storyBtn = document.getElementById('questCardStoryBtn');
     const survivalBtn = document.getElementById('questCardSurvivalBtn');
     const trialsBtn = document.getElementById('questCardTrialsBtn');
     
     if (storyBtn) {
-      storyBtn.style.display = shouldHideTop100Buttons ? 'none' : '';
+      storyBtn.style.display = shouldHideTop50Buttons ? 'none' : '';
     }
     if (survivalBtn) {
-      survivalBtn.style.display = shouldHideTop100Buttons ? 'none' : '';
+      survivalBtn.style.display = shouldHideTop50Buttons ? 'none' : '';
     }
     if (trialsBtn) {
-      trialsBtn.style.display = shouldHideTop100Buttons ? 'none' : '';
+      trialsBtn.style.display = shouldHideTop50Buttons ? 'none' : '';
     }
 
     // Обновляем кнопки только если они не скрыты
-    if (!shouldHideTop100Buttons) {
+    if (!shouldHideTop50Buttons) {
       // Обновляем кнопку Сюжет
-      updateTop100Button('questCardStoryBtn', 'Топ-100 "Сюжет"', weekData.story || '—', weekData.story_mod_icon, weekData.story_slug || (weekData.story_img ? weekData.story_img.replace('.jpg', '') : ''), 'story', null, null, top100Prize);
+      updateTop50Button('questCardStoryBtn', 'Топ-50 "Сюжет"', weekData.story || '—', weekData.story_mod_icon, weekData.story_slug || (weekData.story_img ? weekData.story_img.replace('.jpg', '') : ''), 'story', null, null, top50Prize);
 
       // Обновляем кнопку Выживание
-      updateTop100Button('questCardSurvivalBtn', 'Топ-100 "Выживание"', weekData.survival || '—', null, weekData.survival_slug || (weekData.survival_img ? weekData.survival_img.replace('.jpg', '') : ''), 'survival', weekData.survival_mod1_icon, weekData.survival_mod2_icon, top100Prize);
+      updateTop50Button('questCardSurvivalBtn', 'Топ-50 "Выживание"', weekData.survival || '—', null, weekData.survival_slug || (weekData.survival_img ? weekData.survival_img.replace('.jpg', '') : ''), 'survival', weekData.survival_mod1_icon, weekData.survival_mod2_icon, top50Prize);
 
       // Обновляем кнопку Испытания Иё
-      updateTop100Button('questCardTrialsBtn', 'Топ-100 "Испытания Иё"', weekData.trials || '—', weekData.trials_mod_icon, weekData.trials_slug || (weekData.trials_img ? weekData.trials_img.replace('.jpg', '') : ''), 'trials', null, null, top100Prize);
+      updateTop50Button('questCardTrialsBtn', 'Топ-50 "Испытания Иё"', weekData.trials || '—', weekData.trials_mod_icon, weekData.trials_slug || (weekData.trials_img ? weekData.trials_img.replace('.jpg', '') : ''), 'trials', null, null, top50Prize);
       
       // Включаем кнопки и добавляем обработчики
-      setupTop100Buttons();
+      setupTop50Buttons();
     }
   }
 }
 
 /**
- * Обновляет содержимое кнопки Top100 (не пересоздает элемент)
+ * Обновляет содержимое кнопки Top50 (не пересоздает элемент)
  */
-function updateTop100Button(btnId, modeName, mapName, modIcon, mapSlug, mapType, mod1Icon, mod2Icon, reward) {
+function updateTop50Button(btnId, modeName, mapName, modIcon, mapSlug, mapType, mod1Icon, mod2Icon, reward) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
 
@@ -1471,7 +1471,8 @@ export async function initHome() {
     ]);
 
     renderWeekHeroesCard(heroes);
-    await renderQuestCard(quest);
+    // TODO: Раскомментировать в субботу для включения системы еженедельных испытаний
+    // await renderQuestCard(quest);
     renderRecentEventsCard(events);
     renderRecentCommentsCard(comments);
     renderUpcomingBirthdaysCard(birthdays);
@@ -1605,10 +1606,10 @@ function setupRotationButtons() {
 }
 
 /**
- * Настраивает обработчики кликов для кнопок ТОП-100
+ * Настраивает обработчики кликов для кнопок ТОП-50
  */
-function setupTop100Buttons() {
-  // Кнопка "ТОП-100 Сюжет"
+function setupTop50Buttons() {
+  // Кнопка "ТОП-50 Сюжет"
   const storyBtn = document.getElementById('questCardStoryBtn');
   if (storyBtn) {
     storyBtn.disabled = false;
@@ -1618,12 +1619,12 @@ function setupTop100Buttons() {
     
     newStoryBtn.addEventListener('click', () => {
       hapticTapSmart();
-      pushNavigation('top100Detail', { category: 'story' });
-      openTop100Detail('story');
+      pushNavigation('top50Detail', { category: 'story' });
+      openTop50Detail('story');
     });
   }
 
-  // Кнопка "ТОП-100 Выживание"
+  // Кнопка "ТОП-50 Выживание"
   const survivalBtn = document.getElementById('questCardSurvivalBtn');
   if (survivalBtn) {
     survivalBtn.disabled = false;
@@ -1632,12 +1633,12 @@ function setupTop100Buttons() {
     
     newSurvivalBtn.addEventListener('click', () => {
       hapticTapSmart();
-      pushNavigation('top100Detail', { category: 'survival' });
-      openTop100Detail('survival');
+      pushNavigation('top50Detail', { category: 'survival' });
+      openTop50Detail('survival');
     });
   }
 
-  // Кнопка "ТОП-100 Испытания Иё"
+  // Кнопка "ТОП-50 Испытания Иё"
   const trialsBtn = document.getElementById('questCardTrialsBtn');
   if (trialsBtn) {
     trialsBtn.disabled = false;
@@ -1646,8 +1647,8 @@ function setupTop100Buttons() {
     
     newTrialsBtn.addEventListener('click', () => {
       hapticTapSmart();
-      pushNavigation('top100Detail', { category: 'trials' });
-      openTop100Detail('trials');
+      pushNavigation('top50Detail', { category: 'trials' });
+      openTop50Detail('trials');
     });
   }
 }

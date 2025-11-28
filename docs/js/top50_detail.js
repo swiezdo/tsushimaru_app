@@ -1,16 +1,16 @@
-// top100_detail.js
-// Модуль для работы со страницей ТОП-100
+// top50_detail.js
+// Модуль для работы со страницей ТОП-50
 
-import { getTop100Prize, submitTop100Application } from './api.js';
+import { getTop50Prize, submitTop50Application } from './api.js';
 import { showScreen, setTopbar, focusAndScrollIntoView } from './ui.js';
 import { tg, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
 import { getModIconPath, getMapPath, getSystemIconPath, isImageFile, isVideoFile, createFileKey, renderFilesPreview, validateFileSize, clearChildren, startButtonDotsAnimation } from './utils.js';
 import { loadRotationData, loadCurrentWeek, getWeekData } from './home.js';
 import { pushNavigation } from './navigation.js';
 
-const detailContainer = document.getElementById('top100DetailContainer');
+const detailContainer = document.getElementById('top50DetailContainer');
 
-const MAX_TOP100_FILES = 18;
+const MAX_TOP50_FILES = 18;
 
 function isSupportedMediaFile(file) {
     return isImageFile(file) || isVideoFile(file);
@@ -34,22 +34,22 @@ const categoryNames = {
 let currentCategory = null;
 let currentPrize = null;
 
-export async function openTop100Detail(category) {
+export async function openTop50Detail(category) {
   if (!detailContainer) return;
   
   currentCategory = category;
   
-  showScreen('top100Detail');
+  showScreen('top50Detail');
   
   const categoryName = categoryNames[category] || category;
-  setTopbar(true, `ТОП-100 ${categoryName}`);
+  setTopbar(true, `ТОП-50 ${categoryName}`);
   
   try {
     // Загружаем данные параллельно
     const [currentWeek, rotationJson, prize] = await Promise.all([
       loadCurrentWeek(),
       loadRotationData(),
-      getTop100Prize().catch(() => 300) // Значение по умолчанию
+      getTop50Prize().catch(() => 300) // Значение по умолчанию
     ]);
     
     currentPrize = prize;
@@ -61,13 +61,13 @@ export async function openTop100Detail(category) {
     
     const weekData = getWeekData(currentWeek);
     
-    renderTop100Detail(category, weekData || {});
+    renderTop50Detail(category, weekData || {});
   } catch (error) {
-    console.error('Ошибка загрузки данных ТОП-100:', error);
+    console.error('Ошибка загрузки данных ТОП-50:', error);
   }
 }
 
-function renderTop100Detail(category, weekData) {
+function renderTop50Detail(category, weekData) {
   if (!detailContainer) return;
   
   // Сброс состояния перед рендером
@@ -301,7 +301,7 @@ function renderDescriptionCard() {
   
   const content = document.createElement('div');
   content.innerHTML = `
-    <p>Выполнить каждое из заданий <b>ТОП-100</b> можно <b>только один</b> раз в неделю начиная с <b>субботы</b>, ваша задача попасть в ТОП-100 списка лидеров в выбранном вами режиме. Последний день для принятия заявок на текущую неделю — <b>четверг</b>, в пятницу подача заявок на получение наград за выполнение заданий ТОП-100 будет не доступна.</p>
+    <p>Выполнить каждое из заданий <b>ТОП-50</b> можно <b>только один</b> раз в неделю начиная с <b>субботы</b>, ваша задача попасть в ТОП-50 списка лидеров в выбранном вами режиме. Последний день для принятия заявок на текущую неделю — <b>четверг</b>, в пятницу подача заявок на получение наград за выполнение заданий ТОП-50 будет не доступна.</p>
   `;
   card.appendChild(content);
   
@@ -319,12 +319,12 @@ function renderRewardCard() {
   
   const content = document.createElement('div');
   content.innerHTML = `
-    <p>Награда за выполнение заданий ТОП-100 зависит от дня недели, в который проверяли ваше место в списке лидеров.</p>
+    <p>Награда за выполнение заданий ТОП-50 зависит от дня недели, в который проверяли ваше место в списке лидеров.</p>
   `;
   card.appendChild(content);
   
   const table = document.createElement('table');
-  table.className = 'top100-rewards-table';
+  table.className = 'top50-rewards-table';
   
   const rewards = [
     { day: 'Суббота', prize: 60 },
@@ -393,24 +393,24 @@ function renderProofCard() {
 function renderApplicationCard(category) {
   const card = document.createElement('section');
   card.className = 'card';
-  card.id = 'top100ApplicationCard';
+  card.id = 'top50ApplicationCard';
   
   card.innerHTML = `
     <h2 class="card-title">Подать заявку</h2>
-    <form class="form" id="top100ApplicationForm">
+    <form class="form" id="top50ApplicationForm">
       <div class="input">
-        <label for="top100ApplicationComment">Комментарии (необязательно)</label>
-        <textarea id="top100ApplicationComment" rows="1" placeholder="Дополнительная информация"></textarea>
+        <label for="top50ApplicationComment">Комментарии (необязательно)</label>
+        <textarea id="top50ApplicationComment" rows="1" placeholder="Дополнительная информация"></textarea>
       </div>
       <div class="input">
-        <label for="top100ApplicationFiles">Прикрепите файлы</label>
-        <input id="top100ApplicationFiles" type="file" multiple accept="image/*,video/*" hidden />
-        <button type="button" class="fileline-btn" id="top100ApplicationAddBtn" aria-label="Прикрепить файлы">＋ Прикрепить</button>
-        <div id="top100ApplicationPreview" class="thumbs-row"></div>
+        <label for="top50ApplicationFiles">Прикрепите файлы</label>
+        <input id="top50ApplicationFiles" type="file" multiple accept="image/*,video/*" hidden />
+        <button type="button" class="fileline-btn" id="top50ApplicationAddBtn" aria-label="Прикрепить файлы">＋ Прикрепить</button>
+        <div id="top50ApplicationPreview" class="thumbs-row"></div>
       </div>
     </form>
     <div class="actions-bar">
-      <button type="button" class="btn primary wide" id="top100ApplicationSubmitBtn">Подать заявку</button>
+      <button type="button" class="btn primary wide" id="top50ApplicationSubmitBtn">Подать заявку</button>
     </div>
   `;
   
@@ -419,11 +419,11 @@ function renderApplicationCard(category) {
 }
 
 function setupApplicationForm(card, category) {
-  const commentEl = card.querySelector('#top100ApplicationComment');
-  const filesInput = card.querySelector('#top100ApplicationFiles');
-  const addBtn = card.querySelector('#top100ApplicationAddBtn');
-  const previewEl = card.querySelector('#top100ApplicationPreview');
-  const submitBtn = card.querySelector('#top100ApplicationSubmitBtn');
+  const commentEl = card.querySelector('#top50ApplicationComment');
+  const filesInput = card.querySelector('#top50ApplicationFiles');
+  const addBtn = card.querySelector('#top50ApplicationAddBtn');
+  const previewEl = card.querySelector('#top50ApplicationPreview');
+  const submitBtn = card.querySelector('#top50ApplicationSubmitBtn');
 
   applicationState.commentEl = commentEl;
   applicationState.filesInput = filesInput;
@@ -454,7 +454,7 @@ function setupApplicationForm(card, category) {
   submitBtn?.addEventListener('pointerdown', () => { hapticTapSmart(); });
   submitBtn?.addEventListener('click', (e) => {
     e.preventDefault?.();
-    submitTop100ApplicationForm(category);
+    submitTop50ApplicationForm(category);
   });
 }
 
@@ -505,7 +505,7 @@ function handleFilesSelected(files) {
         return;
     }
 
-    const freeSlots = Math.max(0, MAX_TOP100_FILES - applicationState.files.length);
+    const freeSlots = Math.max(0, MAX_TOP50_FILES - applicationState.files.length);
     const knownKeys = new Set(applicationState.files.map((file) => createFileKey(file)));
     const uniqueNewFiles = [];
     let skippedByLimit = 0;
@@ -524,7 +524,7 @@ function handleFilesSelected(files) {
     if (skippedByLimit > 0) {
         tg?.showPopup?.({
             title: 'Лимит файлов',
-            message: `Можно прикрепить не более ${MAX_TOP100_FILES} файлов.`,
+            message: `Можно прикрепить не более ${MAX_TOP50_FILES} файлов.`,
             buttons: [{ type: 'ok' }],
         });
     }
@@ -557,13 +557,13 @@ function resetApplicationState() {
     applicationState.submitBtn = null;
 }
 
-async function submitTop100ApplicationForm(category) {
+async function submitTop50ApplicationForm(category) {
   const submitBtn = applicationState.submitBtn;
   if (!submitBtn) return;
 
   if (applicationState.files.length === 0) {
       shake(submitBtn);
-      focusAndScrollIntoView(submitBtn);
+      focusAndScrollIntoView(applicationState.previewEl || applicationState.submitBtn);
       tg?.showPopup?.({
           title: 'Ошибка',
           message: 'Необходимо прикрепить хотя бы один файл (изображение или видео).',
@@ -583,7 +583,7 @@ async function submitTop100ApplicationForm(category) {
   try {
     const comment = (applicationState.commentEl?.value || '').trim();
     
-    await submitTop100Application(category, comment, applicationState.files);
+    await submitTop50Application(category, comment, applicationState.files);
     
     applicationState.files = [];
     applicationState.cleanupPreview();

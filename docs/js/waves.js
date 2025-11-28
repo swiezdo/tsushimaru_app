@@ -367,7 +367,10 @@ function renderWaves(data) {
 }
 
 function renderModIcons(data) {
-  if (!elements.modIcons) return;
+  if (!elements.modIcons) {
+    console.warn('waves.js: elements.modIcons не найден');
+    return;
+  }
   elements.modIcons.innerHTML = '';
 
   const items = [];
@@ -385,6 +388,11 @@ function renderModIcons(data) {
   }
 
   if (!items.length) {
+    console.warn('waves.js: Нет данных для модификаторов', {
+      mod1_icon: data?.mod1_icon,
+      mod2_icon: data?.mod2_icon,
+      dataKeys: data ? Object.keys(data) : null
+    });
     elements.modIcons.classList.add('hidden');
     return;
   }
@@ -401,6 +409,9 @@ function renderModIcons(data) {
     img.title = item.title;
     img.decoding = 'async';
     img.loading = 'lazy';
+    img.onerror = () => {
+      console.error(`waves.js: Не удалось загрузить иконку модификатора: ${item.path}`);
+    };
 
     wrapper.appendChild(img);
     elements.modIcons.appendChild(wrapper);
