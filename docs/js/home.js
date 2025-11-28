@@ -1472,7 +1472,7 @@ export async function initHome() {
 
     renderWeekHeroesCard(heroes);
     // TODO: Раскомментировать в субботу для включения системы еженедельных испытаний
-    // await renderQuestCard(quest);
+    await renderQuestCard(quest);
     renderRecentEventsCard(events);
     renderRecentCommentsCard(comments);
     renderUpcomingBirthdaysCard(birthdays);
