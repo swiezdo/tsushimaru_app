@@ -170,46 +170,74 @@
     ],
     "gear": [
       {
+        "name": "Кунаи духов",
+        "slug": "spirit-kunai",
+        "bonus": 10
+      },
+      {
         "name": "Дымовая бомба",
         "slug": "smoke-bomb",
-        "bonus": 10,
-        "color": "epic"
+        "bonus": 10
+      },
+      {
+        "name": "Бомба-липучка",
+        "slug": "sticky-bomb",
+        "bonus": 20
+      },
+      {
+        "name": "Кунаи (эпич.)",
+        "slug": "kunai",
+        "bonus": 20
       },
       {
         "name": "Туман над Ягатой",
         "slug": "the-mist-of-yagata",
-        "bonus": 10,
-        "color": "legendary"
+        "bonus": 30
       },
       {
         "name": "Проволочные силки",
         "slug": "caltrops",
-        "bonus": 20,
-        "color": "epic"
+        "bonus": 50
       },
       {
-        "name": "Демоничиские семена",
-        "slug": "demon-seeds",
-        "bonus": 20,
-        "color": "legendary"
-      },
-      {
-        "name": "Исцеляющая тыква",
-        "slug": "healing-gourd",
-        "bonus": 30,
-        "color": "epic"
-      },
-      {
-        "name": "Щедрость Кэндзи",
-        "slug": "kenjis-shared-brew",
-        "bonus": 50,
-        "color": "legendary"
+        "name": "Магмовая бомба",
+        "slug": "magma-bomb",
+        "bonus": 50
       },
       {
         "name": "Бутыль жидкого мужества",
         "slug": "bottle-of-liquid-courage",
-        "bonus": 50,
-        "color": "legendary"
+        "bonus": 60
+      },
+      {
+        "name": "Демоничиские семена",
+        "slug": "demon-seeds",
+        "bonus": 70
+      },
+      {
+        "name": "Касание небес",
+        "slug": "the-touch-of-heaven",
+        "bonus": 80
+      },
+      {
+        "name": "Бросок землей",
+        "slug": "dirt-throw",
+        "bonus": 80
+      },
+      {
+        "name": "Исцеляющая тыква",
+        "slug": "healing-gourd",
+        "bonus": 90
+      },
+      {
+        "name": "Хитрость госпожи Сандзё",
+        "slug": "lady-sanjos-surprise",
+        "bonus": 90
+      },
+      {
+        "name": "Щедрость Кэндзи",
+        "slug": "kenjis-shared-brew",
+        "bonus": 100
       }
     ]
   }
