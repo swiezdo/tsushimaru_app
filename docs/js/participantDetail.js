@@ -1,5 +1,5 @@
 // participantDetail.js
-import { tg, $, hapticTapSmart } from './telegram.js';
+import { tg, $, hapticTapSmart, hapticOK, hapticERR } from './telegram.js';
 import { showScreen, setTopbar } from './ui.js';
 import { pushNavigation, setCurrentScreenParams, getCurrentScreenParams } from './navigation.js';
 import { fetchUserProfile, fetchUserBuilds, fetchUserMastery, API_BASE, fetchUserTrophies, fetchTrophiesList } from './api.js';
@@ -12,6 +12,8 @@ import {
 
 // Элементы интерфейса
 const participantRealNameEl = $('participant_real_name');
+const participantUsernameEl = $('participant_username');
+const participantUsernameFieldEl = participantUsernameEl?.closest('.field');
 const participantPsnIdEl = $('participant_psn_id');
 const participantPlatformEl = $('participant_platform');
 const participantModesEl = $('participant_modes');
@@ -32,6 +34,20 @@ let trophyDefinitionsByKey = new Map();
 // Рендеринг профиля участника
 function renderParticipantProfile(profile) {
     if (!profile) return;
+    
+    // Рендеринг username
+    if (participantUsernameEl) {
+        if (profile.username) {
+            participantUsernameEl.textContent = `@${profile.username}`;
+            if (participantUsernameFieldEl) {
+                participantUsernameFieldEl.classList.remove('hidden');
+            }
+        } else {
+            if (participantUsernameFieldEl) {
+                participantUsernameFieldEl.classList.add('hidden');
+            }
+        }
+    }
     
     if (participantRealNameEl) participantRealNameEl.textContent = profile.real_name || '—';
     if (participantPsnIdEl) participantPsnIdEl.textContent = profile.psn_id || '—';
@@ -368,8 +384,75 @@ export function getCurrentParticipantId() {
     return currentParticipantId;
 }
 
+// Функция копирования username в буфер обмена
+async function copyUsernameToClipboard(username) {
+    const textToCopy = `@${username}`;
+    
+    try {
+        // Пытаемся использовать современный Clipboard API
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+            hapticOK();
+            tg?.showPopup?.({
+                title: 'Username скопирован',
+                message: `@${username} скопирован в буфер обмена`,
+                buttons: [{ type: 'ok' }]
+            });
+        } else {
+            // Fallback для старых браузеров
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    hapticOK();
+                    tg?.showPopup?.({
+                        title: 'Username скопирован',
+                        message: `@${username} скопирован в буфер обмена`,
+                        buttons: [{ type: 'ok' }]
+                    });
+                } else {
+                    throw new Error('execCommand failed');
+                }
+            } catch (err) {
+                document.body.removeChild(textArea);
+                throw err;
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка копирования username в буфер обмена:', error);
+        hapticERR();
+        tg?.showPopup?.({
+            title: 'Ошибка',
+            message: 'Не удалось скопировать username. Скопируйте вручную: @' + username,
+            buttons: [{ type: 'ok' }]
+        });
+    }
+}
+
 // Инициализация модуля
 export function initParticipantDetail() {
+    // Добавляем обработчик для чипа username (копирование при клике)
+    if (participantUsernameEl) {
+        participantUsernameEl.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            hapticTapSmart();
+            
+            if (currentParticipantProfile && currentParticipantProfile.username) {
+                await copyUsernameToClipboard(currentParticipantProfile.username);
+            }
+        });
+    }
+    
     // Модуль готов к использованию
     console.log('ParticipantDetail модуль инициализирован');
 }
