@@ -30,6 +30,17 @@ let selectedDifficulties = [];
 async function loadParticipants() {
     try {
         ALL_PARTICIPANTS = await fetchParticipants();
+        // Отладочный вывод (можно убрать после проверки)
+        if (ALL_PARTICIPANTS.length > 0) {
+            console.log('Загружено участников:', ALL_PARTICIPANTS.length);
+            console.log('Пример данных участника:', {
+                psn_id: ALL_PARTICIPANTS[0].psn_id,
+                platforms: ALL_PARTICIPANTS[0].platforms,
+                modes: ALL_PARTICIPANTS[0].modes,
+                goals: ALL_PARTICIPANTS[0].goals,
+                difficulties: ALL_PARTICIPANTS[0].difficulties
+            });
+        }
     } catch (error) {
         console.error('Ошибка загрузки участников:', error);
         ALL_PARTICIPANTS = [];
@@ -167,7 +178,8 @@ function filterParticipants(searchQuery = '') {
     filtered = filtered.filter(user => {
         // Платформа
         if (selectedPlatforms.length > 0) {
-            const userPlatforms = user.platforms || [];
+            const userPlatforms = Array.isArray(user.platforms) ? user.platforms : [];
+            if (userPlatforms.length === 0) return false; // Если у пользователя нет платформ, а мы ищем - исключаем
             const platformMatch = selectedPlatforms.some(platform => 
                 userPlatforms.includes(platform)
             );
@@ -176,7 +188,8 @@ function filterParticipants(searchQuery = '') {
         
         // Режимы
         if (selectedModes.length > 0) {
-            const userModes = user.modes || [];
+            const userModes = Array.isArray(user.modes) ? user.modes : [];
+            if (userModes.length === 0) return false; // Если у пользователя нет режимов, а мы ищем - исключаем
             const modesMatch = selectedModes.some(mode => 
                 userModes.includes(mode)
             );
@@ -185,7 +198,8 @@ function filterParticipants(searchQuery = '') {
         
         // Цели
         if (selectedGoals.length > 0) {
-            const userGoals = user.goals || [];
+            const userGoals = Array.isArray(user.goals) ? user.goals : [];
+            if (userGoals.length === 0) return false; // Если у пользователя нет целей, а мы ищем - исключаем
             const goalsMatch = selectedGoals.some(goal => 
                 userGoals.includes(goal)
             );
@@ -194,7 +208,8 @@ function filterParticipants(searchQuery = '') {
         
         // Сложность
         if (selectedDifficulties.length > 0) {
-            const userDifficulties = user.difficulties || [];
+            const userDifficulties = Array.isArray(user.difficulties) ? user.difficulties : [];
+            if (userDifficulties.length === 0) return false; // Если у пользователя нет сложностей, а мы ищем - исключаем
             const difficultiesMatch = selectedDifficulties.some(difficulty => 
                 userDifficulties.includes(difficulty)
             );
@@ -203,6 +218,26 @@ function filterParticipants(searchQuery = '') {
         
         return true;
     });
+    
+    // Отладочный вывод (можно убрать после проверки)
+    if (selectedPlatforms.length > 0 || selectedModes.length > 0 || selectedGoals.length > 0 || selectedDifficulties.length > 0) {
+        console.log('Фильтры:', {
+            platforms: selectedPlatforms,
+            modes: selectedModes,
+            goals: selectedGoals,
+            difficulties: selectedDifficulties
+        });
+        console.log('Найдено участников:', filtered.length);
+        if (filtered.length > 0) {
+            console.log('Пример участника:', {
+                psn_id: filtered[0].psn_id,
+                platforms: filtered[0].platforms,
+                modes: filtered[0].modes,
+                goals: filtered[0].goals,
+                difficulties: filtered[0].difficulties
+            });
+        }
+    }
     
     renderParticipants(filtered);
 }
