@@ -301,6 +301,28 @@ main.container {
 .value { font-size: var(--fs-15); word-break: break-word; }
 .value.lines { white-space: pre-line; }
 
+/* Custom username chip for participant detail page */
+#participantDetailScreen .author-chip#participant_username {
+  background: linear-gradient(135deg, rgba(51, 144, 236, 0.15) 0%, rgba(51, 144, 236, 0.15) 100%);
+  color: var(--tg-button-color, #3390ec);
+  border: 1px solid rgba(51, 144, 236, 0.3);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(51, 144, 236, 0.1);
+  min-height: 28px;
+  font-size: var(--fs-14);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+#participantDetailScreen .author-chip#participant_username .username-chip-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+}
+
 /* ========== FORMS ========== */
 .form { display: grid; }
 .input label { font-size: var(--fs-13); color: var(--tg-hint); margin-bottom: var(--space-1); }

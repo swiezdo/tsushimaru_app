@@ -37,12 +37,30 @@ function renderParticipantProfile(profile) {
     
     // Рендеринг username
     if (participantUsernameEl) {
+        const usernameIcon = document.getElementById('participant_username_icon');
+        const usernameText = document.getElementById('participant_username_text');
+        
         if (profile.username) {
-            participantUsernameEl.textContent = `@${profile.username}`;
+            // Устанавливаем иконку
+            if (usernameIcon) {
+                usernameIcon.src = getSystemIconPath('telegram.svg');
+                usernameIcon.alt = 'Telegram';
+                usernameIcon.style.display = 'block';
+            }
+            // Устанавливаем текст
+            if (usernameText) {
+                usernameText.textContent = `@${profile.username}`;
+            }
             if (participantUsernameFieldEl) {
                 participantUsernameFieldEl.classList.remove('hidden');
             }
         } else {
+            if (usernameIcon) {
+                usernameIcon.style.display = 'none';
+            }
+            if (usernameText) {
+                usernameText.textContent = '—';
+            }
             if (participantUsernameFieldEl) {
                 participantUsernameFieldEl.classList.add('hidden');
             }
@@ -416,7 +434,7 @@ async function copyUsernameToClipboard(username) {
                 if (successful) {
                     hapticOK();
                     tg?.showPopup?.({
-                        title: 'Username скопирован',
+                        title: 'Никнейм скопирован',
                         message: `@${username} скопирован в буфер обмена`,
                         buttons: [{ type: 'ok' }]
                     });
