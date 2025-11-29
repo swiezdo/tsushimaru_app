@@ -2920,6 +2920,34 @@ button, .list-btn, .chip-btn, .build-item, .upload-box, .class-tab {
   margin-bottom: var(--space-4);
 }
 
+.filter-category-section {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.filter-category-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-category-title {
+  font-size: var(--fs-18);
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: var(--space-2);
+}
+
+.theme-light .filter-category-title {
+  color: #000;
+}
+
+/* Стили для страницы участников - выравнивание инпута и кнопки фильтра */
+#participantsScreen .input input {
+  height: var(--size-touch);
+  padding: 0 var(--space-3);
+  box-sizing: border-box;
+}
+
 .filter-option {
   display: flex;
   align-items: center;

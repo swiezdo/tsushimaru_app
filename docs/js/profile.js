@@ -8,10 +8,10 @@ import { setBottomNavVisible } from './main.js';
 const TELEGRAM_COMMUNITY_URL = 'https://t.me/+ZFiVYVrz-PEzYjBi';
 
 // ---------- Константы ----------
-const PLATFORM   = ['🎮 PlayStation','💻 ПК'];
-const MODES      = ['📖 Сюжет','🏹 Выживание','🗻 Испытания Иё','⚔️ Соперники','📜 Главы'];
-const GOALS      = ['🔎 Узнать что-то новое','👥 Поиск тиммейтов','🏆 Получение наград'];
-const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','💎 Платина','👻 Кошмар','🔥 HellMode','⚡ Спидран'];
+export const PLATFORM   = ['🎮 PlayStation','💻 ПК'];
+export const MODES      = ['📖 Сюжет','🏹 Выживание','🗻 Испытания Иё','⚔️ Соперники','📜 Главы'];
+export const GOALS      = ['🔎 Узнать что-то новое','👥 Поиск тиммейтов','🏆 Получение наград'];
+export const DIFFICULTY = ['🥉 Бронза','🥈 Серебро','🥇 Золото','💎 Платина','👻 Кошмар','🔥 HellMode','⚡ Спидран'];
 
 // Константы для дня рождения
 const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 

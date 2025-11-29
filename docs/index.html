@@ -267,12 +267,15 @@
       <section id="participantsScreen" class="hidden">
         <section class="card">
           <h2 class="card-title">Поиск</h2>
-          <div class="input">
-            <input
-              id="participantSearch"
-              type="text"
-              placeholder="Введите ник PSN"
-            />
+          <div style="display: flex; align-items: center; gap: var(--space-1);">
+            <div class="input" style="flex: 1;">
+              <input
+                id="participantSearch"
+                type="text"
+                placeholder="Введите ник PSN"
+              />
+            </div>
+            <div class="class-tabs-container" id="participantsFilterTabsContainer" style="margin-bottom: 0; justify-content: flex-end;"></div>
           </div>
         </section>
 

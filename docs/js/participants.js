@@ -1,17 +1,31 @@
 // participants.js
-import { tg, $, hapticTapSmart } from './telegram.js';
+import { tg, $, hapticTapSmart, hapticOK } from './telegram.js';
 import { showScreen } from './ui.js';
 import { fetchParticipants, API_BASE } from './api.js';
 import { openParticipantDetail } from './participantDetail.js';
 import { pushNavigation } from './navigation.js';
 import { getTrophyIconPath, getDynamicAssetPath, getStaticAssetPath, getSystemIconPath } from './utils.js';
+import { PLATFORM, MODES, GOALS, DIFFICULTY } from './profile.js';
 
 // Элементы интерфейса
 const participantsListEl = $('participantsList');
 const noParticipantsHintEl = $('noParticipantsHint');
 const participantSearchEl = $('participantSearch');
+const participantsFilterTabsContainer = $('participantsFilterTabsContainer');
+
+// Элементы модального окна фильтров
+const filterModal = $('filterModal');
+const filterModalTitle = $('filterModalTitle');
+const filterModalOptions = $('filterModalOptions');
+const filterModalOkBtn = $('filterModalOkBtn');
 
 let ALL_PARTICIPANTS = [];
+
+// Состояние фильтров
+let selectedPlatforms = [];
+let selectedModes = [];
+let selectedGoals = [];
+let selectedDifficulties = [];
 
 async function loadParticipants() {
     try {
@@ -136,19 +150,217 @@ function renderParticipants(participants = ALL_PARTICIPANTS) {
     });
 }
 
-function filterParticipants(searchQuery) {
-    if (!searchQuery || searchQuery.trim() === '') {
-        renderParticipants(ALL_PARTICIPANTS);
-        return;
+// Функция фильтрации участников по текстовому запросу и тегам
+function filterParticipants(searchQuery = '') {
+    let filtered = ALL_PARTICIPANTS;
+    
+    // Применяем текстовый поиск
+    if (searchQuery && searchQuery.trim() !== '') {
+        const query = searchQuery.toLowerCase().trim();
+        filtered = filtered.filter(user => {
+            const psnId = (user.psn_id || '').toLowerCase();
+            return psnId.startsWith(query);
+        });
     }
     
-    const query = searchQuery.toLowerCase().trim();
-    const filtered = ALL_PARTICIPANTS.filter(user => {
-        const psnId = (user.psn_id || '').toLowerCase();
-        return psnId.startsWith(query);
+    // Применяем фильтры по тегам (AND между категориями, OR внутри категории)
+    filtered = filtered.filter(user => {
+        // Платформа
+        if (selectedPlatforms.length > 0) {
+            const userPlatforms = user.platforms || [];
+            const platformMatch = selectedPlatforms.some(platform => 
+                userPlatforms.includes(platform)
+            );
+            if (!platformMatch) return false;
+        }
+        
+        // Режимы
+        if (selectedModes.length > 0) {
+            const userModes = user.modes || [];
+            const modesMatch = selectedModes.some(mode => 
+                userModes.includes(mode)
+            );
+            if (!modesMatch) return false;
+        }
+        
+        // Цели
+        if (selectedGoals.length > 0) {
+            const userGoals = user.goals || [];
+            const goalsMatch = selectedGoals.some(goal => 
+                userGoals.includes(goal)
+            );
+            if (!goalsMatch) return false;
+        }
+        
+        // Сложность
+        if (selectedDifficulties.length > 0) {
+            const userDifficulties = user.difficulties || [];
+            const difficultiesMatch = selectedDifficulties.some(difficulty => 
+                userDifficulties.includes(difficulty)
+            );
+            if (!difficultiesMatch) return false;
+        }
+        
+        return true;
     });
     
     renderParticipants(filtered);
+}
+
+// Функция обновления состояния кнопки фильтра
+function updateFilterButton() {
+    if (!participantsFilterTabsContainer) return;
+    
+    const hasActiveFilters = selectedPlatforms.length > 0 || 
+                            selectedModes.length > 0 || 
+                            selectedGoals.length > 0 || 
+                            selectedDifficulties.length > 0;
+    
+    const filterTab = participantsFilterTabsContainer.querySelector('.class-tab');
+    if (filterTab) {
+        filterTab.classList.toggle('active', hasActiveFilters);
+    }
+}
+
+// Функция открытия модального окна фильтров
+function openParticipantsFilterModal() {
+    if (!filterModal || !filterModalTitle || !filterModalOptions) return;
+    
+    filterModalTitle.textContent = 'Фильтры';
+    renderFilterModalCategories();
+    filterModal.classList.remove('hidden');
+}
+
+// Функция рендеринга всех категорий в модальном окне
+function renderFilterModalCategories() {
+    if (!filterModalOptions) return;
+    
+    filterModalOptions.innerHTML = '';
+    
+    // Платформа
+    const platformSection = createFilterCategorySection('Платформа:', PLATFORM, selectedPlatforms, 'platform');
+    filterModalOptions.appendChild(platformSection);
+    
+    // Режимы
+    const modesSection = createFilterCategorySection('Режимы:', MODES, selectedModes, 'modes');
+    filterModalOptions.appendChild(modesSection);
+    
+    // Цели
+    const goalsSection = createFilterCategorySection('Цели:', GOALS, selectedGoals, 'goals');
+    filterModalOptions.appendChild(goalsSection);
+    
+    // Сложность
+    const difficultySection = createFilterCategorySection('Сложность:', DIFFICULTY, selectedDifficulties, 'difficulty');
+    filterModalOptions.appendChild(difficultySection);
+}
+
+// Функция создания секции категории фильтров
+function createFilterCategorySection(title, values, selectedValues, categoryType) {
+    const section = document.createElement('div');
+    section.className = 'filter-category-section';
+    
+    const titleEl = document.createElement('div');
+    titleEl.className = 'filter-category-title';
+    titleEl.textContent = title;
+    section.appendChild(titleEl);
+    
+    values.forEach(value => {
+        const label = document.createElement('label');
+        label.className = 'filter-option';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = value;
+        checkbox.checked = selectedValues.includes(value);
+        
+        const span = document.createElement('span');
+        span.textContent = value;
+        
+        label.appendChild(checkbox);
+        label.appendChild(span);
+        
+        checkbox.addEventListener('change', (e) => {
+            hapticTapSmart();
+            updateFilterSelection(categoryType, e.target.value, e.target.checked);
+        });
+        
+        section.appendChild(label);
+    });
+    
+    return section;
+}
+
+// Функция обновления выбора фильтров
+function updateFilterSelection(categoryType, value, checked) {
+    if (categoryType === 'platform') {
+        if (checked) {
+            if (!selectedPlatforms.includes(value)) {
+                selectedPlatforms.push(value);
+            }
+        } else {
+            selectedPlatforms = selectedPlatforms.filter(v => v !== value);
+        }
+    } else if (categoryType === 'modes') {
+        if (checked) {
+            if (!selectedModes.includes(value)) {
+                selectedModes.push(value);
+            }
+        } else {
+            selectedModes = selectedModes.filter(v => v !== value);
+        }
+    } else if (categoryType === 'goals') {
+        if (checked) {
+            if (!selectedGoals.includes(value)) {
+                selectedGoals.push(value);
+            }
+        } else {
+            selectedGoals = selectedGoals.filter(v => v !== value);
+        }
+    } else if (categoryType === 'difficulty') {
+        if (checked) {
+            if (!selectedDifficulties.includes(value)) {
+                selectedDifficulties.push(value);
+            }
+        } else {
+            selectedDifficulties = selectedDifficulties.filter(v => v !== value);
+        }
+    }
+    
+    updateFilterButton();
+    // Обновляем модальное окно, чтобы отразить изменения
+    renderFilterModalCategories();
+}
+
+// Функция закрытия модального окна фильтров
+function closeParticipantsFilterModal() {
+    if (filterModal) {
+        filterModal.classList.add('hidden');
+    }
+}
+
+// Функция создания кнопки фильтра
+function createFilterButton() {
+    if (!participantsFilterTabsContainer) return;
+    
+    participantsFilterTabsContainer.innerHTML = '';
+    
+    const filterTab = document.createElement('button');
+    filterTab.type = 'button';
+    filterTab.className = 'class-tab';
+    filterTab.dataset.type = 'filter';
+    
+    const filterIcon = document.createElement('img');
+    filterIcon.src = getSystemIconPath('tag.svg');
+    filterIcon.alt = 'Фильтры';
+    filterTab.appendChild(filterIcon);
+    
+    filterTab.addEventListener('click', () => {
+        hapticTapSmart();
+        openParticipantsFilterModal();
+    });
+    
+    participantsFilterTabsContainer.appendChild(filterTab);
+    updateFilterButton();
 }
 
 export async function initParticipants() {
@@ -168,24 +380,67 @@ export async function initParticipants() {
         }
     }
     
+    // Создаем кнопку фильтра
+    createFilterButton();
+    
     // Рендерим интерфейс
     renderParticipants();
     
     // Обработчик поиска
     if (participantSearchEl) {
         participantSearchEl.addEventListener('input', (e) => {
-            filterParticipants(e.target.value);
+            const searchQuery = e.target.value;
+            filterParticipants(searchQuery);
         });
         participantSearchEl.addEventListener('focus', () => {
             hapticTapSmart();
         }, { passive: true });
+    }
+    
+    // Обработчик кнопки ОК в модальном окне фильтров
+    // Используем проверку заголовка, чтобы не конфликтовать с builds.js
+    if (filterModalOkBtn) {
+        // Удаляем старый обработчик, если он есть
+        if (filterModalOkBtn._participantsFilterHandler) {
+            filterModalOkBtn.removeEventListener('click', filterModalOkBtn._participantsFilterHandler);
+        }
+        
+        // Создаем новый обработчик
+        filterModalOkBtn._participantsFilterHandler = () => {
+            // Проверяем, что это модальное окно фильтров участников
+            if (filterModalTitle?.textContent === 'Фильтры') {
+                hapticOK();
+                closeParticipantsFilterModal();
+                // Применяем фильтры после закрытия модального окна
+                const searchQuery = participantSearchEl?.value || '';
+                filterParticipants(searchQuery);
+            }
+        };
+        
+        filterModalOkBtn.addEventListener('click', filterModalOkBtn._participantsFilterHandler);
+    }
+    
+    // Закрытие модального окна при клике на фон
+    // Используем проверку заголовка, чтобы не конфликтовать с builds.js
+    if (filterModal) {
+        if (filterModal._participantsClickHandler) {
+            filterModal.removeEventListener('click', filterModal._participantsClickHandler);
+        }
+        filterModal._participantsClickHandler = (e) => {
+            if (e.target === filterModal && filterModalTitle?.textContent === 'Фильтры') {
+                hapticTapSmart();
+                closeParticipantsFilterModal();
+            }
+        };
+        filterModal.addEventListener('click', filterModal._participantsClickHandler);
     }
 }
 
 // Функция для обновления списка участников (вызывается после сохранения профиля)
 export async function refreshParticipantsList() {
     await loadParticipants();
-    renderParticipants();
+    const searchQuery = participantSearchEl?.value || '';
+    filterParticipants(searchQuery);
 }
 
 export function resetParticipantSearch() {
